@@ -29,25 +29,24 @@ class Descriptor(object):
     """ returns the descriptor of an object based on a wikipedia
         query """
 
+    def __init__(self):
+        self.r = Retrieve( Descriptor.__name__ )
     
-    @staticmethod
-    def getDescriptor(synonym, lang='en'):
+    def getDescriptor(self, synonym, lang='en'):
         """ returns the descriptor for the given synonym in the diven language """
         assert( len(lang)==2 )
-        result = Descriptor.getWikipediaSearchResults(synonym, lang)
+        result = self.getWikipediaSearchResults(synonym, lang)
         return result[0]
 
 
-    @staticmethod
-    def getWikipediaSearchResults(term, lang):
+    def getWikipediaSearchResults(self, term, lang):
         """ returns a list of wikipedia search results for the given term """
         search_query = WIKIPEDIA_SEARCH_QUERY % (lang, quote(term) )
-        f=Retrieve( Descriptor.__name__ ).open(search_query)
+        f=self.r.open(search_query)
         results = Descriptor._parse_wikipedia_search_results( f.read() )
         f.close()
 
         return results
-
 
     @staticmethod
     def _parse_wikipedia_search_results( text ):
@@ -77,9 +76,10 @@ if __name__ == '__main__':
         def testDescriptor(self):
             """ tries to retrieve the following url's from the list """
 
+            d=Descriptor()
             for descriptor, synonyms in self.TEST_TERMS.iteritems():
                 for synonym in synonyms:
-                    self.assertEqual( descriptor, Descriptor.getDescriptor(synonym) )
+                    self.assertEqual( descriptor, d.getDescriptor(synonym) )
 
 
     main()

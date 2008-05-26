@@ -19,21 +19,32 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import urllib2
-from config import USER_AGENT
+from config import USER_AGENT, DEFAULT_WEB_REQUEST_SLEEP_TIME
+import time
 
 
 class Retrieve(object):
     """ retrieves URL's using http """
 
-    def __init__(self, module):
+    def __init__(self, module, sleep_time=DEFAULT_WEB_REQUEST_SLEEP_TIME):
         self.module = module
+        self.sleep_time       = sleep_time
+        self.last_access_time = 0
+
 
     def open(self, url ):
         """ opens an url """
         request = urllib2.Request( url )
         request.add_header('User-Agent', USER_AGENT % self.module)
+        self._throttle()
         return urllib2.build_opener().open( request )
 
+
+    def _throttle( self ):
+        """ delays web access according to the content provider's policy """
+        if (time.time() - self.last_access_time) < DEFAULT_WEB_REQUEST_SLEEP_TIME:
+            time.sleep( self.sleep_time )
+        self.last_access_time= time.time()
 
 
 
