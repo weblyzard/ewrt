@@ -1,0 +1,45 @@
+#!/usr/bin/env python
+
+""" config.py 
+    - configuration values."""
+
+__Revision__="$Header$"
+
+import os.path
+
+# ===================================================================
+# GENERAL CONFIGURATION
+# ===================================================================
+
+USER_AGENT = 'eWRT Version/0.1; Module %s +http://p.semanticlab.net/eWRT'
+
+# default sleep time for web requests in seconds
+DEFAULT_WEB_REQUEST_SLEEP_TIME = 1 
+
+# ===================================================================
+#
+# ===================================================================
+
+
+#
+# CORPUS LOCATIONS
+#
+CORPUS_DIR = 'corpus'
+AUTOCLASS_SAMPLE = "reuters-10000-multitoken"
+
+#BBC_CORPUS_HOME      = os.path.join( CORPUS_DIR, "news.bbc.co.uk-frozen" )
+BBC_CORPUS_HOME      = os.path.join( CORPUS_DIR, "news.bbc.co.uk" )
+BBC_CORPUS_HOME_HTML = os.path.join( BBC_CORPUS_HOME, "html" )
+BBC_CORPUS_HOME_LOW  = os.path.join( BBC_CORPUS_HOME, "low" )
+BBC_CORPUS_HOME_RSS  = os.path.join( BBC_CORPUS_HOME, "rss" )
+
+BBC_CORPUS_TIMEFORMAT = "%a, %d %b %Y %H:%M:%S %Z"
+
+# COMPRESSED VERSION OF THE CORPUS
+BBC_CORPUS_COMPRESSED = "data/news.bbc.co.uk.tar.gz"
+
+#
+# NEURAL NETWORK
+#
+
+# $Id$
