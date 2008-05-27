@@ -36,7 +36,10 @@ class Descriptor(object):
         """ returns the descriptor for the given synonym in the diven language """
         assert( len(lang)==2 )
         result = self.getWikipediaSearchResults(synonym, lang)
-        return result[0]
+        try:
+            return result[0]
+        except IndexError:
+            return None
 
 
     def getWikipediaSearchResults(self, term, lang):
@@ -69,7 +72,9 @@ if __name__ == '__main__':
 
     class TestDescriptor(TestCase):
         """ tests the http class """
-        TEST_TERMS = { 'Pope Benedict XVI': ('pope benedict', 'ratzinger', 'joseph ratzinger'),
+        TEST_TERMS = { 
+                       None: ('noresults_ksfdasdf', ),
+                       'Pope Benedict XVI': ('pope benedict', 'ratzinger', 'joseph ratzinger'),
                        'Wolfgang Amadeus Mozart': ('amadeus', 'wolfgang amadeus'), 
                      }
 
