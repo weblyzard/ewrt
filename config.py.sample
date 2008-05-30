@@ -16,6 +16,12 @@ USER_AGENT = 'eWRT Version/0.1; Module %s +http://p.semanticlab.net/eWRT'
 # default sleep time for web requests in seconds
 DEFAULT_WEB_REQUEST_SLEEP_TIME = 1 
 
+# service usernames (required for amazon, del.icio.us, ...)
+DELICIOUS_USER = "username"
+DELICIOUS_PASS = "password"
+
+
+
 # ===================================================================
 #
 # ===================================================================

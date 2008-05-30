@@ -20,8 +20,10 @@
 
 import urllib2
 from config import USER_AGENT, DEFAULT_WEB_REQUEST_SLEEP_TIME
+from urlparse import urlsplit
 import time
 
+getHostName = lambda x: "://".join( urlsplit(x)[:2] )
 
 class Retrieve(object):
     """ retrieves URL's using http """
@@ -30,14 +32,24 @@ class Retrieve(object):
         self.module = module
         self.sleep_time       = sleep_time
         self.last_access_time = 0
+        # request object
 
-
-    def open(self, url ):
+    def open(self, url, user=None, pwd=None ):
         """ opens an url """
         request = urllib2.Request( url )
         request.add_header('User-Agent', USER_AGENT % self.module)
         self._throttle()
-        return urllib2.build_opener().open( request )
+        if user and pwd:
+            return urllib2.build_opener( self._getHTTPBasicAuthOpener(url, user, pwd) ).open( request ) 
+        else:
+            return urllib2.build_opener().open( request )
+
+
+    def _getHTTPBasicAuthOpener(self, url, user, pwd):
+        """ returns an opener, capable of handling http-auth """
+        auth_handler = urllib2.HTTPBasicAuthHandler()
+        auth_handler.add_password('realm', getHostName(url), user, pwd)
+        return auth_handler
 
 
     def _throttle( self ):
