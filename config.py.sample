@@ -16,15 +16,34 @@ USER_AGENT = 'eWRT Version/0.1; Module %s +http://p.semanticlab.net/eWRT'
 # default sleep time for web requests in seconds
 DEFAULT_WEB_REQUEST_SLEEP_TIME = 1 
 
-# service usernames (required for amazon, del.icio.us, ...)
+
+# ===================================================================
+# USERNAMES AND API-KEYS
+# ===================================================================
+
+# delicious
 DELICIOUS_USER = "username"
 DELICIOUS_PASS = "password"
 
+# amazon
+AMAZON_ACCESS_KEY = "yourkey"
 
+# file to copy all xml input from the amazon webservice (the content is only
+# copyied if a file is specified)
+AMAZON_DEBUG_FILE = ""
 
 # ===================================================================
-#
+# PATHS AND URLs
 # ===================================================================
+
+AMAZON_LOCATIONS = { 'us': 'http://webservices.amazon.com/onca/xml?Service=AWSECommerceService',
+                     'uk': 'http://webservices.amazon.co.uk/onca/xml?Service=AWSECommerceService',
+		     'de': 'http://webservices.amazon.de/onca/xml?Service=AWSECommerceService',
+		     'jp': 'http://webservices.amazon.co.jp/onca/xml?Service=AWSECommerceService',
+		     'fr': 'http://webservices.amazon.fr/onca/xml?Service=AWSECommerceService',
+		     'ca': 'http://webservices.amazon.ca/onca/xml?Service=AWSECommerceService' }
+
+
 
 
 #
