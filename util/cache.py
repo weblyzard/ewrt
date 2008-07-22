@@ -69,13 +69,13 @@ class Cache(object):
             if the fetch_function is called, the functions result is saved 
             in the cache """
             
-        cache_file = self._get_fname( obj_id )
+        cache_file = self._get_fname( self.getObjectId(obj_id) )
         if exists(cache_file):
             self._cache_hit += 1
             return open(cache_file).read()
         else:
             self._cache_miss += 1
-            obj = fetch_function()
+            obj = fetch_function( obj_id )
             f = open(cache_file, "w")
             f.write(obj)
             f.close()
@@ -95,13 +95,13 @@ class IterableCache(Cache):
 
     def fetch(self, obj_id, fetch_function):
         """ checks whether the object with the given id exists """
-        self.cache_file = self._get_fname( obj_id )
+        self.cache_file = self._get_fname( self.getObjectId(obj_id) )
         self.seq = 0
 
         if exists(self.cache_file):
             self.next = self._read_next_element()
         else:
-            self._fetch_function = fetch_function
+            self._fetch_function = fetch_function(obj_id)
             self.next = self._cache_next_element()
             open( self.cache_file, "w").close()
 
@@ -114,7 +114,7 @@ class IterableCache(Cache):
             c) passes the data through to the calling element
         """
         self._cache_miss += 1
-        obj = fetch_function()
+        obj = self._fetch_function.next()
         f = open( "%s.%d" % (self.cache_file, self.seq), "w")
         f.write(obj)
         f.close()
