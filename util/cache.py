@@ -15,9 +15,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+__revision__  = "$Revision"
+__copyright__ = "GPL"
 
 from os import makedirs
 from os.path import join, exists
+
+try:
+    import hashutils
+    HASH = hashutils.sha1
+except ImportError:
+    import sha
+    HASH = sha.sha
+
 
 class Cache(object):
     """ caches abitrary content based on an identifier """
@@ -30,8 +40,15 @@ class Cache(object):
         self.cache_file_suffix = cache_file_suffix
         self.cache_nesting_level = 0
 
+        self._cache_hit  = 0
+        self._cache_miss = 0
 
-    def _get_fname( obj_id ):
+    @staticmethod
+    def getObjectId( obj_str ):
+        return HASH(str)
+        
+
+    def _get_fname( self, obj_id ):
         """ computes the filename of the file with the given
             object identifier and creates the required directory
             structure (if necessary).
@@ -42,7 +59,7 @@ class Cache(object):
         if not exists(obj_dir):
             makedirs(obj_dir)
 
-        return join(obj_dir, obj_id+cache_file_suffix)
+        return join(obj_dir, obj_id+self.cache_file_suffix)
     
     
     def fetch(self, obj_id, fetch_function):
@@ -54,13 +71,67 @@ class Cache(object):
             
         cache_file = self._get_fname( obj_id )
         if exists(cache_file):
+            self._cache_hit += 1
             return open(cache_file).read()
         else:
+            self._cache_miss += 1
             obj = fetch_function()
             f = open(cache_file, "w")
             f.write(obj)
             f.close()
             return obj
+
+
+    def getCacheStatistics(self):
+        """ returns statistics regarding the cache's hit/miss ratio """
+        return {'cache_hits': self._cache_hit, 'cache_misses': self._cache_miss}
+
+
+
+class IterableCache(Cache):
+    """ caches arbitrary iterable content identified by an identifier """
+
+    def __iter__(self): return self
+
+    def fetch(self, obj_id, fetch_function):
+        """ checks whether the object with the given id exists """
+        self.cache_file = self._get_fname( obj_id )
+        self.seq = 0
+
+        if exists(self.cache_file):
+            self.next = self._read_next_element()
+        else:
+            self._fetch_function = fetch_function
+            self.next = self._cache_next_element()
+            open( self.cache_file, "w").close()
+
+        return self
+
+
+    def _cache_next_element(self):
+        """ a) retrieves the next element from the fetch function 
+            b) writes the data to the cache
+            c) passes the data through to the calling element
+        """
+        self._cache_miss += 1
+        obj = fetch_function()
+        f = open( "%s.%d" % (self.cache_file, self.seq), "w")
+        f.write(obj)
+        f.close()
+        return obj
+
+
+    def _read_next_element(self):
+        """ returns the next element from the cache """
+        self._cache_hit +=1
+        try:
+            obj = open( "%s.%d" % (self.cache_file, self.seq) ).read()
+            self.seq += 1
+            return obj
+        except IOError:
+            raise StopIteration
+
+
 
 if __name__ == '__main__':
     
