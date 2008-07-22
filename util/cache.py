@@ -23,7 +23,7 @@ __copyright__ = "GPL"
 from os import makedirs
 from os.path import join, exists
 from operator import attrgetter
-import cPickle
+from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
 
 try:
     import hashutils
@@ -48,6 +48,7 @@ class Cache(object):
 
         self._cache_hit  = 0
         self._cache_miss = 0
+
 
     @staticmethod
     def getObjectId( obj_str ):
@@ -101,26 +102,26 @@ class Cache(object):
 class IterableCache(Cache):
     """ caches arbitrary iterable content identified by an identifier """
 
-    cache_file      = ""
-    _cls            = None
-    _fetch_function = None
-    _cached         = False
-    _seq            = 0
+    _cls             = None
+    _fetch_function  = None
+    _cached          = False
+    _pickle_iterator = None
  
     def __iter__(self): return self
 
+
     def fetch(self, obj_id, fetch_function, cls):
         """ checks whether the object with the given id exists """
-        self.cache_file = self._get_fname( self.getObjectId(obj_id) )
-        self._seq = 0
+        cache_file = self._get_fname( self.getObjectId(obj_id) )
 
-        if exists(self.cache_file):
+        if exists(cache_file):
             self._cached = True
+            self._pickle_iterator = ReadPickleIterator(cache_file)
         else:
             self._cls = cls
             self._fetch_function = fetch_function(self, obj_id)
             self._cached = False
-            open( self.cache_file, "w").close()
+            self._pickle_iterator = WritePickleIterator(cache_file)
 
         return self
 
@@ -138,21 +139,22 @@ class IterableCache(Cache):
             c) passes the data through to the calling element
         """
         self._cache_miss += 1
-        obj = attrgetter('next')(self._cls)(self)
-        f = open( "%s.%d" % (self.cache_file, self._seq), "w")
-        cPickle.dump(obj, f)
-        self._seq +=1
-        return obj
+        try:
+            obj = attrgetter('next')(self._cls)(self)
+            self._pickle_iterator.dump( obj )
+            return obj
+        except StopIteration:
+            self._pickle_iterator.close()
+            raise StopIteration
 
 
     def _read_next_element(self):
         """ returns the next element from the cache """
         self._cache_hit +=1
         try:
-            obj = cPickle.load(open( "%s.%d" % (self.cache_file, self._seq) ) )
-            self._seq += 1
-            return obj
+            return self._pickle_iterator.next()
         except IOError:
+            self._pickle_iterator.close()
             raise StopIteration
 
 

@@ -35,6 +35,9 @@ class WritePickleIterator(object):
         """ dumps the following object to the pickle file """
         p = b2a_base64( dumps(obj) )
         self.f.write(p)
+
+    def close(self):
+        self.f.close()
         
 
 class ReadPickleIterator(object):
@@ -52,6 +55,9 @@ class ReadPickleIterator(object):
             raise StopIteration
 
         return loads( a2b_base64(line) )
+
+    def close(self):
+        self.f.close()
 
 
 if __name__ == '__main__':
