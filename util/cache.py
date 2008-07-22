@@ -35,7 +35,7 @@ class Cache(object):
     cache_dir = ""
     cache_file_suffix = ""
 
-    def __init__(self, cache_dir, cache_nesting_level=0, cache_file_suffix=""):
+    def __init__(self, cache_dir="", cache_nesting_level=0, cache_file_suffix=""):
         self.cache_dir = cache_dir
         self.cache_file_suffix = cache_file_suffix
         self.cache_nesting_level = 0
