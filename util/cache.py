@@ -24,6 +24,7 @@ from os import makedirs
 from os.path import join, exists
 from operator import attrgetter
 from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
+from cPickle import dump, load
 
 try:
     import hashutils
@@ -40,7 +41,11 @@ class Cache(object):
     cache_file_suffix = ""
 
     def __init__(self, cache_dir, cache_nesting_level=0, cache_file_suffix=""):
-        """ initializes the Cache object """
+        """ initializes the Cache object 
+            @param[in] cache_dir the cache base directory
+            @param[in] cache_nesting_level optional number of nesting level (0)
+            @param[in] cache_file_suffix optional suffix for cache files
+        """
 
         self.cache_dir = cache_dir
         self.cache_file_suffix = cache_file_suffix
@@ -75,22 +80,34 @@ class Cache(object):
              a) the cache and
              b) the fetch_function
             if the fetch_function is called, the functions result is saved 
-            in the cache """
+            in the cache 
+
+            @param[in] obj_id a unique object identifier (same object must have the same identifier
+            @param[in] fetch_function a function to call if the object is not found in the cache
+            @param[in] inherited whether the calling class is a subclass of cache
+
+            @returns the object (retrieved from the cache or computed)
+        """
             
         cache_file = self._get_fname( self.getObjectId(obj_id) )
+        # try to fetch the object from the cache
         if exists(cache_file):
             self._cache_hit += 1
-            return open(cache_file).read()
+            try:
+                return load(open(cache_file))
+            except EOFError:
+                pass
+
+        # compute and cache it otherwise
+        self._cache_miss += 1
+        if inherited:
+            obj = fetch_function(self, obj_id)
         else:
-            self._cache_miss += 1
-            if inherited:
-                obj = fetch_function(self, obj_id)
-            else:
-                obj = fetch_function(obj_id)
-            f = open(cache_file, "w")
-            f.write(obj)
-            f.close()
-            return obj
+            obj = fetch_function(obj_id)
+        f = open(cache_file, "w")
+        dump(obj, f)
+        f.close()
+        return obj
 
 
     def getCacheStatistics(self):
