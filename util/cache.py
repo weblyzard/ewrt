@@ -17,7 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__revision__  = "$Revision"
+__author__    = "Albert Weichselbraun"
+__revision__  = "$Id$"
 __copyright__ = "GPL"
 
 from os import makedirs
@@ -58,7 +59,7 @@ class Cache(object):
     @staticmethod
     def getObjectId( obj_str ):
         """ returns an identifier representing the object """
-        return HASH(obj_str).hexdigest()
+        return HASH(str(obj_str)).hexdigest()
         
 
     def _get_fname( self, obj_id ):
@@ -114,6 +115,30 @@ class Cache(object):
         """ returns statistics regarding the cache's hit/miss ratio """
         return {'cache_hits': self._cache_hit, 'cache_misses': self._cache_miss}
 
+
+class MemoryBufferCache(Cache):
+    """ caches abitrary content based on an identifier """
+
+    cache_dir = ""
+    cache_file_suffix = ""
+
+    def __init__(self, cache_dir, cache_nesting_level=0, cache_file_suffix=""):
+        """ initializes the Cache object 
+            @param[in] cache_dir the cache base directory
+            @param[in] cache_nesting_level optional number of nesting level (0)
+            @param[in] cache_file_suffix optional suffix for cache files
+        """
+        Cache.__init__(self, cache_dir, cache_nesting_level, cache_file_suffix)
+        self.cacheData = {}
+        
+    def fetch(self, obj_id, fetch_function, inherited=False):
+        obj_key = self.getObjectId(obj_id)
+        if obj_key in self.cacheData:
+            return self.cacheData[obj_key]
+        else:
+            obj = Cache.fetch(self, obj_id, fetch_function, inherited)
+            self.cacheData[obj_key] = obj
+            return obj    
 
 
 class IterableCache(Cache):
@@ -186,3 +211,4 @@ if __name__ == '__main__':
         def setUp(self):
             pass
 
+# $Id$
