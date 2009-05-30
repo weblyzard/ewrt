@@ -8,14 +8,14 @@ from sys import exit
 setup(
       ###########################################
       ## Metadata
-      name="eWrt",
+      name="eWRT",
       version      = "0.2",
-      description  = 'eWrt',
+      description  = 'eWRT',
       author       = 'Albert Weichselbraun, Heinz Lang',
       author_email = 'albert.weichselbraun@wu-wien.ac.at, heinz.lang@wu-wien.ac.at',
       url          = 'http://www.semanticlab.net/index.php/EWRT',
       license      = "GPL3", 
-      package_dir  = {'eWrt': 'src'},
+      package_dir  = {'eWRT': 'src'},
 
       ###########################################
       ## Scripts
@@ -23,17 +23,17 @@ setup(
  
       ###########################################
       ## Package List
-      packages     = ['eWrt',
-                      'eWrt.access',
-                      'eWrt.input',
-                      'eWrt.input.corpus',
-                      'eWrt.input.corpus.reuters',
-                      'eWrt.util',
-                      'eWrt.ws',
-                      'eWrt.ws.amazon',
-                      'eWrt.ws.delicious',
-                      'eWrt.ws.opencalias',
-                      'eWrt.ws.wikipedia',
+      packages     = ['eWRT',
+                      'eWRT.access',
+                      'eWRT.input',
+                      'eWRT.input.corpus',
+                      'eWRT.input.corpus.reuters',
+                      'eWRT.util',
+                      'eWRT.ws',
+                      'eWRT.ws.amazon',
+                      'eWRT.ws.delicious',
+                      'eWRT.ws.opencalias',
+                      'eWRT.ws.wikipedia',
                      ],
 
       ###########################################

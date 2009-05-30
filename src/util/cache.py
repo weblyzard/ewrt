@@ -2,7 +2,7 @@
 
 """ caches arbitrary objects """
 
-# (C)opyrights 2008 by Albert Weichselbraun <albert@weichselbraun.net>
+# (C)opyrights 2008-2009 by Albert Weichselbraun <albert@weichselbraun.net>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,12 +34,15 @@ except ImportError:
     import sha
     HASH = sha.sha
 
-
 class Cache(object):
-    """ caches abitrary content based on an identifier """
+    """ An abstract class for caching functions """
 
-    cache_dir = ""
-    cache_file_suffix = ""
+    def fetch(self, fetch_function, *args):
+        raise NotImplementedError
+
+
+class DiskCache(Cache):
+    """ caches abitrary functions based on the function's arguments """
 
     def __init__(self, cache_dir, cache_nesting_level=0, cache_file_suffix=""):
         """ initializes the Cache object 
@@ -48,8 +51,8 @@ class Cache(object):
             @param[in] cache_file_suffix optional suffix for cache files
         """
 
-        self.cache_dir = cache_dir
-        self.cache_file_suffix = cache_file_suffix
+        self.cache_dir           = cache_dir
+        self.cache_file_suffix   = cache_file_suffix
         self.cache_nesting_level = cache_nesting_level
 
         self._cache_hit  = 0
@@ -61,7 +64,6 @@ class Cache(object):
         """ returns an identifier representing the object """
         return HASH(str(obj_str)).hexdigest()
         
-
     def _get_fname( self, obj_id ):
         """ computes the filename of the file with the given
             object identifier and creates the required directory
@@ -75,22 +77,21 @@ class Cache(object):
 
         return join(obj_dir, obj_id+self.cache_file_suffix)
     
-    
-    def fetch(self, obj_id, fetch_function, inherited=False):
+    def fetch(self, fetch_function, *args):
         """ fetches the object with the given id, querying
              a) the cache and
              b) the fetch_function
             if the fetch_function is called, the functions result is saved 
             in the cache 
 
-            @param[in] obj_id a unique object identifier (same object must have the same identifier
-            @param[in] fetch_function a function to call if the object is not found in the cache
-            @param[in] inherited whether the calling class is a subclass of cache
+            @param[in] function to call if the result is not in the cache
+            @param[in] function arguments (used to identify, whether the function has already
+                                           been cached or not)
 
             @returns the object (retrieved from the cache or computed)
         """
             
-        cache_file = self._get_fname( self.getObjectId(obj_id) )
+        cache_file = self._get_fname( self.getObjectId(args) )
         # try to fetch the object from the cache
         if exists(cache_file):
             self._cache_hit += 1
@@ -101,44 +102,69 @@ class Cache(object):
 
         # compute and cache it otherwise
         self._cache_miss += 1
-        if inherited:
-            obj = fetch_function(self, obj_id)
-        else:
-            obj = fetch_function(obj_id)
+        obj = fetch_function(*args)
         f = open(cache_file, "w")
         dump(obj, f)
         f.close()
         return obj
-
 
     def getCacheStatistics(self):
         """ returns statistics regarding the cache's hit/miss ratio """
         return {'cache_hits': self._cache_hit, 'cache_misses': self._cache_miss}
 
 
-class MemoryBufferCache(Cache):
-    """ caches abitrary content based on an identifier """
-
-    cache_dir = ""
-    cache_file_suffix = ""
-
+class DiskCached(DiskCache):
+    """ Decorator based on Cache for caching arbitrary function calls
+        usage:
+          @DiskCached("./cache/myfunction")
+          def myfunction(*args):
+             ...
+    """
     def __init__(self, cache_dir, cache_nesting_level=0, cache_file_suffix=""):
         """ initializes the Cache object 
-            @param[in] cache_dir the cache base directory
+            @param[in] fn                  the function to cache
+            @param[in] cache_dir           the cache base directory
             @param[in] cache_nesting_level optional number of nesting level (0)
-            @param[in] cache_file_suffix optional suffix for cache files
+            @param[in] cache_file_suffix   optional suffix for cache files
         """
-        Cache.__init__(self, cache_dir, cache_nesting_level, cache_file_suffix)
-        self.cacheData = {}
+        DiskCache.__init__(self, cache_dir, cache_nesting_level, cache_file_suffix)
+        self._fn = None
+
+    def __call__(self, fn):
+        self._fn = fn
+        def wrapped_fn(*args):
+            return self.fetch(self._fn, *args)
+        return wrapped_fn
+
+
+class MemoryCache(Cache):
+    """ Cache arbitrary functions based on the function's arguments """
+
+    def __init__(self):
+        """ initializes the Cache object """
+        self._cacheData = {}
         
-    def fetch(self, obj_id, fetch_function, inherited=False):
-        obj_key = self.getObjectId(obj_id)
-        if obj_key in self.cacheData:
-            return self.cacheData[obj_key]
-        else:
-            obj = Cache.fetch(self, obj_id, fetch_function, inherited)
-            self.cacheData[obj_key] = obj
-            return obj    
+    def fetch(self, fetch_function, *args):
+        try:
+            return self._cacheData[args]
+        except KeyError:
+            obj = fetch_function(*args)
+            self._cacheData[args] = obj
+            return obj
+
+class MemoryCached(MemoryCache):
+    """ Decorator based on MemoryCache for caching arbitrary function calls
+        usage:
+          @MemoryCached
+          def myfunction(*args):
+             ...
+    """
+    def __init__(self, fn):
+        MemoryCache.__init__(self)
+        self._fn = fn
+
+    def __call__(self, *args):
+        return self.fetch(self._fn, *args)
 
 
 class IterableCache(Cache):
