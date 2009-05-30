@@ -103,9 +103,10 @@ class DiskCache(Cache):
         # compute and cache it otherwise
         self._cache_miss += 1
         obj = fetch_function(*args)
-        f = open(cache_file, "w")
-        dump(obj, f)
-        f.close()
+        if obj != None:
+            f = open(cache_file, "w")
+            dump(obj, f)
+            f.close()
         return obj
 
     def getCacheStatistics(self):
@@ -149,7 +150,8 @@ class MemoryCache(Cache):
             return self._cacheData[args]
         except KeyError:
             obj = fetch_function(*args)
-            self._cacheData[args] = obj
+            if obj != None:
+                self._cacheData[args] = obj
             return obj
 
 class MemoryCached(MemoryCache):
