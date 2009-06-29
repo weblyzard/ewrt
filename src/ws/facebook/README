@@ -1,0 +1,17 @@
+===== eWRT - setup Facebook =====
+
+  * download the facebook Client library for PHP (only needed for creating the infinite session key)
+
+  * enter your API_KEY and SECRET_KEY in config_facebook.py
+
+  * go to
+
+  http://www.facebook.com/code_gen.php?v=1.0&api_key=YOUR_API_KEY
+
+  * generate the code and copy it
+
+  * paste the generated code, API-Key and secret-key in ''createInfiniteKey.php''
+
+  * run ''createInfiniteKey.php''
+
+  * copy the Session-Key to config_facebook.py

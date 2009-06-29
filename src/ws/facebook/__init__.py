@@ -26,11 +26,15 @@ class FacebookWS(Webservice):
 
     def login(self):
         """ opens a browserwindow to login at facebook """
-        self.facebook = Facebook(FACEBOOK_API_KEY, FACEBOOK_SECRET_KEY)
-        
-        self.facebook.auth.createToken()
-        self.facebook.login()
-        self.facebook.auth.getSession()
+        # FACEBOOK_SESSION_KEY = ''
+        if FACEBOOK_SESSION_KEY == '':
+            self.facebook = Facebook(FACEBOOK_API_KEY, FACEBOOK_SECRET_KEY)
+            self.facebook.auth.createToken()
+            self.facebook.login()
+        else:
+            print 'Infinite session key found'
+            self.facebook = Facebook(FACEBOOK_API_KEY, FACEBOOK_SECRET_KEY)
+            self.facebook.session_key = FACEBOOK_SESSION_KEY
 
  
     def loadAlbums(self, userID=None, loadPhotos=0):    
