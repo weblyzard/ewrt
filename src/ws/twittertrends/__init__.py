@@ -1,4 +1,5 @@
-import tango
+from eWRTlibs.tango.tango import tango
+import oauth
 
 ## @package TwitterTrends
 class TwitterTrends(object):
