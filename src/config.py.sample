@@ -32,6 +32,10 @@ AMAZON_ACCESS_KEY = "yourkey"
 # copyied if a file is specified)
 AMAZON_DEBUG_FILE = ""
 
+# google (gmail)
+GOOGLE_USER = "username"
+GOOGLE_PASS = "password"
+
 # ===================================================================
 # PATHS AND URLs
 # ===================================================================
