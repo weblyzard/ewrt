@@ -76,7 +76,7 @@ class FacebookWS(Webservice):
 
         friendList = self.facebook.friends.get()
 
-        friendList = self.facebook.users.getInfo(friendList[0:5])
+        friendList = self.facebook.users.getInfo(friendList)
 
         for friend in friendList:
 
