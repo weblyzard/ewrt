@@ -36,6 +36,11 @@ AMAZON_DEBUG_FILE = ""
 GOOGLE_USER = "username"
 GOOGLE_PASS = "password"
 
+# facebook
+FACEBOOK_API_KEY = "api-key"
+FACEBOOK_SECRET_KEY = "secret-key"
+FACEBOOK_SESSION_KEY = "session-key"
+
 # ===================================================================
 # PATHS AND URLs
 # ===================================================================
