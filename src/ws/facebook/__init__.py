@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 import sys
-from config_facebook import FACEBOOK_API_KEY, FACEBOOK_SECRET_KEY, FACEBOOK_SESSION_KEY
+from config import FACEBOOK_API_KEY, FACEBOOK_SECRET_KEY, FACEBOOK_SESSION_KEY
 from lib.Webservice import Webservice 
 from lib.Result import Result
 from lib.ResultSet import ResultSet
-from externalLibs.facebook.facebook_api import Facebook
+from eWRTlibs.facebook.facebook_api import Facebook
 
 class FacebookWS(Webservice):
     """ class for fetching and storing the data of a user
@@ -26,7 +26,6 @@ class FacebookWS(Webservice):
 
     def login(self):
         """ opens a browserwindow to login at facebook """
-        # FACEBOOK_SESSION_KEY = ''
         if FACEBOOK_SESSION_KEY == '':
             self.facebook = Facebook(FACEBOOK_API_KEY, FACEBOOK_SECRET_KEY)
             self.facebook.auth.createToken()
