@@ -1,4 +1,4 @@
-from pyGTrends import pyGTrends
+from eWRTlibs.googleTrends.pyGTrends import pyGTrends
 from config import GOOGLE_USER, GOOGLE_PASS
 
 ## Documentation for the Class Google Trends
@@ -33,5 +33,5 @@ class GoogleTrends(object):
 
 if __name__ == "__main__":
     a = GoogleTrends()
-    print a.printTrends(('Terminator', 'Rambo'))
+    print a.getTrends(('Terminator', 'Rambo'))
     print a.getTrends(('Apple', 'Microsoft'))
