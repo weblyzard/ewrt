@@ -9,7 +9,7 @@ setup(
       ###########################################
       ## Metadata
       name="eWRT",
-      version      = "0.2",
+      version      = "0.3",
       description  = 'eWRT',
       author       = 'Albert Weichselbraun, Heinz Lang',
       author_email = 'albert.weichselbraun@wu-wien.ac.at, heinz.lang@wu-wien.ac.at',
@@ -32,8 +32,11 @@ setup(
                       'eWRT.ws',
                       'eWRT.ws.amazon',
                       'eWRT.ws.delicious',
+                      'eWRT.ws.facebook',
+                      'eWRT.ws.googletrends',
                       'eWRT.ws.opencalias',
-                      'eWRT.ws.wikipedia',
+                      'eWRT.ws.twittertrends',
+                      'eWRT.ws.wikipedia'
                      ],
 
       ###########################################
