@@ -20,7 +20,7 @@
 
 __version__ = "$Header$"
 
-from access.http import Retrieve
+from eWRT.access.http import Retrieve
 from urllib import quote
 
 WIKIPEDIA_SEARCH_QUERY = 'http://%s.wikipedia.org/w/index.php?title=Special%%3ASearch&search=%s&ns0=1&fulltext=Search'
