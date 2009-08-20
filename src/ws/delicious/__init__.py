@@ -21,40 +21,35 @@ __version__ = "$Header$"
 
 import sys
 import re
-from access.http import Retrieve
+from eWRT.access.http import Retrieve
+from eWRT.ws import TagInfoService
 from urlparse import urlsplit
 from md5 import md5
-from config import DELICIOUS_USER, DELICIOUS_PASS
+from eWRT.config import DELICIOUS_USER, DELICIOUS_PASS
 
 
-class Delicious:
+class Delicious(TagInfoService):
     """ retrieves data using the del.icio.us API """
     
     DELICIOUS_SERVICE_URL = "http://del.icio.us/url/%s"
     RE_COUNT = re.compile("this url has been saved by (\d+) people")
 
     @staticmethod
-    def normalize_url(url):
-        """ prepares a url for the usage by delicious"""
-        if not url.endswith("/"):
-            url += "/"
-        return url
-
+    def getUrlInfo( url ):
+        """ @param   url 
+            @returns the number of bookmarks for the given url """
+        return Delicious.delicious_info_retrieve( url )
 
     @staticmethod
-    def delicious_info_retrieve( url ):
-        """ returns the data from delicious """
-        assert( url.startswith("http") )
+    def getTagInfo( tags ):
+        """ @param   tags   A list of tags to retrieve information for
+            @returns        the number of bookmarks using the given tags
+        """
+        raise NotImplementedError
 
-        md5_url = md5( Delicious.normalize_url(url)).hexdigest()
-        request = Delicious.DELICIOUS_SERVICE_URL % md5_url
-
-        f = Retrieve(Delicious.__name__).open(request)
-        content = f.read()
-        f.close()
-
-        return Delicious._parse_counts(content)
-
+    # 
+    # helper functions
+    #
 
     @staticmethod
     def _parse_counts( content ):
@@ -65,8 +60,29 @@ class Delicious:
         else:
             return 0
 
+    @staticmethod
+    def _normalize_url(url):
+        """ prepares a url for the usage by delicious"""
+        if not url.endswith("/"):
+            url += "/"
+        return url
+
+    @staticmethod
+    def delicious_info_retrieve( url ):
+        """ returns the data from delicious """
+        assert( url.startswith("http") )
+
+        md5_url = md5( Delicious._normalize_url(url)).hexdigest()
+        request = Delicious.DELICIOUS_SERVICE_URL % md5_url
+
+        f = Retrieve(Delicious.__name__).open(request)
+        content = f.read()
+        f.close()
+
+        return Delicious._parse_counts(content)
+
 
 if __name__ == '__main__':
     url = sys.argv[1].strip()
-    print Delicious.delicious_info_retrieve( url ), "counts"
+    print Delicious.getUrlInfo( url ), "counts"
 
