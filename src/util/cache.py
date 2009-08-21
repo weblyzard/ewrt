@@ -26,6 +26,8 @@ from os.path import join, exists
 from operator import attrgetter
 from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
 from cPickle import dump, load
+from time import time
+from operator import itemgetter
 
 try:
     import hashutils
@@ -141,18 +143,37 @@ class DiskCached(DiskCache):
 class MemoryCache(Cache):
     """ Cache arbitrary functions based on the function's arguments """
 
-    def __init__(self):
+    __slots__ = ('max_cache_size', '_cacheData', '_usage' )
+
+    def __init__(self, max_cache_size =0):
         """ initializes the Cache object """
-        self._cacheData = {}
+        self._cacheData  = {}  
+        self._usage      = {}
+        self.max_cache_size = max_cache_size
         
     def fetch(self, fetch_function, *args):
+        # update the object's last usage time stamp
+        self._usage[args]     = time()  
         try:
             return self._cacheData[args]
         except KeyError:
             obj = fetch_function(*args)
             if obj != None:
+                self.garbage_collect_cache()
                 self._cacheData[args] = obj
             return obj
+
+    def garbage_collect_cache(self):
+        """ removes the object which have not been in use for the 
+            longest time """
+        if self.max_cache_size == 0 or len(self._cacheData)<=self.max_cache_size: 
+            return
+
+        (key, _) = sorted( self._usage.items(), key=itemgetter(1), reverse=True ).pop()
+        del self._usage[key]
+        del self._cacheData[key]
+
+
 
 class MemoryCached(MemoryCache):
     """ Decorator based on MemoryCache for caching arbitrary function calls
