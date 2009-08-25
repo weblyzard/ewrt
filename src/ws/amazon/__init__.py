@@ -27,8 +27,8 @@ import logging
 
 from urllib import quote
 from xml.parsers.expat import ParserCreate
-from access.http import Retrieve
-from config import AMAZON_ACCESS_KEY, AMAZON_LOCATIONS, AMAZON_DEBUG_FILE
+from eWRT.access.http import Retrieve
+from eWRT.config import AMAZON_ACCESS_KEY, AMAZON_LOCATIONS, AMAZON_DEBUG_FILE
 
 # time to wait after an error in seconds
 ERROR_SLEEP_TIME=30

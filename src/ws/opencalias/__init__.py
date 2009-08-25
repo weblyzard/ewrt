@@ -35,8 +35,8 @@ from random import choice
 from xml.dom import minidom
 from StringIO import StringIO
 import urllib, string
-from config import OPENCALAIS_KEY, OPENCALAIS_CACHE_DIR, OPENCALAIS_URL, USER_AGENT
-from util.cache import Cache
+from eWRT.config import OPENCALAIS_KEY, OPENCALAIS_CACHE_DIR, OPENCALAIS_URL, USER_AGENT
+from eWRT.util.cache import Cache
 
 PARAMS_XML = """
 <c:params xmlns:c="http://s.opencalais.com/1/pred/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"> 

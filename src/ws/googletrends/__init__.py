@@ -1,5 +1,5 @@
 from eWRTlibs.googleTrends.pyGTrends import pyGTrends
-from config import GOOGLE_USER, GOOGLE_PASS
+from eWRT.config import GOOGLE_USER, GOOGLE_PASS
 
 ## Documentation for the Class Google Trends
 #

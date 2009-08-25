@@ -19,7 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import urllib2
-from config import USER_AGENT, DEFAULT_WEB_REQUEST_SLEEP_TIME
+from eWRT.config import USER_AGENT, DEFAULT_WEB_REQUEST_SLEEP_TIME
 from urlparse import urlsplit
 import time
 

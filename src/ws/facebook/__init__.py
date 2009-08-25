@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 import sys
-from config import FACEBOOK_API_KEY, FACEBOOK_SECRET_KEY, FACEBOOK_SESSION_KEY
-from lib.Webservice import Webservice 
-from lib.Result import Result
-from lib.ResultSet import ResultSet
+from eWRT.config import FACEBOOK_API_KEY, FACEBOOK_SECRET_KEY, FACEBOOK_SESSION_KEY
+from eWRT.lib import Webservice, Result, ResultSet
 from eWRTlibs.facebook.facebook_api import Facebook
 
 class FacebookWS(Webservice):

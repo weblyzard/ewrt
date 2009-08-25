@@ -19,7 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 MAX_PAGES_TO_PARSE = 10
-from ws.amazon import AmazonWS, ResultList
+from eWRT.ws.amazon import AmazonWS, ResultList
 
 def getReview( asin_list ):
 	""" returns the reviews for the given asins """
