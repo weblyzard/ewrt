@@ -2,8 +2,8 @@
 
 """ uses flickr """
 
-# (C)opyrights 2008 by Albert Weichselbraun <albert@weichselbraun.net>
-# (C)opyrights 2009 by Heinz Lang <heinz@langatium.net>
+# (C)opyrights 2008-2009 by Albert Weichselbraun <albert@weichselbraun.net>
+#                           Heinz-Peter Lang <heinz@langatium.net>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -68,5 +68,5 @@ class Flickr(TagInfoService):
         return content
 
 if __name__ == '__main__':
-    print Flickr.getTagInfo( ("peugeot 206", "206") ), "counts"
+    print Flickr.getTagInfo( ("berlin", "dom") ), "counts"
 

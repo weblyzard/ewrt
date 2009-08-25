@@ -102,6 +102,7 @@ class Delicious(TagInfoService):
         return content
 
 if __name__ == '__main__':
+
     url = sys.argv[1].strip()
     print Delicious.delicious_get_content( url )
     print Delicious.getUrlInfo( url ), "counts"
