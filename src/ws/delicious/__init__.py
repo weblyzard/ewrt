@@ -2,7 +2,8 @@
 
 """ uses the del.icio.us API to access information about del.icio.us URLs """
 
-# (C)opyrights 2008 by Albert Weichselbraun <albert@weichselbraun.net>
+# (C)opyrights 2008-2009 by Albert Weichselbraun <albert@weichselbraun.net>
+#                           Heinz Peter Lang <hplang@langatium.net>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,7 +25,7 @@ import re
 from eWRT.access.http import Retrieve
 from eWRT.ws.TagInfoService import TagInfoService
 from urlparse import urlsplit
-from md5 import md5
+from hashlib import md5
 from eWRT.config import DELICIOUS_USER, DELICIOUS_PASS
 
 class Delicious(TagInfoService):
@@ -34,6 +35,8 @@ class Delicious(TagInfoService):
     DELICIOUS_TAG_URL = "http://delicious.com/tag/%s"
     RE_COUNT = re.compile("this url has been saved by (\d+) people")
     RE_TAG_COUNT = re.compile("<p>(\d+) Bookmarks</p></div>")
+
+    __slots__ = ()
 
     @staticmethod
     def getUrlInfo( url ):
@@ -79,7 +82,6 @@ class Delicious(TagInfoService):
             url += "/"
         return url
 
-    # heinz: todo remove or adopt???
     @staticmethod
     def delicious_info_retrieve( url ):
         assert( url.startswith("http") )
@@ -87,11 +89,7 @@ class Delicious(TagInfoService):
         md5_url = md5( Delicious._normalize_url(url)).hexdigest()
         request = Delicious.DELICIOUS_SERVICE_URL % md5_url
 
-        f = Retrieve(Delicious.__name__).open(request)
-        content = f.read()
-        f.close()
-
-        return Delicious._parse_counts(content)
+        return Delicious._parse_counts( Delicious.get_content(md5_url) )
     
     @staticmethod
     def get_content( url ):

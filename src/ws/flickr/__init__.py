@@ -33,6 +33,8 @@ class Flickr(TagInfoService):
     RE_TAG_COUNT = re.compile('var page_pagination_count = (\d+);')
     # RE_TAG_COUNT = re.compile('<div class="Results">\((\d+) results\)</div>')
 
+    __slots__ = ()
+
     @staticmethod
     def getTagInfo( tags ):
         """ @param   tags   A list of tags to retrieve information for
@@ -40,7 +42,6 @@ class Flickr(TagInfoService):
         """
 
         url = Flickr.FLICKR_TAG_URL % "+".join(tags)        
-        print url
         content = Flickr.get_content(url)
         return Flickr._parse_tag_counts(content)
 
