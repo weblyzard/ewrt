@@ -9,10 +9,10 @@ setup(
       ###########################################
       ## Metadata
       name="eWRT",
-      version      = "0.3",
+      version      = "0.3-5",
       description  = 'eWRT',
       author       = 'Albert Weichselbraun, Heinz Lang',
-      author_email = 'albert.weichselbraun@wu-wien.ac.at, heinz.lang@wu-wien.ac.at',
+      author_email = 'albert.weichselbraun@wu.ac.at, heinz.lang@wu.ac.at',
       url          = 'http://www.semanticlab.net/index.php/EWRT',
       license      = "GPL3", 
       package_dir  = {'eWRT': 'src'},
@@ -28,6 +28,7 @@ setup(
                       'eWRT.input',
                       'eWRT.input.corpus',
                       'eWRT.input.corpus.reuters',
+                      'eWRT.lib',
                       'eWRT.util',
                       'eWRT.ws',
                       'eWRT.ws.amazon',
