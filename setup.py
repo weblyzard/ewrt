@@ -37,7 +37,7 @@ setup(
                       'eWRT.ws.facebook',
                       'eWRT.ws.flickr',
                       'eWRT.ws.googletrends',
-                      'eWRT.ws.opencalias',
+                      'eWRT.ws.opencalais',
                       'eWRT.ws.twittertrends',
                       'eWRT.ws.wikipedia'
                      ],
