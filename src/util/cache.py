@@ -62,9 +62,9 @@ class DiskCache(Cache):
 
 
     @staticmethod
-    def getObjectId( obj_str ):
+    def getObjectId( obj ):
         """ returns an identifier representing the object """
-        return HASH(str(obj_str)).hexdigest()
+        return HASH(str( obj )).hexdigest()
         
     def _get_fname( self, obj_id ):
         """ computes the filename of the file with the given
@@ -79,7 +79,7 @@ class DiskCache(Cache):
 
         return join(obj_dir, obj_id+self.cache_file_suffix)
     
-    def fetch(self, fetch_function, *args):
+    def fetch(self, fetch_function, *args, **kargs):
         """ fetches the object with the given id, querying
              a) the cache and
              b) the fetch_function
@@ -87,13 +87,13 @@ class DiskCache(Cache):
             in the cache 
 
             @param[in] function to call if the result is not in the cache
-            @param[in] function arguments (used to identify, whether the function has already
-                                           been cached or not)
+            @param[in] args   arguments 
+            @param[in] kargs  optional keyword arguments
 
             @returns the object (retrieved from the cache or computed)
         """
             
-        cache_file = self._get_fname( self.getObjectId(args) )
+        cache_file = self._get_fname( self.getObjectId( (args, tuple(kargs.items())) ) )
         # try to fetch the object from the cache
         if exists(cache_file):
             self._cache_hit += 1
@@ -104,7 +104,7 @@ class DiskCache(Cache):
 
         # compute and cache it otherwise
         self._cache_miss += 1
-        obj = fetch_function(*args)
+        obj = fetch_function(*args, **kargs)
         if obj != None:
             f = open(cache_file, "w")
             dump(obj, f)
@@ -123,6 +123,7 @@ class DiskCached(DiskCache):
           def myfunction(*args):
              ...
     """
+    
     def __init__(self, cache_dir, cache_nesting_level=0, cache_file_suffix=""):
         """ initializes the Cache object 
             @param[in] fn                  the function to cache
@@ -131,12 +132,10 @@ class DiskCached(DiskCache):
             @param[in] cache_file_suffix   optional suffix for cache files
         """
         DiskCache.__init__(self, cache_dir, cache_nesting_level, cache_file_suffix)
-        self._fn = None
 
     def __call__(self, fn):
-        self._fn = fn
-        def wrapped_fn(*args):
-            return self.fetch(self._fn, *args)
+        def wrapped_fn(*args, **kargs):
+            return self.fetch(fn, *args, **kargs)
         return wrapped_fn
 
 
@@ -151,16 +150,17 @@ class MemoryCache(Cache):
         self._usage      = {}
         self.max_cache_size = max_cache_size
         
-    def fetch(self, fetch_function, *args):
+    def fetch(self, fetch_function, *args, **kargs):
         # update the object's last usage time stamp
-        self._usage[args]     = time()  
+        key = (args, tuple(kargs.items()) )
+        self._usage[key]     = time()  
         try:
-            return self._cacheData[args]
+            return self._cacheData[key]
         except KeyError:
-            obj = fetch_function(*args)
+            obj = fetch_function(*args, **kargs)
             if obj != None:
                 self.garbage_collect_cache()
-                self._cacheData[args] = obj
+                self._cacheData[key] = obj
             return obj
 
     def garbage_collect_cache(self):
@@ -174,20 +174,32 @@ class MemoryCache(Cache):
         del self._cacheData[key]
 
 
-
 class MemoryCached(MemoryCache):
     """ Decorator based on MemoryCache for caching arbitrary function calls
         usage:
-          @MemoryCached
+          @MemoryCached or @MemoryCached(max_cache_size)
           def myfunction(*args):
              ...
     """
-    def __init__(self, fn):
-        MemoryCache.__init__(self)
-        self._fn = fn
+    def __init__(self, arg):
+        """ initializes the MemoryCache object 
+            @param[in] either the max_cache_size or the function to call
+        """
+        if hasattr(arg, '__call__'):
+            MemoryCache.__init__(self)
+            self._fn = arg
+        else:
+            MemoryCache.__init__(self, max_cache_size=arg)
+            self._fn = None
 
-    def __call__(self, *args):
-        return self.fetch(self._fn, *args)
+    def __call__(self, *args, **kargs):
+        if self._fn == None:
+            fn = args[0]
+            def wrapped_fn(*args, **kargs):
+                return self.fetch(fn, *args, **kargs)
+            return wrapped_fn
+        else:
+            return self.fetch(self._fn, *args, **kargs)
 
 
 class IterableCache(Cache):
@@ -248,16 +260,70 @@ class IterableCache(Cache):
             self._pickle_iterator.close()
             raise StopIteration
 
+# 
+# Unittests
+# run nosetest from python-nose to execute these tests
+#
+
+class TestCached(object):
+    """ tests the MemoryCached Decorator """
+    @staticmethod
+    def add(a=2,b=3): 
+        return a+b
+
+    @staticmethod
+    def sub(a=2,b=3): 
+        return a-b
+
+    def testNonKeywordArguments(self):
+        """ tests the class with non Keyword Arguments """
+        for x in xrange(1,20):
+            assert self.add(x,5) == (x+5)
+            assert self.add(x,5) == (x+5)
+
+        # test objects with a cachesize specified
+        for x in xrange(1,20):
+            assert self.sub(x,5) == x-5
+            assert self.sub(x,5) == x-5
+
+    def testKeywordArguments(self):
+        """ tests keyword arguments """
+        assert self.add(3, b=7) == 3+7
+        assert self.add(3, b=7) == 3+7
+        assert self.add(a=9, b=8) == 9+8
 
 
-if __name__ == '__main__':
-    
-    from unittest import TestCase
+class TestMemoryCached(TestCached):
+    @staticmethod
+    @MemoryCached
+    def add(a=1, b=2):
+        return a+b
 
-    class TestCache(TestCase):
-        """ tests the caching class based on a dummy example """
+    @staticmethod
+    @MemoryCached(12)
+    def sub(a=2, b=1):
+        return a-b 
 
-        def setUp(self):
-            pass
+class TestDiskCached(TestCached):
+    @staticmethod
+    @DiskCached("./.unittest-temp1")
+    def add(a=1, b=2):
+        return a+b
+
+    @staticmethod
+    @DiskCached("./.unittest-temp2")
+    def sub(a=2, b=1):
+        return a-b 
+
+    def teardown(self):
+        """ remove the cache directories """
+        from shutil import rmtree
+        from os.path import exists
+
+        if exists("./.unittest-temp1"):
+            rmtree("./.unittest-temp1")
+        if exists("./unittest-temp2"):
+            rmtree("./.unittest-temp2")
+       
 
 # $Id$
