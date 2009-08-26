@@ -34,7 +34,8 @@ from os import makedirs
 from random import choice
 from xml.dom import minidom
 from StringIO import StringIO
-import urllib, string
+import urllib2, string
+from urllib import urlencode
 from eWRT.config import OPENCALAIS_KEY, OPENCALAIS_CACHE_DIR, OPENCALAIS_URL, USER_AGENT
 from eWRT.util.cache import DiskCache
 
@@ -102,18 +103,19 @@ class Calais:
         """ Submits 'text' to OpenCalais for analysis and memorizes the extracted metadata. 
             Set the content-type to 'text/html' if you are submitting HTML data.  
         """
-        externalID = Calais.content_id(text)
+        externalID = self.content_id( text )
         paramsXML = PARAMS_XML % (content_type, self.allow_distro, self.allow_search, externalID, self.submitter) 
-        param = urllib.urlencode({'licenseID':self.api_key, 'content':text, 'paramsXML':paramsXML}) 
+        param = urlencode({'licenseID':self.api_key, 'content':text, 'paramsXML':paramsXML}) 
                 
         # do not fetch the data again, if a file exists in the cache
-        get_calias_data = urllib.urlopen(OPENCALAIS_URL, param).read
-        if self.cache is None:
-            xml_data = unpack( get_calias_data() )
-        else:
-            xml_data = unpack( self.cache.fetch( externalID, get_calias_data ) )
+        get_calias_data = lambda x: urllib2.urlopen(OPENCALAIS_URL, x).read()
 
-        return parse( xml_data )
+        if self.cache is None:
+            xml_data = self.unpack( get_calias_data( param) )
+        else:
+            xml_data = self.unpack( self.cache.fetch( get_calias_data, param ) )
+
+        return self.parse( xml_data )
 
 
     @staticmethod
