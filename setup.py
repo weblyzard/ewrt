@@ -25,6 +25,7 @@ setup(
       ## Package List
       packages     = ['eWRT',
                       'eWRT.access',
+                      'eWRT.config',
                       'eWRT.input',
                       'eWRT.input.corpus',
                       'eWRT.input.corpus.reuters',
