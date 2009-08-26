@@ -66,7 +66,6 @@ class Calais:
         """
         assert(api_key) 
         self.submitter = submitter
-        self.use_caching = use_caching
         self.allow_distro = "false"
         self.allow_search = "false"
         self.api_key = api_key
