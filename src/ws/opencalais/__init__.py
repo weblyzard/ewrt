@@ -134,6 +134,7 @@ class Calais:
 
         things = []
 
+        f= open("tmp","w"); f.write(xml_data.encode("utf8")); f.close()
         dom = minidom.parseString( xml_data.encode("utf8" ))
         for document in dom.getElementsByTagName("CalaisSimpleOutputFormat"):
             for annotations in document.childNodes:
