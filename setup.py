@@ -9,7 +9,7 @@ setup(
       ###########################################
       ## Metadata
       name="eWRT",
-      version      = "0.4",
+      version      = "0.4-1",
       description  = 'eWRT',
       author       = 'Albert Weichselbraun, Heinz Lang',
       author_email = 'albert.weichselbraun@wu.ac.at, heinz.lang@wu.ac.at',
