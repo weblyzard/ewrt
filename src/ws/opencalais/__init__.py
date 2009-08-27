@@ -127,6 +127,24 @@ class Calais:
         return """<?xml version="1.0" encoding="utf-8"?>\n""" \
                  + dom.getElementsByTagName("string")[0].firstChild.data
 
+    @staticmethod
+    def cleanup_xml(xml_data):
+        """ removes comments from xml-data-streams provided by opencalais
+            @param[in] xml_data 
+            @returns the xml data without any comments
+        """
+        result = []
+        comment = False
+        for line in xml_data.split("\n"):
+            if "<!--" in line:
+                comment = True
+            if comment is False:
+                result.append( line )
+            if "-->" in line:
+                comment = False
+
+        return "\n".join( result )
+
 
     @staticmethod
     def parse(xml_data): 
@@ -134,7 +152,8 @@ class Calais:
 
         things = []
 
-        f= open("tmp","w"); f.write(xml_data.encode("utf8")); f.close()
+        xml_data = Calais.cleanup_xml(xml_data)
+        # f= open("tmp","w"); f.write(xml_data.encode("utf8")); f.close()
         dom = minidom.parseString( xml_data.encode("utf8" ))
         for document in dom.getElementsByTagName("CalaisSimpleOutputFormat"):
             for annotations in document.childNodes:
