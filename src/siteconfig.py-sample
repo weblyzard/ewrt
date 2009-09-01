@@ -41,6 +41,17 @@ FACEBOOK_API_KEY = "api-key"
 FACEBOOK_SECRET_KEY = "secret-key"
 FACEBOOK_SESSION_KEY = "session-key"
 
+# geonames
+GAZETTEER_DB   = 'dbname'
+GAZETTEER_HOST = 'hostname'
+GAZETTEER_USER = 'username'
+GAZETTEER_PASS = 'password'
+
+CONTENT_DB   = 'dbname'
+CONTENT_HOST = 'hostname'
+CONTENT_USER = 'username'
+CONTENT_PASS = 'password'
+
 # ===================================================================
 # PATHS AND URLs
 # ===================================================================
