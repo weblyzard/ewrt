@@ -3,6 +3,7 @@
 
 import sys
 from eWRT.access.db import PostgresqlDb
+from eWRT.config import GAZETTEER_DB, GAZETTEER_HOST, GAZETTEER_USER, GAZETTEER_PASS, CONTENT_DB, CONTENT_HOST, CONTENT_USER, CONTENT_PASS
 
 class Gazetteer(object):
     QUERY_HAS_PARENT = '''
@@ -16,14 +17,18 @@ class Gazetteer(object):
     QUERY_CONTENT_ID = '''
         SELECT gazetteer_id FROM content_id_gazeteer_id WHERE content_id = %d '''
 
+    QUERY_NAME = '''
+            SELECT entity_id, ispreferredname, lang, gazetteerentry_id
+            FROM gazetteerentry_ordered_names
+            WHERE name LIKE '%s' '''
+
     parents = []
 
     ## init - establishes the db-connections
     def __init__(self):
-        """ implement me """
-        self.db = PostgresqlDb("gazetteer", "xmhawk.ai.wu.ac.at", "", "")
+        self.db = PostgresqlDb(GAZETTEER_DB, GAZETTEER_HOST, GAZETTEER_USER, GAZETTEER_PASS)
         self.db.connect()
-        self.db2 = PostgresqlDb("geoEval", "xmdimrill.ai.wu.ac.at", "", "")
+        self.db2 = PostgresqlDb(CONTENT_DB, CONTENT_HOST, CONTENT_USER, CONTENT_PASS)
         self.db2.connect()
 
     ## returns the location of the content ID
@@ -43,7 +48,7 @@ class Gazetteer(object):
 
     ## returns the location of the GazetteerEntry ID  
     # @param gazetteer-entry ID  
-    # @return list of locaions, e.g. ['Europa', 'France', 'Centre']
+    # @return list of locations, e.g. ['Europa', 'France', 'Centre']
     def getGeoNameFromGazetteerID(self, gazetteer_id):
         
         self.parents = []
@@ -56,16 +61,14 @@ class Gazetteer(object):
         else:
             return result
 
+    ## returns the geoname for the given String
+    # @param string
+    # @return dictionary of locations
     def getGeoNameFromString(self, name):
-        """ implement me """
-        query = '''
-            SELECT entity_id, ispreferredname, lang, gazetteerentry_id
-            FROM gazetteerentry_ordered_names
-            WHERE name LIKE '%s' '''
 
         list = []
 
-        for result in self.db.query(query % name):
+        for result in self.db.query(QUERY_NAME % name):
             tmp = self.getGeoNameFromGazetteerID(result['entity_id'])
             list.append(tmp)
         
@@ -111,20 +114,20 @@ class Gazetteer(object):
     def __hasParent(self, child_id):
         query = self.QUERY_HAS_PARENT % child_id
         result = self.db.query(query)
-        # todo: funktioniert nicht mit 1++ parents  
+        
+        # todo: is it necessary, that this functions can process multiple parents?
+        if result.__len__() > 1:
+            print '### result > 1 ###'
+            print '    child_id:  %s' % child_id
+            print '    parent_id: %s ' % parent_id
 
-        #for result in self.db.query(query):
-        #parent_id = result[0]['parent_id']
-        """
-        if self.parent.index(parent_id):
-            return 0        
-        else 
-            return parent_id
-        """
+
+        # todo: does it make sense to fetch infinite loops
         if result == []:
             return 0 
         else:
             return result[0]["parent_id"]
+
 
 if __name__ == "__main__":
 
@@ -136,3 +139,5 @@ if __name__ == "__main__":
         print a.getGeoNameFromGazetteerID(95078)
         print a.getGeoNameFromGazetteerID(959484848078)
         print a.getGeoNameFromString('Vienna')
+        print a.getGeoNameFromString('China')
+        print a.getGeoNameFromString('Wien')
