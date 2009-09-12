@@ -52,10 +52,14 @@ class GazetteerNameNotFound(Exception):
 
 
 class Gazetteer(object):
+    # sorting by population is a workaround for entries with multiple parents
+    # (without the sorting loops occure)
     QUERY_HAS_PARENT = '''
         SELECT parent_id 
-        FROM gazetteerentity JOIN locatedin ON (gazetteerentity.id = locatedin.child_id)
-        WHERE child_id = %d'''
+        FROM gazetteerentity ga 
+        JOIN locatedin ON (ga.id = locatedin.child_id)
+        JOIN gazetteerentity gb ON (gb.id = locatedin.parent_id)
+        WHERE child_id = %d order by gb.population DESC LIMIT 1'''
 
     QUERY_CONTENT_ID = '''
         SELECT gazetteer_id FROM content_id_gazeteer_id WHERE content_id = %d '''
@@ -76,11 +80,12 @@ class Gazetteer(object):
         self.db2 = PostgresqlDb( **DATABASE_CONNECTION['geo_mapping'] )
         self.db2.connect()
 
-    ## returns the location of the content ID
-    # @param content_id
-    # @return list of locaions, e.g. ['Europa', 'France', 'Centre']
     @MemoryCached
     def getGeoNameFromContentID(self, content_id):
+        """ returns the location of the content ID
+            @param content_id
+            @return list of locaions, e.g. ['Europa', 'France', 'Centre']
+        """
 
         id = content_id
         query = self.QUERY_CONTENT_ID % content_id 
@@ -100,7 +105,7 @@ class Gazetteer(object):
         
         self.parents = []
 
-        result = self.__getGazetteer(gazetteer_id)
+        result = self.__getLocationTree(gazetteer_id)
         result.reverse()
 
         if result == []:
@@ -114,6 +119,7 @@ class Gazetteer(object):
     @MemoryCached
     def getGeoNameFromString(self, name):
         """ implement me """
+        res = set()
         query = '''SELECT entity_id FROM gazetteerentry JOIN hasname ON (gazetteerentry.id = hasname.entry_id) WHERE name = '%s' '''
         for result in self.db.query(query % name.replace("'", "''")):
             try:
@@ -125,19 +131,25 @@ class Gazetteer(object):
         return list(res)
 
 
-    ## builds the full location
+    ## recursive function to build the full location tree
     # @param id
     # @returns list of locations
-    def __getGazetteer(self, id):
-        list = []
-        list.append(self.__getPreferredGeoName(id))
+    def __getLocationTree(self, id):
+        geoPath = [ self.__getPreferredGeoName( id ) ]
 
-        parent = self.__hasParent(id)
+        while id:
+            parentLocationEntity = self.__hasParent(id)
+            if parentLocationEntity:
+                parentLocationName = self.__getPreferredGeoName( parentLocationEntity )
+                if parentLocationName in geoPath:
+                    print "%s in %s" % (parentLocationName, geoPath)
+                    break
+                geoPath.append( parentLocationName )
 
-        if parent:
-            list.extend(self.__getGazetteer(parent))
+            id = parentLocationEntity
 
-        return list
+        return geoPath
+
 
     ## gets the preferred name for the location
     # @param id
@@ -167,17 +179,19 @@ class Gazetteer(object):
         result = self.db.query(query)
         
         # todo: is it necessary, that this functions can process multiple parents?
+        # multiple parents (!)
         if result.__len__() > 1:
             print '### result > 1 ###'
             print '    child_id:  %s' % child_id
-            print '    parent_id: %s ' % parent_id
+            print '    parent_id: %s ' % [ e['parent_id'] for e in result ]
 
 
         # todo: does it make sense to fetch infinite loops
         if result == []:
             return 0 
         else:
-            return result[0]["parent_id"]
+            return result[0]['parent_id']
+
 
 class TestGazeteer(object):
     
@@ -185,8 +199,11 @@ class TestGazeteer(object):
         self.gazetteer = Gazetteer()
     
     def testUniqueStringResolver(self):
-        assert Gazetteer.getGeoNameFromString( self.gazetteer, "Lainach" ) == []
-        assert len(Gazetteer.getGeoNameFromString( self.gazetteer, "Vienna")) == 3
+        getName = Gazetteer.getGeoNameFromString
+        assert getName( self.gazetteer, "Lainach" ) == []
+
+        for name, entries in ( ('Vienna', 3), ('Madrid', 2), ('Graz', 1), ('Poland', 2), ('Geneva', 4) ):
+            assert len( getName( self.gazetteer, name )) == entries 
 
     def testContentIdResolver(self):
         assert Gazetteer.getGeoNameFromContentID(self.gazetteer, 86597672) == ['Europe', 'France', 'Centre']
@@ -194,13 +211,13 @@ class TestGazeteer(object):
 if __name__ == "__main__":
     a = Gazetteer()
     if sys.argv.__len__() > 1:
-        print a.getGeoNameFromContentID(sys.argv[1])
+        print Gazetteer.getGeoNameFromString(a, sys.argv[1])
     else:
-        print a.getGeoNameFromContentID(86597672)
-        print a.getGeoNameFromContentID(90160635)
-        print a.getGeoNameFromString('Vienna')
-        print a.getGeoNameFromString( "Lainach" )
-        print a.getGeoNameFromString( "Spittal an der Drau" )
-        print a.getGeoNameFromString( "Salzburg" )
+        # print Gazetteer.getGeoNameFromContentID(a, 86597672)
+        # print Gazetteer.getGeoNameFromContentID(a, 90160635)
+        print Gazetteer.getGeoNameFromString(a, 'Vienna')
+        print Gazetteer.getGeoNameFromString(a, "Lainach" )
+        print Gazetteer.getGeoNameFromString(a, "Spittal an der Drau" )
+        print Gazetteer.getGeoNameFromString(a, "Salzburg" )
 
 
