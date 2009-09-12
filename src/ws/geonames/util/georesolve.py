@@ -24,13 +24,9 @@
 
 import sys
 from eWRT.access.db import PostgresqlDb
-<<<<<<< .mine
 from eWRT.util.cache import MemoryCached
 from eWRT.config import DATABASE_CONNECTION
 from warnings import warn
-=======
-from eWRT.config import GAZETTEER_DB, GAZETTEER_HOST, GAZETTEER_USER, GAZETTEER_PASS, CONTENT_DB, CONTENT_HOST, CONTENT_USER, CONTENT_PASS
->>>>>>> .r596
 
 class GazetteerEntryNotFound(Exception):
     """ @class GazetteerEntryNotFound
@@ -73,19 +69,11 @@ class Gazetteer(object):
 
     ## init - establishes the db-connections
     def __init__(self):
-<<<<<<< .mine
         """ implement me """
         self.db = PostgresqlDb( **DATABASE_CONNECTION['gazetteer'] )
         #PostgresqlDb.DEBUG=True
-=======
-        self.db = PostgresqlDb(GAZETTEER_DB, GAZETTEER_HOST, GAZETTEER_USER, GAZETTEER_PASS)
->>>>>>> .r596
         self.db.connect()
-<<<<<<< .mine
         self.db2 = PostgresqlDb( **DATABASE_CONNECTION['geo_mapping'] )
-=======
-        self.db2 = PostgresqlDb(CONTENT_DB, CONTENT_HOST, CONTENT_USER, CONTENT_PASS)
->>>>>>> .r596
         self.db2.connect()
 
     ## returns the location of the content ID
@@ -120,36 +108,19 @@ class Gazetteer(object):
         else:
             return result
 
-<<<<<<< .mine
-    @MemoryCached
-=======
     ## returns the geoname for the given String
     # @param string
     # @return dictionary of locations
->>>>>>> .r596
+    @MemoryCached
     def getGeoNameFromString(self, name):
-<<<<<<< .mine
         """ implement me """
         query = '''SELECT entity_id FROM gazetteerentry JOIN hasname ON (gazetteerentry.id = hasname.entry_id) WHERE name = '%s' '''
-=======
->>>>>>> .r596
-
-        res = set()
-
-<<<<<<< .mine
         for result in self.db.query(query % name.replace("'", "''")):
             try:
                 tmp = Gazetteer.getGeoNameFromGazetteerID(self, result['entity_id'])
                 res.add( tuple(tmp) )
             except GazetteerEntryNotFound:
                 pass
-=======
-        for result in self.db.query(QUERY_NAME % name):
-            tmp = self.getGeoNameFromGazetteerID(result['entity_id'])
-            list.append(tmp)
-        
-        return list
->>>>>>> .r596
 
         return list(res)
 
@@ -208,7 +179,6 @@ class Gazetteer(object):
         else:
             return result[0]["parent_id"]
 
-<<<<<<< .mine
 class TestGazeteer(object):
     
     def __init__(self):
@@ -221,10 +191,6 @@ class TestGazeteer(object):
     def testContentIdResolver(self):
         assert Gazetteer.getGeoNameFromContentID(self.gazetteer, 86597672) == ['Europe', 'France', 'Centre']
     
-
-=======
-
->>>>>>> .r596
 if __name__ == "__main__":
     a = Gazetteer()
     if sys.argv.__len__() > 1:
@@ -233,12 +199,8 @@ if __name__ == "__main__":
         print a.getGeoNameFromContentID(86597672)
         print a.getGeoNameFromContentID(90160635)
         print a.getGeoNameFromString('Vienna')
-<<<<<<< .mine
         print a.getGeoNameFromString( "Lainach" )
         print a.getGeoNameFromString( "Spittal an der Drau" )
         print a.getGeoNameFromString( "Salzburg" )
 
-=======
-        print a.getGeoNameFromString('China')
-        print a.getGeoNameFromString('Wien')
->>>>>>> .r596
+
