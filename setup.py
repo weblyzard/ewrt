@@ -36,6 +36,8 @@ setup(
                       'eWRT.ws.delicious',
                       'eWRT.ws.facebook',
                       'eWRT.ws.flickr',
+                      'eWRT.ws.geonames',
+                      'eWRT.ws.geonames.util',
                       'eWRT.ws.googletrends',
                       'eWRT.ws.opencalais',
                       'eWRT.ws.twittertrends',

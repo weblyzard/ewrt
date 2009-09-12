@@ -34,7 +34,7 @@ except ImportError:
 try:
     import MySQLdb
 except ImportError:
-    warn("Cannot import postgresql library.")
+    warn("Cannot import mysql library.")
 
 
 
@@ -92,6 +92,8 @@ class PostgresqlDb(IDB):
     """ @class 
         provides generall database access """
 
+    DEBUG = False
+
     def __init__(self, dbname, host="", username="", passwd=""):
         """ inits the database class """
         self.dbname   = dbname
@@ -106,8 +108,10 @@ class PostgresqlDb(IDB):
     def query(self,qu):
         """ queries the postgresql database """
         if type(qu) in StringTypes: qu=(qu,)
+        if PostgresqlDb.DEBUG: 
+            print qu
         cur = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        [ cur.execute(q) for q in qu ]
+        [ cur.execute(q ) for q in qu ]
         return cur.fetchall()
 
 

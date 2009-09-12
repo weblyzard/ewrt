@@ -16,6 +16,15 @@ USER_AGENT = 'eWRT Version/0.1; Module %s +http://p.semanticlab.net/eWRT'
 # default sleep time for web requests in seconds
 DEFAULT_WEB_REQUEST_SLEEP_TIME = 1 
 
+# ===================================================================
+# DATABASE CONFIGURATION
+#  contains a dictionary containing the connection information for
+#  different database connections (e.g. gazetteer, geo_mapping, ...)
+# ===================================================================
+DATABASE_CONNECTION = {
+            'gazetteer'  : {'host': '', 'dbname': '', 'username': '', 'passwd': ''},
+            'geo_mapping': {'host': '', 'dbname': '', 'username': '', 'passwd': ''},
+    } 
 
 # ===================================================================
 # USERNAMES AND API-KEYS

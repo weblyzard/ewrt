@@ -8,7 +8,7 @@ Usage:
 
 """
 
-# OpenCalias module
+# Opencalais module
 # based on python-calais v.0.2 by Jordan Dimov (jdimov@mlke.net)
 # 
 # (C)opyrights 2008 by Jordan Dimov <jdimov@mlke.net>
@@ -34,7 +34,7 @@ from os import makedirs
 from random import choice
 from xml.dom import minidom
 from StringIO import StringIO
-import urllib2, string
+from eWRT.access.http import Retrieve
 from urllib import urlencode
 from eWRT.config import OPENCALAIS_KEY, OPENCALAIS_CACHE_DIR, OPENCALAIS_URL, USER_AGENT
 from eWRT.util.cache import DiskCache
@@ -54,7 +54,6 @@ class Calais:
     submitter = USER_AGENT % "Calais"
     allow_distro = "false"
     allow_search = "false" 
-    things  = []
     api_key = ""
 
     def __init__(self, submitter, api_key=OPENCALAIS_KEY, allow_distro="false", allow_search="false", cache_dir=OPENCALAIS_CACHE_DIR):
@@ -70,7 +69,6 @@ class Calais:
         self.allow_distro = "false"
         self.allow_search = "false"
         self.api_key = api_key
-        self.things = {}
         if cache_dir:
             self.cache  = DiskCache(cache_dir, cache_nesting_level=2, cache_file_suffix=".xml")
 
@@ -108,22 +106,22 @@ class Calais:
         param = urlencode({'licenseID':self.api_key, 'content':text, 'paramsXML':paramsXML}) 
                 
         # do not fetch the data again, if a file exists in the cache
-        get_calias_data = lambda x: urllib2.urlopen(OPENCALAIS_URL, x).read()
+        get_calais_data = lambda x: Retrieve(OPENCALAIS_URL, x).read()
 
         if self.cache is None:
-            xml_data = self.unpack( get_calias_data( param) )
+            xml_data = self.unpack( get_calais_data( param ) )
         else:
-            xml_data = self.unpack( self.cache.fetch( get_calias_data, param ) )
+            xml_data = self.unpack( self.cache.fetch( get_calais_data, param ) )
 
         return self.parse( xml_data )
 
 
     @staticmethod
-    def unpack(calias_data):
+    def unpack(calais_data):
         """ extracts calais' xml response from the data send by the calais 
             webservice 
         """
-        dom = minidom.parseString(calias_data)
+        dom = minidom.parseString(calais_data)
         return """<?xml version="1.0" encoding="utf-8"?>\n""" \
                  + dom.getElementsByTagName("string")[0].firstChild.data
 

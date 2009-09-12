@@ -22,11 +22,17 @@ import urllib2
 from eWRT.config import USER_AGENT, DEFAULT_WEB_REQUEST_SLEEP_TIME
 from urlparse import urlsplit
 import time
+from StringIO import StringIO
+from gzip import GzipFile
 
 getHostName = lambda x: "://".join( urlsplit(x)[:2] )
 
 class Retrieve(object):
-    """ retrieves URL's using http """
+    """ retrieves URL's using HTTP supporting transparent
+        * authentication and
+        * compression """
+
+    __slots__ = ('module', 'sleep_time', 'last_access_time')
 
     def __init__(self, module, sleep_time=DEFAULT_WEB_REQUEST_SLEEP_TIME):
         self.module = module
@@ -35,21 +41,46 @@ class Retrieve(object):
         # request object
 
     def open(self, url, user=None, pwd=None ):
-        """ opens an url """
+        """ Opens an URL and returns the matching file object 
+            @param[in] url 
+            @param[in] user
+            @param[in] pwd
+            @returns a file object for reading the url
+        """
         request = urllib2.Request( url )
         request.add_header('User-Agent', USER_AGENT % self.module)
+        request.add_header('Accept-encoding', 'gzip')
         self._throttle()
+
+        # handle authentification
         if user and pwd:
-            return urllib2.build_opener( self._getHTTPBasicAuthOpener(url, user, pwd) ).open( request ) 
+            urlObj = urllib2.build_opener( self._getHTTPBasicAuthOpener(url, user, pwd) ).open( request ) 
         else:
-            return urllib2.build_opener().open( request )
+            urlObj = urllib2.build_opener().open( request )
+
+        # check whether the data stream is compressed
+        if urlObj.headers.get('Content-Encoding') == 'gzip':
+            return self._getUncompressedStream( urlObj )
+
+        return urlObj
 
 
-    def _getHTTPBasicAuthOpener(self, url, user, pwd):
+
+    @staticmethod
+    def _getHTTPBasicAuthOpener(url, user, pwd):
         """ returns an opener, capable of handling http-auth """
         auth_handler = urllib2.HTTPBasicAuthHandler()
         auth_handler.add_password('realm', getHostName(url), user, pwd)
         return auth_handler
+
+    @staticmethod
+    def _getUncompressedStream(urlObj):
+        """ transparently uncompressed the given data stream
+            @param[in] urlObj 
+            @returns an urlObj containing the uncompressed data
+        """
+        compressedStream = StringIO( urlObj.read() )
+        return GzipFile(fileobj=compressedStream) 
 
 
     def _throttle( self ):
