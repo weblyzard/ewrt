@@ -26,7 +26,7 @@ import sys
 from eWRT.access.db import PostgresqlDb
 from eWRT.util.cache import MemoryCached
 from eWRT.config import DATABASE_CONNECTION
-from warnings import warn
+# from warnings import warn
 
 class GazetteerEntryNotFound(Exception):
     """ @class GazetteerEntryNotFound
@@ -69,7 +69,7 @@ class Gazetteer(object):
             FROM gazetteerentry_ordered_names
             WHERE name LIKE '%s' '''
 
-    parents = []
+    DEBUG = False
 
     ## init - establishes the db-connections
     def __init__(self):
@@ -87,7 +87,6 @@ class Gazetteer(object):
             @return list of locaions, e.g. ['Europa', 'France', 'Centre']
         """
 
-        id = content_id
         query = self.QUERY_CONTENT_ID % content_id 
         result = self.db2.query(query)
 
@@ -102,9 +101,6 @@ class Gazetteer(object):
     # @return list of locations, e.g. ['Europa', 'France', 'Centre']
     @MemoryCached
     def getGeoNameFromGazetteerID(self, gazetteer_id):
-        
-        self.parents = []
-
         result = self.__getLocationTree(gazetteer_id)
         result.reverse()
 
@@ -113,12 +109,12 @@ class Gazetteer(object):
         else:
             return result
 
-    ## returns the geoname for the given String
-    # @param string
-    # @return dictionary of locations
     @MemoryCached
     def getGeoNameFromString(self, name):
-        """ implement me """
+        """ returns the geoname for the given string
+            @param string
+            @return dictionary of locations
+        """
         res = set()
         query = '''SELECT entity_id FROM gazetteerentry JOIN hasname ON (gazetteerentry.id = hasname.entry_id) WHERE name = '%s' '''
         for result in self.db.query(query % name.replace("'", "''")):
@@ -136,16 +132,18 @@ class Gazetteer(object):
     # @returns list of locations
     def __getLocationTree(self, id):
         geoPath = [ self.__getPreferredGeoName( id ) ]
+        geoIdPath = [ id ]
 
         while id:
             parentLocationEntity = self.__hasParent(id)
             if parentLocationEntity:
                 parentLocationName = self.__getPreferredGeoName( parentLocationEntity )
-                if parentLocationName in geoPath:
+                if parentLocationEntity in geoIdPath:
                     print "%s in %s" % (parentLocationName, geoPath)
                     break
                 geoPath.append( parentLocationName )
 
+            geoIdPath.append( parentLocationEntity )
             id = parentLocationEntity
 
         return geoPath
@@ -161,15 +159,17 @@ class Gazetteer(object):
             @returns the geo entity's name
         """ 
 
-        query = '''SELECT name FROM vw_gazetteer_c5000 WHERE id=%d 
-                      ORDER BY (lang='en' and lang is not null) DESC,
+        query = '''SELECT name FROM vw_gazetteer_c5000_tng WHERE id=%d 
+                      ORDER BY 
+                            (lang='en' and lang is not null) DESC,
+                            (short=TRUE and short IS NOT NULL) DESC,
                             preferred DESC
                       LIMIT 1''' % (id)
         result = self.db.query(query)
         if not result:
             raise GazetteerEntryNotFound(id)
 
-        return result[0]['name']
+        return Gazetteer.DEBUG and result[0]['name']+"(%d)" % (id) or result[0]['name']
 
     ## checks if the given ID has a parent
     # @param ID of the child
