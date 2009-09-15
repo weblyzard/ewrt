@@ -117,16 +117,15 @@ class Gazetteer(object):
     def getGeoNameFromString(self, name):
         """ returns the geoname for the given string
             @param string
-            @return dictionary of locations
+            @return a list of tuples (population, location) 
         """
-        Gazetteer.DEBUG = True
         res = set()
-        query = '''SELECT entity_id FROM gazetteerentry JOIN hasname ON (gazetteerentry.id = hasname.entry_id) 
+        query = '''SELECT entity_id, population FROM gazetteerentry JOIN hasname ON (gazetteerentry.id = hasname.entry_id) 
                   JOIN gazetteerentity ON (gazetteerentity.id=hasname.entity_id) WHERE name = '%%s' AND population > %d''' % ( MIN_POPULATION)
         for result in self.db.query(query % name.replace("'", "''")):
             try:
                 tmp = Gazetteer.getGeoNameFromGazetteerID(self, result['entity_id'])
-                res.add( tuple(tmp) )
+                res.add( (result['population'], tuple(tmp)) )
             except GazetteerEntryNotFound:
                 pass
 
