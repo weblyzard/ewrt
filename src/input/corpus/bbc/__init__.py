@@ -15,7 +15,8 @@ __revision__ = "$Revision: 545 $"
 __author__   = "Albert Weichselbraun"
 
 from eWRT.config import BBC_CORPUS_PRINT
-from eWRT.conv.html import HtmlToText
+from eWRT.convert.html import HtmlToText
+from glob import glob
 import os
 
 class BBCGetCorpus(object):
@@ -36,3 +37,14 @@ class BBCGetCorpus(object):
         else:
             raise StopIteration
 
+    @staticmethod
+    def getTitle(text):
+        """ returns the title of a given text """
+        return text.split("\n")[2].strip()
+
+
+if __name__ == '__main__':
+    n = lambda x: x.replace("'", "''")
+    for num, text in enumerate( BBCGetCorpus( "7[3456789]*.stm") ):
+        title = BBCGetCorpus.getTitle(text)
+        print "INSERT INTO evaluation_documents content_id, title, content VALUES ('%d', '%s', '%s');" % (num, n(title), n(text))

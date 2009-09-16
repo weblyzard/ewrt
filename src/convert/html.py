@@ -61,5 +61,10 @@ class HtmlToText(object):
         return ( p.wait(), content ) 
 
 
-print HtmlToText.convert( "<html><body><h1>Hallo</h1><ul><li>1</li><li>Jasna</li></ul></body></html>" )
+
+class TestHtmlToText(object):
+
+    def testConversion(self):
+        text =  HtmlToText.getText( "<html><body><h1>Hallo</h1><ul><li>1</li><li>Jasna</li></ul></body></html>" )
+        assert 'Jasna' in text
 

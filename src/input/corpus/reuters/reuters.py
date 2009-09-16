@@ -16,7 +16,7 @@ __author__   = "Albert Weichselbraun"
 
 from xml.sax import make_parser, handler, parseString
 from glob import glob
-from config import REUTERS_DATA_DIR
+from eWRT.config import REUTERS_DATA_DIR
 from zipfile import ZipFile
 import os
 
