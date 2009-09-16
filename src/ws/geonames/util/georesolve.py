@@ -121,7 +121,7 @@ class Gazetteer(object):
         """
         res = set()
         query = '''SELECT entity_id, population FROM gazetteerentry JOIN hasname ON (gazetteerentry.id = hasname.entry_id) 
-                  JOIN gazetteerentity ON (gazetteerentity.id=hasname.entity_id) WHERE name = '%%s' AND population > %d''' % ( MIN_POPULATION)
+                  JOIN gazetteerentity ON (gazetteerentity.id=hasname.entity_id) WHERE name = '%%s' AND (population > %d or feature_code in ('ADM1', 'ADM2', 'ADM3')) ''' % ( MIN_POPULATION)
         for result in self.db.query(query % name.replace("'", "''")):
             try:
                 tmp = Gazetteer.getGeoNameFromGeoId(self, result['entity_id'])
@@ -256,7 +256,7 @@ class TestGazeteer(object):
 if __name__ == "__main__":
     a = Gazetteer()
     if sys.argv.__len__() > 1:
-        print a.getGeoIdFromGeoUrl( "Europe/Austria/Vienna/Vienna" )
+        # print a.getGeoIdFromGeoUrl( "Europe/Austria/Vienna/Vienna" )
         print Gazetteer.getGeoNameFromString(a, sys.argv[1])
     else:
         # print Gazetteer.getGeoNameFromContentID(a, 86597672)
