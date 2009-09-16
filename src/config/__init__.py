@@ -27,6 +27,8 @@ from os.path import expanduser
 from warnings import warn
 sys.path.append( expanduser("~/.eWRT/") )
 
+CMD_HTML_CONV="/usr/bin/lynx -stdin -width=20000 -force_html -nocolor -dump -nolist -nobold -pseudo_inlines=0 -assume_charset=%s -display_charset=utf8"
+
 try:
     from siteconfig import *
 except ImportError:
