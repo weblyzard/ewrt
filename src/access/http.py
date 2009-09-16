@@ -40,14 +40,15 @@ class Retrieve(object):
         self.last_access_time = 0
         # request object
 
-    def open(self, url, user=None, pwd=None ):
+    def open(self, url, data=None, user=None, pwd=None ):
         """ Opens an URL and returns the matching file object 
             @param[in] url 
-            @param[in] user
-            @param[in] pwd
+            @param[in] data  optional data to submit
+            @param[in] user  optional user name
+            @param[in] pwd   optional password
             @returns a file object for reading the url
         """
-        request = urllib2.Request( url )
+        request = urllib2.Request( url, data )
         request.add_header('User-Agent', USER_AGENT % self.module)
         request.add_header('Accept-encoding', 'gzip')
         self._throttle()

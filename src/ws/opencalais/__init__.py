@@ -106,7 +106,7 @@ class Calais:
         param = urlencode({'licenseID':self.api_key, 'content':text, 'paramsXML':paramsXML}) 
                 
         # do not fetch the data again, if a file exists in the cache
-        get_calais_data = lambda x: Retrieve(OPENCALAIS_URL, x).read()
+        get_calais_data = lambda x: Retrieve(Calais.__name__).open(OPENCALAIS_URL, x).read()
 
         if self.cache is None:
             xml_data = self.unpack( get_calais_data( param ) )
