@@ -98,13 +98,13 @@ class Gazetteer(object):
             return 'ContentID not found!'
         else:
             gaz_id = result[0]['gazetteer_id']
-            return Gazetteer.getGeoNameFromGazetteerID(self, gaz_id)
+            return Gazetteer.getGeoNameFromGeoId(self, gaz_id)
 
     ## returns the location of the GazetteerEntry ID  
     # @param gazetteer-entry ID  
     # @return list of locations, e.g. ['Europa', 'France', 'Centre']
     @MemoryCached
-    def getGeoNameFromGazetteerID(self, gazetteer_id):
+    def getGeoNameFromGeoId(self, gazetteer_id):
         result = self.__getLocationTree(gazetteer_id)
         result.reverse()
 
@@ -124,7 +124,7 @@ class Gazetteer(object):
                   JOIN gazetteerentity ON (gazetteerentity.id=hasname.entity_id) WHERE name = '%%s' AND population > %d''' % ( MIN_POPULATION)
         for result in self.db.query(query % name.replace("'", "''")):
             try:
-                tmp = Gazetteer.getGeoNameFromGazetteerID(self, result['entity_id'])
+                tmp = Gazetteer.getGeoNameFromGeoId(self, result['entity_id'])
                 res.add( (result['population'], tuple(tmp)) )
             except GazetteerEntryNotFound:
                 pass
@@ -197,6 +197,34 @@ class Gazetteer(object):
         else:
             return result[0]['parent_id']
 
+    @MemoryCached
+    def __getNameGeoId(self, name):
+        """ returns the possible geoids for the given name 
+            @param[in] name
+            @returns a list of geoids
+        """
+        query = "SELECT DISTINCT entity_id FROM vw_entry_id_has_name WHERE name='%s'" % ( name.replace("'", "''") )
+        return [ r['entity_id'] for r in self.db.query( query ) ]
+
+
+    def getGeoIdFromGeoUrl(self, geoUrl):
+        """ returns the geoId forv the given geoUrl 
+            @param[in] geoUrl String or List containing the geoUrl
+            @returns the geoId
+        """
+        if isinstance(geoUrl, str):
+            geoUrl = geoUrl.split("/")
+
+        join  = []
+        where = []
+        for nr, name in enumerate( geoUrl ):
+            join.append("JOIN locatedin L%d ON (A%d.id = L%d.parent_id) JOIN gazetteerentity A%d ON (A%d.id = L%d.child_id)" % (nr, nr, nr, nr+1, nr+1, nr) )
+            where.append( "A%d.id IN (%s)" % (nr, ", ".join( map(str, self.__getNameGeoId(self, name))) ))
+
+        query = "SELECT A%d.id AS id FROM gazetteerentity A0 %s WHERE %s;" % ( nr, " ".join(join[:-1]), " AND ".join(where) )
+        return [ r['id'] for r in self.db.query( query ) ]
+            
+
 
 class TestGazeteer(object):
     
@@ -210,10 +238,25 @@ class TestGazeteer(object):
 
     def testContentIdResolver(self):
         assert Gazetteer.getGeoNameFromContentID(self.gazetteer, 86597672) == ['Europe', 'France', 'Centre']
+
+    def testGetGeoIdFromGeoUrl(self):
+        """ tests the resolution from geurls to geoid's """
+        for geoId in ( 2761367,  # Vienna
+                       4277145,  # Perth
+                       2063523, 
+                       2599670,  # Bosten
+                       6470560,  # New York
+                       2772400): # Linz
+
+            geoUrl    = self.gazetteer.getGeoNameFromGeoId( self.gazetteer, geoId )
+            geoIdList = self.gazetteer.getGeoIdFromGeoUrl( geoUrl )
+            assert len(geoIdList) == 1
+            assert geoId == geoIdList[0]
     
 if __name__ == "__main__":
     a = Gazetteer()
     if sys.argv.__len__() > 1:
+        print a.getGeoIdFromGeoUrl( "Europe/Austria/Vienna/Vienna" )
         print Gazetteer.getGeoNameFromString(a, sys.argv[1])
     else:
         # print Gazetteer.getGeoNameFromContentID(a, 86597672)
