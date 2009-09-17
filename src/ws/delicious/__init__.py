@@ -25,7 +25,10 @@ import re
 from eWRT.access.http import Retrieve
 from eWRT.ws.TagInfoService import TagInfoService
 from urlparse import urlsplit
-from hashlib import md5
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import md5
 from eWRT.config import DELICIOUS_USER, DELICIOUS_PASS
 
 class Delicious(TagInfoService):
