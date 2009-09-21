@@ -24,14 +24,24 @@ import unittest
 DELICIOUS_TEST_URLS = ( 'http://www.iaeste.at', 'http://www.wu-wien.ac.at', 'http://www.heise.de', 
                         'http://www.kurier.at', 'http://news.bbc.co.uk', )
 
+DELICIOUS_TEST_TAGS = [("linux",), ("information",), ("information", "retrieval"),("linux", "debian"),("algore",)]
 
 class DeliciousTest( unittest.TestCase ):
 
-    def test(self):
+    def test_url_info(self):
         for url in DELICIOUS_TEST_URLS:
-            print Delicious.delicious_info_retrieve(url)
+            print '%s has %s counts '% (url, Delicious.delicious_info_retrieve(url))
 
+    def test_tag_info(self):
+        print '### Testing tag_info ###'
+        for tags in DELICIOUS_TEST_TAGS:
+            print '%s has %s counts ' % (tags, Delicious.getTagInfo( tags ))
 
+    
+    def test_related_tags(self):
+        print '### Testing related_tags ###'
+        for tags in DELICIOUS_TEST_TAGS:
+            print '%s has related tags: %s' % (tags, Delicious.getRelatedTags( tags ))
 
 if __name__ == '__main__':
     unittest.main()
