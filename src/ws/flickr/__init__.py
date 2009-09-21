@@ -45,6 +45,33 @@ class Flickr(TagInfoService):
         content = Flickr.get_content(url)
         return Flickr._parse_tag_counts(content)
 
+
+    @staticmethod
+    def getRelatedTags( tag ):
+        """ @param  tags    list of tags
+            @returns        list of related tags 
+        """
+
+        if type(tag) == 'list':
+            raise ValueError('getRelatedTags is limited to single tag at the moment!')
+
+        url = Flickr.FLICKR_TAG_URL % "+".join(tag)
+        url = 'http://www.flickr.com/photos/tags/%s' % tag
+        content = Flickr.get_content(url)
+        tag_container = re.findall('<p>Related tags:<br>(.*?)</p>', content, re.IGNORECASE|re.DOTALL)
+        related_tags_with_count = []
+
+        if len(tag_container) > 0:
+
+            related_tags = re.sub('<.*?b>', '', tag_container[0])
+            related_tags = re.findall('<a.*?">(.*?)</a>', related_tags, re.IGNORECASE | re.DOTALL)
+
+            for tag in related_tags:
+                related_tags_with_count.append((tag, Flickr.getTagInfo(tag)))
+
+        return related_tags_with_count
+
+
     # 
     # helper functions
     #
@@ -69,4 +96,5 @@ class Flickr(TagInfoService):
 
 if __name__ == '__main__':
     print Flickr.getTagInfo( ("berlin", "dom") ), "counts"
-
+    print Flickr.getRelatedTags( "berlin" ), "counts"
+    
