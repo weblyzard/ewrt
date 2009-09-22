@@ -57,5 +57,4 @@ class TwitterTest( unittest.TestCase ):
             print '%s has %s counts '% (tag, Twitter.getRelatedTags(tag))
 
 if __name__ == '__main__':
-    print Twitter.getRelatedTags('linux')
-    #unittest.main()
+    unittest.main()
