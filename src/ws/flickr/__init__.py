@@ -29,15 +29,18 @@ from urlparse import urlsplit
 
 class Flickr(TagInfoService):
     """ retrieves data using the del.icio.us API """
+
     FLICKR_TAG_URL = "http://www.flickr.com/search/?w=all&q=%s&m=tags" 
     RE_TAG_COUNT = re.compile('var page_pagination_count = (\d+);')
-    # RE_TAG_COUNT = re.compile('<div class="Results">\((\d+) results\)</div>')
+    RE_TAG_CONTAINER = re.compile('<p>Related tags:<br>(.*?)</p>', re.IGNORECASE|re.DOTALL)
+    RE_RELATED_TAGS = re.compile('<a.*?">(.*?)</a>', re.IGNORECASE | re.DOTALL)
 
     __slots__ = ()
 
     @staticmethod
     def getTagInfo( tags ):
-        """ @param   tags   A list of tags to retrieve information for
+        """ 
+            @param   tags   A list of tags to retrieve information for
             @returns        the number of bookmarks using the given tags
         """
 
@@ -48,7 +51,8 @@ class Flickr(TagInfoService):
 
     @staticmethod
     def getRelatedTags( tag ):
-        """ @param  tags    list of tags
+        """ fetches the related tags with their overall count
+            @param  tags    list of tags
             @returns        list of related tags 
         """
 
@@ -58,13 +62,13 @@ class Flickr(TagInfoService):
         url = Flickr.FLICKR_TAG_URL % "+".join(tag)
         url = 'http://www.flickr.com/photos/tags/%s' % tag
         content = Flickr.get_content(url)
-        tag_container = re.findall('<p>Related tags:<br>(.*?)</p>', content, re.IGNORECASE|re.DOTALL)
+        tag_container = Flickr.RE_TAG_CONTAINER.findall( content )
         related_tags_with_count = []
 
         if len(tag_container) > 0:
 
             related_tags = re.sub('<.*?b>', '', tag_container[0])
-            related_tags = re.findall('<a.*?">(.*?)</a>', related_tags, re.IGNORECASE | re.DOTALL)
+            related_tags = Flickr.RE_RELATED_TAGS.findall(related_tags)
 
             for tag in related_tags:
                 related_tags_with_count.append((tag, Flickr.getTagInfo(tag)))

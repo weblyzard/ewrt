@@ -10,6 +10,7 @@ import unittest
 class Twitter(TagInfoService):
 
     TWITTER_SEARCH_URL = 'http://search.twitter.com/search.json?q=&tag=%s&lang=all&rpp=100'
+    RE_FIND_TAGS = re.compile('#(\w+)', re.IGNORECASE|re.DOTALL)
 
     def __init__(self):
         """ init connects to Twitter """
@@ -40,7 +41,7 @@ class Twitter(TagInfoService):
         related_tags = {}
 
         for result in search_results['results']:
-            found_tags.extend(re.findall('#(\w+)', result['text'], re.IGNORECASE|re.DOTALL))
+            found_tags.extend(Twitter.RE_FIND_TAGS.findall( result['text']))
 
         for tag in found_tags:
             related_tags[tag.lower()] = related_tags.get(tag.lower(), 0) + 1
