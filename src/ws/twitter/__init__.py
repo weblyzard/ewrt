@@ -7,8 +7,7 @@ import json
 import re
 import unittest
 
-@deprecated
-class TwitterTrends(TagInfoService):
+class Twitter(TagInfoService):
 
     TWITTER_SEARCH_URL = 'http://search.twitter.com/search.json?q=&tag=%s&lang=all&rpp=100'
 
@@ -29,11 +28,11 @@ class TwitterTrends(TagInfoService):
         """
 
         if type(tags).__name__ == 'str':
-            url = TwitterTrends.TWITTER_SEARCH_URL % tags
+            url = Twitter.TWITTER_SEARCH_URL % tags
         else:   
-            url = TwitterTrends.TWITTER_SEARCH_URL % "+".join(tags)
+            url = Twitter.TWITTER_SEARCH_URL % "+".join(tags)
 
-        f = Retrieve(TwitterTrends.__name__).open(url)
+        f = Retrieve(Twitter.__name__).open(url)
 
         # convert json into dict and remove null values with ""
         search_results = eval(re.sub('null', '""', f.read()))
@@ -55,8 +54,8 @@ class TwitterTest( unittest.TestCase ):
 
     def test_url_info(self):
         for tag in self.TWITTER_TEST_TAGS:
-            print '%s has %s counts '% (tag, TwitterTrends.getRelatedTags(tag))
+            print '%s has %s counts '% (tag, Twitter.getRelatedTags(tag))
 
 if __name__ == '__main__':
-    print TwitterTrends.getRelatedTags('linux')
+    print Twitter.getRelatedTags('linux')
     #unittest.main()
