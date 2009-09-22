@@ -34,7 +34,13 @@ class Technorati(TagInfoService):
     TECHNORATI_URL = 'http://api.technorati.com/tag?key='+TECHNORATI_API_KEY+'&tag=%s' 
     TECHNORATI_URL = 'http://technorati.com/r/tag/%s?authority=n&language=n'
     #RE_TAG_COUNT = re.compile('<postsmatched>(\d+)</postsmatched>')
-    RE_TAG_COUNT = re.compile('<span class="count">\((\S+)\)</span>')
+    RE_TAG_COUNT = re.compile('<span class="count">\((\S+)\)</span>',
+        re.IGNORECASE|re.DOTALL)
+    RE_TAG_CONTAINER = re.compile('<div id="related-tags".*?<ul>(.*?)</ul>.*?</div>',
+        re.IGNORECASE|re.DOTALL)
+    RE_RELATED_TAG = re.compile('<a.*?">(.*?)</a>', 
+        re.IGNORECASE|re.DOTALL)
+
 
     __slots__ = ()
 
@@ -61,12 +67,12 @@ class Technorati(TagInfoService):
         url = Technorati._parseURL(tags)
 
         content = Technorati.get_content(url)
-        tag_container = re.findall('<div id="related-tags".*?<ul>(.*?)</ul>.*?</div>', content, re.IGNORECASE|re.DOTALL)
+        tag_container = Technorati.RE_TAG_CONTAINER.findall(content)
         related_tags_with_count = []
 
         if len(tag_container) > 0:
 
-            related_tags = re.findall('<a.*?">(.*?)</a>', tag_container[0], re.IGNORECASE | re.DOTALL)
+            related_tags = Technorati.RE_RELATED_TAG.findall(tag_container[0])
 
             if withCounts:
                 for tag in related_tags:
@@ -121,7 +127,6 @@ class Technorati(TagInfoService):
     @staticmethod
     def get_content( url ):
         """ returns the content from Technorati """
-        print url
         assert( url.startswith("http") )
         f = Retrieve(Technorati.__name__).open(url)
         content = f.read()
