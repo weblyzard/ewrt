@@ -3,23 +3,27 @@ import oauth
 
 from eWRT.access.http import Retrieve
 from eWRT.ws.TagInfoService import TagInfoService
+from eWRT.ws.twitter import Twitter
 import json
 import re
 import unittest
 
-@deprecated
+import warnings
+
+warnings.warn("Class TwitterTrends is deprecated, use eWRT.ws.twitter instead ", category=DeprecationWarning)
+
 class TwitterTrends(TagInfoService):
 
     TWITTER_SEARCH_URL = 'http://search.twitter.com/search.json?q=&tag=%s&lang=all&rpp=100'
 
     def __init__(self):
         """ init connects to Twitter """
-        self.twitter = tango.setup();
+        Twitter.__init__()
 
     def getDailyTrends(self):
         """ getDailyTrends fetches the daily trends of twitter
              @return trends """
-        return self.twitter.getDailyTrends() 
+        return Twitter.getDailyTrends() 
 
     @staticmethod
     def getRelatedTags( tags ):
@@ -27,27 +31,7 @@ class TwitterTrends(TagInfoService):
             @param list of tags
             @return dictionary of related tags with count
         """
-
-        if type(tags).__name__ == 'str':
-            url = TwitterTrends.TWITTER_SEARCH_URL % tags
-        else:   
-            url = TwitterTrends.TWITTER_SEARCH_URL % "+".join(tags)
-
-        f = Retrieve(TwitterTrends.__name__).open(url)
-
-        # convert json into dict and remove null values with ""
-        search_results = eval(re.sub('null', '""', f.read()))
-        found_tags = []
-        related_tags = {}
-
-        for result in search_results['results']:
-            found_tags.extend(re.findall('#(\w+)', result['text'], re.IGNORECASE|re.DOTALL))
-
-        for tag in found_tags:
-            related_tags[tag.lower()] = related_tags.get(tag.lower(), 0) + 1
-
-        return related_tags
-
+        return Twitter.getRelatedTags( tags)
 
 class TwitterTest( unittest.TestCase ):
 
@@ -58,5 +42,4 @@ class TwitterTest( unittest.TestCase ):
             print '%s has %s counts '% (tag, TwitterTrends.getRelatedTags(tag))
 
 if __name__ == '__main__':
-    print TwitterTrends.getRelatedTags('linux')
-    #unittest.main()
+   TwitterTrends.getRelatedTags('linxu') 
