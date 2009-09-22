@@ -45,6 +45,8 @@ class Twitter(TagInfoService):
         for tag in found_tags:
             related_tags[tag.lower()] = related_tags.get(tag.lower(), 0) + 1
 
+        # todo: sort
+
         return related_tags
 
 
