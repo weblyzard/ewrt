@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-""" descriptor.py
-    this module assigns descriptors to terms based on wikipedia queries """
+""" __init__.py
+    retrieves WikiPedia articles """
 
 # (C)opyrights 2008 by Albert Weichselbraun <albert@weichselbraun.net>
 # 
@@ -23,11 +23,10 @@ __version__ = "$Header$"
 from eWRT.access.http import Retrieve
 from urllib import quote
 
-WIKIPEDIA_SEARCH_QUERY = 'http://%s.wikipedia.org/w/index.php?title=Special%%3ASearch&search=%s&ns0=1&fulltext=Search'
+WIKIPEDIA_SEARCH_QUERY = 'http://%s.wikipedia.org/wiki/%s'
 
-class Descriptor(object):
-    """ returns the descriptor of an object based on a wikipedia
-        query """
+class WikiPedia(object):
+    """ returns a wikipedia article """
 
     def __init__(self):
         self.r = Retrieve( Descriptor.__name__ )
