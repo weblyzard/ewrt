@@ -66,26 +66,21 @@ class Descriptor(object):
         return result
 
 
-if __name__ == '__main__':
-    
-    from unittest import TestCase, main
+class TestDescriptor(object):
+    """ tests the http class """
+    TEST_TERMS = { 
+                   None: ('noresults_ksfdasdf', ),
+                   'Pope Benedict XVI': ('pope benedict xvi', 'joseph ratzinger'),
+                   'Wolfgang Amadeus Mozart': ( 'wolfgang amadeus', 'mozart' ), 
+                 }
 
-    class TestDescriptor(TestCase):
-        """ tests the http class """
-        TEST_TERMS = { 
-                       None: ('noresults_ksfdasdf', ),
-                       'Pope Benedict XVI': ('pope benedict', 'ratzinger', 'joseph ratzinger'),
-                       'Wolfgang Amadeus Mozart': ('amadeus', 'wolfgang amadeus'), 
-                     }
+    def testDescriptor(self):
+        """ tries to retrieve the following url's from the list """
 
-        def testDescriptor(self):
-            """ tries to retrieve the following url's from the list """
+        d=Descriptor()
+        for descriptor, synonyms in self.TEST_TERMS.iteritems():
+            for synonym in synonyms:
+                print synonym, d.getDescriptor(synonym)
+                assert descriptor == d.getDescriptor(synonym)
 
-            d=Descriptor()
-            for descriptor, synonyms in self.TEST_TERMS.iteritems():
-                for synonym in synonyms:
-                    self.assertEqual( descriptor, d.getDescriptor(synonym) )
-
-
-    main()
 
