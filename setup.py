@@ -45,7 +45,8 @@ setup(
                       'eWRT.ws.opencalais',
                       'eWRT.ws.twittertrends',
                       'eWRT.ws.twitter',
-                      'eWRT.ws.wikipedia'
+                      'eWRT.ws.wikipedia',
+                      'eWRT.ws.yahoo'
                      ],
 
       ###########################################
