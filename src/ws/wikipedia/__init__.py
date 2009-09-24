@@ -88,7 +88,8 @@ class TestWikiPedia(object):
                 assert term in wikiPediaText
 
 
-w=WikiPedia()
-text = w.getWikiPage("Energy", "en")
-print CleanupWikiText.removeLanguageReferences( text )
+if __name__ == '__main__':
+    w=WikiPedia()
+    text = w.getWikiPage("Energy", "en")
+    print CleanupWikiText.removeLanguageReferences( text )
 
