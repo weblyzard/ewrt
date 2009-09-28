@@ -64,6 +64,7 @@ class Delicious(TagInfoService):
             @param list/tuple of tags 
             @returns list of related tags with a count of their occurence """
 
+        assert( isinstance(tags, tuple) or isinstance(tags, list) )
         content = Delicious.get_content(Delicious._parse_tag_url(tags))
 
         related_tags = re.findall('class="m relatedTag" title="">(\w*?)<em>', content, re.IGNORECASE|re.DOTALL)
