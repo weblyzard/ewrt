@@ -47,4 +47,4 @@ if __name__ == '__main__':
     n = lambda x: x.replace("'", "''")
     for num, text in enumerate( BBCGetCorpus( "7[3456789]*.stm") ):
         title = BBCGetCorpus.getTitle(text)
-        print "INSERT INTO evaluation_documents content_id, title, content VALUES ('%d', '%s', '%s');" % (num, n(title), n(text))
+        print "INSERT INTO evaluation_documents (content_id, title, content) VALUES ('%d', '%s', '%s');" % (num, n(title), n(text))
