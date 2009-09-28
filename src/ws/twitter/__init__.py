@@ -1,25 +1,11 @@
-from eWRTlibs.tango.tango import tango
-import oauth
-
 from eWRT.access.http import Retrieve
 from eWRT.ws.TagInfoService import TagInfoService
-import json
 import re
-import unittest
 
 class Twitter(TagInfoService):
 
     TWITTER_SEARCH_URL = 'http://search.twitter.com/search.json?q=&tag=%s&lang=all&rpp=100'
     RE_FIND_TAGS = re.compile('#(\w+)', re.IGNORECASE|re.DOTALL)
-
-    def __init__(self):
-        """ init connects to Twitter """
-        self.twitter = tango.setup();
-
-    def getDailyTrends(self):
-        """ getDailyTrends fetches the daily trends of twitter
-             @return trends """
-        return self.twitter.getDailyTrends() 
 
     @staticmethod
     def getRelatedTags( tags ):
@@ -51,7 +37,7 @@ class Twitter(TagInfoService):
         return related_tags
 
 
-class TwitterTest( unittest.TestCase ):
+class TwitterTest( object ):
 
     TWITTER_TEST_TAGS = ['linux', ('linux', 'debian')]
 
@@ -59,5 +45,3 @@ class TwitterTest( unittest.TestCase ):
         for tag in self.TWITTER_TEST_TAGS:
             print '%s has %s counts '% (tag, Twitter.getRelatedTags(tag))
 
-if __name__ == '__main__':
-    unittest.main()
