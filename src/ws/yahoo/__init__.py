@@ -28,6 +28,8 @@ from eWRT.config import YAHOO_APP_ID, YAHOO_SEARCH_URL
 class Yahoo(object):
     """ interfaces with yahoo's search service """
 
+    __slots__ = (r, )
+
     def __init__(self):
         self.r = Retrieve( Yahoo.__name__ )
 
