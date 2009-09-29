@@ -44,6 +44,7 @@ class WikiPedia(object):
         param = urlencode( {'action': 'query',
                             'format':'json', 
                             'export':'',
+                            'redirects':'true',
                             'titles':pageName 
         })
         data = self.r.open( WIKIPEDIA_API_QUERY % lang, param ).read()
@@ -91,5 +92,6 @@ class TestWikiPedia(object):
 if __name__ == '__main__':
     w=WikiPedia()
     text = w.getWikiPage("Energy", "en")
+    text = w.getWikiPage("Greenhouse Gas", "en")
     print CleanupWikiText.removeLanguageReferences( text )
 
