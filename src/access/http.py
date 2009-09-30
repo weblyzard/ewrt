@@ -49,17 +49,18 @@ class Retrieve(object):
             @returns a file object for reading the url
         """
         request = urllib2.Request( url, data )
-        if PROXY_SERVER:
-            request.set_proxy(PROXY_SERVER, "http")
         request.add_header('User-Agent', USER_AGENT % self.module)
         request.add_header('Accept-encoding', 'gzip')
         self._throttle()
 
-        # handle authentification
+        opener = []
+        if PROXY_SERVER:
+            opener.append( urllib2.ProxyHandler({"http" :PROXY_SERVER} ) )
         if user and pwd:
-            urlObj = urllib2.build_opener( self._getHTTPBasicAuthOpener(url, user, pwd) ).open( request ) 
-        else:
-            urlObj = urllib2.build_opener().open( request )
+            opener.append( self._getHTTPBasicAuthOpener(url, user, pwd) )
+
+        urllib2.install_opener( urllib2.build_opener( *opener ) )
+        urlObj = urllib2.urlopen( request )
 
         # check whether the data stream is compressed
         if urlObj.headers.get('Content-Encoding') == 'gzip':

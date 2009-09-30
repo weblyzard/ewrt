@@ -26,8 +26,11 @@ from eWRT.ws.TagInfoService import TagInfoService
 from urlparse import urlsplit
 from eWRT.config import TECHNORATI_API_KEY
 import xml.sax
+import time
 
 import unittest
+
+SLEEP_TIME=30
 
 class Technorati(TagInfoService):
     """ retrieves data using the del.icio.us API """
@@ -43,6 +46,8 @@ class Technorati(TagInfoService):
 
 
     __slots__ = ()
+    last_access = 0
+
 
     @staticmethod
     def getTagInfo( tags ):
@@ -128,6 +133,11 @@ class Technorati(TagInfoService):
     def get_content( url ):
         """ returns the content from Technorati """
         assert( url.startswith("http") )
+
+        if (time.time() - Technorati.last_access) < SLEEP_TIME:
+            time.sleep( SLEEP_TIME )
+        Technorati.last_access= time.time()
+
         f = Retrieve(Technorati.__name__).open(url)
         content = f.read()
         f.close()
@@ -135,3 +145,4 @@ class Technorati(TagInfoService):
 
 if __name__ == '__main__':
     print Technorati.test()
+    print Technorati.getRelatedTags( ("Linux", ) )
