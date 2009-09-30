@@ -19,7 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import urllib2
-from eWRT.config import USER_AGENT, DEFAULT_WEB_REQUEST_SLEEP_TIME
+from eWRT.config import USER_AGENT, DEFAULT_WEB_REQUEST_SLEEP_TIME, PROXY_SERVER
 from urlparse import urlsplit
 import time
 from StringIO import StringIO
@@ -49,6 +49,8 @@ class Retrieve(object):
             @returns a file object for reading the url
         """
         request = urllib2.Request( url, data )
+        if PROXY_SERVER:
+            request.set_proxy(PROXY_SERVER, "http")
         request.add_header('User-Agent', USER_AGENT % self.module)
         request.add_header('Accept-encoding', 'gzip')
         self._throttle()
