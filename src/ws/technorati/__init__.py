@@ -56,7 +56,8 @@ class Technorati(TagInfoService):
 
     @staticmethod
     def test ():
-        print Technorati.TECHNORATI_URL
+        url = 'http://api.technorati.com/tag?key='+TECHNORATI_API_KEY+'&tag=linux'
+        return Technorati.get_content(url)
 
     @staticmethod
     def getRelatedTags( tags, withCounts = True ):
@@ -73,7 +74,6 @@ class Technorati(TagInfoService):
         if len(tag_container) > 0:
 
             related_tags = Technorati.RE_RELATED_TAG.findall(tag_container[0])
-
             if withCounts:
                 for tag in related_tags:
                     tag = re.sub(' ', '-', tag)
@@ -91,7 +91,7 @@ class Technorati(TagInfoService):
     #
     @staticmethod
     def _parse_tag_counts( content ):
-        """ parses flickrs html content and returns the number of counts for the tags """
+        """ parses technorati html content and returns the number of counts for the tags """
         m = Technorati.RE_TAG_COUNT.search( content )
         if m:
             return re.sub(',', '', m.group(1))
@@ -132,3 +132,6 @@ class Technorati(TagInfoService):
         content = f.read()
         f.close()
         return content
+
+if __name__ == '__main__':
+    print Technorati.test()
