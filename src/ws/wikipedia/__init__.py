@@ -35,12 +35,38 @@ class WikiPedia(object):
         self.r = Retrieve( WikiPedia.__name__ )
     
     def getWikiPage(self, pageName, lang='en'):
-        """ returns the given wikipedia page
+        """ returns the given wikipedia page considering different spellings 
             @param[in] pageName
             @param[in] language (determines which wikipedia to query)
             @returns the page's wikipedia text
         """
         assert( len(lang)==2 )
+
+        for pn in self._getPageNameAlterations( pageName ):
+            pageContent = self._retrievePage( pn, lang )
+            if pageContent:
+                return pageContent
+
+        return None
+
+    @staticmethod
+    def _getPageNameAlterations(pageName):
+        """ @returns a list of differnt names for the given page """
+
+        alt = [ pageName, ]
+        if not ' ' in pageName:
+            alt
+
+        words = pageName.split(" ")
+        alt.append( "%s %s" % (words[0].capitalize(), " ".join( map(str.lower, words[1:] ) )) )
+        return alt
+
+    def _retrievePage(self, pageName, lang):
+        """ retrieves the given Wiki page
+            @param[in] pageName
+            @param[in] language (determines which wikipedia to query)
+            @returns the page's wikipedia text
+        """
         param = urlencode( {'action': 'query',
                             'format':'json', 
                             'export':'',
@@ -54,6 +80,7 @@ class WikiPedia(object):
 
         xmlData = jsonData['export']['*'].replace("\/","/")
         return parseString( xmlData  ).getElementsByTagName('text')[0].firstChild.data
+
 
 
 class CleanupWikiText(object):
@@ -91,7 +118,14 @@ class TestWikiPedia(object):
 
 if __name__ == '__main__':
     w=WikiPedia()
-    text = w.getWikiPage("Energy", "en")
-    text = w.getWikiPage("Greenhouse Gas", "en")
-    print CleanupWikiText.removeLanguageReferences( text )
+    # text = w.getWikiPage("Energy", "en")
+    # text = w.getWikiPage("Greenhouse Gas", "en")
+
+    print w._getPageNameAlterations("Greenhouse Gas Emissions")
+    text = w.getWikiPage("Greenhouse Gas Emissions", "en")
+    text2 = w.getWikiPage("Emissions", "en")
+    print 'greenhouse gas emissions' in text2
+    print 'emissions' in text
+
+    # print CleanupWikiText.removeLanguageReferences( text )
 
