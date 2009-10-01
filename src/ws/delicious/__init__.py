@@ -53,7 +53,7 @@ class Delicious(TagInfoService):
         """ @param   tags   A list of tags to retrieve information for
             @returns        the number of bookmarks using the given tags
         """
-
+        assert( isinstance(tags, tuple) or isinstance(tags, list) )
         url = Delicious._parse_tag_url(tags)
         content = Delicious.get_content(url)
         return Delicious._parse_counts(content)
@@ -71,7 +71,7 @@ class Delicious(TagInfoService):
         related_tags_with_count = []
 
         for tag in related_tags:
-            related_tags_with_count.append((tag, Delicious.getTagInfo(tag)))
+            related_tags_with_count.append((tag, Delicious.getTagInfo( (tag, ))))
             
         return related_tags_with_count
 
