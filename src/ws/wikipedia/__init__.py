@@ -116,16 +116,21 @@ class TestWikiPedia(object):
                 assert term in wikiPediaText
 
 
+def test( term1, term2):
+    w = WikiPedia()
+    text1 = w.getWikiPage(term1, 'en')
+    text2 = w.getWikiPage(term2, 'en')
+    return term1 in text2 or term2 in text1
+
 if __name__ == '__main__':
     w=WikiPedia()
     # text = w.getWikiPage("Energy", "en")
     # text = w.getWikiPage("Greenhouse Gas", "en")
 
+    
     print w._getPageNameAlterations("Greenhouse Gas Emissions")
-    text = w.getWikiPage("Greenhouse Gas Emissions", "en")
-    text2 = w.getWikiPage("Emissions", "en")
-    print 'greenhouse gas emissions' in text2
-    print 'emissions' in text
+    #print test('Greenhouse Gsa Emissions', 'Emissions')
+    print test('Oil', 'Fossil Fuels')
 
     # print CleanupWikiText.removeLanguageReferences( text )
 
