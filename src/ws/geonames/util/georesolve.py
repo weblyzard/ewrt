@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
- @package eWRT.ws.geonames.utils.georesolve
+ @package eWRT.ws.geonames.util.georesolve
  fetches for an ContentID or GazEntry-ID where it is located
  e.g. for Vienna: Europe/Austria/Vienna
 """
