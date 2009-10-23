@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
- @package eWRT.ws.geonames.util.georesolve
+ @package eWRT.ws.geonames.gazetteer
  fetches for an ContentID or GazEntry-ID where it is located
  e.g. for Vienna: Europe/Austria/Vienna
 """
@@ -26,33 +26,10 @@ import sys
 from eWRT.access.db import PostgresqlDb
 from eWRT.util.cache import MemoryCached
 from eWRT.config import DATABASE_CONNECTION
-# from warnings import warn
+from eWRT.ws.geonames import GeoEntity
+from eWRT.ws.geonames.exception import *
 
 MIN_POPULATION = 5000
-
-class GazetteerEntryNotFound(Exception):
-    """ @class GazetteerEntryNotFound
-        Base class for gazetteer lookup errors 
-    """
-    def __init__(self, id, query):
-        self.id = id
-        self.query = query
-        print id, query
-
-    def __str__(self):
-        return "Gazetteer lookup for entity-id '%s' failed." % (self.id)
-
-
-class GazetteerNameNotFound(Exception):
-    """ @class GazetteerNameNotFound
-        This exception is thrown if a lookup name has not been found in the gazetteer
-    """
-
-    def __init__(self, name):
-        self.name = name
-
-    def __str__(self):
-        return "Gazetteer lookup of name '%s' failed." % (self.name)
 
 
 class Gazetteer(object):
@@ -65,84 +42,86 @@ class Gazetteer(object):
         JOIN gazetteerentity gb ON (gb.id = locatedin.parent_id)
         WHERE child_id = %d order by gb.population DESC LIMIT 1'''
 
-    QUERY_CONTENT_ID = '''
-        SELECT gazetteer_id FROM content_id_gazeteer_id WHERE content_id = %d '''
-
-    QUERY_NAME = '''
-            SELECT entity_id, ispreferredname, lang, gazetteerentry_id
-            FROM gazetteerentry_ordered_names
-            WHERE name LIKE '%s' '''
-
     DEBUG = False
 
-    ## init - establishes the db-connections
     def __init__(self):
-        """ implement me """
+        """ initializes the gazetteer object and the database connections  """
         self.db = PostgresqlDb( **DATABASE_CONNECTION['gazetteer'] )
-        #PostgresqlDb.DEBUG=True
         self.db.connect()
         self.db2 = PostgresqlDb( **DATABASE_CONNECTION['geo_mapping'] )
         self.db2.connect()
 
     @MemoryCached
-    def getGeoNameFromContentID(self, content_id):
-        """ returns the location of the content ID
-            @param content_id
-            @return list of locaions, e.g. ['Europa', 'France', 'Centre']
+    def getGeoEntities(self, name=None, id=None, geoUrl=None):
+        """ returns a list of GeoEntities matching the given information
+            @param[in] name   of the Entity
+            @param[in] id     the GeoNames id 
+            @param[in] geoUrl the entity url
         """
+        geoId = []
+        if name:
+            geoId.extend( getIdFromName(name) )
+        if id:
+            geoId.extend( id )
+        if geoUrl:
+            geoId.extend( getIdFromGeoUrl( geoUrl ) )
 
-        query = self.QUERY_CONTENT_ID % content_id 
-        result = self.db2.query(query)
-
-        if result == []:
-            return 'ContentID not found!'
-        else:
-            gaz_id = result[0]['gazetteer_id']
-            return Gazetteer.getGeoNameFromGeoId(self, gaz_id)
-
-    ## returns the location of the GazetteerEntry ID  
-    # @param gazetteer-entry ID  
-    # @return list of locations, e.g. ['Europa', 'France', 'Centre']
-    @MemoryCached
-    def getGeoNameFromGeoId(self, gazetteer_id):
-        result = self.__getLocationTree(gazetteer_id)
-        result.reverse()
-
-        if result == []:
-            return 'GazetteerID not found!'
-        else:
-            return result
+        return getGeoEntityFromId( geoId )
 
     @MemoryCached
-    def getGeoNameFromString(self, name):
-        """ returns the geoname for the given string
-            @param string
-            @return a list of tuples (population, location) 
+    def getIdFromName(self, name):
+        """ returns the possible GeoNames ids for the given name 
+            @param[in] name
+            @returns a list of GeoNames ids
         """
-        res = set()
-        query = '''SELECT entity_id, population FROM gazetteerentry JOIN hasname ON (gazetteerentry.id = hasname.entry_id) 
-                  JOIN gazetteerentity ON (gazetteerentity.id=hasname.entity_id) WHERE name = '%%s' AND (population > %d or feature_code in ('ADM1', 'ADM2', 'ADM3')) ''' % ( MIN_POPULATION)
-        for result in self.db.query(query % name.replace("'", "''")):
-            try:
-                tmp = Gazetteer.getGeoNameFromGeoId(self, result['entity_id'])
-                res.add( (result['population'], tuple(tmp)) )
-            except GazetteerEntryNotFound:
-                pass
+        query = "SELECT DISTINCT entity_id FROM vw_entry_id_has_name WHERE name='%s'" % ( name.replace("'", "''") )
+        return [ r['entity_id'] for r in self.db.query( query ) ]
 
-        return list(res)
+    def getIdFromGeoUrl(self, geoUrl):
+        """ returns the geoId forv the given geoUrl 
+            @param[in] geoUrl 
+            @returns a list of geonames ids matching the geoUrl
+        """
+        geoUrl = geoUrl.split("/")
+
+        join  = []
+        where = []
+        for nr, name in enumerate( geoUrl ):
+            join.append("JOIN locatedin L%d ON (A%d.id = L%d.parent_id) JOIN gazetteerentity A%d ON (A%d.id = L%d.child_id)" % (nr, nr, nr, nr+1, nr+1, nr) )
+            where.append( "A%d.id IN (%s)" % (nr, ", ".join( map(str, self.getIdFromName(self, name))) ))
+
+        query = "SELECT A%d.id AS id FROM gazetteerentity A0 %s WHERE %s;" % ( nr, " ".join(join[:-1]), " AND ".join(where) )
+        return [ int(r['id']) for r in self.db.query( query ) ]
+
+    @MemoryCached
+    def getGeoEntityFromId(self, id):
+        """ returns the location of the GazetteerEntry ID  
+            @param id a list of geonames ids
+            @return list of GeoEntities
+        """
+        q = "SELECT * FROM entity WHERE gazetteer_id IN (%s)" % ", ".join(gazetteer_id)
+        entities = [ GeoEntity( result ) for result in self.db.query( q ) ]
+        self._addGeoUrl( entities )
+        return entities
+
+    def _addGeoUrl( entities ):
+        """ adds the geoUrl key to the given list of entities """
+        for entity in entities:
+            entry.entityDict['geoUrl'] = self._getGeoUrl( entity['id'] )
 
 
-    ## recursive function to build the full location tree
-    # @param id
-    # @returns list of locations
-    def __getLocationTree(self, id):
+    def _getGeoUrl(self, id):
+        """ returns the geoUrl for the given entity 
+            @param[in] the geonames gazetteer id 
+            @returns   the geoUrl (e.g. /Europe/Austria/Vienna)
+        """
         geoPath = [ self.__getPreferredGeoName( id ) ]
         geoIdPath = [ id ]
 
         while id:
-            parentLocationEntity = self.__hasParent(id)
+            parentLocationEntity = self._hasParent(id)
             if parentLocationEntity:
-                parentLocationName = self.__getPreferredGeoName( parentLocationEntity )
+                parentLocationName = self._getPreferredGeoName( parentLocationEntity )
                 if parentLocationEntity in geoIdPath:
                     print "%s in %s" % (parentLocationName, geoPath)
                     break
@@ -157,7 +136,7 @@ class Gazetteer(object):
     ## gets the preferred name for the location
     # @param id
     # @returns preferred name
-    def __getPreferredGeoName(self, id):
+    def _getPreferredGeoName(self, id):
         """ returns the preferred entry name for the given
             entity id
             @param[in] entity_id 
@@ -176,10 +155,11 @@ class Gazetteer(object):
 
         return Gazetteer.DEBUG and result[0]['name']+"(%d)" % (id) or result[0]['name']
 
+
     ## checks if the given ID has a parent
     # @param ID of the child
     # @return false or ID of the parent 
-    def __hasParent(self, child_id):
+    def _hasParent(self, child_id):
         query = self.QUERY_HAS_PARENT % child_id
         result = self.db.query(query)
         
@@ -196,43 +176,6 @@ class Gazetteer(object):
             return 0 
         else:
             return result[0]['parent_id']
-
-    @MemoryCached
-    def __getNameGeoId(self, name):
-        """ returns the possible geoids for the given name 
-            @param[in] name
-            @returns a list of geoids
-        """
-        query = "SELECT DISTINCT entity_id FROM vw_entry_id_has_name WHERE name='%s'" % ( name.replace("'", "''") )
-        return [ r['entity_id'] for r in self.db.query( query ) ]
-
-
-    def getGeoIdFromGeoUrl(self, geoUrl):
-        """ returns the geoId forv the given geoUrl 
-            @param[in] geoUrl String or List containing the geoUrl
-            @returns the geoId
-        """
-        if isinstance(geoUrl, str):
-            geoUrl = geoUrl.split("/")
-
-        join  = []
-        where = []
-        for nr, name in enumerate( geoUrl ):
-            join.append("JOIN locatedin L%d ON (A%d.id = L%d.parent_id) JOIN gazetteerentity A%d ON (A%d.id = L%d.child_id)" % (nr, nr, nr, nr+1, nr+1, nr) )
-            where.append( "A%d.id IN (%s)" % (nr, ", ".join( map(str, self.__getNameGeoId(self, name))) ))
-
-        query = "SELECT A%d.id AS id FROM gazetteerentity A0 %s WHERE %s;" % ( nr, " ".join(join[:-1]), " AND ".join(where) )
-        return [ int(r['id']) for r in self.db.query( query ) ]
-
-    def getGeoDict(self, geoId):
-        """ returns a dictinary with all information about the given geoId """
-        print geoId
-        query = "SELECT * FROM gazetteerentity WHERE id = %s" % geoId
-        res = self.db.query( query )
-        if len(res)>0:
-            return dict(res[0])
-        else:
-            return {}
 
 
 class TestGazeteer(object):

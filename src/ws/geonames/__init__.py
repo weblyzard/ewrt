@@ -18,12 +18,45 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import sys
 from eWRT.access.db import PostgresqlDb
 from eWRT.util.cache import DiskCached
-from eWRT.config import DATABASE_CONNECTION
 from eWRT.access.http import Retrieve
+from eWRT.ws.geonames.gazetteer import Gazetteer
+
+class GeoEntity(object):
+    """ a geographic entity """
+
+    __slots__ = ('entityDict', )
+
+    def __init__(self, entityDict):
+        self.entityDict = entityDict
+
+    def factory(name=None, id=None, geoUrl=None):
+        """ creates geoentity objects based on the given information
+            @param[in] name   of the Entity
+            @param[in] id     the GeoNames id 
+            @param[in] geoUrl the entity url
+        """
+        return Gazetteer.getGeoEntities(name, id, geoUrl)
+
+
+    def __get__(self, key):
+        return entityDict.get( key )
+
+
+    def __sub__(self, geoEntity):
+        """ returns the distance between the two locations 
+            @param[in] the entity to compare
+            @returns the distance in m
+        """
+        pass
+
+    def __str__(self):
+        return "GeoEntity <%s (id=%s)>" % (self.entityDict['geoUrl'], self.entityDict['id'] )
+
+
+
 
 class GeoNames(object):
     """ retrieves information for GeoNames ids
@@ -52,3 +85,8 @@ class TestGeoNames(object):
 
     def testGetNeighbours(self):
         assert GeoNames.getNeighbours(2658434) == [2782113, 3017382, 2921044, 3175395, 3042058]
+
+
+if __name__ == '__main__':
+    g = GeoEntity.factory(geoUrl = 'Europe/Austria/Vienna')
+    print g

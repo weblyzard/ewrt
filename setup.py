@@ -40,6 +40,7 @@ setup(
                       'eWRT.ws.flickr',
                       'eWRT.ws.geoLyzard',
                       'eWRT.ws.geonames',
+                      'eWRT.ws.geonames.gazetteer',
                       'eWRT.ws.geonames.util',
                       'eWRT.ws.googletrends',
                       'eWRT.ws.opencalais',

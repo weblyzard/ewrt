@@ -30,8 +30,8 @@ from time import time
 from operator import itemgetter
 
 try:
-    import hashutils
-    HASH = hashutils.sha1
+    import hashlib
+    HASH = hashlib.sha1
 except ImportError:
     import sha
     HASH = sha.sha
