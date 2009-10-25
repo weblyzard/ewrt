@@ -30,19 +30,22 @@ class GeoEntity(object):
     __slots__ = ('entityDict', )
 
     def __init__(self, entityDict):
+        assert isinstance(entityDict, dict)
         self.entityDict = entityDict
 
+    @staticmethod
     def factory(name=None, id=None, geoUrl=None):
         """ creates geoentity objects based on the given information
             @param[in] name   of the Entity
             @param[in] id     the GeoNames id 
             @param[in] geoUrl the entity url
         """
-        return Gazetteer.getGeoEntities(name, id, geoUrl)
+        g = Gazetteer()
+        return [ GeoEntity( d ) for d in g.getGeoEntityDict(name, id, geoUrl) ]
 
 
-    def __get__(self, key):
-        return entityDict.get( key )
+    def __getitem__(self, key):
+        return self.entityDict.get( key )
 
 
     def __sub__(self, geoEntity):
@@ -54,7 +57,6 @@ class GeoEntity(object):
 
     def __str__(self):
         return "GeoEntity <%s (id=%s)>" % (self.entityDict['geoUrl'], self.entityDict['id'] )
-
 
 
 
@@ -89,4 +91,4 @@ class TestGeoNames(object):
 
 if __name__ == '__main__':
     g = GeoEntity.factory(geoUrl = 'Europe/Austria/Vienna')
-    print g
+    print g, g[0]

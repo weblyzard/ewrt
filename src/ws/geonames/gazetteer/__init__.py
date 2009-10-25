@@ -26,11 +26,10 @@ import sys
 from eWRT.access.db import PostgresqlDb
 from eWRT.util.cache import MemoryCached
 from eWRT.config import DATABASE_CONNECTION
-from eWRT.ws.geonames import GeoEntity
-from eWRT.ws.geonames.exception import *
+from eWRT.ws.geonames.gazetteer.exception import *
 
 MIN_POPULATION = 5000
-
+GEO_ENTITY_SEPARATOR = ">"
 
 class Gazetteer(object):
     # sorting by population is a workaround for entries with multiple parents
@@ -51,22 +50,20 @@ class Gazetteer(object):
         self.db2 = PostgresqlDb( **DATABASE_CONNECTION['geo_mapping'] )
         self.db2.connect()
 
-    @MemoryCached
-    def getGeoEntities(self, name=None, id=None, geoUrl=None):
+    def getGeoEntityDict(self, name=None, id=None, geoUrl=None):
         """ returns a list of GeoEntities matching the given information
             @param[in] name   of the Entity
             @param[in] id     the GeoNames id 
-            @param[in] geoUrl the entity url
+            @param[in] geoUrl the entity's dictionary
         """
         geoId = []
         if name:
-            geoId.extend( getIdFromName(name) )
+            geoId.extend( self.getIdFromName(self, name) )
         if id:
-            geoId.extend( id )
+            geoId.append( id )
         if geoUrl:
-            geoId.extend( getIdFromGeoUrl( geoUrl ) )
-
-        return getGeoEntityFromId( geoId )
+            geoId.extend( self.getIdFromGeoUrl( geoUrl ) )
+        return self.getGeoEntityDictFromId( geoId )
 
     @MemoryCached
     def getIdFromName(self, name):
@@ -74,15 +71,18 @@ class Gazetteer(object):
             @param[in] name
             @returns a list of GeoNames ids
         """
-        query = "SELECT DISTINCT entity_id FROM vw_entry_id_has_name WHERE name='%s'" % ( name.replace("'", "''") )
-        return [ r['entity_id'] for r in self.db.query( query ) ]
+        query = "SELECT id FROM vw_gazetteer WHERE name='%s' ORDER BY population DESC" % ( name.replace("'", "''") )
+        res = [ r['id'] for r in self.db.query( query ) ]
+        print "**", res
+        #query = "SELECT DISTINCT entity_id FROM vw_entry_id_has_name WHERE name='%s'" % ( name.replace("'", "''") )
+        return [ r['id'] for r in self.db.query( query ) ]
 
     def getIdFromGeoUrl(self, geoUrl):
-        """ returns the geoId forv the given geoUrl 
+        """ returns the geoId for the given geoUrl 
             @param[in] geoUrl 
             @returns a list of geonames ids matching the geoUrl
         """
-        geoUrl = geoUrl.split("/")
+        geoUrl = geoUrl.split(GEO_ENTITY_SEPARATOR)
 
         join  = []
         where = []
@@ -93,21 +93,36 @@ class Gazetteer(object):
         query = "SELECT A%d.id AS id FROM gazetteerentity A0 %s WHERE %s;" % ( nr, " ".join(join[:-1]), " AND ".join(where) )
         return [ int(r['id']) for r in self.db.query( query ) ]
 
-    @MemoryCached
-    def getGeoEntityFromId(self, id):
+    # @MemoryCached
+    def getGeoEntityDictFromId(self, id):
         """ returns the location of the GazetteerEntry ID  
             @param id a list of geonames ids
             @return list of GeoEntities
         """
-        q = "SELECT * FROM entity WHERE gazetteer_id IN (%s)" % ", ".join(gazetteer_id)
-        entities = [ GeoEntity( result ) for result in self.db.query( q ) ]
-        self._addGeoUrl( entities )
-        return entities
+        if id:
+            q = "SELECT * FROM gazetteerentity WHERE id IN (%s)" % ", ".join( map(str, id ))
+            res = self.db.query( q ) 
+            entities = [ dict(self._getResultById(res, i).items()) for i in id ]
+            self._addGeoUrl( entities )
+            return entities
+        else:
+            return []
 
-    def _addGeoUrl( entities ):
+    def _getResultById(self, l, id, idAttr="id"):
+        """ returns the database column matching the given id 
+            @param[in] l      the list of query results
+            @param[in] id     the row id to return
+            @param[in] idAttr attribute to consider for the id
+        """
+        return [ e for e in l if e[idAttr] == id ][0]
+
+
+    def _addGeoUrl( self, entities ):
         """ adds the geoUrl key to the given list of entities """
         for entity in entities:
-            entry.entityDict['geoUrl'] = self._getGeoUrl( entity['id'] )
+            url = self._getGeoUrl( entity['id'] )
+            url.reverse()
+            entity['geoUrl'] = ">".join(url)
 
 
     def _getGeoUrl(self, id):
@@ -115,7 +130,7 @@ class Gazetteer(object):
             @param[in] the geonames gazetteer id 
             @returns   the geoUrl (e.g. /Europe/Austria/Vienna)
         """
-        geoPath = [ self.__getPreferredGeoName( id ) ]
+        geoPath = [ self._getPreferredGeoName( id ) ]
         geoIdPath = [ id ]
 
         while id:
@@ -145,9 +160,9 @@ class Gazetteer(object):
 
         query = '''SELECT name FROM vw_gazetteer_tng WHERE id=%d 
                       ORDER BY 
-                            (lang='en' and lang is not null) DESC,
-                            (short=TRUE and short IS NOT NULL) DESC,
-                            preferred DESC
+                        (lang='en') DESC, (lang IS NULL) DESC, (lang = '') DESC,
+                        (short=TRUE and short IS NOT NULL) DESC,
+                        preferred DESC
                       LIMIT 1''' % (id)
         result = self.db.query(query)
         if not result:
@@ -178,33 +193,6 @@ class Gazetteer(object):
             return result[0]['parent_id']
 
 
-class TestGazeteer(object):
-    
-    def __init__(self):
-        self.gazetteer = Gazetteer()
-    
-    def testUniqueStringResolver(self):
-        getName = Gazetteer.getGeoNameFromString
-        for name, entries in ( ('Lainach', 0), ('Vienna', 4), ('Madrid', 5), ('Graz', 1), ('Poland', 2), ('Geneva', 5) ):
-            assert len( getName( self.gazetteer, name )) == entries 
-
-    def testContentIdResolver(self):
-        assert Gazetteer.getGeoNameFromContentID(self.gazetteer, 86597672) == ['Europe', 'France', 'Centre']
-
-    def testGetGeoIdFromGeoUrl(self):
-        """ tests the resolution from geurls to geoid's """
-        for geoId in ( 2761367,  # Vienna
-                       4277145,  # Perth
-                       2063523, 
-                       2599670,  # Bosten
-                       6470560,  # New York
-                       2772400): # Linz
-
-            geoUrl    = self.gazetteer.getGeoNameFromGeoId( self.gazetteer, geoId )
-            geoIdList = self.gazetteer.getGeoIdFromGeoUrl( geoUrl )
-            assert len(geoIdList) == 1
-            assert geoId == geoIdList[0]
-    
 if __name__ == "__main__":
     a = Gazetteer()
     if sys.argv.__len__() > 1:
