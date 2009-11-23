@@ -42,8 +42,8 @@ class GeoLyzard(object):
 
         current = {'focus_points': 0.0}
         for entity in res.values()[0]:
-            if (entity['focus_points'] == current['focus_points'] and entity['confidence'] > current['confidence']) or \
-                entity['focus_points'] > current['focus_points']:
+            if ( float(entity['focus_points']) == float(current['focus_points']) and float(entity['confidence']) > float(current['confidence'])) or \
+                 float(entity['focus_points']) > float(current['focus_points']):
                 current = entity
 
         return current
