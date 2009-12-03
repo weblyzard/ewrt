@@ -25,11 +25,10 @@
 import sys
 from eWRT.access.db import PostgresqlDb
 from eWRT.util.cache import MemoryCached
-from eWRT.config import DATABASE_CONNECTION
+from eWRT.config import DATABASE_CONNECTION, GEO_ENTITY_SEPARATOR
 from eWRT.ws.geonames.gazetteer.exception import *
 
 MIN_POPULATION = 5000
-GEO_ENTITY_SEPARATOR = ">"
 
 class Gazetteer(object):
     # sorting by population is a workaround for entries with multiple parents

@@ -23,15 +23,15 @@ from eWRT.access.db import PostgresqlDb
 from eWRT.util.cache import DiskCached
 from eWRT.access.http import Retrieve
 from eWRT.ws.geonames.gazetteer import Gazetteer
+from eWRT.config import GEO_ENTITY_SEPARATOR
 
 class GeoEntity(object):
     """ a geographic entity """
 
-    __slots__ = ('entityDict', )
-
     def __init__(self, entityDict):
         assert isinstance(entityDict, dict)
         self.entityDict = entityDict
+        self.id         = entityDict['id']
 
     @staticmethod
     def factory(name=None, id=None, geoUrl=None):
@@ -58,6 +58,19 @@ class GeoEntity(object):
     def __str__(self):
         return "GeoEntity <%s (id=%s)>" % (self.entityDict['geoUrl'], self.entityDict['id'] )
 
+    def contains(self, geoEntity):
+        """ Returns true if the Object contains the given GeoEntity.
+            e.g. eu>at>Carinthia contains 
+                 eu>at>Carinthia, eu>at>Carinthia>Spittal/Drau and any
+                 other more detailed specification.
+            
+            @param[in] geoEntity
+            @returns true or false """
+
+        if self['geoUrl'] in geoEntity['geoUrl']:
+            return True
+        else:
+            return False
 
 
 class GeoNames(object):
@@ -70,24 +83,43 @@ class GeoNames(object):
 
     @staticmethod
     @DiskCached("./.geonames-neighbours")
-    def getNeighbours(country_id):
+    def getNeighbours(geo_entity):
         """ returns all neighbours for the given geo id
             (currently only implemented on a country level)
-            @param[in] country_id 
+            @param[in] geo_entity
             @returns a list containing the neighbours of the given country """
 
-        url = GeoNames.NEIGHBOURS_SERVICE_URL % country_id 
-        print url
+        url = GeoNames.NEIGHBOURS_SERVICE_URL % geo_entity.id
         jsonData = eval( Retrieve('eWRT.ws.geonames').open(url).read() )
-        print jsonData
-        return [ e['geonameId'] for e in jsonData['geonames'] ]
+        return [ GeoEntity.factory( id = e['geonameId'] )[0] for e in jsonData['geonames'] ]
 
 
 class TestGeoNames(object):
 
-    def testGetNeighbours(self):
-        assert GeoNames.getNeighbours(2658434) == [2782113, 3017382, 2921044, 3175395, 3042058]
+    EXAMPLE_ENTITIES = { '.ch': GeoEntity.factory( id = 2658434 )[0],
+                         '.at': GeoEntity.factory( id = 2782113 )[0],
+                         '.carinthia': GeoEntity.factory( id = 2774686 )[0],
+                         '.eu': GeoEntity.factory( id = 6255148 )[0],
+                       }
 
+    def testGetNeighbours(self):
+        geoEntity = self.EXAMPLE_ENTITIES['.ch'] # .ch
+        assert set([ g.id for g in GeoNames.getNeighbours(geoEntity) ]) == set([2782113, 3017382, 2921044, 3175395, 3042058])
+
+    def testContains(self):
+        geoEntity = self.EXAMPLE_ENTITIES['.at'] # .at
+        assert geoEntity.contains( self.EXAMPLE_ENTITIES['.at'] ) == True
+        assert geoEntity.contains( self.EXAMPLE_ENTITIES['.carinthia'] ) == True
+        assert geoEntity.contains( self.EXAMPLE_ENTITIES['.eu'] ) == False
+        assert geoEntity.contains( self.EXAMPLE_ENTITIES['.ch'] ) == False
+       
+    def testIsContained(self):
+        geoEntity = self.EXAMPLE_ENTITIES['.at'] # .at
+        assert self.EXAMPLE_ENTITIES['.at'].contains( geoEntity ) == True
+        assert self.EXAMPLE_ENTITIES['.carinthia'].contains( geoEntity ) == False
+        assert self.EXAMPLE_ENTITIES['.eu'].contains( geoEntity ) == True
+        assert self.EXAMPLE_ENTITIES['.ch'].contains( geoEntity ) == False
+ 
 
 if __name__ == '__main__':
     g = GeoEntity.factory(geoUrl = 'Europe/Austria/Vienna')
