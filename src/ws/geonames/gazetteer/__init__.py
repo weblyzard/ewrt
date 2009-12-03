@@ -117,12 +117,12 @@ class Gazetteer(object):
 
 
     def _addGeoUrl( self, entities ):
-        """ adds the geoUrl key to the given list of entities """
+        """ adds the geoUrl and level key to the given list of entities """
         for entity in entities:
             url = self._getGeoUrl( entity['id'] )
             url.reverse()
-            entity['geoUrl'] = ">".join(url)
-
+            entity['geoUrl'] = GEO_ENTITY_SEPARATOR.join(url)
+            entity['level']  = len(url)                         # hierarchy level of the entity (e.g. eu>at => 2)
 
     def _getGeoUrl(self, id):
         """ returns the geoUrl for the given entity 
