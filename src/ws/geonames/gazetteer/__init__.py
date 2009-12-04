@@ -119,17 +119,17 @@ class Gazetteer(object):
     def _addGeoUrl( self, entities ):
         """ adds the geoUrl and level key to the given list of entities """
         for entity in entities:
-            url = self._getGeoUrl( entity['id'] )
-            url.reverse()
-            entity['geoUrl'] = GEO_ENTITY_SEPARATOR.join(url)
-            entity['level']  = len(url)                         # hierarchy level of the entity (e.g. eu>at => 2)
+            idUrl, nameUrl = self._getGeoUrl( entity['id'] )
+            entity['geoUrl'] = GEO_ENTITY_SEPARATOR.join(nameUrl)
+            entity['idUrl']  = idUrl
+            entity['level']  = len(nameUrl)                         # hierarchy level of the entity (e.g. eu>at => 2)
 
     def _getGeoUrl(self, id):
         """ returns the geoUrl for the given entity 
             @param[in] the geonames gazetteer id 
-            @returns   the geoUrl (e.g. /Europe/Austria/Vienna)
+            @returns   two lists containing (geoIdPath, geoNamePath) 
         """
-        geoPath = [ self._getPreferredGeoName( id ) ]
+        geoNamePath = [ self._getPreferredGeoName( id ) ]
         geoIdPath = [ id ]
 
         while id:
@@ -137,14 +137,16 @@ class Gazetteer(object):
             if parentLocationEntity:
                 parentLocationName = self._getPreferredGeoName( parentLocationEntity )
                 if parentLocationEntity in geoIdPath:
-                    print "%s in %s" % (parentLocationName, geoPath)
+                    print "%s in %s" % (parentLocationName, geoNamePath)
                     break
-                geoPath.append( parentLocationName )
+                geoNamePath.append( parentLocationName )
 
             geoIdPath.append( parentLocationEntity )
             id = parentLocationEntity
 
-        return geoPath
+        geoIdPath.reverse()
+        geoNamePath.reverse()
+        return (geoIdPath[1:], geoNamePath)
 
 
     ## gets the preferred name for the location
