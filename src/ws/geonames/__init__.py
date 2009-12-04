@@ -72,6 +72,21 @@ class GeoEntity(object):
         else:
             return False
 
+    def highestCommonLevel(self, geoEntity):
+        """ Returns the highest common level between the two GeoEntities
+            e.g. eu>at>Carinthia, eu>at>Carinthia>Spittal/Drau => 3
+            @param[in] geoEntity
+            @returns the level
+        """
+        selfLevels = self['geoUrl'].split( GEO_ENTITY_SEPARATOR )
+        cmpLevels  = geoEntity['geoUrl'].split( GEO_ENTITY_SEPARATOR ) 
+        for level, (l1, l2) in enumerate( zip( selfLevels, cmpLevels) ):
+            if l1 != l2:
+                break
+            level += 1
+
+        return level
+
 
 class GeoNames(object):
     """ retrieves information for GeoNames ids
@@ -119,8 +134,16 @@ class TestGeoNames(object):
         assert self.EXAMPLE_ENTITIES['.carinthia'].contains( geoEntity ) == False
         assert self.EXAMPLE_ENTITIES['.eu'].contains( geoEntity ) == True
         assert self.EXAMPLE_ENTITIES['.ch'].contains( geoEntity ) == False
- 
+
+    def testHighestCommonLevels(self):
+        g = self.EXAMPLE_ENTITIES['.carinthia']
+        assert g.highestCommonLevel( self.EXAMPLE_ENTITIES['.at'] ) == 2
+        assert g.highestCommonLevel( self.EXAMPLE_ENTITIES['.eu'] ) == 1
+        print g.highestCommonLevel( self.EXAMPLE_ENTITIES['.ch'])
+        assert g.highestCommonLevel( self.EXAMPLE_ENTITIES['.ch'] ) == 1
+        assert g.highestCommonLevel( self.EXAMPLE_ENTITIES['.carinthia'] ) == 3
 
 if __name__ == '__main__':
-    g = GeoEntity.factory(geoUrl = 'Europe/Austria/Vienna')
+    g = GeoEntity.factory(geoUrl = 'Europe>Austria>Vienna')
     print g, g[0]
+    print g[0].entityDict
