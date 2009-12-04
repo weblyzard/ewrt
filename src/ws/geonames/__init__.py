@@ -87,6 +87,25 @@ class GeoEntity(object):
 
         return level
 
+    def getState(self):
+        """ Returns the state in which the given geoEntity
+            is located """
+
+        assert self['level']>=3
+        print self['level'], self['idUrl'], self['idUrl'][2]
+        return GeoEntity.factory( id = self['idUrl'][2] )[0]
+
+    def getCountry(self):
+        """ Returns the country in which the given geoEntity
+            is located """
+
+        assert self['level']>=2
+        return GeoEntity.factory( id = self['idUrl'][1] )[0]
+
+    def __eq__(self, o):
+        """ add's support for comparisons using == """
+        return self['id'] == o['id']
+
 
 class GeoNames(object):
     """ retrieves information for GeoNames ids
@@ -111,10 +130,12 @@ class GeoNames(object):
 
 class TestGeoNames(object):
 
-    EXAMPLE_ENTITIES = { '.ch': GeoEntity.factory( id = 2658434 )[0],
-                         '.at': GeoEntity.factory( id = 2782113 )[0],
+    EXAMPLE_ENTITIES = { '.ch'       : GeoEntity.factory( id = 2658434 )[0],
+                         '.at'       : GeoEntity.factory( id = 2782113 )[0],
                          '.carinthia': GeoEntity.factory( id = 2774686 )[0],
                          '.eu': GeoEntity.factory( id = 6255148 )[0],
+                         'villach'   : GeoEntity.factory( id = 2762372 )[0],
+                         'hermagor'  : GeoEntity.factory( id = 2776497 )[0],
                        }
 
     def testGetNeighbours(self):
@@ -142,6 +163,19 @@ class TestGeoNames(object):
         print g.highestCommonLevel( self.EXAMPLE_ENTITIES['.ch'])
         assert g.highestCommonLevel( self.EXAMPLE_ENTITIES['.ch'] ) == 1
         assert g.highestCommonLevel( self.EXAMPLE_ENTITIES['.carinthia'] ) == 3
+
+    def testGetState(self):
+        assert self.EXAMPLE_ENTITIES['villach'].getState() == self.EXAMPLE_ENTITIES['.carinthia']
+        assert self.EXAMPLE_ENTITIES['hermagor'].getState() == self.EXAMPLE_ENTITIES['.carinthia']
+        assert self.EXAMPLE_ENTITIES['.carinthia'].getState() == self.EXAMPLE_ENTITIES['.carinthia']
+
+    def testGetCountry(self):
+        assert self.EXAMPLE_ENTITIES['villach'].getCountry() == self.EXAMPLE_ENTITIES['.at']
+        assert self.EXAMPLE_ENTITIES['hermagor'].getCountry() == self.EXAMPLE_ENTITIES['.at']
+        assert self.EXAMPLE_ENTITIES['.carinthia'].getCountry() == self.EXAMPLE_ENTITIES['.at']
+        assert self.EXAMPLE_ENTITIES['.at'].getCountry() == self.EXAMPLE_ENTITIES['.at']
+        assert not self.EXAMPLE_ENTITIES['.at'].getCountry() == self.EXAMPLE_ENTITIES['.ch']
+
 
 if __name__ == '__main__':
     g = GeoEntity.factory(geoUrl = 'Europe>Austria>Vienna')
