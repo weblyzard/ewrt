@@ -20,7 +20,7 @@
 
 import sys
 from eWRT.access.db import PostgresqlDb
-from eWRT.util.cache import DiskCached
+from eWRT.util.cache import MemoryCached
 from eWRT.access.http import Retrieve
 from eWRT.ws.geonames.gazetteer import Gazetteer
 from eWRT.config import GEO_ENTITY_SEPARATOR
@@ -34,6 +34,7 @@ class GeoEntity(object):
         self.id         = entityDict['id']
 
     @staticmethod
+    @MemoryCached
     def factory(name=None, id=None, geoUrl=None):
         """ creates geoentity objects based on the given information
             @param[in] name   of the Entity
