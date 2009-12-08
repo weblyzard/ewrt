@@ -20,7 +20,7 @@
 
 import sys
 from eWRT.access.db import PostgresqlDb
-from eWRT.util.cache import MemoryCached
+from eWRT.util.cache import MemoryCached, DiskCached
 from eWRT.access.http import Retrieve
 from eWRT.ws.geonames.gazetteer import Gazetteer
 from eWRT.config import GEO_ENTITY_SEPARATOR
