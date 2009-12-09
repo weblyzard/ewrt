@@ -107,6 +107,16 @@ class GeoEntity(object):
         """ add's support for comparisons using == """
         return self['id'] == o['id']
 
+    def __neq__(self, o):
+        """ adds support for the != operator """
+        return self['id'] != o['id']
+
+    def __cmp__(self, o):
+        return self['id'].__cmp__(o['id'])
+
+    def __hash__(self):
+        return self['id'].__hash__()
+
 
 class GeoNames(object):
     """ retrieves information for GeoNames ids
@@ -176,6 +186,14 @@ class TestGeoNames(object):
         assert self.EXAMPLE_ENTITIES['.carinthia'].getCountry() == self.EXAMPLE_ENTITIES['.at']
         assert self.EXAMPLE_ENTITIES['.at'].getCountry() == self.EXAMPLE_ENTITIES['.at']
         assert not self.EXAMPLE_ENTITIES['.at'].getCountry() == self.EXAMPLE_ENTITIES['.ch']
+
+    def testSetProperties(self):
+        """ verifies that functions such as __hash__, __cmp__ required for handling
+            sets work """
+        a = set( self.EXAMPLE_ENTITIES.values() )
+        b = set( (self.EXAMPLE_ENTITIES['villach'], self.EXAMPLE_ENTITIES['hermagor']) )
+        assert a.intersection(b) == b
+        assert len(a.difference(b)) < len(a)
 
 
 if __name__ == '__main__':
