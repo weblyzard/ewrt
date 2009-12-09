@@ -128,7 +128,7 @@ class GeoNames(object):
 
     @staticmethod
     @DiskCached("./.geonames-neighbours")
-    def getNeighbours(geo_entity):
+    def getNeighbors(geo_entity):
         """ returns all neighbours for the given geo id
             (currently only implemented on a country level)
             @param[in] geo_entity
@@ -149,9 +149,9 @@ class TestGeoNames(object):
                          'hermagor'  : GeoEntity.factory( id = 2776497 )[0],
                        }
 
-    def testGetNeighbours(self):
+    def testGetNeighbors(self):
         geoEntity = self.EXAMPLE_ENTITIES['.ch'] # .ch
-        assert set([ g.id for g in GeoNames.getNeighbours(geoEntity) ]) == set([2782113, 3017382, 2921044, 3175395, 3042058])
+        assert set([ g.id for g in GeoNames.getNeighbors(geoEntity) ]) == set([2782113, 3017382, 2921044, 3175395, 3042058])
 
     def testContains(self):
         geoEntity = self.EXAMPLE_ENTITIES['.at'] # .at
