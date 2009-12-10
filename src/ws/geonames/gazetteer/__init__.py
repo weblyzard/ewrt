@@ -113,8 +113,6 @@ class Gazetteer(object):
             @param[in] id     the row id to return
             @param[in] idAttr attribute to consider for the id
         """
-        print ">>|>", l, id
-        open("/tmp/aw", "w").write(">>|>%s %s\n" % (l,id))
         return [ e for e in l if e[idAttr] == id ][0]
 
 
