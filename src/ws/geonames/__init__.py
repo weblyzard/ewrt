@@ -153,6 +153,14 @@ class TestGeoNames(object):
         geoEntity = self.EXAMPLE_ENTITIES['.ch'] # .ch
         assert set([ g.id for g in GeoNames.getNeighbors(geoEntity) ]) == set([2782113, 3017382, 2921044, 3175395, 3042058])
 
+    def testAreaInfo(self):
+        """ verifies whether the information on a entities country is retrieved 
+            correctly (currently only supported for countries """
+        assert self.EXAMPLE_ENTITIES['.at'].entityDict['area'] > 0
+        assert self.EXAMPLE_ENTITIES['.ch'].entityDict['area'] > 0
+
+        assert self.EXAMPLE_ENTITIES['villach'].entityDict['area'] == None
+
     def testContains(self):
         geoEntity = self.EXAMPLE_ENTITIES['.at'] # .at
         assert geoEntity.contains( self.EXAMPLE_ENTITIES['.at'] ) == True

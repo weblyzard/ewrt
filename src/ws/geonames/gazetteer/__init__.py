@@ -99,7 +99,7 @@ class Gazetteer(object):
             @return list of GeoEntities
         """
         if id:
-            q = "SELECT * FROM gazetteerentity WHERE id IN (%s)" % ", ".join( map(str, id ))
+            q = "SELECT * FROM gazetteerentity LEFT JOIN countryInfo USING(id) WHERE id IN (%s)" % ", ".join( map(str, id ))
             res = self.db.query( q ) 
             entities = [ dict(self._getResultById(res, i).items()) for i in id ]
             self._addGeoUrl( entities )
@@ -113,6 +113,8 @@ class Gazetteer(object):
             @param[in] id     the row id to return
             @param[in] idAttr attribute to consider for the id
         """
+        print ">>|>", l, id
+        open("/tmp/aw", "w").write(">>|>%s %s\n" % (l,id))
         return [ e for e in l if e[idAttr] == id ][0]
 
 
