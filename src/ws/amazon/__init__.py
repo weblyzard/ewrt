@@ -28,7 +28,14 @@ import logging
 from urllib import quote
 from xml.parsers.expat import ParserCreate
 from eWRT.access.http import Retrieve
-from eWRT.config import AMAZON_ACCESS_KEY, AMAZON_LOCATIONS, AMAZON_DEBUG_FILE
+from eWRT.config import AMAZON_ACCESS_KEY, AMAZON_LOCATIONS, AMAZON_DEBUG_FILE, AMAZON_SECRET_KEY
+
+from time import strftime
+
+import base64
+import hashlib
+import hmac
+import urllib
 
 # time to wait after an error in seconds
 ERROR_SLEEP_TIME=30
@@ -38,6 +45,7 @@ BROWSE_NODE_ID = { 'book' : '283155',
                    'music': '5174'
                  }
 
+amazon_url = AmazonUrl()
 
 class ResultList:
 	""" converts xml results into a list of dictionaries """
@@ -116,6 +124,12 @@ class AmazonWS:
 		argList = [ "%s&SubscriptionId=%s" % (self.wsBase, self.accessKey) ] + [ "%s=%s" % (k,quote(v)) for k,v in arguments.items() ]
 		return "&".join(argList)
 
+	def generateWsUrl( self, arguments ):
+		""" generates a valid amazon webservice request url """
+		#argList = [ "%s&SubscriptionId=%s" % (self.wsBase, self.accessKey) ] + [ "%s=%s" % (k,quote(v)) for k,v in arguments.items() ]
+		#return "&".join(argList)
+		return amazon_url.get_result_url(arguments)
+
 
 	def query( self, arguments ):
 		""" retrieves a result from amazon webservice """
@@ -185,4 +199,54 @@ class AmazonWS:
                          'ResponseGroup': 'ItemAttributes,SalesRank' }
             arguments.update( param )
             return self.query( arguments )
+
+
+AWS_ACCESS_KEY_ID = {'AWSAccessKeyId': AMAZON_ACCESS_KEY}
+
+class AmazonUrl:
+
+    def timestamp(self):
+        """ determine the current timestamp """
+        current_timestamp = strftime('%Y-%m-%dT%H:%M:%SZ')
+        return {'Timestamp': current_timestamp}
+
+    def get_signature(self, msg):
+        """ apply hmac with sha256 to the msg using key """
+        hmac_sha256_alg = hmac.new(AMAZON_SECRET_KEY, msg, hashlib.sha256)
+        signature = hmac_sha256_alg.digest()
+        signature = base64.encodestring(signature)
+        return signature
+
+    def get_msgs(self, params):
+        """ determine the sig_msg (i.e. the message to be hmac encoded) and the
+        url_msg (i.e. the message to be sent to amazon) """
+
+        GET = 'GET'
+        ECS = 'ecs.amazonaws.com'
+        ONCA = '/onca/xml'
+        
+        params.update(self.timestamp())
+        params.update(AWS_ACCESS_KEY_ID)
+        url_encoded = urllib.urlencode(params)
+
+        msg = [entry for entry in url_encoded.split('&')]
+        msg.sort() # amazon also calculates signature from sorted entries
+        msg = '&'.join(msg)
+
+        sig_msg = '\n'.join([GET, ECS, ONCA, msg])
+        url_msg = '%s%s%s?%s' % ('http://', ECS, ONCA, msg)
+        return url_msg, sig_msg
+
+    def get_request_url(self, **params):
+        """ generate a url containing signature and timestamp with the given
+        parameters """
+        url_msg, sig_msg = self.get_msgs(params)
+        signature = self.get_signature(sig_msg)
+        request_url = "%s&%s" % (url_msg, urllib.urlencode({ 'Signature': signature }))
+        return request_url.replace('%0A', '')
+
+if __name__ == "__main__":
+    url_generator = AmazonUrl()
+    url = url_generator.get_request_url(Operation='BrowseNodeLookup', Service='AWSECommerceService', ResponseGroup='NewReleases', Marketplace='us', BrowseNodeId='281052')
+    print url
 
