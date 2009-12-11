@@ -24,6 +24,7 @@ from eWRT.util.cache import MemoryCached, DiskCached
 from eWRT.access.http import Retrieve
 from eWRT.ws.geonames.gazetteer import Gazetteer
 from eWRT.config import GEO_ENTITY_SEPARATOR
+from warnings import warn
 
 class GeoEntity(object):
     """ a geographic entity """
@@ -136,7 +137,10 @@ class GeoNames(object):
 
         url = GeoNames.NEIGHBOURS_SERVICE_URL % geo_entity.id
         jsonData = eval( Retrieve('eWRT.ws.geonames').open(url).read() )
-        return [ GeoEntity.factory( id = e['geonameId'] )[0] for e in jsonData['geonames'] ]
+        if 'geonames' in jsonData:
+            return [ GeoEntity.factory( id = e['geonameId'] )[0] for e in jsonData['geonames'] ]
+        else:
+            return []
 
 
 class TestGeoNames(object):
