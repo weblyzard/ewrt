@@ -32,7 +32,7 @@ from os.path import join, exists
 from operator import attrgetter
 from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
 from cPickle import dump, load
-from time import time
+import time
 from operator import itemgetter
 from subprocess import Popen
 
@@ -63,7 +63,9 @@ class Async(object):
 
     @staticmethod
     def getObjectId( obj ):
-        """ returns an identifier representing the object """
+        """ returns an identifier representing the object which is compatible 
+            to the identifiers returned by the eWRT.util.cache.* classes. """
+        obj = ( tuple(obj[1:]), () )
         return HASH(str( obj )).hexdigest()
         
     def _get_fname( self, obj_id ):
@@ -80,13 +82,14 @@ class Async(object):
         return join(obj_dir, obj_id+self.cache_file_suffix)
 
     
-    def call(self, cmdline):
+    def post(self, cmd):
         """ checks whether the given command is already cached and calls
             the command otherwise.
             @param[in] cmdline command to call
             @returns the hash required to fetch this object
         """
-        cache_file = self._get_fname( self.getObjectId(cmdline ))  
+        cache_file = self._get_fname( self.getObjectId( cmd  ))  
+        print "xx", cmd
         # try to fetch the object from the cache
         if exists(cache_file):
             try:
@@ -95,12 +98,12 @@ class Async(object):
             except EOFError:
                 pass
 
-        self._execute(cmdline)
+        self._execute(cmd)
         return cache_file
 
 
-    def _excecute(cmdline):
-        pid = Popen( cmdline.split(" ",1) ).pid
+    def _execute(self, cmd):
+        pid = Popen( cmd ).pid
 
 
     def fetch(self, cache_file):
