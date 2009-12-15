@@ -29,10 +29,10 @@ __copyright__ = "GPL"
 from StringIO import StringIO
 import cProfile, pstats
 
-def profile(fn, logfile="profile.awi"):
+def profile(fnName, logfile="profile.awi"):
     """ profile function """
     prof = cProfile.Profile()
-    prof = prof.runctx("%s()" % fn.__name__, globals(), locals())
+    prof = prof.runctx(fnName, globals(), locals())
     stream = StringIO()
     stats = pstats.Stats(prof, stream=stream)
     stats.sort_stats("time")  # Or cumulative
