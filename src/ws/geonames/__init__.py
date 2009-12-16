@@ -68,8 +68,8 @@ class GeoEntity(object):
             
             @param[in] geoEntity
             @returns true or false """
-
-        if self['geoUrl'] in geoEntity['geoUrl']:
+        # required to handle eu>Serbia versus eu>Serbia and Montenegro
+        if (self['geoUrl']+GEO_ENTITY_SEPARATOR) in (geoEntity['geoUrl']+GEO_ENTITY_SEPARATOR):  
             return True
         else:
             return False
@@ -103,6 +103,12 @@ class GeoEntity(object):
 
         assert self['level']>=2
         return GeoEntity.factory( id = self['idUrl'][1] )[0]
+
+    def getContinent(self):
+        """ Returns the continent in which the given
+            geoEntity is located """
+        assert self['level']>=1
+        return GeoEntity.factory( id = self['idUrl'][0] )[0]
 
     def __eq__(self, o):
         """ add's support for comparisons using == """
@@ -143,6 +149,7 @@ class GeoNames(object):
             return []
 
 
+g = lambda x: GeoEntity.factory( id=x )[0]
 class TestGeoNames(object):
 
     EXAMPLE_ENTITIES = { '.ch'       : GeoEntity.factory( id = 2658434 )[0],
@@ -151,6 +158,8 @@ class TestGeoNames(object):
                          '.eu': GeoEntity.factory( id = 6255148 )[0],
                          'villach'   : GeoEntity.factory( id = 2762372 )[0],
                          'hermagor'  : GeoEntity.factory( id = 2776497 )[0],
+                         'serbia'    : g(6290252),
+                         'montenegro': g(863038),
                        }
 
     def testGetNeighbors(self):
@@ -171,6 +180,10 @@ class TestGeoNames(object):
         assert geoEntity.contains( self.EXAMPLE_ENTITIES['.carinthia'] ) == True
         assert geoEntity.contains( self.EXAMPLE_ENTITIES['.eu'] ) == False
         assert geoEntity.contains( self.EXAMPLE_ENTITIES['.ch'] ) == False
+        # eu>Serbia <-> eu>Serbia and Montenegro
+        assert self.EXAMPLE_ENTITIES['montenegro'].contains( self.EXAMPLE_ENTITIES['serbia'] ) == False
+        assert self.EXAMPLE_ENTITIES['serbia'].contains( self.EXAMPLE_ENTITIES['montenegro'] ) == False
+
        
     def testIsContained(self):
         geoEntity = self.EXAMPLE_ENTITIES['.at'] # .at
