@@ -45,8 +45,6 @@ BROWSE_NODE_ID = { 'book' : '283155',
                    'music': '5174'
                  }
 
-amazon_url = AmazonUrl()
-
 class ResultList:
 	""" converts xml results into a list of dictionaries """
 
@@ -117,6 +115,7 @@ class AmazonWS:
                 self.retrieve  = Retrieve( self.__class__.__name__ )
 		self.wsBase    = AMAZON_LOCATIONS[ location ]
                 self.accessKey = key or AMAZON_ACCESS_KEY
+                self.amazon_url = AmazonUrl()
 
 
 	def generateWsUrl( self, arguments ):
@@ -124,11 +123,11 @@ class AmazonWS:
 		argList = [ "%s&SubscriptionId=%s" % (self.wsBase, self.accessKey) ] + [ "%s=%s" % (k,quote(v)) for k,v in arguments.items() ]
 		return "&".join(argList)
 
-	def generateWsUrl( self, arguments ):
+	def generateSignedWsUrl( self, **arguments ):
 		""" generates a valid amazon webservice request url """
 		#argList = [ "%s&SubscriptionId=%s" % (self.wsBase, self.accessKey) ] + [ "%s=%s" % (k,quote(v)) for k,v in arguments.items() ]
 		#return "&".join(argList)
-		return amazon_url.get_result_url(arguments)
+		return self.amazon_url.get_request_url(arguments)
 
 
 	def query( self, arguments ):
@@ -237,7 +236,7 @@ class AmazonUrl:
         url_msg = '%s%s%s?%s' % ('http://', ECS, ONCA, msg)
         return url_msg, sig_msg
 
-    def get_request_url(self, **params):
+    def get_request_url(self, params):
         """ generate a url containing signature and timestamp with the given
         parameters """
         url_msg, sig_msg = self.get_msgs(params)
@@ -246,7 +245,7 @@ class AmazonUrl:
         return request_url.replace('%0A', '')
 
 if __name__ == "__main__":
-    url_generator = AmazonUrl()
-    url = url_generator.get_request_url(Operation='BrowseNodeLookup', Service='AWSECommerceService', ResponseGroup='NewReleases', Marketplace='us', BrowseNodeId='281052')
+    url_generator = AmazonWS()
+    url = url_generator.generateSignedWsUrl(Operation='BrowseNodeLookup', Service='AWSECommerceService', ResponseGroup='NewReleases', Marketplace='us', BrowseNodeId='281052')
     print url
 
