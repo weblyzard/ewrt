@@ -17,6 +17,11 @@ class GeoLyzard(object):
     """ An xmlrpc object around the geoLyzard tagger """
 
     @staticmethod
+    def getServerHandle():
+        """ returns a handle to the geoLyzard Web service """
+        return ServerProxy( GEOLYZARD_URL ).Tagger
+
+    @staticmethod
     @DiskCached("./.geoLyzard")
     def getGeoEntities( text, gazetteer="C10000" ):
         """ determins the geoEntites occurring in the given text
