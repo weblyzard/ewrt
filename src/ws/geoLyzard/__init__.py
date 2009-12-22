@@ -32,7 +32,6 @@ class GeoLyzardIterator(object):
             self.fetch_next_batch()
 
         if self.result:
-            print "***", self.result
             return self.result.pop()
         else:
             raise StopIteration
@@ -40,10 +39,8 @@ class GeoLyzardIterator(object):
     def fetch_next_batch(self):
         """ processes the next batch of documents """
         tagger_input_dict = dict( [ (str(seq), b64encode(text)) for nr, (seq, text) in zip(xrange(self.batch_size), self.documents)  ] )
-        print tagger_input_dict
         self.result = GeoLyzard.unpackTaggerResult( 
                          self.xmlrpc_server.Tagger.getTextGeoLocation( self.gazetteer, tagger_input_dict )).items()
-        print ">>>", self.result
 
 
 
