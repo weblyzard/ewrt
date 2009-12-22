@@ -12,6 +12,40 @@ try:
 except ImportError:
     pass
 
+DEFAULT_BATCH_SIZE = 50
+
+class GeoLyzardIterator(object):
+    """ An iterator performing more efficient queries to the geoLyzard tagger """
+
+    def __init__(self, documents, gazetteer="C", batch_size = DEFAULT_BATCH_SIZE ):
+        """ @param[in] documents A dictionary of input documents to tag """
+        self.documents     = documents.iteritems()
+        self.batch_size    = batch_size
+        self.xmlrpc_server = ServerProxy( GEOLYZARD_URL )
+        self.gazetteer     = gazetteer
+        self.result        = []
+
+    def __iter__(self): return self
+
+    def next(self):
+        if not self.result:
+            self.fetch_next_batch()
+
+        if self.result:
+            print "***", self.result
+            return self.result.pop()
+        else:
+            raise StopIteration
+
+    def fetch_next_batch(self):
+        """ processes the next batch of documents """
+        tagger_input_dict = dict( [ (str(seq), b64encode(text)) for nr, (seq, text) in zip(xrange(self.batch_size), self.documents)  ] )
+        print tagger_input_dict
+        self.result = GeoLyzard.unpackTaggerResult( 
+                         self.xmlrpc_server.Tagger.getTextGeoLocation( self.gazetteer, tagger_input_dict )).items()
+        print ">>>", self.result
+
+
 
 class GeoLyzard(object):
     """ An xmlrpc object around the geoLyzard tagger """
@@ -29,8 +63,8 @@ class GeoLyzard(object):
             @returns a list of geographic entities
         """
         xmlrpc_server = ServerProxy( GEOLYZARD_URL )
-        res = GeoLyzard.__unpackTaggerResult( 
-            xmlrpc_server.Tagger.getTextGeoLocation( gazetteer, { 'id': b64encode(text) } ))
+        res = GeoLyzard.unpackTaggerResult( 
+            self.xmlrpc_server.Tagger.getTextGeoLocation( gazetteer, { 'id': b64encode(text) } ))
 
         return res
 
@@ -65,12 +99,28 @@ class GeoLyzard(object):
              
 
     @staticmethod
-    def __unpackTaggerResult( res ):
+    def unpackTaggerResult( res ):
             """ unpacks the taggers results """
             for resultList in res.itervalues():
                     for listDict in resultList:
                             listDict['name'] = b64decode( listDict['name'] )
             return res
+
+class TestGeoLyzard(object):
+
+    def testGeoLyzardIterator(self):
+        input_dict = { 1: 'Lainach is a village in Carinthia',
+                       2: 'Spittal an der Drau is a district located in the most southern district of Austria',
+                       3: 'Ana lives in Vienna.',
+                       4: 'Jasna lives in Vienna, the capital of Austria',
+                       5: 'Parik lives in Perth'
+                     }
+
+        for seq, result in enumerate( GeoLyzardIterator( input_dict )):
+            assert len(result) > 0
+
+        print "SEQ: ", seq
+        assert seq == len(input_dict)-1
 
 
 if __name__ == '__main__':
