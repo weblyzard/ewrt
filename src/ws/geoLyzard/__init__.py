@@ -4,6 +4,7 @@ from xmlrpclib import ServerProxy, Error
 from eWRT.config import GEOLYZARD_URL, GEOLYZARD_GAZETTEERS
 from eWRT.util.cache import DiskCached
 from base64 import b64decode, b64encode
+from operator import itemgetter
 import csv
 import sys
 try:
@@ -12,7 +13,7 @@ try:
 except ImportError:
     pass
 
-DEFAULT_BATCH_SIZE = 50
+DEFAULT_BATCH_SIZE = 5
 
 class GeoLyzardIterator(object):
     """ An iterator performing more efficient queries to the geoLyzard tagger """
@@ -43,7 +44,6 @@ class GeoLyzardIterator(object):
                          self.xmlrpc_server.Tagger.getTextGeoLocation( self.gazetteer, tagger_input_dict )).items()
 
 
-
 class GeoLyzard(object):
     """ An xmlrpc object around the geoLyzard tagger """
 
@@ -61,7 +61,7 @@ class GeoLyzard(object):
         """
         xmlrpc_server = ServerProxy( GEOLYZARD_URL )
         res = GeoLyzard.unpackTaggerResult( 
-            self.xmlrpc_server.Tagger.getTextGeoLocation( gazetteer, { 'id': b64encode(text) } ))
+            xmlrpc_server.Tagger.getTextGeoLocation( gazetteer, { 'id': b64encode(text) } ))
 
         return res
 
