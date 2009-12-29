@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 
-""" install libsts :) """
+""" install eWRT :) """
 
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
+
 from sys import exit
 
 setup(
@@ -15,7 +19,8 @@ setup(
       author_email = 'albert.weichselbraun@wu.ac.at, heinz.lang@wu.ac.at',
       url          = 'http://www.semanticlab.net/index.php/EWRT',
       license      = "GPL3", 
-      package_dir  = {'eWRT': 'src'},
+      requires     = [ "psycopg2", ],
+      package_dir  = {'': 'src'},
 
       ###########################################
       ## Scripts
