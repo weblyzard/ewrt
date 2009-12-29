@@ -1,5 +1,6 @@
 from eWRT.access.http import Retrieve
 from eWRT.ws.TagInfoService import TagInfoService
+from nose.plugins.attrib import attr
 import re
 
 class Twitter(TagInfoService):
@@ -35,8 +36,13 @@ class Twitter(TagInfoService):
         # todo: sort
 
         return related_tags
+    
+    @staticmethod
+    def getDailyTrends():
+        raise NotImplementedError
 
 
+@attr("remote")
 class TwitterTest( object ):
 
     TWITTER_TEST_TAGS = ['linux', ('linux', 'debian')]

@@ -1,8 +1,16 @@
 #!/usr/bin/env python
 import sys
 from eWRT.config import FACEBOOK_API_KEY, FACEBOOK_SECRET_KEY, FACEBOOK_SESSION_KEY
-from eWRT.lib import Webservice, Result, ResultSet
-from eWRTlibs.facebook.facebook_api import Facebook
+from eWRT.lib import Webservice, Result 
+from eWRT.lib.ResultSet import ResultSet
+
+try:
+    from eWRTlibs.facebook.facebook_api import Facebook
+except ImportError:
+    from warnings import warn
+    from sys import exit
+    warn("This module requires the facebook library.")
+    exit(-1)
 
 class FacebookWS(Webservice):
     """ class for fetching and storing the data of a user

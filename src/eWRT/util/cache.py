@@ -318,7 +318,6 @@ class TestDiskCached(TestCached):
     def teardown(self):
         """ remove the cache directories """
         from shutil import rmtree
-        from os.path import exists
 
         if exists("./.unittest-temp1"):
             rmtree("./.unittest-temp1")

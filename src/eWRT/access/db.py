@@ -47,7 +47,7 @@ class IDB(object):
         """ connects to the database """   
 
     def query(self,qu):
-    	""" processes a queries to the database and returns
+        """ processes a queries to the database and returns
             the result.
             @param[in] query (list or string)
             @returns the result as dictionary
@@ -103,7 +103,7 @@ class PostgresqlDb(IDB):
         self.connect()
 
     def connect(self):
-         self.db=psycopg2.connect("dbname='%s' user='%s' host='%s' password='%s'" % (self.dbname, self.username, self.host, self.passwd))
+        self.db=psycopg2.connect("dbname='%s' user='%s' host='%s' password='%s'" % (self.dbname, self.username, self.host, self.passwd))
 
     def query(self,qu):
         """ queries the postgresql database """
@@ -117,4 +117,3 @@ class PostgresqlDb(IDB):
 
     def close(self):
         self.db.close()
-

@@ -60,7 +60,7 @@ class Flickr(TagInfoService):
             raise ValueError('getRelatedTags is limited to single tag at the moment!')
 
         url = Flickr.FLICKR_TAG_URL % "+".join(tag)
-        url = 'http://www.flickr.com/photos/tags/%s' % tag
+        # url = 'http://www.flickr.com/photos/tags/%s' % tag
         content = Flickr.get_content(url)
         tag_container = Flickr.RE_TAG_CONTAINER.findall( content )
         related_tags_with_count = []

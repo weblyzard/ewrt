@@ -14,7 +14,7 @@
 __revision__ = "$Revision: 545 $"
 __author__   = "Albert Weichselbraun"
 
-from eWRT.config import BBC_CORPUS_PRINT
+from eWRT.config import BBC_CORPUS_HOME_LOW
 from eWRT.convert.html import HtmlToText
 from glob import glob
 import os
@@ -25,7 +25,7 @@ class BBCGetCorpus(object):
     def __init__(self, filePattern="*"):
         """ @param[in] filePattern Pattern of files to consider (e.g. 7[3456789]*.stm)
         """
-        self.files = glob( os.path.join(BBC_CORPUS_PRINT, filePattern) )
+        self.files = glob( os.path.join(BBC_CORPUS_HOME_LOW, filePattern) )
 
     def __iter__(self):
         return self

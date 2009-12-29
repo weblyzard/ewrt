@@ -29,11 +29,8 @@ __copyright__ = "GPL"
 
 from os import makedirs
 from os.path import join, exists
-from operator import attrgetter
-from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
-from cPickle import dump, load
+from cPickle import load
 import time
-from operator import itemgetter
 from subprocess import Popen
 
 try:

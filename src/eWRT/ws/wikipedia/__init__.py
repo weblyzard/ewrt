@@ -25,6 +25,7 @@ __version__ = "$Header$"
 from eWRT.access.http import Retrieve
 from urllib import urlencode
 from xml.dom.minidom import parseString
+from nose.plugins.attrib import attr
 
 WIKIPEDIA_API_QUERY = 'http://%s.wikipedia.org/w/api.php'
 
@@ -91,13 +92,13 @@ class CleanupWikiText(object):
         cleaned = []
         for line in text.split("\n"):
             if line.startswith("<!--") and "Other languages" in line:
-               break
+                break
             cleaned.append(line)
 
         return "\n".join(cleaned)
         
 
-
+@attr("remote")
 class TestWikiPedia(object):
     """ tests the WikiPedia Class """
     TEST_QUERIES= { 
@@ -115,22 +116,8 @@ class TestWikiPedia(object):
                 print keyword, term
                 assert term in wikiPediaText
 
-
-def test( term1, term2):
-    w = WikiPedia()
-    text1 = w.getWikiPage(term1, 'en')
-    text2 = w.getWikiPage(term2, 'en')
-    return term1 in text2 or term2 in text1
-
-if __name__ == '__main__':
-    w=WikiPedia()
-    # text = w.getWikiPage("Energy", "en")
-    # text = w.getWikiPage("Greenhouse Gas", "en")
-
-    
-    print w._getPageNameAlterations("Greenhouse Gas Emissions")
-    #print test('Greenhouse Gsa Emissions', 'Emissions')
-    print test('Oil', 'Fossil Fuels')
-
-    # print CleanupWikiText.removeLanguageReferences( text )
-
+    def testAlternations(self):
+        w=WikiPedia()
+        print w._getPageNameAlterations("Greenhouse Gas Emissions")
+        text = w.getWikiPage("oil", "en")
+        print CleanupWikiText.removeLanguageReferences( text )

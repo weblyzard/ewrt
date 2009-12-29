@@ -58,6 +58,7 @@ class ResultSet:
         return self.name
 
     ## prints the items stored in the ResultSet
+    @staticmethod
     def printRS(resultSet, filler = 0):
         print resultSet.getName(),':'
 
@@ -72,7 +73,6 @@ class ResultSet:
 if __name__ == "__main__":
     
     from Result import Result
-    from ResultSet import ResultSet
 
     a = Result(1, 'foobar1')
     b = Result(2, 'foobar2')

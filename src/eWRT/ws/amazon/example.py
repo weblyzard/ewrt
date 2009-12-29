@@ -41,8 +41,8 @@ def getReview( asin_list ):
 		for review in result:
 			review['Summary']=review['Summary'].replace("'", "\\'")
 			review['Content']=review['Content'].replace("'", "\\'")
-			if not review.has_key('CustomerId'): 
-				out.write("Skipping record\n")
+			if not "CustomerId" in review: 
+				print("Skipping record\n")
 				continue
 			print "INSERT INTO Review (asin,customerId,rating,helpfulVotes,totalVotes,date,summary,content) VALUES('%(ASIN)s', '%(CustomerId)s', %(Rating)s, %(HelpfulVotes)s, %(TotalVotes)s, '%(Date)s', '%(Summary)s', '%(Content)s');" % (review)
 

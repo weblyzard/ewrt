@@ -57,12 +57,12 @@ class Calais:
     api_key = ""
 
     def __init__(self, submitter, api_key=OPENCALAIS_KEY, allow_distro="false", allow_search="false", cache_dir=OPENCALAIS_CACHE_DIR):
-	"""
-		Creates a new handler for communicating with OpenCalais.  
+        """
+        Creates a new handler for communicating with OpenCalais.  
                 The parameter 'submitter' must contain a string, identifying your application.  
                 'api_key' must contain a string with your OpenCalais API key (get it here: http://developer.opencalais.com/apps/register).  
-		The optional parameter 'allow_distro', if set to 'true' gives OpenCalais permission to distribute the metadata extracted from your submissions.  The default value for 'allow_distro' is 'false'.  
-		The optional parameter 'allow_search', if set to 'true' tells OpenCalais that future searches can be performed on the extracted metadata.  The default value for 'allow_search' is 'false'.  
+        The optional parameter 'allow_distro', if set to 'true' gives OpenCalais permission to distribute the metadata extracted from your submissions.  The default value for 'allow_distro' is 'false'.  
+        The optional parameter 'allow_search', if set to 'true' tells OpenCalais that future searches can be performed on the extracted metadata.  The default value for 'allow_search' is 'false'.  
         """
         assert(api_key) 
         self.submitter = submitter
@@ -77,7 +77,7 @@ class Calais:
         """
         Creates a random 10-character ID for your submission.  
         """
-        chars = string.letters + string.digits
+        chars = str.letters + str.digits
         return "".join( [ choice(chars) for i in xrange(10) ] )
     
 
@@ -93,8 +93,8 @@ class Calais:
             import sha
             h = sha.new()
 
-	h.update(text)
-	return h.hexdigest()
+        h.update(text)
+        return h.hexdigest()
 
 
     def analyze(self, text, content_type="text/txt"): 
@@ -164,4 +164,3 @@ class Calais:
                 things.append( {nodeName: nodeAttr } )
 
         return things
-

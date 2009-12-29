@@ -1,6 +1,13 @@
-from eWRTlibs.googleTrends.pyGTrends import pyGTrends
 from eWRT.config import GOOGLE_USER, GOOGLE_PASS
 
+try:
+    from eWRTlibs.googleTrends.pyGTrends import pyGTrends
+except ImportError:
+    from warnings import warn
+    from sys import exit
+    warn("This module requires google Trends ")
+    exit(-1)
+    
 ## Documentation for the Class Google Trends
 #
 # fetches the Google trends for a set of keywords

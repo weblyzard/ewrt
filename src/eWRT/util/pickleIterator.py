@@ -66,7 +66,6 @@ if __name__ == '__main__':
     from unittest import main, TestCase
     from random import randint
     from os.path import join
-    from os import mkdir
 
     class TestPickle(TestCase):
         

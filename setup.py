@@ -24,7 +24,7 @@ setup(
 
       ###########################################
       ## Scripts
-      scripts = ['src/input/corpus/reuters/reuters.py' ],
+      scripts = ['src/eWRT/input/corpus/reuters/reuters.py' ],
  
       ###########################################
       ## Package List

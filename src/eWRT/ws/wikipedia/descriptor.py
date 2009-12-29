@@ -20,8 +20,10 @@
 
 __version__ = "$Header$"
 
+
 from eWRT.access.http import Retrieve
 from urllib import quote
+from nose.plugins.attrib import attr
 
 WIKIPEDIA_SEARCH_QUERY = 'http://%s.wikipedia.org/wiki/%s'
 
@@ -29,7 +31,7 @@ class WikiPedia(object):
     """ returns a wikipedia article """
 
     def __init__(self):
-        self.r = Retrieve( Descriptor.__name__ )
+        self.r = Retrieve( WikiPedia.__name__ )
     
     def getDescriptor(self, synonym, lang='en'):
         """ returns the descriptor for the given synonym in the diven language """
@@ -45,7 +47,7 @@ class WikiPedia(object):
         """ returns a list of wikipedia search results for the given term """
         search_query = WIKIPEDIA_SEARCH_QUERY % (lang, quote(term) )
         f=self.r.open(search_query)
-        results = Descriptor._parse_wikipedia_search_results( f.read() )
+        results = WikiPedia._parse_wikipedia_search_results( f.read() )
         f.close()
 
         return results
@@ -64,7 +66,7 @@ class WikiPedia(object):
 
         return result
 
-
+@attr("remote")
 class TestDescriptor(object):
     """ tests the http class """
     TEST_TERMS = { 
@@ -76,7 +78,7 @@ class TestDescriptor(object):
     def testDescriptor(self):
         """ tries to retrieve the following url's from the list """
 
-        d=Descriptor()
+        d=WikiPedia()
         for descriptor, synonyms in self.TEST_TERMS.iteritems():
             for synonym in synonyms:
                 print synonym, d.getDescriptor(synonym)

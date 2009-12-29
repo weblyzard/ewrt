@@ -14,7 +14,7 @@ __revision__ = "$Revision: 545 $"
 __author__   = "Albert Weichselbraun"
 
 
-from xml.sax import make_parser, handler, parseString
+from xml.sax import handler, parseString
 from glob import glob
 from eWRT.config import REUTERS_DATA_DIR
 from zipfile import ZipFile
@@ -55,7 +55,7 @@ class Reuters(object):
             @param[in] s      string containing the article
             @returns the text in the file from the headline and text fields
         """
-        parser = make_parser()
+        # parser = make_parser()
         rps = ReutersParser()
         parseString(s, rps)
         return rps.getText()
