@@ -50,7 +50,6 @@ setup(
                       'eWRT.ws.googletrends',
                       'eWRT.ws.opencalais',
                       'eWRT.ws.technorati',
-                      'eWRT.ws.twittertrends',
                       'eWRT.ws.twitter',
                       'eWRT.ws.wikipedia',
                       'eWRT.ws.yahoo'
