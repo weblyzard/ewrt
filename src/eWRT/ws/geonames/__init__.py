@@ -221,7 +221,7 @@ class TestGeoNames(object):
         assert len(a.difference(b)) < len(a)
 
 
-if __name__ == '__main__':
-    g = GeoEntity.factory(geoUrl = 'Europe>Austria>Vienna')
-    print g, g[0]
-    print g[0].entityDict
+# if __name__ == '__main__':
+#     g = GeoEntity.factory(geoUrl = 'Europe>Austria>Vienna')
+#     print g, g[0]
+#     print g[0].entityDict

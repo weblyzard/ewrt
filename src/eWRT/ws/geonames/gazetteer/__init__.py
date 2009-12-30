@@ -26,7 +26,7 @@ import sys
 from eWRT.access.db import PostgresqlDb
 from eWRT.util.cache import MemoryCached
 from eWRT.config import DATABASE_CONNECTION, GEO_ENTITY_SEPARATOR
-from eWRT.ws.geonames.gazetteer.exception import *
+from eWRT.ws.geonames.gazetteer.exception import GazetteerEntryNotFound
 
 MIN_POPULATION = 5000
 
@@ -192,20 +192,4 @@ class Gazetteer(object):
             return 0 
         else:
             return result[0]['parent_id']
-
-
-if __name__ == "__main__":
-    a = Gazetteer()
-    if sys.argv.__len__() > 1:
-        # print a.getGeoIdFromGeoUrl( "Europe/Austria/Vienna/Vienna" )
-        print Gazetteer.getGeoNameFromString(a, sys.argv[1])
-    else:
-        # print Gazetteer.getGeoNameFromContentID(a, 86597672)
-        # print Gazetteer.getGeoNameFromContentID(a, 90160635)
-        print Gazetteer.getGeoNameFromString(a, 'Vienna')
-        print Gazetteer.getGeoNameFromString(a, "Lainach" )
-        print Gazetteer.getGeoNameFromString(a, "Spittal an der Drau" )
-        print Gazetteer.getGeoNameFromString(a, "Salzburg" )
-        print Gazetteer.getGeoNameFromString(a, "London" )
-
 
