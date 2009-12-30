@@ -149,17 +149,18 @@ class GeoNames(object):
             return []
 
 
-g = lambda x: GeoEntity.factory( id=x )[0]
 class TestGeoNames(object):
 
-    EXAMPLE_ENTITIES = { '.ch'       : GeoEntity.factory( id = 2658434 )[0],
-                         '.at'       : GeoEntity.factory( id = 2782113 )[0],
-                         '.carinthia': GeoEntity.factory( id = 2774686 )[0],
-                         '.eu': GeoEntity.factory( id = 6255148 )[0],
-                         'villach'   : GeoEntity.factory( id = 2762372 )[0],
-                         'hermagor'  : GeoEntity.factory( id = 2776497 )[0],
-                         'serbia'    : g(6290252),
-                         'montenegro': g(863038),
+    def __init__(self):
+        g = lambda x: GeoEntity.factory( id=x )[0]
+        self.EXAMPLE_ENTITIES = { '.ch'       : g(2658434),
+                                  '.at'       : g(2782113),
+                                  '.carinthia': g(2774686),
+                                  '.eu'       : g(6255148),
+                                  'villach'   : g(2762372),
+                                  'hermagor'  : g(2776497),
+                                  'serbia'    : g(6290252),
+                                  'montenegro': g(863038),
                        }
 
     def testGetNeighbors(self):
