@@ -5,6 +5,8 @@ from eWRT.config import GEOLYZARD_URL, GEOLYZARD_GAZETTEERS
 from eWRT.util.cache import DiskCached
 from base64 import b64decode, b64encode
 from operator import itemgetter
+from gzip import GzipFile
+from StringIO import StringIO
 import csv
 import sys
 try:
@@ -14,6 +16,22 @@ except ImportError:
     pass
 
 DEFAULT_BATCH_SIZE = 5
+
+def _pack(data):
+    """ prepares the data for transmittion to the tagger. """
+    outData = StringIO()
+    d = GzipFile( mode="w", fileobj = outData )
+    d.write(data)
+    d.close()
+    return b64encode( outData.getvalue() )
+
+def _unpack(data):
+    """ handles data returned from the tagger """
+    d = GzipFile( fileobj = StringIO( b64decode( data) ) )
+    res = d.read()
+    d.close()
+    return res
+
 
 class GeoLyzardIterator(object):
     """ An iterator performing more efficient queries to the geoLyzard tagger """
@@ -28,6 +46,7 @@ class GeoLyzardIterator(object):
 
     def __iter__(self): return self
 
+
     def next(self):
         if not self.result:
             self.fetch_next_batch()
@@ -39,7 +58,7 @@ class GeoLyzardIterator(object):
 
     def fetch_next_batch(self):
         """ processes the next batch of documents """
-        tagger_input_dict = dict( [ (str(seq), b64encode(text)) for nr, (seq, text) in zip(xrange(self.batch_size), self.documents)  ] )
+        tagger_input_dict = dict( [ (str(seq), _pack(text)) for nr, (seq, text) in zip(xrange(self.batch_size), self.documents)  ] )
         self.result = GeoLyzard.unpackTaggerResult( 
                          self.xmlrpc_server.Tagger.getTextGeoLocation( self.gazetteer, tagger_input_dict )).items()
 
@@ -61,7 +80,7 @@ class GeoLyzard(object):
         """
         xmlrpc_server = ServerProxy( GEOLYZARD_URL )
         res = GeoLyzard.unpackTaggerResult( 
-            xmlrpc_server.Tagger.getTextGeoLocation( gazetteer, { 'id': b64encode(text) } ))
+            xmlrpc_server.Tagger.getTextGeoLocation( gazetteer, { 'id': _pack( text) } ))
 
         return res
 
@@ -100,7 +119,7 @@ class GeoLyzard(object):
             """ unpacks the taggers results """
             for resultList in res.itervalues():
                     for listDict in resultList:
-                            listDict['name'] = b64decode( listDict['name'] )
+                            listDict['name'] = _unpack( listDict['name'] )
             return res
 
 class TestGeoLyzard(object):
