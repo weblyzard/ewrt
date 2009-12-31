@@ -27,10 +27,14 @@ def _pack(data):
 
 def _unpack(data):
     """ handles data returned from the tagger """
-    d = GzipFile( fileobj = StringIO( b64decode( data) ) )
-    res = d.read()
-    d.close()
-    return res
+    return b64decode( data )
+    # no uncompression is required because the returned data
+    # is not compressed :)
+    #
+    # d = GzipFile( fileobj = StringIO( b64decode( data) ) )
+    # res = d.read()
+    # d.close()
+    # return res
 
 
 class GeoLyzardIterator(object):
