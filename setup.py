@@ -13,13 +13,12 @@ setup(
       ###########################################
       ## Metadata
       name="eWRT",
-      version      = "0.5",
+      version      = "0.5.1",
       description  = 'eWRT',
-      author       = 'Albert Weichselbraun, Heinz Lang',
-      author_email = 'albert.weichselbraun@wu.ac.at, heinz.lang@wu.ac.at',
+      author       = 'Albert Weichselbraun, Heinz Lang, Gerhard Wohlgenannt, Johannes Duong',
+      author_email = 'albert.weichselbraun@wu.ac.at, heinz.lang@wu.ac.at, wohlg@ai.wu.ac.at, johannes.duong@wu.ac.at',
       url          = 'http://www.semanticlab.net/index.php/EWRT',
       license      = "GPL3", 
-      requires     = [ "psycopg2", ],
       package_dir  = {'': 'src'},
 
       ###########################################
