@@ -99,24 +99,24 @@ class Async(object):
         return cache_file
 
     def has_processes_limit_reached(self):
-        """ verifies whether we have already reached the maximum number of processes """
+        """ closes finished processes and verifies whether we have already 
+            reached the maximum number of processes """
         # verify whether all registered processes are still running
-        for pid in self.cur_processes:
-            try:
-                os.kill(pid, 0)
-            except OSError:
-                self.cur_processes.remove( pid )
+        for pObj in self.cur_processes:
+            if pObj.poll()!=None:
+               self.cur_processes.remove( pObj )
 
-        return len(self.cur_processes) > self.max_processes
+        return len(self.cur_processes) >= self.max_processes
 
     def _execute(self, cmd):
         while self.has_processes_limit_reached():
             time.sleep(2)
-        pid = Popen( cmd ).pid
-        self.cur_processes.append( pid )
+        pObj = Popen( cmd )
+        self.cur_processes.append( pObj )
 
 
     def fetch(self, cache_file):
+        self.has_processes_limit_reached()
         while True:
             if exists(cache_file):
                 try: 
@@ -145,15 +145,15 @@ class TestAsync(object):
 
     def testMaxProcessLimit(self):
         """ tests the max process limit """
-        async = Async(self.TEST_CACHE_DIR, max_processes=2)
-        for x in xrange(3):
+        async = Async(self.TEST_CACHE_DIR, max_processes=1)
+        for x in xrange(2):
             async.post( [ "/bin/sleep", str(x+1) ] )
 
-        print async.has_processes_limit_reached(), async.cur_processes
         assert async.has_processes_limit_reached() == True
 
-
-
-
+        time.sleep(2)
+        flag = async.has_processes_limit_reached()
+        print flag, [ p.pid for p in async.cur_processes ]
+        assert flag  == False
 
 # $Id$
