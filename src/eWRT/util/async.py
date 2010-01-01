@@ -27,11 +27,12 @@ __author__    = "Albert Weichselbraun"
 __revision__  = "$Id$"
 __copyright__ = "GPL"
 
-from os import makedirs
+from os import makedirs, removedirs
 from os.path import join, exists
 from cPickle import load
 import time
 from subprocess import Popen
+import os
 
 try:
     import hashlib
@@ -86,7 +87,6 @@ class Async(object):
             @returns the hash required to fetch this object
         """
         cache_file = self._get_fname( self.getObjectId( cmd  ))  
-        print "xx", cmd
         # try to fetch the object from the cache
         if exists(cache_file):
             try:
@@ -98,9 +98,22 @@ class Async(object):
         self._execute(cmd)
         return cache_file
 
+    def has_processes_limit_reached(self):
+        """ verifies whether we have already reached the maximum number of processes """
+        # verify whether all registered processes are still running
+        for pid in self.cur_processes:
+            try:
+                os.kill(pid, 0)
+            except OSError:
+                self.cur_processes.remove( pid )
+
+        return len(self.cur_processes) > self.max_processes
 
     def _execute(self, cmd):
+        while self.has_processes_limit_reached():
+            time.sleep(2)
         pid = Popen( cmd ).pid
+        self.cur_processes.append( pid )
 
 
     def fetch(self, cache_file):
@@ -112,6 +125,33 @@ class Async(object):
                     pass
 
             time.sleep(10)
+
+
+class TestAsync(object):
+    """ unittests covering the class async """
+
+    TEST_CACHE_DIR = "./.test-async"
+
+    def setUp(self):
+        self._delCacheDir()
+
+    def tearDown(self):
+        self._delCacheDir()
+
+    @staticmethod
+    def _delCacheDir():
+        if exists( TestAsync.TEST_CACHE_DIR ):
+            os.removedirs( TestAsync.TEST_CACHE_DIR )
+
+    def testMaxProcessLimit(self):
+        """ tests the max process limit """
+        async = Async(self.TEST_CACHE_DIR, max_processes=2)
+        for x in xrange(3):
+            async.post( [ "/bin/sleep", str(x+1) ] )
+
+        print async.has_processes_limit_reached(), async.cur_processes
+        assert async.has_processes_limit_reached() == True
+
 
 
 
