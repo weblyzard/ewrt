@@ -27,11 +27,13 @@ __author__    = "Albert Weichselbraun"
 __revision__  = "$Id$"
 __copyright__ = "GPL"
 
+from eWRT.util.cache import Cache
 from os import makedirs, removedirs
 from os.path import join, exists
 from cPickle import load
 import time
 from subprocess import Popen
+from fcntl import fcntl, F_GETFL, F_SETFL
 import os
 
 try:
@@ -42,7 +44,7 @@ except ImportError:
     HASH = sha.sha
 
 
-class Async(object):
+class Async(Cache):
     """ Asynchronous Call Handling """
 
     def __init__(self, cache_dir, cache_nesting_level=0, cache_file_suffix="", max_processes=8):
@@ -59,12 +61,10 @@ class Async(object):
         self.max_processes       = max_processes
         self.cur_processes       = []
 
-    @staticmethod
-    def getObjectId( obj ):
+    def getPostHashfile(self, cmd ):
         """ returns an identifier representing the object which is compatible 
             to the identifiers returned by the eWRT.util.cache.* classes. """
-        obj = ( tuple(obj[1:]), () )
-        return HASH(str( obj )).hexdigest()
+        return self._get_fname( Cache.getObjectId( cmd ) )
         
     def _get_fname( self, obj_id ):
         """ computes the filename of the file with the given
@@ -86,7 +86,7 @@ class Async(object):
             @param[in] cmdline command to call
             @returns the hash required to fetch this object
         """
-        cache_file = self._get_fname( self.getObjectId( cmd  ))  
+        cache_file = self.getPostHashfile( cmd )  
         # try to fetch the object from the cache
         if exists(cache_file):
             try:
@@ -106,12 +106,20 @@ class Async(object):
             if pObj.poll()!=None:
                self.cur_processes.remove( pObj )
 
+        pids = [ str(pObj.pid) for pObj in self.cur_processes ]
         return len(self.cur_processes) >= self.max_processes
 
     def _execute(self, cmd):
         while self.has_processes_limit_reached():
-            time.sleep(2)
+            time.sleep(5)
+
         pObj = Popen( cmd )
+        # set stdout and stderr to non blocking because otherwise
+        # the process will block after a limit of 64k has been reached
+        # (see http://bytes.com/topic/python/answers/741393-spawning-process-subprocess)
+        # fcntl(stdout, F_SETFL, fcntl(stdout, F_GETFL) | os.O_NONBLOCK)
+        # fcntl(stdin, F_SETFL, fcntl(stdin, F_GETFL) | os.O_NONBLOCK)
+
         self.cur_processes.append( pObj )
 
 

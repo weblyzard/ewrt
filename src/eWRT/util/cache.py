@@ -42,6 +42,11 @@ class Cache(object):
     def fetch(self, fetch_function, *args):
         raise NotImplementedError
 
+    @staticmethod
+    def getObjectId( obj ):
+        """ returns an identifier representing the object """
+        return HASH(str( obj )).hexdigest()
+ 
 
 class DiskCache(Cache):
     """ caches abitrary functions based on the function's arguments """
@@ -59,13 +64,7 @@ class DiskCache(Cache):
 
         self._cache_hit  = 0
         self._cache_miss = 0
-
-
-    @staticmethod
-    def getObjectId( obj ):
-        """ returns an identifier representing the object """
-        return HASH(str( obj )).hexdigest()
-        
+       
     def _get_fname( self, obj_id ):
         """ computes the filename of the file with the given
             object identifier and creates the required directory
