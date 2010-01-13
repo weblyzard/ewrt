@@ -28,12 +28,14 @@ __revision__  = "$Id$"
 __copyright__ = "GPL"
 
 from eWRT.util.cache import Cache
-from os import makedirs, removedirs
+from os import makedirs
+from shutil import rmtree
 from os.path import join, exists
 from cPickle import load
 import time
 from subprocess import Popen
 from fcntl import fcntl, F_GETFL, F_SETFL
+from glob import glob
 import os
 
 try:
@@ -47,12 +49,13 @@ except ImportError:
 class Async(Cache):
     """ Asynchronous Call Handling """
 
-    def __init__(self, cache_dir, cache_nesting_level=0, cache_file_suffix="", max_processes=8):
+    def __init__(self, cache_dir, cache_nesting_level=0, cache_file_suffix="", max_processes=8, debug_dir=None):
         """ initializes the Cache object 
             @param[in] cache_dir the cache base directory
             @param[in] cache_nesting_level optional number of nesting level (0)
             @param[in] cache_file_suffix optional suffix for cache files
             @param[in] max_processes maximum number of parallel processes
+            @param[in] optional debug directory where stdout and stderr of the processes gets saved
         """
 
         self.cache_dir           = cache_dir
@@ -60,6 +63,7 @@ class Async(Cache):
         self.cache_nesting_level = cache_nesting_level
         self.max_processes       = max_processes
         self.cur_processes       = []
+        self.debug_dir           = debug_dir
 
     def getPostHashfile(self, cmd ):
         """ returns an identifier representing the object which is compatible 
@@ -113,7 +117,16 @@ class Async(Cache):
         while self.has_processes_limit_reached():
             time.sleep(5)
 
-        pObj = Popen( cmd )
+        if self.debug_dir:
+            fname_base = join(self.debug_dir, str(time.time()) )
+            stdout = open(fname_base+".out", "w")
+            stderr = open(fname_base+".err", "w")
+            pObj = Popen( cmd, stdout=stdout, stderr=stderr )
+            os.rename( fname_base+".out", join(self.debug_dir, "debug_%d.out" % pObj.pid ))
+            os.rename( fname_base+".err", join(self.debug_dir, "debug_%d.err" % pObj.pid ))
+        else:
+            pObj = Popen( cmd )
+
         # set stdout and stderr to non blocking because otherwise
         # the process will block after a limit of 64k has been reached
         # (see http://bytes.com/topic/python/answers/741393-spawning-process-subprocess)
@@ -149,7 +162,7 @@ class TestAsync(object):
     @staticmethod
     def _delCacheDir():
         if exists( TestAsync.TEST_CACHE_DIR ):
-            os.removedirs( TestAsync.TEST_CACHE_DIR )
+            rmtree( TestAsync.TEST_CACHE_DIR )
 
     def testMaxProcessLimit(self):
         """ tests the max process limit """
@@ -163,5 +176,16 @@ class TestAsync(object):
         flag = async.has_processes_limit_reached()
         print flag, [ p.pid for p in async.cur_processes ]
         assert flag  == False
+
+    def testDebugMode(self):
+        """ tests the debug mode """
+        async = Async(self.TEST_CACHE_DIR, max_processes=1, debug_dir=self.TEST_CACHE_DIR)
+        for x in xrange(2):
+            async.post( ["/bin/echo", "hallo"] )
+
+        print glob( join(self.TEST_CACHE_DIR, "debug*") )
+        assert len( glob( join(self.TEST_CACHE_DIR, "debug*.out") )  ) == 2
+        assert len( glob( join(self.TEST_CACHE_DIR, "debug*.err") )  ) == 2
+
 
 # $Id$
