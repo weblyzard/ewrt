@@ -46,6 +46,19 @@ class Cache(object):
     def getObjectId( obj ):
         """ returns an identifier representing the object """
         return HASH(str( obj )).hexdigest()
+
+    def _get_fname( self, obj_id ):
+        """ computes the filename of the file with the given
+            object identifier and creates the required directory
+            structure (if necessary).
+        """
+        assert( len(obj_id) >= self.cache_nesting_level )
+
+        obj_dir = join( *( [self.cache_dir] + list( obj_id[:self.cache_nesting_level] )) )
+        if not exists(obj_dir):
+            makedirs(obj_dir)
+
+        return join(obj_dir, obj_id+self.cache_file_suffix)
  
 
 class DiskCache(Cache):
@@ -65,19 +78,7 @@ class DiskCache(Cache):
         self._cache_hit  = 0
         self._cache_miss = 0
        
-    def _get_fname( self, obj_id ):
-        """ computes the filename of the file with the given
-            object identifier and creates the required directory
-            structure (if necessary).
-        """
-        assert( len(obj_id) >= self.cache_nesting_level )
-
-        obj_dir = join( *( [self.cache_dir] + list( obj_id[:self.cache_nesting_level] )) )
-        if not exists(obj_dir):
-            makedirs(obj_dir)
-
-        return join(obj_dir, obj_id+self.cache_file_suffix)
-    
+   
     def fetch(self, fetch_function, *args, **kargs):
         """ fetches the object with the given id, querying
              a) the cache and

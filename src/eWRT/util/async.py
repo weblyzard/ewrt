@@ -68,22 +68,10 @@ class Async(Cache):
     def getPostHashfile(self, cmd ):
         """ returns an identifier representing the object which is compatible 
             to the identifiers returned by the eWRT.util.cache.* classes. """
-        return self._get_fname( Cache.getObjectId( cmd ) )
+        args = ( tuple(cmd[1:]), ())  # required to produce the same hash as DiskCache's fetch method
+        return self._get_fname( Cache.getObjectId( args ) ) 
         
-    def _get_fname( self, obj_id ):
-        """ computes the filename of the file with the given
-            object identifier and creates the required directory
-            structure (if necessary).
-        """
-        assert( len(obj_id) >= self.cache_nesting_level )
-
-        obj_dir = join( *( [self.cache_dir] + list( obj_id[:self.cache_nesting_level] )) )
-        if not exists(obj_dir):
-            makedirs(obj_dir)
-
-        return join(obj_dir, obj_id+self.cache_file_suffix)
-
-    
+   
     def post(self, cmd):
         """ checks whether the given command is already cached and calls
             the command otherwise.
