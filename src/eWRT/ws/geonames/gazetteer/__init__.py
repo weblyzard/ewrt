@@ -72,7 +72,6 @@ class Gazetteer(object):
         """
         query = "SELECT id FROM vw_gazetteer WHERE name='%s' ORDER BY population DESC" % ( name.replace("'", "''") )
         res = [ r['id'] for r in self.db.query( query ) ]
-        print "**", res
         #query = "SELECT DISTINCT entity_id FROM vw_entry_id_has_name WHERE name='%s'" % ( name.replace("'", "''") )
         return [ r['id'] for r in self.db.query( query ) ]
 
@@ -101,11 +100,14 @@ class Gazetteer(object):
         if id:
             q = "SELECT * FROM gazetteerentity LEFT JOIN countryInfo USING(id) WHERE id IN (%s)" % ", ".join( map(str, id ))
             res = self.db.query( q ) 
-            entities = [ dict(self._getResultById(res, i).items()) for i in id ]
-            self._addGeoUrl( entities )
-            return entities
-        else:
-            return []
+            if len(res)>0:
+                entities = [ dict(self._getResultById(res, i).items()) for i in id ]
+                self._addGeoUrl( entities )
+                return entities
+
+            print "WARNING: no entities found for ", ", ".join( map(str,id) )
+
+        return []
 
     def _getResultById(self, l, id, idAttr="id"):
         """ returns the database column matching the given id 

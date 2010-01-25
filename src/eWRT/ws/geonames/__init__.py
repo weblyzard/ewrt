@@ -144,7 +144,7 @@ class GeoNames(object):
         url = GeoNames.NEIGHBOURS_SERVICE_URL % geo_entity.id
         jsonData = eval( Retrieve('eWRT.ws.geonames').open(url).read() )
         if 'geonames' in jsonData:
-            return [ GeoEntity.factory( id = e['geonameId'] )[0] for e in jsonData['geonames'] ]
+            return [ GeoEntity.factory( id = e['geonameId'] )[0] for e in jsonData['geonames'] if e ]
         else:
             return []
 
