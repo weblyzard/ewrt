@@ -112,7 +112,7 @@ class GeoEntity(object):
 
     def __eq__(self, o):
         """ add's support for comparisons using == """
-        return self['id'] == o['id']
+        return self['id'] == o['id'] or self['geoUrl'] == o['geoUrl']
 
     def __neq__(self, o):
         """ adds support for the != operator """
