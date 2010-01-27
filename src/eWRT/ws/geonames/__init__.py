@@ -133,6 +133,9 @@ class GeoNames(object):
 
     NEIGHBOURS_SERVICE_URL = "http://ws.geonames.org/neighboursJSON?geonameId=%d" 
 
+    # required to handle cases where the factory does not return any GeoEntity
+    getGeoEntity = staticmethod( lambda factory: factory != [] and factory[0] or factory )
+
     @staticmethod
     @DiskCached("./.geonames-neighbours")
     def getNeighbors(geo_entity):
@@ -144,7 +147,7 @@ class GeoNames(object):
         url = GeoNames.NEIGHBOURS_SERVICE_URL % geo_entity.id
         jsonData = eval( Retrieve('eWRT.ws.geonames').open(url).read() )
         if 'geonames' in jsonData:
-            return [ GeoEntity.factory( id = e['geonameId'] )[0] for e in jsonData['geonames'] if e ]
+            return [ GeoNames.getGeoEntity( GeoEntity.factory( id = e['geonameId'] )) for e in jsonData['geonames'] if e ]
         else:
             return []
 
