@@ -1,0 +1,40 @@
+
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    	xmlns:test="http://semanticweb.net/">
+    
+        <rdf:Description rdf:about="http://semanticweb.net/c1">
+        	<test:irgendwas>a</test:irgendwas>
+        </rdf:Description>
+        
+        <rdf:Description rdf:about="http://semanticweb.net/c2">
+            <test:l1 rdf:resource="http://semanticweb.net/c1"/>
+        </rdf:Description>
+        
+        <rdf:Description rdf:about="http://semanticweb.net/c4">
+            <test:l1 rdf:resource="http://semanticweb.net/c2"/>
+            <test:l1 rdf:resource="http://semanticweb.net/c8"/>
+        </rdf:Description>
+        
+        <rdf:Description rdf:about="http://semanticweb.net/c8">
+            <test:l2 rdf:resource="http://semanticweb.net/c3"/>
+        </rdf:Description>
+        
+        <rdf:Description rdf:about="http://semanticweb.net/c5">
+            <test:l2 rdf:resource="http://semanticweb.net/c1"/>
+        </rdf:Description>
+        
+        <rdf:Description rdf:about="http://semanticweb.net/c3">
+            <test:l2 rdf:resource="http://semanticweb.net/c1"/>
+        </rdf:Description>
+        
+        <rdf:Description rdf:about="http://semanticweb.net/c6">
+            <test:l2 rdf:resource="http://semanticweb.net/c5"/>
+        </rdf:Description>
+        
+        <rdf:Description rdf:about="http://semanticweb.net/c7">
+            <test:l2 rdf:resource="http://semanticweb.net/c1"/>
+            <test:l2 rdf:resource="http://semanticweb.net/c3"/>
+        </rdf:Description>
+        
+        
+    </rdf:RDF>
