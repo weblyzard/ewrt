@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from eWRT.access.http import Retrieve
 from eWRT.ws.TagInfoService import TagInfoService
 import re
@@ -43,9 +45,10 @@ class Twitter(TagInfoService):
 
 class TwitterTest( object ):
 
-    TWITTER_TEST_TAGS = ['linux', ('linux', 'debian')]
+    TWITTER_TEST_TAGS = [ 'linux', ('linux', 'debian') ]
 
-    def test_url_info(self):
+    def testUrlInfo(self):
         for tag in self.TWITTER_TEST_TAGS:
-            print '%s has %s counts '% (tag, Twitter.getRelatedTags(tag))
+            relTags = Twitter.getRelatedTags(tag)
+            print 'related to %s are %s.'% (tag, relTags )
 

@@ -1,7 +1,9 @@
+#!/usr/bin/env python
+
 import unittest
 from __init__ import Technorati
 
-TECHNORATI_TEST_TAGS = ['linux', ('debian', 'linux')]
+TECHNORATI_TEST_TAGS = ['linux', ('debian', 'linux') ]
 
 class TestTechnorati( unittest.TestCase ):
 

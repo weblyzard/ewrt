@@ -61,7 +61,6 @@ class Flickr(TagInfoService):
         assert isinstance(tags, list) or isinstance(tags, tuple)
 
         url = Flickr.FLICKR_TAG_URL % "+".join(tags)
-        print url
         content = Flickr.get_content(url)
         tag_container = Flickr.RE_TAG_CONTAINER.findall( content )
         related_tags_with_count = []

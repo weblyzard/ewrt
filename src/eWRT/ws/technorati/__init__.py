@@ -27,14 +27,19 @@ from urlparse import urlsplit
 from eWRT.config import TECHNORATI_API_KEY
 import xml.sax
 import time
+from warnings import warn
 
 import unittest
 
 SLEEP_TIME=30
 
+warn("Technorati has disabled their service! - please do not use this API anymore.")
+sys.exit(-1)
+
 class Technorati(TagInfoService):
     """ retrieves data using the del.icio.us API """
-    TECHNORATI_URL = 'http://api.technorati.com/tag?key='+TECHNORATI_API_KEY+'&tag=%s' 
+    # TECHNORATI_URL = 'http://api.technorati.com/tag?key='+TECHNORATI_API_KEY+'&tag=%s' 
+    #TECHNORATI_URL = 'http://technorati.com/r/tag/%s?authority=n&language=n'
     TECHNORATI_URL = 'http://technorati.com/r/tag/%s?authority=n&language=n'
     #RE_TAG_COUNT = re.compile('<postsmatched>(\d+)</postsmatched>')
     RE_TAG_COUNT = re.compile('<span class="count">\((\S+)\)</span>',
