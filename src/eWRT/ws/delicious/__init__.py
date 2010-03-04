@@ -67,7 +67,7 @@ class Delicious(TagInfoService):
         assert( isinstance(tags, tuple) or isinstance(tags, list) )
         content = Delicious.get_content(Delicious._parse_tag_url(tags))
 
-        related_tags = re.findall('class="m relatedTag" title="">(\w*?)<em>', content, re.IGNORECASE|re.DOTALL)
+        related_tags = re.findall('<span class="m" title="(\w*?)">', content, re.IGNORECASE|re.DOTALL)
         related_tags_with_count = []
 
         for tag in related_tags:
