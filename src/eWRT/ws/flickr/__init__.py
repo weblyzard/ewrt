@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
-""" uses flickr """
+""" @package eWRT.ws.flickr
+    retrieve flickr related tags and tag counts.    
+"""
 
-# (C)opyrights 2008-2009 by Albert Weichselbraun <albert@weichselbraun.net>
+# (C)opyrights 2008-2010 by Albert Weichselbraun <albert@weichselbraun.net>
 #                           Heinz-Peter Lang <heinz@langatium.net>
 # 
 # This program is free software: you can redistribute it and/or modify
@@ -30,7 +32,6 @@ from urlparse import urlsplit
 class Flickr(TagInfoService):
     """ retrieves data using the del.icio.us API """
 
-    #FLICKR_TAG_URL = "http://www.flickr.com/search/?w=all&q=%s&m=tags" 
     FLICKR_TAG_URL = "http://www.flickr.com/photos/tags/%s" 
     RE_TAG_COUNT = re.compile('<div class="Results">\(([\d,]+) upload')
     RE_TAG_CONTAINER = re.compile('<p>Related tags:<br>(.*?)</p>', re.IGNORECASE|re.DOTALL)
@@ -99,8 +100,22 @@ class Flickr(TagInfoService):
 class TestFlickr( object ):
     
     def testMultipleTags( self ):
-        assert Flickr.getRelatedTags( ("berlin", "dom") != Flickr.getRelatedTags( ("berlin",) ) )
+        """ verifies whether multiple tags return results different from single tags """
+        assert Flickr.getRelatedTags( ("berlin", "dom")) != Flickr.getRelatedTags( ("berlin",) ) 
         assert Flickr.getTagInfo( ("berlin", "dom") ) != Flickr.getTagInfo( ("berlin",) ) 
+
+    def testTagInfo( self ):
+        """ test the tag info """
+        for tags in ( ('berlin','dom') , ('vienna',),  ('castle',) ):
+            assert Flickr.getTagInfo( tags ) > 0
+
+    def testRelatedTags( self ):
+        """ test related tags by retrieving related tags for the following tags """
+        for tags in ( ('berlin', 'dom'),  ):
+            relatedTags = Flickr.getRelatedTags( tags )
+            print tags, relatedTags
+            assert len( relatedTags  ) > 0
+
 
 if __name__ == '__main__':
     print Flickr.getTagInfo( ("berlin", "dom") ), "counts"
