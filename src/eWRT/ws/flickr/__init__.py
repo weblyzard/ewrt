@@ -30,8 +30,9 @@ from urlparse import urlsplit
 class Flickr(TagInfoService):
     """ retrieves data using the del.icio.us API """
 
-    FLICKR_TAG_URL = "http://www.flickr.com/search/?w=all&q=%s&m=tags" 
-    RE_TAG_COUNT = re.compile('var page_pagination_count = (\d+);')
+    #FLICKR_TAG_URL = "http://www.flickr.com/search/?w=all&q=%s&m=tags" 
+    FLICKR_TAG_URL = "http://www.flickr.com/photos/tags/%s" 
+    RE_TAG_COUNT = re.compile('<div class="Results">\(([\d,]+) upload')
     RE_TAG_CONTAINER = re.compile('<p>Related tags:<br>(.*?)</p>', re.IGNORECASE|re.DOTALL)
     RE_RELATED_TAGS = re.compile('<a.*?">(.*?)</a>', re.IGNORECASE | re.DOTALL)
 
@@ -43,6 +44,7 @@ class Flickr(TagInfoService):
             @param   tags   A list of tags to retrieve information for
             @returns        the number of bookmarks using the given tags
         """
+        assert isinstance(tags, list) or isinstance(tags, tuple)
 
         url = Flickr.FLICKR_TAG_URL % "+".join(tags)        
         content = Flickr.get_content(url)
@@ -50,28 +52,26 @@ class Flickr(TagInfoService):
 
 
     @staticmethod
-    def getRelatedTags( tag ):
+    def getRelatedTags( tags ):
         """ fetches the related tags with their overall count
             @param  tags    list of tags
             @returns        list of related tags 
         """
+        assert isinstance(tags, list) or isinstance(tags, tuple)
 
-        if type(tag) == 'list':
-            raise ValueError('getRelatedTags is limited to single tag at the moment!')
-
-        url = Flickr.FLICKR_TAG_URL % "+".join(tag)
-        # url = 'http://www.flickr.com/photos/tags/%s' % tag
+        url = Flickr.FLICKR_TAG_URL % "+".join(tags)
+        print url
         content = Flickr.get_content(url)
         tag_container = Flickr.RE_TAG_CONTAINER.findall( content )
         related_tags_with_count = []
 
         if len(tag_container) > 0:
 
-            related_tags = re.sub('<.*?b>', '', tag_container[0])
+            related_tags = re.sub('</?b>', '', tag_container[0])
             related_tags = Flickr.RE_RELATED_TAGS.findall(related_tags)
 
             for tag in related_tags:
-                related_tags_with_count.append((tag, Flickr.getTagInfo(tag)))
+                related_tags_with_count.append((tag, Flickr.getTagInfo( (tag,) )))
 
         return related_tags_with_count
 
@@ -83,10 +83,8 @@ class Flickr(TagInfoService):
     def _parse_tag_counts( content ):
         """ parses flickrs html content and returns the number of counts for the tags """
         m=Flickr.RE_TAG_COUNT.search( content )
-        if m:
-            return m.group(1)
-        else:
-            return 0
+        return int(m.group(1).replace(",","")) if m else 0
+
 
     @staticmethod
     def get_content( url ):
@@ -98,7 +96,13 @@ class Flickr(TagInfoService):
         f.close()
         return content
 
+class TestFlickr( object ):
+    
+    def testMultipleTags( self ):
+        assert Flickr.getRelatedTags( ("berlin", "dom") != Flickr.getRelatedTags( ("berlin",) ) )
+        assert Flickr.getTagInfo( ("berlin", "dom") ) != Flickr.getTagInfo( ("berlin",) ) 
+
 if __name__ == '__main__':
     print Flickr.getTagInfo( ("berlin", "dom") ), "counts"
-    print Flickr.getRelatedTags( "berlin" ), "counts"
+    print Flickr.getRelatedTags( ("berlin", "dom", ) ), "counts"
     
