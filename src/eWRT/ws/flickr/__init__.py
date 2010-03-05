@@ -41,7 +41,7 @@ class Flickr(TagInfoService):
 
     @staticmethod
     def getTagInfo( tags ):
-        """ 
+        """ returns the number of counts for the given tags
             @param   tags   A list of tags to retrieve information for
             @returns        the number of bookmarks using the given tags
         """
@@ -53,10 +53,11 @@ class Flickr(TagInfoService):
 
 
     @staticmethod
-    def getRelatedTags( tags ):
+    def getRelatedTags( tags, retrieveTagInfo=False):
         """ fetches the related tags with their overall count
-            @param  tags    list of tags
-            @returns        list of related tags 
+            @param  tags             list of tags
+            @param  retrieveTagInfo  determines whether we will retrieve the tagInfo for the related tags
+            @returns                 list of related tags 
         """
         assert isinstance(tags, list) or isinstance(tags, tuple)
 
@@ -66,12 +67,10 @@ class Flickr(TagInfoService):
         related_tags_with_count = []
 
         if len(tag_container) > 0:
-
             related_tags = re.sub('</?b>', '', tag_container[0])
             related_tags = Flickr.RE_RELATED_TAGS.findall(related_tags)
 
-            for tag in related_tags:
-                related_tags_with_count.append((tag, Flickr.getTagInfo( (tag,) )))
+            related_tags_with_count = [ (tag, Flickr.getTagInfo( (tag,) ) if retrieveTagInfo else None) for tag in related_tags ]
 
         return related_tags_with_count
 

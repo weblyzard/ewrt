@@ -7,7 +7,10 @@ class TagInfoService(object):
             @returns number of counts """ 
         return NotImplemented        
 
-    def getRelatedTags( self, tags ):
+    def getRelatedTags( self, tags, retrieveTagInfo=False):
         """ returns a the count of related tags 
-            @param list/tuple of tags 
+            @param   list/tuple of tags 
+            @param   retrieveTagInfo  determines whether we will retrieve the tagInfo for the related tags
             @returns list of related tags with a count of their occurence """
+        return NotImplemented        
+

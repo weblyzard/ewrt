@@ -59,20 +59,19 @@ class Delicious(TagInfoService):
         return Delicious._parse_counts(content)
 
     @staticmethod
-    def getRelatedTags( tags ):
+    def getRelatedTags( tags, retrieveTagInfo=False ):
         """ returns a the count of related tags 
-            @param list/tuple of tags 
-            @returns list of related tags with a count of their occurence """
+            @param  tags             list of tags
+            @param  retrieveTagInfo  determines whether we will retrieve the tagInfo for the related tags
+            @returns                 list of related tags 
+        """
 
         assert( isinstance(tags, tuple) or isinstance(tags, list) )
         content = Delicious.get_content(Delicious._parse_tag_url(tags))
 
         related_tags = re.findall('<span class="m" title="(\w*?)">', content, re.IGNORECASE|re.DOTALL)
-        related_tags_with_count = []
+        related_tags_with_count = [ (tag, Flickr.getTagInfo( (tag,) ) if retrieveTagInfo else None) for tag in related_tags ]
 
-        for tag in related_tags:
-            related_tags_with_count.append((tag, Delicious.getTagInfo( (tag, ))))
-            
         return related_tags_with_count
 
     # 
