@@ -19,31 +19,47 @@ import re
 
 from itertools import chain
 
-HIERARCHY_LINK_TYPES = [URIRef('http://semanticweb.net/l1'), URIRef('http://semanticweb.net/l2'), URIRef('http://rdflib.net/test/member')]
+HIERARCHY_LINK_TYPES = [URIRef('http://semanticweb.net/l1'), URIRef('http://semanticweb.net/l2')]
+
 
 class OntologyEvaluator(object):
     
-    paths = []
-    namespaces = {}
-    rdf = None
-    root_node = None
 
     def __init__(self, rdf, root_node):
-        """ """
-        print type(self)
+
         self.rdf = Graph()
         self.rdf = self.rdf.parse(rdf)
-#        self.__getDocNamespaces()
         self.root_node = URIRef(root_node)
     
     def getSimilarity(self, correct_node, response_node):
-        """ """
+        ''' find the similarity between 2 nodes 
+            @param correct_node: URI of the correct node, e.g. http://semanticweb.net/c7
+            @param response_node: URI of the response node, e.g. http://semanticweb.net/c7
+            @return: learning accuracy (LA)
+        '''
+        if correct_node == response_node:
+            
+            return 1
+        
+        else:
+    
+            cn = Node(correct_node, self)
+            rn = Node(correct_node, self)    
+    
+            sp = float(cn.spLen)
+            fp = float(rn.spLen)
+            la = 0.0
 
-        cn = Node(correct_node, self)
-        rn = Node(correct_node, self)
+            cp, msca = OntologyEvaluator.findMSCA(cn.pathsToRoot, rn.pathsToRoot)
 
-#        self.getPathsToRoot(correct_node)
-#        self.getPathsToRoot(response_node)
+            dp = float(len(rn.getShortestPathToNode(msca)))
+
+            la = cp / ( fp + dp )
+            
+            bdm = 0.0
+            
+            return la, bdm
+
     
     @staticmethod
     def getShortestPath(node):
@@ -59,92 +75,64 @@ class OntologyEvaluator(object):
                 shortestPath = path
     
         return shortestPath
-    
-    @staticmethod
-    def getCommonPath(sp, fp):
-        """ find the common path """
-        
-        print 'a', sp
-        
-        print sp.reverse()
-        
-        print fp.reverse()
         
     @staticmethod
     def findMSCA(key, response):
         
         commonPaths = []
         
+        # todo: good idea -> O(n^2)        
         for key_path in key:
         
-            print '###', key_path
-        
             for response_path in response:
-                
-                print '%%%%', response_path
-                
-                commonPaths.append(OntologyEvaluator.compareLists(key_path, response_path))
-        
-        print commonPaths
+                a = OntologyEvaluator.compareLists(key_path, response_path, [])
+
+                if len(a) > 1:
+                    commonPaths.append(a)
+
+        return OntologyEvaluator.getLongestCommonPathLen(commonPaths)
         
     @staticmethod                  
     def compareLists(array1, array2, path=[]):
+        '''
+            compares two lists for their common path
+            @param array1: path to root
+            @param array2: path to root 
+            @param path: for recursion usage of this function, stores the found path
+            @return: common path (reversed: from root)
+        '''
         
-        print '**** comparing lists: ar1, ar2 ', array1, array2
-        print ' length ', len(array1), len(array2)
-        
-        if len(array1) > 1 or len(array2) > 1:
+        if len(array1) > 1 and len(array2) > 1:
             
             element1 = array1.pop()
             element2 = array2.pop()
-        
-            print 'elements ',  element1, element2
-        
-            if rdflib.URIRef('http://semanticweb.net/c1') == rdflib.URIRef('http://semanticweb.net/c1'):
-                print 'equal'
-        
-            if element1 == element2:
-                print 'equal'
-                path.append(element1)
-                
-                return OntologyEvaluator.compareLists(array1, array2, path)
-        
-        return path
-            
-    
-#    def __getNamespace(self, ns):
-#        
-#        if not self.namespaces.has_key(ns):
-#            self.namespaces[ns] = Namespace(ns)
-#            
-#        return self.namespaces[ns]
-    
-#    def __getDocNamespaces(self):
-#
-#        namespaces = list(self.rdf.namespaces())
-#        
-#        for ns, uri in namespaces:
-#            
-#            self.namespaces[uri] = Namespace(uri)      
-    
-    
-#    def getPathsToRoot(self, node, path=[]):
-#        """ """
-#        
-#        path.append(URIRef(node))
-#        
-#        if self._isRootNode(node):
-#            self.paths.append(path)
-#            return
-#
-#        for predicate, object in self.__getPredicateObjects(node):
-#
-#            new_path = []
-#            new_path.extend(path)
-#            if predicate in HIERARCHY_LINK_TYPES:
-#            
-#                self.getPathsToRoot(object, new_path)
 
+            if element1 == element2:
+                path.append(element1)
+        
+                return OntologyEvaluator.compareLists(array1, array2, path)
+
+        return path
+    
+    @staticmethod
+    def getLongestCommonPathLen(paths):
+        
+        if type(paths).__name__ == 'list':
+            
+            if type(paths[0]).__name__ == 'list':
+    
+                # todo: does this really return the element with the shortest path    
+                path = min(paths) 
+                
+                return len(path), path.pop()
+                
+            else:
+    
+                return len(paths), paths.pop()
+            
+        else:
+
+            return 0, None       
 
     def getPredicateObjects(self, subject):
         """ @param node: URI of a node, e.g. http://purl.org/dc/elements/1.1/title """
@@ -167,24 +155,63 @@ class OntologyEvaluator(object):
 
 class Node(object):
     
-    evaluator = None
-    nodeURI = None
-    pathsToRoot = []
-    
+
     def __init__(self, uri, oe):
-        """ """
+
         self.evaluator = oe
         self.nodeURI = URIRef(uri)
+        self.pathsToRoot = []
+        self.shortestPath = None
+        self.pathsToNode = {}        
 
+    def _getPathsToNode(self, node=None, end=None, path=[]):
+        ''' find all paths from node to the end 
+            @param node: node to start
+            @param end: node to stop (default = root)
+            @param path: found path
+            @return: void (stored in self.pathsToNode) 
+        '''
+        if node == None:
+            node = self.nodeURI
+            path=[]
+            
+        if end == None:
+            
+            end = self.evaluator.root_node
+        
+        path.append(node)
+        
+        print node, end
+        
+        if node == end:
+            
+            if not self.pathsToNode.has_key(end):
+                self.pathsToNode[end] = []
 
-    def getPathsToRoot(self, node=None, path=[]):
+            self.pathsToNode[end].append(path)
+
+            return   
+        
+        for predicate, object in self.evaluator.getPredicateObjects(node):
+            
+            new_path = []
+            new_path.extend(path)
+            
+            if predicate in HIERARCHY_LINK_TYPES:
+            
+                self._getPathsToNode(object, end, new_path)
+        
+
+    def _getPathsToRoot(self, node=None, path=[]):
         """ """
         if node == None:
             node = self.nodeURI
+            path=[]
         
         path.append(node)
         
         if self.evaluator._isRootNode(node):
+
             self.pathsToRoot.append(path)
             return
 
@@ -195,8 +222,41 @@ class Node(object):
             
             if predicate in HIERARCHY_LINK_TYPES:
             
-                self.getPathsToRoot(object, new_path)
+                self._getPathsToRoot(object, new_path)
+    
+    def getShortestPathToNode(self, node):
+        ''' find the shortest path to the given node
+            @param node: e.g. root node
+            @return: list with the shortest path 
+        '''
+        
+        node = URIRef(node)
+        
+        if not self.pathsToNode.has_key(node):
+            self._getPathsToNode(end=node)
+            
+        shortestPath = []
+    
+        for path in self.pathsToNode[node]:
+            
+            if len(path) < len(shortestPath) or len(shortestPath) == 0:
+                shortestPath = path
                 
+        return shortestPath
+    
+    def __getShortestPathLength(self):
+
+        if self.pathsToRoot == []:
+            self._getPathsToRoot()
+        
+        if self.shortestPath == None:
+        
+            self.shortestPath = OntologyEvaluator.getShortestPath(self)
+
+        return len(self.shortestPath)
+    
+
+    spLen = property(__getShortestPathLength)
 
 
 class TestOntologyEvaluator(object):
@@ -215,24 +275,33 @@ class TestOntologyEvaluator(object):
     def test_getPathToRoot(self):
         """ tests if the path was properly extracted """
     
+        print '\n\n*** test finding paths to root *** \n'
+    
+        node = Node('http://semanticweb.net/c7', self.oe)
+    
+        paths = [
+                [rdflib.URIRef('http://semanticweb.net/c4'), rdflib.URIRef('http://semanticweb.net/c2'), rdflib.URIRef('http://semanticweb.net/c1')],
+                [rdflib.URIRef('http://semanticweb.net/c4'), rdflib.URIRef('http://semanticweb.net/c8'), rdflib.URIRef('http://semanticweb.net/c3'), rdflib.URIRef('http://semanticweb.net/c1')]]
+    
+        node._getPathsToRoot()
+
+        print 'found ', len(node.pathsToRoot), ' paths '
+
+        assert len(node.pathsToRoot) == 2   
+    
+    def test_getPathToNode(self):
+        """ tests if the path was properly extracted """
+    
+        print '\n\n*** test finding paths to node *** \n'
+    
         node = Node('http://semanticweb.net/c4', self.oe)
     
         paths = [
-            [rdflib.URIRef('http://semanticweb.net/c4'), rdflib.URIRef('http://semanticweb.net/c2'), rdflib.URIRef('http://semanticweb.net/c1')],
-            [rdflib.URIRef('http://semanticweb.net/c4'), rdflib.URIRef('http://semanticweb.net/c3'), rdflib.URIRef('http://semanticweb.net/c1')]]
+                [rdflib.URIRef('http://semanticweb.net/c4'), rdflib.URIRef('http://semanticweb.net/c2'), rdflib.URIRef('http://semanticweb.net/c1')],
+                [rdflib.URIRef('http://semanticweb.net/c4'), rdflib.URIRef('http://semanticweb.net/c8'), rdflib.URIRef('http://semanticweb.net/c3'), rdflib.URIRef('http://semanticweb.net/c1')]]
+
+        print node.getShortestPathToNode('http://semanticweb.net/c3')
     
-        node.getPathsToRoot()
-        print 'len to root ', node.pathsToRoot
-        # paths to root = 2
-        assert len(node.pathsToRoot) == 2
-        
-        # number of nodes in all paths
-        # todo: add test to find out, how many nodes are stored
-    
-        # are the paths correct?
-        print 'path ', node.pathsToRoot
-        #assert self.oe.paths == paths
-        
     
     def test_isRoot(self):
         
@@ -242,33 +311,81 @@ class TestOntologyEvaluator(object):
     
     def test_findShortestPath(self):
         
+        print '\n\n*** test finding shortest path *** \n'
+        node = None
         node = Node('http://semanticweb.net/c4', self.oe)
-        node.getPathsToRoot()
+        node._getPathsToRoot()
         
         shortestPath = OntologyEvaluator.getShortestPath(node)
+
+        print 'shortestPath: ', shortestPath
 
         assert len(shortestPath) == 3
         assert shortestPath == [rdflib.URIRef('http://semanticweb.net/c4'), rdflib.URIRef('http://semanticweb.net/c2'), rdflib.URIRef('http://semanticweb.net/c1')]
     
+    
+    def test_shortestPathLen(self):
+        
+        print '\n\n*** test shortest path len ***\n'
+        
+        node = Node('http://semanticweb.net/c4', self.oe)
+        
+        print 'shortest path of c4 == ', node.spLen
+        
+        assert node.spLen == 3
+        
+    
+    def test_compareLists(self):
+        
+        print '\n\n*** test comparing lists ***\n'
+        
+        
+        array1 = [rdflib.URIRef('http://semanticweb.net/c7'), rdflib.URIRef('http://semanticweb.net/c2'), rdflib.URIRef('http://semanticweb.net/c1')]
+        array2 = [rdflib.URIRef('http://semanticweb.net/c4'), rdflib.URIRef('http://semanticweb.net/c2'), rdflib.URIRef('http://semanticweb.net/c1')]
+        assert OntologyEvaluator.compareLists(array1, array2) == [rdflib.URIRef('http://semanticweb.net/c1'), rdflib.URIRef('http://semanticweb.net/c2')]
+
+
+        array1 = [rdflib.URIRef('http://semanticweb.net/c8'), rdflib.URIRef('http://semanticweb.net/c3'), rdflib.URIRef('http://semanticweb.net/c1')]
+        array2 = [rdflib.URIRef('http://semanticweb.net/c7'), rdflib.URIRef('http://semanticweb.net/c3'), rdflib.URIRef('http://semanticweb.net/c1')]
+        assert OntologyEvaluator.compareLists(array1, array2, []) == [rdflib.URIRef('http://semanticweb.net/c1'), rdflib.URIRef('http://semanticweb.net/c3')]
+    
     def test_findMSCA(self):
         
-        correct_node = Node('http://semanticweb.net/c4', self.oe)
-        response_node = Node('http://semanticweb.net/c7', self.oe)
+        print '\n\n *** test finding MSCA *** \n'
         
-        correct_node.getPathsToRoot()
-        response_node.getPathsToRoot()
+        cnode_paths = [
+            [rdflib.URIRef('http://semanticweb.net/c4'), rdflib.URIRef('http://semanticweb.net/c2'), rdflib.URIRef('http://semanticweb.net/c1')],
+            [rdflib.URIRef('http://semanticweb.net/c4'), rdflib.URIRef('http://semanticweb.net/c8'), rdflib.URIRef('http://semanticweb.net/c3'), rdflib.URIRef('http://semanticweb.net/c1')]]
+        rnode_paths = [
+            [rdflib.URIRef('http://semanticweb.net/c7'), rdflib.URIRef('http://semanticweb.net/c2'), rdflib.URIRef('http://semanticweb.net/c1')],
+            [rdflib.URIRef('http://semanticweb.net/c7'), rdflib.URIRef('http://semanticweb.net/c3'), rdflib.URIRef('http://semanticweb.net/c1')]]
         
-        print correct_node.pathsToRoot
-        print response_node.pathsToRoot
+        len, path = OntologyEvaluator.findMSCA(cnode_paths, rnode_paths)
         
+        print len, path
         
-        assert URIRef('http://semanticweb.net/c3') == OntologyEvaluator.findMSCA(correct_node.pathsToRoot, response_node.pathsToRoot)
+        assert len == 2
+        assert path == rdflib.URIRef('http://semanticweb.net/c2')
+
+    def test_getSimilarity(self):
         
+        print '\n\n *** test getting similarity *** \n'
+        
+        correct_node = 'http://semanticweb.net/c4'
+        respone_node = 'http://semanticweb.net/c7'
+        
+        print self.oe.getSimilarity(correct_node, respone_node)
+        
+    
     
 if __name__ == '__main__':
     
     toe = TestOntologyEvaluator()
     toe.test_getPathToRoot()
+    toe.test_getPathToNode()
     toe.test_isRoot()
     toe.test_findShortestPath()
+    toe.test_shortestPathLen()
+    toe.test_compareLists()
     toe.test_findMSCA()
+    toe.test_getSimilarity()

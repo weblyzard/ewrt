@@ -32,7 +32,7 @@
         </rdf:Description>
         
         <rdf:Description rdf:about="http://semanticweb.net/c7">
-            <test:l2 rdf:resource="http://semanticweb.net/c1"/>
+            <test:l2 rdf:resource="http://semanticweb.net/c2"/>
             <test:l2 rdf:resource="http://semanticweb.net/c3"/>
         </rdf:Description>
         
