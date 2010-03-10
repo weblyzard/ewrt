@@ -44,11 +44,14 @@ class OntologyEvaluator(object):
         else:
     
             cn = Node(correct_node, self)
-            rn = Node(correct_node, self)    
+            rn = Node(response_node, self)    
     
+            # sp = shortest length from root to the key concept
+            # fp = shortest length from root to the predicted concept
+            # dp = shortest length from msca to the predicted concept
+            # cp = shortest length from root to the MSCA                
             sp = float(cn.spLen)
             fp = float(rn.spLen)
-            la = 0.0
 
             cp, msca = OntologyEvaluator.findMSCA(cn.pathsToRoot, rn.pathsToRoot)
 
@@ -57,6 +60,7 @@ class OntologyEvaluator(object):
             la = cp / ( fp + dp )
             
             bdm = 0.0
+            
             
             return la, bdm
 
@@ -81,14 +85,22 @@ class OntologyEvaluator(object):
         
         commonPaths = []
         
-        # todo: good idea -> O(n^2)        
-        for key_path in key:
+        # todo: good idea -> O(n^2)
         
-            for response_path in response:
-                a = OntologyEvaluator.compareLists(key_path, response_path, [])
+        if len(key) > len(response):
+            array1 = response
+            array2 = key
+        else:
+            array1 = key
+            array2 = response
+            
+        for path1 in array1:
+        
+            for path2 in array2:
+                foundPath = OntologyEvaluator.compareLists(path1, path2, [])
 
-                if len(a) > 1:
-                    commonPaths.append(a)
+                if len(foundPath) > 1:
+                    commonPaths.append(foundPath)
 
         return OntologyEvaluator.getLongestCommonPathLen(commonPaths)
         
@@ -102,7 +114,7 @@ class OntologyEvaluator(object):
             @return: common path (reversed: from root)
         '''
         
-        if len(array1) > 1 and len(array2) > 1:
+        if len(array1) > 0 and len(array2) > 0:
             
             element1 = array1.pop()
             element2 = array2.pop()
@@ -376,6 +388,10 @@ class TestOntologyEvaluator(object):
         
         print self.oe.getSimilarity(correct_node, respone_node)
         
+        correct_node = 'http://semanticweb.net/c4'
+        respone_node = 'http://semanticweb.net/c2'
+        
+        print self.oe.getSimilarity(correct_node, respone_node)
     
     
 if __name__ == '__main__':
