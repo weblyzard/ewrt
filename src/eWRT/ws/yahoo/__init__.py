@@ -22,11 +22,11 @@ __version__ = "$Header$"
 
 from eWRT.access.http import Retrieve
 from urllib import urlencode, quote
-from eWRT.ws import TagInfoService
+from eWRT.ws.TagInfoService import TagInfoService
 from eWRT.config import YAHOO_APP_ID, YAHOO_SEARCH_URL
 
 
-class Yahoo(object):
+class Yahoo(TagInfoService):
     """ interfaces with yahoo's search service """
 
     __slots__ = ('r', )
