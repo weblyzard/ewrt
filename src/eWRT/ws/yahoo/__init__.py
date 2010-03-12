@@ -22,6 +22,7 @@ __version__ = "$Header$"
 
 from eWRT.access.http import Retrieve
 from urllib import urlencode, quote
+from eWRT.ws import TagInfoService
 from eWRT.config import YAHOO_APP_ID, YAHOO_SEARCH_URL
 
 
@@ -47,7 +48,12 @@ class Yahoo(object):
         })
         url = YAHOO_SEARCH_URL % "%2B".join(map( quote, terms) ) +"?"+ params
         result = eval( self.r.open(url).read() )
+
         return result['ysearchresponse']
+    
+    def getTagInfo(self, tag):
+        """ @Override """
+        return int( self.query(tag)['totalhits'] )
 
 
 
@@ -69,6 +75,11 @@ class TestYahoo(object):
             for q in refinedQueries:
                 print query, q, "**",qCount, int(self.y.query( q )['totalhits'])
                 assert qCount > int(self.y.query( q )['totalhits'])
+    
+    def testTagInfo(self):
+        """ tests the tag info service """
+        assert self.y.getTagInfo( ('weblyzard',)) > 10
+        assert self.y.getTagInfo( ('a_query_which_should_not_appear_at_all', )) == 0
 
 
 
