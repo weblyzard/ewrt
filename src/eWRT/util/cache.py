@@ -33,7 +33,19 @@ from hashlib import sha1
 class Cache(object):
     """ An abstract class for caching functions """
 
-    def fetch(self, fetch_function, *args):
+    def fetchObjectId(self, key, fetch_function, *args, **kargs):
+        """ Fetches a object from the cache or computes it by calling the 
+            fetch_function.
+            The key helps to determine whether the object is already in
+            the cache or not. 
+        """
+        raise NotImplementedError
+
+    def fetch(self, fetch_function, *args, **kargs):
+        """ Fetches a object from the cache or computes it by calling the 
+            fetch_function.
+            The objectId is computed based on the function arguments
+        """
         raise NotImplementedError
 
     @staticmethod
@@ -85,24 +97,24 @@ class DiskCache(Cache):
 
             @returns the object (retrieved from the cache or computed)
         """
-        objectId = self.getObjectId( (args, tuple(kargs.items())) )
+        objectId = (args, tuple(kargs.items())) 
         return self.fetchObjectId(objectId, fetch_function, *args, **kargs)
     
-    def fetchObjectId(self, objectId, fetch_function, *args, **kargs):
+    def fetchObjectId(self, key, fetch_function, *args, **kargs):
         """ fetches the object with the given id, querying
              a) the cache and
              b) the fetch_function
             if the fetch_function is called, the functions result is saved 
             in the cache 
 
-            @param[in] objectId the id of the object to fetch
+            @param[in] key      key to fetch
             @param[in] function to call if the result is not in the cache
-            @param[in] args   arguments 
-            @param[in] kargs  optional keyword arguments
+            @param[in] args     arguments 
+            @param[in] kargs    optional keyword arguments
 
             @returns the object (retrieved from the cache or computed)
         """
-        cache_file = self._get_fname( objectId  ) 
+        cache_file = self._get_fname( self.getObjectId(key)  ) 
         # try to fetch the object from the cache
         if exists(cache_file):
             self._cache_hit += 1
@@ -160,20 +172,20 @@ class MemoryCache(Cache):
         self.max_cache_size = max_cache_size
 
     def fetch(self, fetch_function, *args, **kargs):
-        objectId = (args, tuple(kargs.items()) ) 
-        return self.fetchObjectId(objectId, fetch_function, *args, **kargs)
+        key = (args, tuple(kargs.items()) ) 
+        return self.fetchObjectId(key, fetch_function, *args, **kargs)
         
         
-    def fetchObjectId(self, objectId, fetch_function, *args, **kargs):
+    def fetchObjectId(self, key, fetch_function, *args, **kargs):
         # update the object's last usage time stamp
-        self._usage[objectId]     = time()  
+        self._usage[key]     = time()  
         try:
-            return self._cacheData[objectId]
+            return self._cacheData[key]
         except KeyError:
             obj = fetch_function(*args, **kargs)
             if obj != None:
                 self.garbage_collect_cache()
-                self._cacheData[objectId] = obj
+                self._cacheData[key] = obj
             return obj
 
     def garbage_collect_cache(self):
@@ -336,6 +348,22 @@ class TestDiskCached(TestCached):
             rmtree("./.unittest-temp1")
         if exists("./unittest-temp2"):
             rmtree("./.unittest-temp2")
+        if exists("./unittest-temp3"):
+            rmtree("./.unittest-temp3")
+
+            
+    def testObjectKeyGeneration(self):
+        """ ensures that the diskcache object's location does not change """
+        
+        CACHE_DIR = "./.unittest-temp3"
+        d = DiskCache(CACHE_DIR)
+        getCacheLocation = lambda x: join(CACHE_DIR, Cache.getObjectId(x))
+        
+        d.fetchObjectId(1, str, 1)
+        assert exists( getCacheLocation(1) )
+        
+        d.fetch(str, 2)
+        assert exists( getCacheLocation( ((2,), ()) ))
        
 
 # $Id$
