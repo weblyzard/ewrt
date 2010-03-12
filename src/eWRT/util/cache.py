@@ -2,7 +2,7 @@
 
 """ caches arbitrary objects """
 
-# (C)opyrights 2008-2009 by Albert Weichselbraun <albert@weichselbraun.net>
+# (C)opyrights 2008-2010 by Albert Weichselbraun <albert@weichselbraun.net>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,13 +28,7 @@ from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
 from cPickle import dump, load
 from time import time
 from operator import itemgetter
-
-try:
-    import hashlib
-    HASH = hashlib.sha1
-except ImportError:
-    import sha
-    HASH = sha.sha
+from hashlib import sha1 
 
 class Cache(object):
     """ An abstract class for caching functions """
@@ -45,7 +39,7 @@ class Cache(object):
     @staticmethod
     def getObjectId( obj ):
         """ returns an identifier representing the object """
-        return HASH(str( obj )).hexdigest()
+        return sha1(str( obj )).hexdigest()
 
     def _get_fname( self, obj_id ):
         """ computes the filename of the file with the given
@@ -77,8 +71,7 @@ class DiskCache(Cache):
 
         self._cache_hit  = 0
         self._cache_miss = 0
-       
-   
+
     def fetch(self, fetch_function, *args, **kargs):
         """ fetches the object with the given id, querying
              a) the cache and
@@ -92,8 +85,24 @@ class DiskCache(Cache):
 
             @returns the object (retrieved from the cache or computed)
         """
-            
-        cache_file = self._get_fname( self.getObjectId( (args, tuple(kargs.items())) ) )
+        objectId = self.getObjectId( (args, tuple(kargs.items())) )
+        return self.fetchObjectId(objectId, fetch_function, *args, **kargs)
+    
+    def fetchObjectId(self, objectId, fetch_function, *args, **kargs):
+        """ fetches the object with the given id, querying
+             a) the cache and
+             b) the fetch_function
+            if the fetch_function is called, the functions result is saved 
+            in the cache 
+
+            @param[in] objectId the id of the object to fetch
+            @param[in] function to call if the result is not in the cache
+            @param[in] args   arguments 
+            @param[in] kargs  optional keyword arguments
+
+            @returns the object (retrieved from the cache or computed)
+        """
+        cache_file = self._get_fname( objectId  ) 
         # try to fetch the object from the cache
         if exists(cache_file):
             self._cache_hit += 1
@@ -149,18 +158,22 @@ class MemoryCache(Cache):
         self._cacheData  = {}  
         self._usage      = {}
         self.max_cache_size = max_cache_size
-        
+
     def fetch(self, fetch_function, *args, **kargs):
+        objectId = (args, tuple(kargs.items()) ) 
+        return self.fetchObjectId(objectId, fetch_function, *args, **kargs)
+        
+        
+    def fetchObjectId(self, objectId, fetch_function, *args, **kargs):
         # update the object's last usage time stamp
-        key = (args, tuple(kargs.items()) )
-        self._usage[key]     = time()  
+        self._usage[objectId]     = time()  
         try:
-            return self._cacheData[key]
+            return self._cacheData[objectId]
         except KeyError:
             obj = fetch_function(*args, **kargs)
             if obj != None:
                 self.garbage_collect_cache()
-                self._cacheData[key] = obj
+                self._cacheData[objectId] = obj
             return obj
 
     def garbage_collect_cache(self):
