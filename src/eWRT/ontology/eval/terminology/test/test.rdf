@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:wl="http://www.weblyzard.com/2005/03/31/wl#" 
+    xmlns:wn="http://www.weblyzard.com/2005/03/31/wn#"  > 
+<owl:Class rdf:ID="building">
+        <rdfs:label>building</rdfs:label></owl:Class>
+<owl:Class rdf:ID="nations">
+        <rdfs:label>nations</rdfs:label></owl:Class>
+<owl:Class rdf:ID="pact">
+        <rdfs:label>pact</rdfs:label></owl:Class>
+<owl:Class rdf:ID="process">
+        <rdfs:label>process</rdfs:label></owl:Class>
+<owl:Class rdf:ID="greenhouseGas">
+        <rdfs:label>greenhouse gas</rdfs:label></owl:Class>
+<owl:Class rdf:ID="newZealand">
+        <rdfs:label>new zealand</rdfs:label></owl:Class>
+<owl:Class rdf:ID="climateChange">
+        <rdfs:label>climate change</rdfs:label></owl:Class>
+<owl:Class rdf:ID="targets">
+        <rdfs:label>targets</rdfs:label></owl:Class>
+<owl:Class rdf:ID="carbonDioxide">
+        <rdfs:label>carbon dioxide</rdfs:label></owl:Class>
+<owl:Class rdf:ID="carbon">
+        <rdfs:label>carbon</rdfs:label></owl:Class>
+<owl:Class rdf:ID="climateChangePolicy">
+        <rdfs:label>climate change policy</rdfs:label></owl:Class>
+<owl:Class rdf:ID="levels">
+        <rdfs:label>levels</rdfs:label></owl:Class>
+<owl:Class rdf:ID="energy">
+        <rdfs:label>energy</rdfs:label></owl:Class>
+<owl:Class rdf:ID="reduceGreenhouseGas">
+        <rdfs:label>reduce greenhouse gas</rdfs:label></owl:Class>
+<owl:Class rdf:ID="copenhagen">
+        <rdfs:label>copenhagen</rdfs:label></owl:Class>
+<owl:Class rdf:ID="firm">
+        <rdfs:label>firm</rdfs:label></owl:Class>
+<owl:Class rdf:ID="ets">
+        <rdfs:label>ets</rdfs:label></owl:Class>
+<owl:Class rdf:ID="fossilFuel">
+        <rdfs:label>fossil fuel</rdfs:label></owl:Class>
+<owl:Class rdf:ID="greenhouseGasEmissions">
+        <rdfs:label>greenhouse gas emissions</rdfs:label></owl:Class>
+<owl:Class rdf:ID="emissions">
+        <rdfs:label>emissions</rdfs:label></owl:Class>
+<owl:Class rdf:ID="reduction">
+        <rdfs:label>reduction</rdfs:label></owl:Class>
+<owl:Class rdf:ID="action">
+        <rdfs:label>action</rdfs:label></owl:Class>
+<owl:Class rdf:ID="malcolm">
+        <rdfs:label>malcolm</rdfs:label></owl:Class>
+<owl:Class rdf:ID="carbonDioxideEmissions">
+        <rdfs:label>carbon dioxide emissions</rdfs:label></owl:Class>
+<owl:Class rdf:ID="coal">
+        <rdfs:label>coal</rdfs:label></owl:Class>
+<owl:Class rdf:ID="itsCarbon">
+        <rdfs:label>its carbon</rdfs:label></owl:Class>
+<owl:Class rdf:ID="pollution">
+        <rdfs:label>pollution</rdfs:label></owl:Class>
+<rdf:Description rdf:about="#pollution">
+        <rdfs:subClassOf rdf:resource="#action" />
+</rdf:Description>
+<rdf:Description rdf:about="#reduceGreenhouseGas">
+        <rdfs:subClassOf rdf:resource="#greenhouseGas" />
+</rdf:Description>
+<rdf:Description rdf:about="#fossilFuel">
+        <rdfs:subClassOf rdf:resource="#greenhouseGas" />
+</rdf:Description>
+<rdf:Description rdf:about="#climateChange">
+        <wl:isRelatedTo rdf:resource="#copenhagen" />
+</rdf:Description>
+<rdf:Description rdf:about="#fossilFuel">
+        <wl:isRelatedTo rdf:resource="#energy" />
+</rdf:Description>
+<rdf:Description rdf:about="#emissions">
+        <wl:isRelatedTo rdf:resource="#pact" />
+</rdf:Description>
+<rdf:Description rdf:about="#reduction">
+        <rdfs:subClassOf rdf:resource="#action" />
+</rdf:Description>
+<rdf:Description rdf:about="#greenhouseGasEmissions">
+        <wl:weight>1.0</wl:weight>
+</rdf:Description>
+<rdf:Description rdf:about="#carbonDioxideEmissions">
+        <wl:weight>1.0</wl:weight>
+</rdf:Description>
+<rdf:Description rdf:about="#itsCarbon">
+        <wl:weight>1.0</wl:weight>
+</rdf:Description>
+<rdf:Description rdf:about="#itsCarbon">
+        <rdfs:subClassOf rdf:resource="#carbon" />
+</rdf:Description>
+<rdf:Description rdf:about="#carbon">
+        <wl:modifierOf rdf:resource="#carbonDioxide" />
+</rdf:Description>
+<rdf:Description rdf:about="#climateChange">
+        <rdfs:subClassOf rdf:resource="#action" />
+</rdf:Description>
+<rdf:Description rdf:about="#reduction">
+        <rdfs:subClassOf rdf:resource="#action" />
+</rdf:Description>
+<rdf:Description rdf:about="#carbonDioxide">
+        <rdfs:subClassOf rdf:resource="#greenhouseGas" />
+</rdf:Description>
+<rdf:Description rdf:about="#fossilFuel">
+        <wl:isRelatedTo rdf:resource="#process" />
+</rdf:Description>
+<rdf:Description rdf:about="#carbon">
+        <wl:weight>1.0</wl:weight>
+</rdf:Description>
+<rdf:Description rdf:about="#coal">
+        <rdfs:subClassOf rdf:resource="#fossilFuel" />
+</rdf:Description>
+<rdf:Description rdf:about="#greenhouseGasEmissions">
+        <rdfs:subClassOf rdf:resource="#emissions" />
+</rdf:Description>
+<rdf:Description rdf:about="#climateChange">
+        <wl:isRelatedTo rdf:resource="#malcolm" />
+</rdf:Description>
+<rdf:Description rdf:about="#reduceGreenhouseGas">
+        <wl:weight>1.0</wl:weight>
+</rdf:Description>
+<rdf:Description rdf:about="#greenhouseGasEmissions">
+        <wl:isRelatedTo rdf:resource="#firm" />
+</rdf:Description>
+<rdf:Description rdf:about="#fossilFuel">
+        <rdfs:subClassOf rdf:resource="#climateChange" />
+</rdf:Description>
+<rdf:Description rdf:about="#emissions">
+        <wl:isRelatedTo rdf:resource="#ets" />
+</rdf:Description>
+<rdf:Description rdf:about="#emissions">
+        <wl:isRelatedTo rdf:resource="#climateChangePolicy" />
+</rdf:Description>
+<rdf:Description rdf:about="#climateChange">
+        <wl:isRelatedTo rdf:resource="#nations" />
+</rdf:Description>
+<rdf:Description rdf:about="#energy">
+        <rdfs:subClassOf rdf:resource="#levels" />
+</rdf:Description>
+<rdf:Description rdf:about="#carbonDioxideEmissions">
+        <rdfs:subClassOf rdf:resource="#emissions" />
+</rdf:Description>
+<rdf:Description rdf:about="#emissions">
+        <wl:isRelatedTo rdf:resource="#targets" />
+</rdf:Description>
+<rdf:Description rdf:about="#climateChange">
+        <wl:isRelatedTo rdf:resource="#newZealand" />
+</rdf:Description>
+<rdf:Description rdf:about="#emissions">
+        <rdfs:subClassOf rdf:resource="#action" />
+</rdf:Description>
+<rdf:Description rdf:about="#fossilFuel">
+        <wl:weight>1.0</wl:weight>
+</rdf:Description>
+<rdf:Description rdf:about="#greenhouseGas">
+        <wl:isRelatedTo rdf:resource="#building" />
+</rdf:Description>
+<rdf:Statement>
+     <rdf:subject    rdf:resource="#greenhouseGasEmissions" />
+     <rdf:object     rdf:resource="#firm" />
+     <rdf:predicate  rdf:resource="wl:isRelatedTo" />
+     <wl:weight>8.000</wl:weight>
+</rdf:Statement>
+        
+<rdf:Statement>
+     <rdf:subject    rdf:resource="#fossilFuel" />
+     <rdf:object     rdf:resource="#process" />
+     <rdf:predicate  rdf:resource="wl:isRelatedTo" />
+     <wl:weight>3.692</wl:weight>
+</rdf:Statement>
+        
+<rdf:Statement>
+     <rdf:subject    rdf:resource="#climateChange" />
+     <rdf:object     rdf:resource="#copenhagen" />
+     <rdf:predicate  rdf:resource="wl:isRelatedTo" />
+     <wl:weight>5.207</wl:weight>
+</rdf:Statement>
+        
+<rdf:Statement>
+     <rdf:subject    rdf:resource="#emissions" />
+     <rdf:object     rdf:resource="#targets" />
+     <rdf:predicate  rdf:resource="wl:isRelatedTo" />
+     <wl:weight>2.962</wl:weight>
+</rdf:Statement>
+        
+<rdf:Statement>
+     <rdf:subject    rdf:resource="#fossilFuel" />
+     <rdf:object     rdf:resource="#energy" />
+     <rdf:predicate  rdf:resource="wl:isRelatedTo" />
+     <wl:weight>6.107</wl:weight>
+</rdf:Statement>
+        
+<rdf:Statement>
+     <rdf:subject    rdf:resource="#greenhouseGas" />
+     <rdf:object     rdf:resource="#building" />
+     <rdf:predicate  rdf:resource="wl:isRelatedTo" />
+     <wl:weight>3.496</wl:weight>
+</rdf:Statement>
+        
+<rdf:Statement>
+     <rdf:subject    rdf:resource="#emissions" />
+     <rdf:object     rdf:resource="#ets" />
+     <rdf:predicate  rdf:resource="wl:isRelatedTo" />
+     <wl:weight>2.611</wl:weight>
+</rdf:Statement>
+        
+<rdf:Statement>
+     <rdf:subject    rdf:resource="#climateChange" />
+     <rdf:object     rdf:resource="#newZealand" />
+     <rdf:predicate  rdf:resource="wl:isRelatedTo" />
+     <wl:weight>6.444</wl:weight>
+</rdf:Statement>
+        
+<rdf:Statement>
+     <rdf:subject    rdf:resource="#climateChange" />
+     <rdf:object     rdf:resource="#malcolm" />
+     <rdf:predicate  rdf:resource="wl:isRelatedTo" />
+     <wl:weight>5.568</wl:weight>
+</rdf:Statement>
+        
+<rdf:Statement>
+     <rdf:subject    rdf:resource="#emissions" />
+     <rdf:object     rdf:resource="#pact" />
+     <rdf:predicate  rdf:resource="wl:isRelatedTo" />
+     <wl:weight>2.889</wl:weight>
+</rdf:Statement>
+        
+<rdf:Statement>
+     <rdf:subject    rdf:resource="#emissions" />
+     <rdf:object     rdf:resource="#climateChangePolicy" />
+     <rdf:predicate  rdf:resource="wl:isRelatedTo" />
+     <wl:weight>2.726</wl:weight>
+</rdf:Statement>
+        
+<rdf:Statement>
+     <rdf:subject    rdf:resource="#climateChange" />
+     <rdf:object     rdf:resource="#nations" />
+     <rdf:predicate  rdf:resource="wl:isRelatedTo" />
+     <wl:weight>4.976</wl:weight>
+</rdf:Statement>
+        
+</rdf:RDF>
