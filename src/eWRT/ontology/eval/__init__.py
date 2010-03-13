@@ -1,5 +1,6 @@
 from xml.dom.minidom import parse, parseString
-from metric import LearningAccuracy
+# removed because this does not work so far <- albert!
+#from metric import LearningAccuracy
 
 import rdflib
 from rdflib.Graph import ConjunctiveGraph as Graph

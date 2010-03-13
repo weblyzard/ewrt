@@ -20,6 +20,7 @@
 
 from eWRT.ws.TagInfoService import TagInfoService
 from unittest import TestCase
+from eWRT.util.cache import DiskCache
 
 from math import exp
 
@@ -28,10 +29,16 @@ class Coherence(object):
         abstract class for computing the coherence between 
         terms """
 
-    def __init__(self, dataSource):
+    def __init__(self, dataSource, cache=True):
         """ @param[in] dataSource implementing the TagInfoService Interface """
-        assert isinstance(dataSource, TagInfoService)
-        self.dataSource = dataSource
+        assert isinstance(dataSource, TagInfoService) 
+        self.dataSource  = dataSource
+        if cache==True:
+            diskCache       = DiskCache("./.coherence-tagcount-cache", 2)
+            self.getTagCount = lambda tt: diskCache.fetchObjectId( self.dataSource.__class__.__name__ + str(tt), 
+                                                                   self.dataSource.getTagInfo, tt)
+        else:
+            self.getTagCount = self.dataSource.getTagInfo
 
     @staticmethod
     def getCoherence(nx, ny, nt):
@@ -46,14 +53,14 @@ class Coherence(object):
         """ @param[in] t1 term1
             @param[in] t2 term2
             @returns the coherence between these two terms
-        """
-        nx  = self.dataSource.getTagInfo( (t1) )
-        ny  = self.dataSource.getTagInfo( (t2) )
-        nx2 = self.dataSource.getTagInfo( (t1, t2) )
+        """        
+        nx = self.getTagCount( (t1, ) )
+        ny = self.getTagCount( (t2, ) )
+        nt = self.getTagCount( (t1, t2) )
         return self.getCoherence(nx, ny, nt)
 
 
-class DiceCoherence(object):
+class DiceCoherence(Coherence):
     """ @class DiceCoherence
         computes the dice coherence for the given terms """
 
@@ -64,9 +71,12 @@ class DiceCoherence(object):
             @param[in] nt counts of term1 together with term2
             @returns the coherence
         """
-        return 2*float(nt)/float(ny+ny)
+        try:
+            return 2*float(nt)/float(ny+ny)
+        except ZeroDivisionError:
+            return None
 
-class PMICoherence(object):
+class PMICoherence(Coherence):
     """ @class PMICoherence
         computes the coherence based on the pointwise mutual
         information (PMI)
@@ -85,7 +95,12 @@ class PMICoherence(object):
         fx = (nx/nz)*exp((nx/nz)*-1)
         fy = (ny/nz)*exp((ny/nz)*-1)
         ft = (nt/nz)*exp((nt/nz)*-1)
-        return ft/(fx*fy)
+        
+        try:
+            return ft/(fx*fy)
+        except ZeroDivisionError:
+            return None
+        
 
 
 class TestCoherence(TestCase):
@@ -107,4 +122,9 @@ class TestCoherence(TestCase):
         self.assertAlmostEqual( c(3670000, 870000, 897), 0.00346634415814)    # one coup - whole wheat flour
         self.assertAlmostEqual( c(4270, 2690000, 897), 0.571746307316)        # one coup whole - wheat flour
         self.assertAlmostEqual( c(2320, 33400000.0, 897), 1.05103564089)      # one coup whole wheat - flour
+        
+    def testPMIZero(self):
+        """ tests the handling of PMI values of no counts are found """
+        c = PMICoherence.getCoherence
+        assert c(0,12,0) == None
 

@@ -70,7 +70,7 @@ class Delicious(TagInfoService):
         content = Delicious.get_content(Delicious._parse_tag_url(tags))
 
         related_tags = re.findall('<span class="m" title="(\w*?)">', content, re.IGNORECASE|re.DOTALL)
-        related_tags_with_count = [ (tag, Flickr.getTagInfo( (tag,) ) if retrieveTagInfo else None) for tag in related_tags ]
+        related_tags_with_count = [ (tag, Delicious.getTagInfo( (tag,) ) if retrieveTagInfo else None) for tag in related_tags ]
 
         return related_tags_with_count
 
@@ -91,11 +91,9 @@ class Delicious(TagInfoService):
         """ parses the tag url, removes white spaces in the tags ...
             @param tuple/list of tags 
             @returns delicious tag url
-        """        
-        if len([ tag for tag in tags if ' ' in tag ]):
-            raise ValueError('Tags must not contain white spaces!')
-        else:
-            return Delicious.DELICIOUS_TAG_URL % "+".join(tags)        
+        """
+        tags = [tag.replace(" ", "+") for tag in tags ]        
+        return Delicious.DELICIOUS_TAG_URL % "+".join(tags)
 
     @staticmethod
     def _normalize_url(url):
@@ -121,6 +119,16 @@ class Delicious(TagInfoService):
         content = f.read()
         f.close()
         return content
+
+class TestDelicious(object):
+    
+    def testTagSplitting(self):
+        """ verifies the correct handling of tags containing spaces
+            i.e. (t1, t2, t3) == (t1, "t2 t3") """
+        d = Delicious._parse_tag_url
+        print d( ("debian linux") )
+        assert d( ("debian", "linux" )) == d( ("debian linux", ) )
+        assert d( ("t1", "t2", "t3") ) == d( ("t1", "t2 t3") )
 
 
 if __name__ == '__main__':
