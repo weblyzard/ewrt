@@ -99,6 +99,11 @@ class DiskCache(Cache):
         """
         objectId = (args, tuple(kargs.items())) 
         return self.fetchObjectId(objectId, fetch_function, *args, **kargs)
+
+    def __contains__(self, key):
+        """ returns whether the key is already stored in the cache """
+        cache_file = self._get_fname( self.getObjectId(key)  ) 
+        return exists(cache_file)
     
     def fetchObjectId(self, key, fetch_function, *args, **kargs):
         """ fetches the object with the given id, querying
@@ -344,12 +349,9 @@ class TestDiskCached(TestCached):
         """ remove the cache directories """
         from shutil import rmtree
 
-        if exists("./.unittest-temp1"):
-            rmtree("./.unittest-temp1")
-        if exists("./unittest-temp2"):
-            rmtree("./.unittest-temp2")
-        if exists("./unittest-temp3"):
-            rmtree("./.unittest-temp3")
+        for cacheDirNo in range(4):
+            if exists("./.unittest-temp%d" % cacheDirNo):
+                rmtree("./.unittest-temp%d" % cacheDirNo)
 
             
     def testObjectKeyGeneration(self):
@@ -364,6 +366,14 @@ class TestDiskCached(TestCached):
         
         d.fetch(str, 2)
         assert exists( getCacheLocation( ((2,), ()) ))
-       
+
+    def testContains(self):
+        """ ensures that the contains code works """
+        CACHE_DIR = "./.unittest-temp0"
+        d = DiskCache(CACHE_DIR)
+
+        d.fetchObjectId(1, str, 1)
+        assert 1 in d
+        assert 2 not in d
 
 # $Id$
