@@ -60,20 +60,37 @@ class Delicious(TagInfoService):
 
     @staticmethod
     def getRelatedTags( tags, retrieveTagInfo=False ):
-        """ returns a the count of related tags 
+        """ returns related tags for the given ones.
             @param  tags             list of tags
             @param  retrieveTagInfo  determines whether we will retrieve the tagInfo for the related tags
             @returns                 list of related tags 
         """
 
         assert( isinstance(tags, tuple) or isinstance(tags, list) )
-        content = Delicious.get_content(Delicious._parse_tag_url(tags))
+        tag_url = Delicious._parse_tag_url( tags )
+        content = Delicious.get_content( tag_url )
 
-        related_tags = re.findall('<span class="m" title="(\w*?)">', content, re.IGNORECASE|re.DOTALL)
+        related_tags = Delicious._getNGramRelatedTags( content ) if '+' in tag_url else Delicious._getMonogramRelatedTags( content )
         related_tags_with_count = [ (tag, Delicious.getTagInfo( (tag,) ) if retrieveTagInfo else None) for tag in related_tags ]
 
         return related_tags_with_count
 
+    @staticmethod
+    def _getMonogramRelatedTags( content ):
+        """ returns the related tags for the given monogram
+            @param content of the tag's page
+            @return a list of related tags
+        """
+        return re.findall('<span class="m" title="(\w*?)">', content, re.IGNORECASE|re.DOTALL)
+
+    @staticmethod
+    def _getNGramRelatedTags( content ):
+        """ returns the related tags for the given n-gram
+            @param content of the tags' page
+            @return a list of related tags
+        """
+        return re.findall('<span class="tag-chain-item-span">(\w*?)</span>', content, re.IGNORECASE|re.DOTALL)
+ 
     # 
     # helper functions
     #
@@ -121,6 +138,8 @@ class Delicious(TagInfoService):
         return content
 
 class TestDelicious(object):
+
+    RELATED_TAGS_DELICIOUS_PAGE = './test/delicious_climate_related_tags.html'
     
     def testTagSplitting(self):
         """ verifies the correct handling of tags containing spaces
@@ -129,6 +148,22 @@ class TestDelicious(object):
         print d( ("debian linux") )
         assert d( ("debian", "linux" )) == d( ("debian linux", ) )
         assert d( ("t1", "t2", "t3") ) == d( ("t1", "t2 t3") )
+
+    def testNGramRelatedTags(self):
+        """ tests support for related tags for n-grams """
+        assert len( Delicious().getRelatedTags( ("climate", "change") ) ) > 0
+
+        content = open( TestDelicious.RELATED_TAGS_DELICIOUS_PAGE ).read()
+        related_tags = Delicious._getNGramRelatedTags( content )
+
+        assert 'global' in related_tags
+        assert 'evidence' in related_tags
+        assert 'vegetarian' in related_tags
+        assert 'sustainability' in related_tags
+
+        assert 'linux' not in related_tags
+
+
 
 
 if __name__ == '__main__':
