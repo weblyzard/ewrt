@@ -38,12 +38,12 @@ class CoherenceEvaluator(object):
         constraints = [ "{ ?c1 %s ?c2; rdfs:label ?s. ?c2 rdfs:label ?o. }" % p for p in RELATION_PREDICATES ]
         return "SELECT ?s ?o WHERE { %s }" % " UNION ".join( constraints )
 
-    def getWeakConcepts(self, ontologyFile):
+    def getWeakConcepts(self, ontology):
         """ returns a list of weak concepts according to the given coherence measure 
-            @param[in] ontologyFile ... a rdf file containing the concepts 
+            @param[in] ontology ... an rdflib.Graph object or an rdf file containing the concepts 
             @returns a list of "weak" concepts
         """
-        rdf = Graph().parse( ontologyFile )
+        rdf = ontology if isinstance( ontology, Graph ) else Graph().parse( ontology)
         q   = CoherenceEvaluator._buildSparqlQuery()
 
         conceptEval = [ (self.metric.getTermCoherence(s,o), s, o) \
@@ -68,9 +68,10 @@ class TestTermEval(object):
     def testEvaluateTerminology(self):
         """ tests an ontology (file) and returns a list of 
             weak concepts """
-
-        t = CoherenceEvaluator( )
-        # assert isinstance( t.getWeakConcepts( self.TEST_ONTOLOGY ), list )
+        from eWRT.ws.yahoo import Yahoo
+        c = DiceCoherence( dataSource = Yahoo() )
+        t = CoherenceEvaluator( c )
+        assert isinstance( t.getWeakConcepts( self.TEST_ONTOLOGY ), list )
         
 
 if __name__ == '__main__':
