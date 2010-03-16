@@ -35,8 +35,8 @@ class CoherenceEvaluator(object):
 
     @staticmethod
     def _buildSparqlQuery():
-        constraints = [ "{ ?c1 %s ?c2; rdfs:label ?s. ?c2 rdfs:label ?o. }" % p for p in RELATION_PREDICATES ]
-        return "SELECT ?s ?o WHERE { %s }" % " UNION ".join( constraints )
+        constraints = [ "{ ?c1 %s ?c2; ?p ?c2; rdfs:label ?s. ?c2 rdfs:label ?o. }" % p for p in RELATION_PREDICATES ]
+        return "SELECT ?s ?p ?o WHERE { %s }" % " UNION ".join( constraints )
 
     def getWeakConcepts(self, ontology):
         """ returns a list of weak concepts according to the given coherence measure 
@@ -46,8 +46,8 @@ class CoherenceEvaluator(object):
         rdf = ontology if isinstance( ontology, Graph ) else Graph().parse( ontology)
         q   = CoherenceEvaluator._buildSparqlQuery()
 
-        conceptEval = [ (self.metric.getTermCoherence(s,o), s, o) \
-            for s, o in rdf.query( q, initNs=dict(rdfs=NS_RDFS, wl=NS_WL) ) ]
+        conceptEval = [ (self.metric.getTermCoherence(s,o), s, p, o) \
+            for s, p, o in rdf.query( q, initNs=dict(rdfs=NS_RDFS, wl=NS_WL) ) ]
 
         conceptEval.sort()
         return conceptEval
@@ -59,7 +59,7 @@ class TestTermEval(object):
     
     def testSparqlQueryGeneration(self):
         """ tests the generation of Sparql queries """
-        referenceQuery = "SELECT ?s ?o WHERE { { ?c1 rdfs:subClassOf ?c2; rdfs:label ?s. ?c2 rdfs:label ?o. } UNION { ?c1 wl:isRelatedTo ?c2; rdfs:label ?s. ?c2 rdfs:label ?o. } UNION { ?c1 wl:modifierOf ?c2; rdfs:label ?s. ?c2 rdfs:label ?o. } }"
+        referenceQuery = "SELECT ?s ?p ?o WHERE { { ?c1 rdfs:subClassOf ?c2; ?p ?c2; rdfs:label ?s. ?c2 rdfs:label ?o. } UNION { ?c1 wl:isRelatedTo ?c2; ?p ?c2; rdfs:label ?s. ?c2 rdfs:label ?o. } UNION { ?c1 wl:modifierOf ?c2; ?p ?c2; rdfs:label ?s. ?c2 rdfs:label ?o. } }"
         print referenceQuery
         print "--"
         print CoherenceEvaluator._buildSparqlQuery()
@@ -71,7 +71,10 @@ class TestTermEval(object):
         from eWRT.ws.yahoo import Yahoo
         c = DiceCoherence( dataSource = Yahoo() )
         t = CoherenceEvaluator( c )
-        assert isinstance( t.getWeakConcepts( self.TEST_ONTOLOGY ), list )
+        weakConcepts = t.getWeakConcepts( self.TEST_ONTOLOGY )
+        assert isinstance( weakConcepts, list )
+        print len(weakConcepts)
+        assert len(weakConcepts) == 27-1
         
 
 if __name__ == '__main__':
