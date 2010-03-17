@@ -22,6 +22,7 @@ from eWRT.stat.coherence import Coherence, DiceCoherence, PMICoherence
 from rdflib.Graph import Graph
 from rdflib import Namespace
 
+from commands import getoutput
 from itertools import chain
 from operator import itemgetter
 
@@ -70,8 +71,6 @@ class GraphvizVisualize(Visualize):
         wl_predicate_type = p.split("#")[1]
         return GraphvizVisualize.WL_PREDICATE_MAPPING[ wl_predicate_type ]
         
-        
-    
     def __str__(self):
         stmts = self.getOntologyStatements()
         conceptDefinitions  = [ '"%s" [ label="%s" ]' % (c,c) 
@@ -80,9 +79,17 @@ class GraphvizVisualize(Visualize):
         
         return "digraph G{\n%s\n\n%s\n}" % ("\n".join(conceptDefinitions), "\n".join(relationDefinitions) )
 
+    def createImage(self, fname, format):
+        """ creates an image based on the ontology 
+            @param[in] fname  ... output file name 
+            @param[in] format ... image format (such as eps, png) to use
+        """
+        open(fname+".dot", "w").write( str(self) )
+        getoutput('fdp -T%s %s.dot -Elen=0.1 -Eweight=3  -Gmindist=0.05 -Nmargin="0.0,0.0" -Nfontname="Helvetica" -Nheight=0.6 -Nwidth=1.1 -Nfontsize=15 -Goverlap="4:" -Goutputorder="edgesfirst" -Gsplines="true" -Gratio=0.7 -o%s.png' % (format, fname, fname) )
+
+
 
 if __name__ == '__main__':
-    from commands import getoutput
     g = GraphvizVisualize('./test/test.rdf')
-    open("test.dot","w").write( str(g) ) 
-    getoutput('fdp -Tpng test.dot -Elen=0.1 -Eweight=3  -Gmindist=0.05 -Nmargin="0.0,0.0" -Nfontname="Helvetica" -Nheight=0.6 -Nwidth=1.1 -Nfontsize=15 -Goverlap="4:" -Goutputorder="edgesfirst" -Gsplines="true" -Gratio=0.7 -otest.png')
+    g.createImage( "test", "png" )
+
