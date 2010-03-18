@@ -25,11 +25,12 @@ from urllib import urlencode, quote
 from eWRT.ws.TagInfoService import TagInfoService
 from eWRT.config import YAHOO_APP_ID, YAHOO_SEARCH_URL
 
-
 class Yahoo(TagInfoService):
     """ interfaces with yahoo's search service """
 
     __slots__ = ('r', )
+
+    YAHOO_TERM_EXTRACTION_URI = 'http://search.yahooapis.com/ContentAnalysisService/V1/termExtraction'
 
     def __init__(self):
         self.r = Retrieve( Yahoo.__name__ )
@@ -47,6 +48,9 @@ class Yahoo(TagInfoService):
                              'format': 'json'
         })
         url = YAHOO_SEARCH_URL % "%2B".join(map( quote, terms) ) +"?"+ params
+        
+        print url
+        
         result = eval( self.r.open(url).read() )
 
         return result['ysearchresponse']
@@ -55,6 +59,17 @@ class Yahoo(TagInfoService):
         """ @Override """
         return int( self.query(tag)['totalhits'] )
 
+    def extractTerms(self, content):
+        """ extract terms from yahoo search, see http://developer.yahoo.com/search/content/V1/termExtraction.html """ 
+
+        params = urlencode( {'appid': YAHOO_APP_ID,
+                             'context': content,
+                             'output': 'json'
+        })
+
+        result = eval ( self.r.open(self.YAHOO_TERM_EXTRACTION_URI, params).read() )
+
+        return result['ResultSet']['Result']
 
 
 class TestYahoo(object):
@@ -90,3 +105,11 @@ if __name__ == '__main__':
     print y.query( ("energy", "coal") )
     print y.query( ("d'alembert", "law") )
 
+    text = ''' 
+        appid       string (required)       The application ID. See Application IDs for more information.
+        context     string (required)     The context to extract terms from (UTF-8 encoded).
+        query     string     An optional query to help with the extraction process.
+        output     string: xml (default), json, php     The format for the output. If json is requested, the results will be returned in JSON format. If php is requested, the results will be returned in Serialized PHP format.
+        callback     string     The name of the callback function to wrap around the JSON data. The following characters are allowed: A-Z a-z 0-9 . [] and _. If output=json has not been requested, this parameter has no effect. More information on the callback can be found in the Yahoo! Developer Network JSON Documentation. ''' 
+
+    print y.extractTerms(text)
