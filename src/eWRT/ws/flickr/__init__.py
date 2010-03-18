@@ -29,6 +29,8 @@ from eWRT.access.http import Retrieve
 from eWRT.ws.TagInfoService import TagInfoService
 from urlparse import urlsplit
 
+import unittest
+
 class Flickr(TagInfoService):
     """ retrieves data using the del.icio.us API """
 
@@ -95,27 +97,39 @@ class Flickr(TagInfoService):
         f.close()
         return content
 
-class TestFlickr( object ):
+class TestFlickr( unittest.TestCase ):
     
     def testMultipleTags( self ):
         """ verifies whether multiple tags return results different from single tags """
+        
+        print '### Testing multiple ###'
+        
         assert Flickr.getRelatedTags( ("berlin", "dom")) != Flickr.getRelatedTags( ("berlin",) ) 
         assert Flickr.getTagInfo( ("berlin", "dom") ) != Flickr.getTagInfo( ("berlin",) ) 
 
     def testTagInfo( self ):
         """ test the tag info """
-        for tags in ( ('berlin','dom') , ('vienna',),  ('castle',) ):
-            assert Flickr.getTagInfo( tags ) > 0
+        
+        print '### Testing tag info ###'
+        
+        for tags in ( ('berlin','dom') , ('vienna',),  ('castle',)):
+            count = Flickr.getTagInfo( tags )
+            print '%s has tag count: %s' % (tags, count )
+            assert count > 0
 
     def testRelatedTags( self ):
         """ test related tags by retrieving related tags for the following tags """
-        for tags in ( ('berlin', 'dom'),  ):
-            relatedTags = Flickr.getRelatedTags( tags )
-            print tags, relatedTags
-            assert len( relatedTags  ) > 0
-
+        
+        print '### Testing related tags ###'
+        
+        tags = ('berlin', 'dom')
+        count = Flickr.getRelatedTags( tags )
+        print '%s has related tags: %s' % (tags, Flickr.getRelatedTags( tags ))
+        assert count > 0
+        count = Flickr.getRelatedTags( tags )
+        print '%s has related tags: %s' % ('berlin', Flickr.getRelatedTags( tags ))
+        assert count > 0
 
 if __name__ == '__main__':
-    print Flickr.getTagInfo( ("berlin", "dom") ), "counts"
-    print Flickr.getRelatedTags( ("berlin", "dom", ) ), "counts"
+    unittest.main()
     
