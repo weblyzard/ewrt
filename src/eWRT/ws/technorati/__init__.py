@@ -27,28 +27,36 @@ from urlparse import urlsplit
 from eWRT.config import TECHNORATI_API_KEY
 import xml.sax
 import time
+
 from warnings import warn
 
 import unittest
 
 SLEEP_TIME=30
 
-warn("Technorati has disabled their service! - please do not use this API anymore.")
-sys.exit(-1)
-
 class Technorati(TagInfoService):
     """ retrieves data using the del.icio.us API """
-    # TECHNORATI_URL = 'http://api.technorati.com/tag?key='+TECHNORATI_API_KEY+'&tag=%s' 
-    #TECHNORATI_URL = 'http://technorati.com/r/tag/%s?authority=n&language=n'
+#    TECHNORATI_URL = 'http://api.technorati.com/tag?key='+TECHNORATI_API_KEY+'&tag=%s' 
     TECHNORATI_URL = 'http://technorati.com/r/tag/%s?authority=n&language=n'
     #RE_TAG_COUNT = re.compile('<postsmatched>(\d+)</postsmatched>')
-    RE_TAG_COUNT = re.compile('<span class="count">\((\S+)\)</span>',
+    RE_TAG_COUNT = re.compile('Posts relating to &ldquo;.*?&rdquo; \((\S+)\)',
         re.IGNORECASE|re.DOTALL)
     RE_TAG_CONTAINER = re.compile('<div id="related-tags".*?<ul>(.*?)</ul>.*?</div>',
         re.IGNORECASE|re.DOTALL)
     RE_RELATED_TAG = re.compile('<a.*?">(.*?)</a>', 
         re.IGNORECASE|re.DOTALL)
 
+    AVAILABLE_TOPICS = ['overall', 'entertainment', 'business', 'sports', 'politics', 'autos', 'technology', 'living', 'green', 'science']
+    AVAILABLE_AUTHORITY = ['all', 'high', 'medium', 'low']
+    AVAILABLE_SOURCE = ['advanced-source-blogs', 'advanced-source-news', 'advanced-source-all']
+    AVAILABLE_RETURN = ['posts', 'news']
+    
+    TOPIC = 'overall'
+    AUTHORITY = 'high'
+    SOURCE = 'advanced-source-all'
+    RETURN = 'posts'
+
+    TECHNORATI_URL = 'http://technorati.com/search?usingAdvanced=1&q=%s&return=%s&source=%s&topic=%s&authority=%s'
 
     __slots__ = ()
     last_access = 0
@@ -75,6 +83,11 @@ class Technorati(TagInfoService):
             @param booelan withCounts to print counts for tags
             @return list of related tags 
         """
+        
+        # not supported at the moment
+        
+        return []
+        
         url = Technorati._parseURL(tags)
 
         content = Technorati.get_content(url)
@@ -101,7 +114,11 @@ class Technorati(TagInfoService):
     #
     @staticmethod
     def _parse_tag_counts( content ):
-        """ parses technorati html content and returns the number of counts for the tags """
+        """ parses technorati html content and returns the number of counts for the tags 
+            @param content: HTML content of technorati
+            @return: count of related posts
+        """
+        
         m = Technorati.RE_TAG_COUNT.search( content )
         if m:
             return re.sub(',', '', m.group(1))
@@ -124,9 +141,9 @@ class Technorati(TagInfoService):
         """ parses the URL """
 
         if type(tags).__name__ == 'str':
-            url = Technorati.TECHNORATI_URL % tags
+            url = Technorati.TECHNORATI_URL % (tags, Technorati.RETURN, Technorati.SOURCE, Technorati.TOPIC, Technorati.AUTHORITY) 
         else:   
-            url = Technorati.TECHNORATI_URL % "+".join(tags)
+            url = Technorati.TECHNORATI_URL % ("+".join(tags), Technorati.RETURN, Technorati.SOURCE, Technorati.TOPIC, Technorati.AUTHORITY) 
 
         if filter == '':
             return url

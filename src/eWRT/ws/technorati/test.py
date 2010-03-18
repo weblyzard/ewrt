@@ -9,14 +9,34 @@ class TestTechnorati( unittest.TestCase ):
 
     def test_tag_info(self):
         print '### Testing tag_info ###'
+        
+        countTags = 0
+        
         for tags in TECHNORATI_TEST_TAGS:
-            print '%s has %s counts ' % (tags, Technorati.getTagInfo( tags ))
+            countTags = Technorati.getTagInfo( tags )
+            print '%s has %s counts ' % (tags, countTags)
+
+            assert countTags > 0
+
 
     
     def test_related_tags(self):
         print '### Testing related_tags ###'
-        for tags in TECHNORATI_TEST_TAGS:
-            print '%s has related tags: %s' % (tags, Technorati.getRelatedTags( tags ))
+        
+        print 'not supported by Technorati at the moment'
+        
+#        countTags = 0
+#        
+#        for tags in TECHNORATI_TEST_TAGS:
+#            countTags = Technorati.getRelatedTags( tags )
+#            print '%s has related tags: %s' % (tags, countTags)
+#        assert countTags > 0
+
+    def test_parse_url(self):
+        
+        print '### Test parsing URL ###'
+        assert Technorati._parseURL('linux') == 'http://technorati.com/search?usingAdvanced=1&q=linux&return=posts&source=advanced-source-all&topic=overall&authority=high'
+        assert Technorati._parseURL(('debian', 'linux')) == 'http://technorati.com/search?usingAdvanced=1&q=debian+linux&return=posts&source=advanced-source-all&topic=overall&authority=high'
 
 if __name__ == '__main__':
     unittest.main()
