@@ -32,11 +32,8 @@ class Timed(object):
     """ decorator class used to time functions """
 
     def __init__(self, f):
-        self.startTime         = time()
-        self.lastCallDuration  = None
-        self.totalCallDuration = 0
-        self.numberOfCalls     = 0
-        self.f = f
+       self.f = f
+       self.clear()
 
     def __call__(self, *args, **kargs):
         """ calls the timed function and computes all necessary
@@ -48,6 +45,12 @@ class Timed(object):
         self.totalCallDuration += self.lastCallDuration
         return retVal
 
+    def clear(self):
+        self.startTime         = time()
+        self.lastCallDuration  = None
+        self.totalCallDuration = 0.
+        self.numberOfCalls     = 0
+ 
 
 class TimedTest(TestCase):
 
@@ -67,6 +70,15 @@ class TimedTest(TestCase):
         
         assert self._timeFunction.numberOfCalls == NR_CALL
         self.assertAlmostEqual( self._timeFunction.totalCallDuration/NR_CALL, self._timeFunction.lastCallDuration, 1 )
+        
+    def testClearCallStatistics(self):
+        NR_CALL = 5000
+        for x in xrange(NR_CALL):
+            self._timeFunction(self, x, 10*x)
+
+        self._timeFunction.clear()
+        assert self._timeFunction.totalCallDuration == 0.
+        assert self._timeFunction.numberOfCalls == 0
         
 
 
