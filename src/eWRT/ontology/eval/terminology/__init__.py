@@ -34,17 +34,17 @@ class CoherenceEvaluator(object):
         self.metric = metric
 
     @staticmethod
-    def _buildSparqlQuery():
-        constraints = [ "{ ?c1 %s ?c2; ?p ?c2; rdfs:label ?s. ?c2 rdfs:label ?o. }" % p for p in RELATION_PREDICATES ]
+    def _buildSparqlQuery(relation_predicates):
+        constraints = [ "{ ?c1 %s ?c2; ?p ?c2; rdfs:label ?s. ?c2 rdfs:label ?o. }" % p for p in relation_predicates ]
         return "SELECT ?s ?p ?o WHERE { %s }" % " UNION ".join( constraints )
 
-    def getWeakConcepts(self, ontology):
+    def getWeakConcepts(self, ontology, relation_predicates=RELATION_PREDICATES):
         """ returns a list of weak concepts according to the given coherence measure 
             @param[in] ontology ... an rdflib.Graph object or an rdf file containing the concepts 
             @returns a list of "weak" concepts
         """
         rdf = ontology if isinstance( ontology, Graph ) else Graph().parse( ontology)
-        q   = CoherenceEvaluator._buildSparqlQuery()
+        q   = CoherenceEvaluator._buildSparqlQuery(relation_predicates)
 
         conceptEval = [ (self.metric.getTermCoherence(s,o), s, p, o) \
             for s, p, o in rdf.query( q, initNs=dict(rdfs=NS_RDFS, wl=NS_WL) ) ]
@@ -62,7 +62,7 @@ class TestTermEval(object):
         referenceQuery = "SELECT ?s ?p ?o WHERE { { ?c1 rdfs:subClassOf ?c2; ?p ?c2; rdfs:label ?s. ?c2 rdfs:label ?o. } UNION { ?c1 wl:isRelatedTo ?c2; ?p ?c2; rdfs:label ?s. ?c2 rdfs:label ?o. } UNION { ?c1 wl:modifierOf ?c2; ?p ?c2; rdfs:label ?s. ?c2 rdfs:label ?o. } }"
         print referenceQuery
         print "--"
-        print CoherenceEvaluator._buildSparqlQuery()
+        print CoherenceEvaluator._buildSparqlQuery( RELATION_PREDICATES )
         assert( CoherenceEvaluator._buildSparqlQuery() == referenceQuery )
 
     def testEvaluateTerminology(self):
