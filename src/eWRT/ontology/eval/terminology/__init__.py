@@ -25,7 +25,7 @@ from rdflib import Namespace
 NS_RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
 NS_WL   = Namespace("http://www.weblyzard.com/2005/03/31/wl#")
 
-RELATION_PREDICATES = ('rdfs:subClassOf', 'wl:isRelatedTo', 'wl:modifierOf')
+RELATION_PREDICATES = ('rdfs:subClassOf', 'wl:isRelatedTo', 'wl:modifierOf', 'wl:social') # 'wl:deleted'
 
 class CoherenceEvaluator(object):
 
@@ -86,5 +86,3 @@ if __name__ == '__main__':
     print weak
     print "---"
     print "\n".join( ( str(w) for w in weak ) )
-
-
