@@ -82,7 +82,7 @@ class DiskCache(Cache):
         self.cache_nesting_level = cache_nesting_level
 
         self._cache_hit  = 0
-        self._cache_miss = 0
+        self._cache_miss = 0        
 
     def fetch(self, fetch_function, *args, **kargs):
         """ fetches the object with the given id, querying
@@ -167,6 +167,7 @@ class DiskCached(DiskCache):
 
     def __call__(self, fn):
         def wrapped_fn(*args, **kargs):
+            wrapped_fn.cache  = self
             return self.fetch(fn, *args, **kargs)
         return wrapped_fn
 
@@ -348,7 +349,7 @@ class TestDiskCached(TestCached):
 
     @staticmethod
     @DiskCached("./.unittest-temp2")
-    def sub(a=2, b=1):
+    def sub(a, b):
         return a-b 
 
     def teardown(self):
@@ -382,7 +383,19 @@ class TestDiskCached(TestCached):
         assert 1 in d
         assert 2 not in d
         
-    def testDelItem(self):
+    def testDelItemDiskCached(self):
+        """ test delitem for classes using the DiskCached decorator """
+        result = self.add(12,13)
+
+        print dir(self.add)
+        assert result == 25
+         
+        key = ((12,13), ())
+        assert key in self.add.cache
+        del self.add.cache[key]
+        assert key not in self.add.cache
+        
+    def testDelItemDiskCache(self):
         CACHE_DIR = "./.unittest-temp4"
         d = DiskCache(CACHE_DIR)
         
