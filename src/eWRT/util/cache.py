@@ -21,7 +21,7 @@ __author__    = "Albert Weichselbraun"
 __revision__  = "$Id$"
 __copyright__ = "GPL"
 
-from os import makedirs
+from os import makedirs, remove
 from os.path import join, exists
 from operator import attrgetter
 from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
@@ -104,6 +104,12 @@ class DiskCache(Cache):
         """ returns whether the key is already stored in the cache """
         cache_file = self._get_fname( self.getObjectId(key)  ) 
         return exists(cache_file)
+    
+    def __delitem__(self, key):
+        """ removes the given item from the cache """
+        cache_file = self._get_fname( self.getObjectId(key)  )
+        remove( cache_file )
+        
     
     def fetchObjectId(self, key, fetch_function, *args, **kargs):
         """ fetches the object with the given id, querying
@@ -349,7 +355,7 @@ class TestDiskCached(TestCached):
         """ remove the cache directories """
         from shutil import rmtree
 
-        for cacheDirNo in range(4):
+        for cacheDirNo in range(5):
             if exists("./.unittest-temp%d" % cacheDirNo):
                 rmtree("./.unittest-temp%d" % cacheDirNo)
 
@@ -375,5 +381,25 @@ class TestDiskCached(TestCached):
         d.fetchObjectId(1, str, 1)
         assert 1 in d
         assert 2 not in d
+        
+    def testDelItem(self):
+        CACHE_DIR = "./.unittest-temp4"
+        d = DiskCache(CACHE_DIR)
+        
+        # using function arguments and fetch
+        d.fetch(str, 2)
+        key = ((2,),())
+        assert key in d
+        del d[key]
+        assert key not in d
+        
+        # using cache labels and fetchObjectId
+        d.fetchObjectId(2, str, 2)
+        assert 2 in d
+        del d[2]
+        assert 2 not in d
+        
+        
+
 
 # $Id$
