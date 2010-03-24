@@ -98,7 +98,6 @@ class CleanupWikiText(object):
         return "\n".join(cleaned)
         
 
-@attr("remote")
 class TestWikiPedia(object):
     """ tests the WikiPedia Class """
     TEST_QUERIES= { 
@@ -106,6 +105,7 @@ class TestWikiPedia(object):
                 ('Energie', 'de'): ('kinetisch', 'Verbrauch', "Atom"),
                  }
 
+    @attr("remote")
     def testRetrievePage(self):
         """ tries to retrieve the following url's from the list """
 
@@ -116,6 +116,7 @@ class TestWikiPedia(object):
                 print keyword, term
                 assert term in wikiPediaText
 
+    @attr("remote")
     def testAlternations(self):
         w=WikiPedia()
         print w._getPageNameAlterations("Greenhouse Gas Emissions")

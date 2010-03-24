@@ -23,6 +23,7 @@ __version__ = "$Header$"
 
 from eWRT.access.http import Retrieve
 from urllib import quote
+from urllib2 import HTTPError
 from nose.plugins.attrib import attr
 
 WIKIPEDIA_SEARCH_QUERY = 'http://%s.wikipedia.org/wiki/%s'
@@ -36,15 +37,17 @@ class WikiPedia(object):
     def getDescriptor(self, synonym, lang='en'):
         """ returns the descriptor for the given synonym in the diven language """
         assert( len(lang)==2 )
-        result = self.getWikipediaSearchResults(synonym, lang)
         try:
+            result = self.getWikipediaSearchResults(synonym, lang)
             return result[0]
-        except IndexError:
+        except (HTTPError, IndexError):
             return None
 
 
     def getWikipediaSearchResults(self, term, lang):
-        """ returns a list of wikipedia search results for the given term """
+        """ returns a list of wikipedia search results for the given term 
+            or None if nothing was found 
+        """
         search_query = WIKIPEDIA_SEARCH_QUERY % (lang, quote(term) )
         f=self.r.open(search_query)
         results = WikiPedia._parse_wikipedia_search_results( f.read() )
@@ -66,15 +69,15 @@ class WikiPedia(object):
 
         return result
 
-@attr("remote")
 class TestDescriptor(object):
     """ tests the http class """
     TEST_TERMS = { 
                    None: ('noresults_ksfdasdf', ),
-                   'Pope Benedict XVI': ('pope benedict xvi', 'joseph ratzinger'),
-                   'Wolfgang Amadeus Mozart': ( 'wolfgang amadeus', 'mozart' ), 
+                   'Wolfgang Amadeus Mozart': ( 'wolfgang amadeus', 'mozart', ), 
+                   'Pope Benedict XVI': ('pope benedict xvi', 'joseph ratzinger', ),
                  }
 
+    @attr("remote")
     def testDescriptor(self):
         """ tries to retrieve the following url's from the list """
 
