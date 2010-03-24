@@ -27,6 +27,8 @@ from urllib import urlencode
 from xml.dom.minidom import parseString
 from nose.plugins.attrib import attr
 
+import unittest
+
 WIKIPEDIA_API_QUERY = 'http://%s.wikipedia.org/w/api.php'
 
 class WikiPedia(object):
@@ -98,27 +100,45 @@ class CleanupWikiText(object):
         return "\n".join(cleaned)
         
 
-class TestWikiPedia(object):
+class TestWikiPedia(unittest.TestCase):
     """ tests the WikiPedia Class """
     TEST_QUERIES= { 
                 ('Energy', 'en'):  ('fossil', 'renewable'),
                 ('Energie', 'de'): ('kinetisch', 'Verbrauch', "Atom"),
                  }
 
+    def setUp(self):
+        self.w = WikiPedia()
+
     @attr("remote")
     def testRetrievePage(self):
         """ tries to retrieve the following url's from the list """
 
-        w = WikiPedia()
         for (keyword, lang), searchTerms in self.TEST_QUERIES.iteritems():
-            wikiPediaText = w.getWikiPage(keyword, lang=lang)
+            wikiPediaText = self.w.getWikiPage(keyword, lang=lang)
             for term in searchTerms:
                 print keyword, term
                 assert term in wikiPediaText
 
     @attr("remote")
     def testAlternations(self):
-        w=WikiPedia()
-        print w._getPageNameAlterations("Greenhouse Gas Emissions")
-        text = w.getWikiPage("oil", "en")
-        print CleanupWikiText.removeLanguageReferences( text )
+
+        print self.w._getPageNameAlterations("Greenhouse Gas Emissions")
+        assert self.w._getPageNameAlterations("Greenhouse Gas Emissions") == ['Greenhouse Gas Emissions', 'Greenhouse gas emissions']
+        
+    @attr("remote")
+    def test_removeLanguageReferences(self):
+        
+        text = self.w.getWikiPage('Energy', 'en')
+
+        otherLanguages = ['fi:Energia', 'sl:Energija]', 'mwl:Einergie']
+
+        cleantText = CleanupWikiText.removeLanguageReferences( text )
+
+        for term in otherLanguages:
+            
+            assert term not in cleantText
+
+if __name__ == '__main__':
+    
+    unittest.main()
