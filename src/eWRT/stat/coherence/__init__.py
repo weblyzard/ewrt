@@ -4,6 +4,7 @@
 """
 
 # (C)opyrights 2010 by Albert Weichselbraun <albert@weichselbraun.net>
+#                      Johannes Duong <johannes.duong@wu.ac.at>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -111,7 +112,6 @@ class TestCoherence(TestCase):
               http://en.wikipedia.org/wiki/Dice's_coefficient
         """
         assert DiceCoherence.getCoherence( 4, 4, 1 ) == 0.25
-
 
     def testPMI(self):
         """ tests the computation of the PMI based on the results
