@@ -413,7 +413,7 @@ class TestDiskCached(TestCached):
         """ verifies that delitem works """
         # diskcache
         assert self.diskCache.fetch(str, 2) == "2"
-        key = ((2,),() )
+        key = self.diskCache.getKey(2)
         assert key in self.diskCache
         del self.diskCache[key]
         assert key not in self.diskCache
