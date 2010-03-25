@@ -203,7 +203,7 @@ class MemoryCache(Cache):
         self.max_cache_size = max_cache_size
 
     def fetch(self, fetch_function, *args, **kargs):
-        key = (args, tuple(kargs.items()) ) 
+        key = self.getKey(*args, **kargs) 
         return self.fetchObjectId(key, fetch_function, *args, **kargs)
         
     def fetchObjectId(self, key, fetch_function, *args, **kargs):
