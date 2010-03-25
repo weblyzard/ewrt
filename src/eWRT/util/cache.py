@@ -432,7 +432,7 @@ class TestDiskCached(TestCached):
         cached_str = DiskCache(CACHE_DIR, fn=str)
         
         assert cached_str(7) == "7"
-        assert ((7,),()) in cached_str
+        assert cached_str.getKey(7) in cached_str
 
             
     def testIterableCache(self):
