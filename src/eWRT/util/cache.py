@@ -62,7 +62,7 @@ class Cache(object):
     @staticmethod
     def getKey( *args, **kargs):
         """ returns the key for a set of function parameters """
-        return (args, tuple(kargs.items())
+        return (args, tuple(kargs.items()) )
 
     @staticmethod
     def getObjectId( obj ):
