@@ -406,7 +406,7 @@ class TestDiskCached(TestCached):
         
         # diskcached
         assert self.add(12,14) == 26
-        assert ((12,14),()) in self.add
+        assert self.add.getKey(12,14) in self.add
         assert 9 not in self.add
         
     def testDelItem(self):
@@ -420,7 +420,8 @@ class TestDiskCached(TestCached):
 
         # diskcached
         assert self.add(12,13) == 25
-        key = ((12,13), ())
+        key = self.add.getKey(12,13)
+        assert key == ((12,13), ())
         assert key in self.add
         del self.add[key]
         assert key not in self.add     
