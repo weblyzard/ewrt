@@ -60,6 +60,11 @@ class Cache(object):
         raise NotImplementedError
 
     @staticmethod
+    def getKey( *args, **kargs):
+        """ returns the key for a set of function parameters """
+        return (args, tuple(kargs.items())
+
+    @staticmethod
     def getObjectId( obj ):
         """ returns an identifier representing the object """
         return sha1(str( obj )).hexdigest()
@@ -98,7 +103,7 @@ class DiskCache(Cache):
 
             @returns the object (retrieved from the cache or computed)
         """
-        objectId = (args, tuple(kargs.items())) 
+        objectId = self.getKey(*args, **kargs) 
         return self.fetchObjectId(objectId, fetch_function, *args, **kargs)
 
     def __contains__(self, key):
