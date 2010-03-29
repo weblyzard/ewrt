@@ -89,7 +89,7 @@ class Delicious(TagInfoService):
             @param content of the tags' page
             @return a list of related tags
         """
-        return re.findall('<span class="tag-chain-item-span">(\w*?)</span>', content, re.IGNORECASE|re.DOTALL)
+        return re.findall('<span class="(?:tag-chain-item-span|tagItem)">(\w*?)</span>', content, re.IGNORECASE|re.DOTALL)
  
     # 
     # helper functions
