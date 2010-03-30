@@ -40,6 +40,10 @@ class Delicious(TagInfoService):
     DELICIOUS_TAG_URL = "http://delicious.com/tag/%s"
     RE_COUNT = re.compile("<p>(\d+) Bookmarks</p></div>")
 
+    NEXT_EXP = re.compile('\?page=(\S+)\" class=\"pn next\">Next')
+    MAX_PAGES = 0 # set to zero if pages should not be iterated
+    
+
     __slots__ = ()
 
     @staticmethod
@@ -59,7 +63,7 @@ class Delicious(TagInfoService):
         return Delicious._parse_counts(content)
 
     @staticmethod
-    def getRelatedTags( tags, retrieveTagInfo=False ):
+    def getRelatedTags( tags, retrieveTagInfo=False, pageNum=0 ):
         """ returns related tags for the given ones.
             @param  tags             list of tags
             @param  retrieveTagInfo  determines whether we will retrieve the tagInfo for the related tags
@@ -68,10 +72,20 @@ class Delicious(TagInfoService):
 
         assert( isinstance(tags, tuple) or isinstance(tags, list) )
         tag_url = Delicious._parse_tag_url( tags )
+
+        if not pageNum == 0:
+            tag_url = '%s?page=%s' % (tag_url, pageNum)
+
         content = Delicious.get_content( tag_url )
 
-        related_tags = Delicious._getNGramRelatedTags( content ) if '+' in tag_url else Delicious._getMonogramRelatedTags( content )
+        m = Delicious.NEXT_EXP.search(content)
+
+        related_tags = (Delicious._getNGramRelatedTags( content ) if '+' in tag_url else Delicious._getMonogramRelatedTags( content ))
         related_tags_with_count = [ (tag, Delicious.getTagInfo( (tag,) ) if retrieveTagInfo else None) for tag in related_tags ]
+
+        # also find the tags in the next pages       
+        if m and int(pageNum) < Delicious.MAX_PAGES:
+            related_tags_with_count.extend( Delicious.getRelatedTags(tags, pageNum=m.group(1)) )
 
         return related_tags_with_count
 
@@ -164,11 +178,17 @@ class TestDelicious(object):
         assert 'linux' not in related_tags
 
 
+    def testGetNextPage(self):
+        
+        
+        Delicious.DELICIOUS_NEXT_EXP
 
 
 if __name__ == '__main__':
 
-    url = sys.argv[1].strip()
-    print Delicious.getUrlInfo( url ), "counts"
+#    url = sys.argv[1].strip()
+#    print Delicious.getUrlInfo( url ), "counts"
+#    print Delicious.getTagInfo( ("debian", "linux") ), "counts"
+#    print Delicious.getRelatedTag( ("debian", "linux") ), "counts"
     print Delicious.getTagInfo( ("debian", "linux") ), "counts"
-    print Delicious.getRelatedTag( ("debian", "linux") ), "counts"
+    print Delicious.getRelatedTags(('debian', 'linux'))

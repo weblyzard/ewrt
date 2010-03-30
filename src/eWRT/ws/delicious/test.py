@@ -26,7 +26,7 @@ DELICIOUS_TEST_URLS = ( 'http://www.iaeste.at', 'http://www.wu-wien.ac.at', 'htt
 
 DELICIOUS_TEST_TAGS = [("linux",), ("information",), ("information", "retrieval"),("linux", "debian"),("algore",)]
 
-class DeliciousTest( unittest.TestCase ):
+class TestDelicious( unittest.TestCase ):
 
     def test_url_info(self):
         for url in DELICIOUS_TEST_URLS:
