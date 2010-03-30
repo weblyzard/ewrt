@@ -38,6 +38,7 @@ from eWRT.access.http import Retrieve
 from urllib import urlencode
 from eWRT.config import OPENCALAIS_KEY, OPENCALAIS_CACHE_DIR, OPENCALAIS_URL, USER_AGENT
 from eWRT.util.cache import DiskCache
+import re
 
 PARAMS_XML = """
 <c:params xmlns:c="http://s.opencalais.com/1/pred/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"> 
@@ -133,15 +134,14 @@ class Calais:
         """
         result = []
         comment = False
-        for line in xml_data.split("\n"):
-            if "<!--" in line:
-                comment = True
-            if comment is False:
-                result.append( line )
-            if "-->" in line:
-                comment = False
 
-        return "\n".join( result )
+        while '<!--' in xml_data:
+
+            xml_data = re.sub('<!--[\s\S]*?-->', '', xml_data)
+            if not re.search('<!--', xml_data):
+                break
+            
+        return xml_data
 
 
     @staticmethod
@@ -151,14 +151,21 @@ class Calais:
         things = []
 
         xml_data = Calais.cleanup_xml(xml_data)
+
         # f= open("tmp","w"); f.write(xml_data.encode("utf8")); f.close()
         dom = minidom.parseString( xml_data.encode("utf8" ))
+        
         for document in dom.getElementsByTagName("CalaisSimpleOutputFormat"):
             for annotations in document.childNodes:
                 if not annotations.hasChildNodes():
                     continue
+                
+                if annotations.nodeName == 'Topics':
+                    annotations = annotations.firstChild
+                
                 nodeName = annotations.nodeName
                 nodeAttr = dict(annotations.attributes.items())
+        
                 nodeAttr.update( {'data': annotations.firstChild.data } )
 
                 things.append( {nodeName: nodeAttr } )
