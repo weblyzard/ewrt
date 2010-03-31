@@ -1,6 +1,6 @@
 import unittest
 from __init__ import GeoLyzard, GeoLyzardIterator
-from warnings import warnings
+from warnings import warn
 
 class TestGeoLyzard( unittest.TestCase ):
 
