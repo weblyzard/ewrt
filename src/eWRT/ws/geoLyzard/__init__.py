@@ -19,6 +19,7 @@ DEFAULT_BATCH_SIZE = 5
 
 def _pack(data):
     """ prepares the data for transmittion to the tagger. """
+    
     outData = StringIO()
     d = GzipFile( mode="w", fileobj = outData )
     d.write(data)
@@ -77,14 +78,22 @@ class GeoLyzard(object):
 
     @staticmethod
     @DiskCached("./.geoLyzard")
-    def getGeoEntities( text, gazetteer="C10000" ):
+    def getGeoEntities( text, gazetteer="C", compress=True ):
         """ determins the geoEntites occurring in the given text
             @param[in] input text
+            @param compress: if retrieving geoEntities fails, try setting compress to False
             @returns a list of geographic entities
         """
         xmlrpc_server = ServerProxy( GEOLYZARD_URL )
-        res = GeoLyzard.unpackTaggerResult( 
-            xmlrpc_server.Tagger.getTextGeoLocation( gazetteer, { 'id': _pack( text) } ))
+
+        if compress:
+            content = _pack(text)
+        else:
+            content = b64encode(text)
+
+        annotations = xmlrpc_server.Tagger.getTextGeoLocation( gazetteer, { 'id': content } )
+
+        res = GeoLyzard.unpackTaggerResult( annotations )
 
         return res
 
@@ -146,6 +155,7 @@ class TestGeoLyzard(object):
 if __name__ == '__main__':
         TEXT = "Lainach is a village in the district Spital an der Drau. Both are located in Carinthia, the most soutern state of Austria"
         res = GeoLyzard.getGeoEntities( TEXT )
+        print res
         myCatch = GeoLyzard.getMostRelevantEntity( res )
         occurrences = GeoLyzard.getOccurrences( res )
         print res, myCatch
