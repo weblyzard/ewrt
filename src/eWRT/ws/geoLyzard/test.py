@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+
 import unittest
 from __init__ import GeoLyzard, GeoLyzardIterator
 from warnings import warn
@@ -29,11 +33,11 @@ class TestGeoLyzard( unittest.TestCase ):
     def testGeoLyzard(self):
         ''' test getGeoEntities '''
         
-        res = GeoLyzard.getGeoEntities('Lainach is a village in the district Spital an der Drau. Both are located in Carinthia, the most soutern state of Austria', compress=False)
+        res = GeoLyzard.getGeoEntities('Lainach is a village in the district Spital an der Drau. Both are located in Carinthia, the most soutern state of Austria.', compress=True)
         print res
         assert res['id'][0]['confidence'] == '0.25'
-        assert res['id'][0]['name'] =='Republic of Austria'
-        assert res['id'][0]['entity_id'] =='2782113'
+        assert res['id'][0]['name'] =='Bundesland Kärnten'
+        assert res['id'][0]['entity_id'] =='2774686'
         
         
 if __name__ == '__main__':

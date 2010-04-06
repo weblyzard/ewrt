@@ -153,7 +153,8 @@ class TestGeoLyzard(object):
 
 
 if __name__ == '__main__':
-        TEXT = "Lainach is a village in the district Spital an der Drau. Both are located in Carinthia, the most soutern state of Austria"
+        #TEXT = "Lainach is a village in the district Spital an der Drau. Both are located in Carinthia, the most soutern state of Austria"
+        TEXT = "Perth is a wonderfull city in Australia."
         res = GeoLyzard.getGeoEntities( TEXT )
         print res
         myCatch = GeoLyzard.getMostRelevantEntity( res )
