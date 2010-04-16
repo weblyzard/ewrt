@@ -15,7 +15,7 @@ try:
 except ImportError:
     pass
 
-DEFAULT_BATCH_SIZE = 5
+DEFAULT_BATCH_SIZE = 50
 
 def _pack(data):
     """ prepares the data for transmittion to the tagger. """
