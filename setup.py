@@ -36,6 +36,7 @@ setup(
                       'eWRT.input.corpus.reuters',
                       'eWRT.input.corpus.bbc',
                       'eWRT.lib',
+                      'eWRT.stat',
                       'eWRT.stat.coherence',
                       'eWRT.ontology',
                       'eWRT.ontology.eval',
