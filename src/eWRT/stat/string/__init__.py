@@ -26,14 +26,27 @@ from collections import defaultdict
 # define some basic mathematical functions
 dot=lambda x,y: map(mul, x, y)
 
-def lev(a, b):
+def lev(s1, s2):
     """ Levenshtein string edit distance
         source: 
         http://en.wikibooks.org/wiki/Algorithm_implementation/Strings/Levenshtein_distance#Python
     """
-    if not a: return len(b)
-    if not b: return len(a)
-    return min(lev(a[1:], b[1:]) + (a[0] != b[0]), lev(a[1:], b) + 1, lev(a, b[1:]) + 1)
+    if len(s1) < len(s2):
+        return lev(s2, s1)
+    if not s1:
+        return len(s2)
+ 
+    previous_row = xrange(len(s2) + 1)
+    for i, c1 in enumerate(s1):
+        current_row = [i + 1]
+        for j, c2 in enumerate(s2):
+            insertions = previous_row[j + 1] + 1 # j+1 instead of j since previous_row and current_row are one character longer
+            deletions = current_row[j] + 1       # than s2
+            substitutions = previous_row[j] + (c1 != c2)
+            current_row.append(min(insertions, deletions, substitutions))
+        previous_row = current_row
+ 
+    return previous_row[-1]
 
 
 class VectorSpaceModel:
@@ -84,6 +97,7 @@ def testLevenshteinDistance():
     assert lev("alfred", "alfred") == 0
     assert lev("tothi", "alfredKurz") == 10
     assert lev("maria", "marion") == 2
+    assert lev("safety measures", "safety measures") == 0
     
 from unittest import TestCase
 
