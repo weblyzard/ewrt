@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cmap xmlns:dcterms="http://purl.org/dc/terms/" xmlns="http://cmap.ihmc.us/xml/cmap/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:vcard="http://www.w3.org/2001/vcard-rdf/3.0#">
+    <res-meta>
+        <dc:title>embeddedsystemsdesign_13639918</dc:title>
+        <dc:creator>
+            <vcard:FN>No creator</vcard:FN>
+        </dc:creator>
+        <dcterms:created>2010-06-08T14:39:18+02:00</dcterms:created>
+        <dcterms:modified>2010-06-08T14:39:18+02:00</dcterms:modified>
+        <dc:language>en</dc:language>
+        <dc:format>x-cmap/x-storable</dc:format>
+        <dc:publisher>FIHMC CmapTools 5.03</dc:publisher>
+        <dc:extent>6582 bytes</dc:extent>
+        <dc:source>cmap:1GBMBSFPM-29G87K8-1:1HCQZG4TV-RZJTBZ-Y:1HCQZG4YY-1TT6312-97</dc:source>
+    </res-meta>
+    <map width="1040" height="436">
+        <concept-list>
+            <concept id="1H37DQRBG-1914VY7-ZY" label="Volitile"/>
+            <concept id="1H37CWJ2S-8Y9PBY-NZ" label="Timers"/>
+            <concept id="1H37CSK1H-J87BJC-JR" label="CPU"/>
+            <concept id="1H37DH6X1-26Y798X-TK" label="DRAM"/>
+            <concept id="1H37CSZTQ-226NMJN-KS" label="RAM"/>
+            <concept id="1H37CGP76-13LZQM2-D3" label="Embedded C"/>
+            <concept id="1H37CCSGW-N8ZCYX-8S" label="Hardware"/>
+            <concept id="1H37CB79S-79BMVT-7T" label="Software"/>
+            <concept id="1H37CTKG7-ZWGJT6-LL" label="ROM"/>
+            <concept id="1H37DJ2JB-ZT1SQL-W6" label="SRAM"/>
+            <concept id="1H37C8VBR-25GDRMB-6N" label="MicroControllers"/>
+            <concept id="1H37CV45R-26KKDD8-M8" label="I/O Ports"/>
+            <concept id="1H37CHRFT-V9D7ZR-FP" label="Assembly"/>
+            <concept id="1H37CYZJZ-MC9CG0-SL" label="Control Unit"/>
+            <concept id="1H37DQVK3-1G8SQ3Y-10Q" label="Non-Volitile"/>
+            <concept id="1H37CY21B-26DLYTM-PX" label="Arithmetic Logic Unit"/>
+        </concept-list>
+        <linking-phrase-list>
+            <linking-phrase id="1H37CY21B-24HTJFK-Q0" label="Consists of"/>
+            <linking-phrase id="1H37DQRBG-1FKQLQY-101" label="This is"/>
+            <linking-phrase id="1H37DH6X1-19Z668J-TN" label="Different Types"/>
+            <linking-phrase id="1H37DQVK3-1JQ1N0J-10T" label="This is"/>
+            <linking-phrase id="1H37CGP76-1GK1GB3-D6" label="Different types of languages"/>
+            <linking-phrase id="1H37CSK20-1SZ15C5-JV" label="Main Components"/>
+            <linking-phrase id="1H37CCSHC-14MQJFV-8W" label="Its consists of"/>
+            <linking-phrase id="1H37CB7B9-1L0WZQ0-7X" label="Instructions of the mc is"/>
+        </linking-phrase-list>
+        <connection-list>
+            <connection id="1H37CSK20-BF340M-K4" from-id="1H37CSK20-1SZ15C5-JV" to-id="1H37CSK1H-J87BJC-JR"/>
+            <connection id="1H37CB7B9-QF5JQR-87" from-id="1H37CB7B9-1L0WZQ0-7X" to-id="1H37CB79S-79BMVT-7T"/>
+            <connection id="1H37CB7B9-3L758N-81" from-id="1H37C8VBR-25GDRMB-6N" to-id="1H37CB7B9-1L0WZQ0-7X"/>
+            <connection id="1H37CTKG7-1MK885G-LP" from-id="1H37CSK20-1SZ15C5-JV" to-id="1H37CTKG7-ZWGJT6-LL"/>
+            <connection id="1H37CGP76-D74HXQ-DH" from-id="1H37CGP76-1GK1GB3-D6" to-id="1H37CGP76-13LZQM2-D3"/>
+            <connection id="1H37CY21B-18JCJSK-Q9" from-id="1H37CY21B-24HTJFK-Q0" to-id="1H37CY21B-26DLYTM-PX"/>
+            <connection id="1H37DH6X1-1W0HMS1-TY" from-id="1H37DH6X1-19Z668J-TN" to-id="1H37DH6X1-26Y798X-TK"/>
+            <connection id="1H37CSK20-K8WLDX-JY" from-id="1H37CCSGW-N8ZCYX-8S" to-id="1H37CSK20-1SZ15C5-JV"/>
+            <connection id="1H37CSZTQ-WW1RMT-KW" from-id="1H37CSK20-1SZ15C5-JV" to-id="1H37CSZTQ-226NMJN-KS"/>
+            <connection id="1H37DQVK3-2BDMK6C-112" from-id="1H37DQVK3-1JQ1N0J-10T" to-id="1H37DQVK3-1G8SQ3Y-10Q"/>
+            <connection id="1H37CYZJZ-XT218D-SP" from-id="1H37CY21B-24HTJFK-Q0" to-id="1H37CYZJZ-MC9CG0-SL"/>
+            <connection id="1H37DJ2JV-2843SVF-W9" from-id="1H37DH6X1-19Z668J-TN" to-id="1H37DJ2JB-ZT1SQL-W6"/>
+            <connection id="1H37DH6X1-L8CG1B-TR" from-id="1H37CSZTQ-226NMJN-KS" to-id="1H37DH6X1-19Z668J-TN"/>
+            <connection id="1H37CV45R-22PYQ1R-MC" from-id="1H37CSK20-1SZ15C5-JV" to-id="1H37CV45R-26KKDD8-M8"/>
+            <connection id="1H37DQRBG-9NF9Z1-104" from-id="1H37CSZTQ-226NMJN-KS" to-id="1H37DQRBG-1FKQLQY-101"/>
+            <connection id="1H37CHRFT-1K1737X-FS" from-id="1H37CGP76-1GK1GB3-D6" to-id="1H37CHRFT-V9D7ZR-FP"/>
+            <connection id="1H37CY21B-157LJVF-Q3" from-id="1H37CSK1H-J87BJC-JR" to-id="1H37CY21B-24HTJFK-Q0"/>
+            <connection id="1H37CWJ2S-X6SMVQ-P2" from-id="1H37CSK20-1SZ15C5-JV" to-id="1H37CWJ2S-8Y9PBY-NZ"/>
+            <connection id="1H37CCSHC-X3XYL0-8Z" from-id="1H37C8VBR-25GDRMB-6N" to-id="1H37CCSHC-14MQJFV-8W"/>
+            <connection id="1H37CCSHC-1FSQGPS-94" from-id="1H37CCSHC-14MQJFV-8W" to-id="1H37CCSGW-N8ZCYX-8S"/>
+            <connection id="1H37CGP76-26060YN-D9" from-id="1H37CB79S-79BMVT-7T" to-id="1H37CGP76-1GK1GB3-D6"/>
+            <connection id="1H37DQVK3-1YGGGWP-10X" from-id="1H37CTKG7-ZWGJT6-LL" to-id="1H37DQVK3-1JQ1N0J-10T"/>
+            <connection id="1H37DQRBG-235MFMS-109" from-id="1H37DQRBG-1FKQLQY-101" to-id="1H37DQRBG-1914VY7-ZY"/>
+        </connection-list>
+        <concept-appearance-list>
+            <concept-appearance id="1H37DQRBG-1914VY7-ZY" x="737" y="368" width="57" height="25"/>
+            <concept-appearance id="1H37CWJ2S-8Y9PBY-NZ" x="965" y="277" width="57" height="25"/>
+            <concept-appearance id="1H37CSK1H-J87BJC-JR" x="516" y="280" width="42" height="25"/>
+            <concept-appearance id="1H37DH6X1-26Y798X-TK" x="594" y="367" width="51" height="25"/>
+            <concept-appearance id="1H37CSZTQ-226NMJN-KS" x="643" y="276" width="42" height="25"/>
+            <concept-appearance id="1H37CGP76-13LZQM2-D3" x="122" y="276" width="96" height="25"/>
+            <concept-appearance id="1H37CCSGW-N8ZCYX-8S" x="714" y="152" width="78" height="25"/>
+            <concept-appearance id="1H37CB79S-79BMVT-7T" x="314" y="173" width="73" height="25"/>
+            <concept-appearance id="1H37CTKG7-ZWGJT6-LL" x="742" y="278" width="44" height="25"/>
+            <concept-appearance id="1H37DJ2JB-ZT1SQL-W6" x="669" y="366" width="50" height="25"/>
+            <concept-appearance id="1H37C8VBR-25GDRMB-6N" x="485" y="64" width="117" min-width="106" height="33" min-height="25"/>
+            <concept-appearance id="1H37CV45R-26KKDD8-M8" x="854" y="276" width="73" height="27"/>
+            <concept-appearance id="1H37CHRFT-V9D7ZR-FP" x="268" y="279" width="75" height="28"/>
+            <concept-appearance id="1H37CYZJZ-MC9CG0-SL" x="493" y="368" width="91" height="25"/>
+            <concept-appearance id="1H37DQVK3-1G8SQ3Y-10Q" x="842" y="377" width="87" height="25"/>
+            <concept-appearance id="1H37CY21B-26DLYTM-PX" x="326" y="374" width="143" height="28"/>
+        </concept-appearance-list>
+        <linking-phrase-appearance-list>
+            <linking-phrase-appearance id="1H37CY21B-24HTJFK-Q0" x="421" y="316" width="72" height="11"/>
+            <linking-phrase-appearance id="1H37DQRBG-1FKQLQY-101" x="706" y="320" width="41" height="11"/>
+            <linking-phrase-appearance id="1H37DH6X1-19Z668J-TN" x="595" y="323" width="97" height="14"/>
+            <linking-phrase-appearance id="1H37DQVK3-1JQ1N0J-10T" x="775" y="321" width="41" height="11"/>
+            <linking-phrase-appearance id="1H37CGP76-1GK1GB3-D6" x="201" y="221" width="181" height="14"/>
+            <linking-phrase-appearance id="1H37CSK20-1SZ15C5-JV" x="734" y="207" width="115" height="13"/>
+            <linking-phrase-appearance id="1H37CCSHC-14MQJFV-8W" x="623" y="111" width="90" height="11"/>
+            <linking-phrase-appearance id="1H37CB7B9-1L0WZQ0-7X" x="353" y="120" width="153" height="11"/>
+        </linking-phrase-appearance-list>
+        <connection-appearance-list>
+            <connection-appearance id="1H37CSK20-BF340M-K4" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37CB7B9-QF5JQR-87" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37CB7B9-3L758N-81" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37CTKG7-1MK885G-LP" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37CGP76-D74HXQ-DH" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37CY21B-18JCJSK-Q9" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37DH6X1-1W0HMS1-TY" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37CSK20-K8WLDX-JY" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37CSZTQ-WW1RMT-KW" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37DQVK3-2BDMK6C-112" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37CYZJZ-XT218D-SP" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37DJ2JV-2843SVF-W9" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37DH6X1-L8CG1B-TR" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37CV45R-22PYQ1R-MC" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37DQRBG-9NF9Z1-104" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37CHRFT-1K1737X-FS" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37CY21B-157LJVF-Q3" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37CWJ2S-X6SMVQ-P2" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37CCSHC-X3XYL0-8Z" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37CCSHC-1FSQGPS-94" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37CGP76-26060YN-D9" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37DQVK3-1YGGGWP-10X" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1H37DQRBG-235MFMS-109" from-pos="center" to-pos="center"/>
+        </connection-appearance-list>
+        <style-sheet-list>
+            <style-sheet id="_Default_">
+                <map-style background-color="255,255,255,0" image-style="full" image-top-left="0,0"/>
+                <concept-style font-name="Verdana" font-size="12" font-style="plain" font-color="0,0,0,255" text-margin="4" background-color="237,244,246,255" background-image-style="full" border-color="0,0,0,255" border-style="solid" border-thickness="1"
+                    border-shape="rounded-rectangle" text-alignment="center" shadow-color="none"/>
+                <linking-phrase-style font-name="Verdana" font-size="12" font-style="plain" font-color="0,0,0,255" text-margin="1" background-color="0,0,255,0" background-image-style="full" border-color="0,0,0,0" border-style="solid" border-thickness="1"
+                    border-shape="rectangle" text-alignment="center" shadow-color="none"/>
+                <connection-style color="0,0,0,255" style="solid" thickness="1" type="straight" arrowhead="if-to-concept-and-slopes-up"/>
+                <resource-style font-name="SanSerif" font-size="12" font-style="plain" font-color="0,0,0,255" background-color="192,192,192,255"/>
+            </style-sheet>
+        </style-sheet-list>
+        <extra-graphical-properties-list>
+            <properties-list id="1HCQZG4YY-1TT6312-97">
+                <property key="StyleSheetGroup_0" value="//*@!#$%%^&amp;*()() No Grouped StyleSheets @"/>
+            </properties-list>
+        </extra-graphical-properties-list>
+    </map>
+</cmap>

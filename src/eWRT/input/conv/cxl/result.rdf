@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+   xmlns:_3="http://www.weblyzard.com/2005/03/31/wl#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#software">
+    <_3:instructionsOfTheMcIs rdf:resource="http://www.weblyzard.com/2005/03/31/wl#microcontrollers"/>
+    <rdfs:label>Software</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#embeddedC">
+    <rdfs:label>Embedded C</rdfs:label>
+    <_3:differentTypesOfLanguages rdf:resource="http://www.weblyzard.com/2005/03/31/wl#software"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#ram">
+    <rdfs:label>RAM</rdfs:label>
+    <_3:mainComponents rdf:resource="http://www.weblyzard.com/2005/03/31/wl#hardware"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#instructionsOfTheMcIs">
+    <rdfs:label>Instructions of the mc is</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#dram">
+    <rdfs:label>DRAM</rdfs:label>
+    <_3:differentTypes rdf:resource="http://www.weblyzard.com/2005/03/31/wl#ram"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#non-volitile">
+    <_3:thisIs rdf:resource="http://www.weblyzard.com/2005/03/31/wl#rom"/>
+    <rdfs:label>Non-Volitile</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#controlUnit">
+    <rdfs:label>Control Unit</rdfs:label>
+    <_3:consistsOf rdf:resource="http://www.weblyzard.com/2005/03/31/wl#cpu"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#thisIs">
+    <rdfs:label>This is</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#timers">
+    <rdfs:label>Timers</rdfs:label>
+    <_3:mainComponents rdf:resource="http://www.weblyzard.com/2005/03/31/wl#hardware"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#itsConsistsOf">
+    <rdfs:label>Its consists of</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#hardware">
+    <rdfs:label>Hardware</rdfs:label>
+    <_3:itsConsistsOf rdf:resource="http://www.weblyzard.com/2005/03/31/wl#microcontrollers"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#sram">
+    <rdfs:label>SRAM</rdfs:label>
+    <_3:differentTypes rdf:resource="http://www.weblyzard.com/2005/03/31/wl#ram"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#arithmeticLogicUnit">
+    <rdfs:label>Arithmetic Logic Unit</rdfs:label>
+    <_3:consistsOf rdf:resource="http://www.weblyzard.com/2005/03/31/wl#cpu"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#consistsOf">
+    <rdfs:label>Consists of</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#assembly">
+    <rdfs:label>Assembly</rdfs:label>
+    <_3:differentTypesOfLanguages rdf:resource="http://www.weblyzard.com/2005/03/31/wl#software"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#i/oPorts">
+    <rdfs:label>I/O Ports</rdfs:label>
+    <_3:mainComponents rdf:resource="http://www.weblyzard.com/2005/03/31/wl#hardware"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#mainComponents">
+    <rdfs:label>Main Components</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#volitile">
+    <_3:thisIs rdf:resource="http://www.weblyzard.com/2005/03/31/wl#ram"/>
+    <rdfs:label>Volitile</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#differentTypes">
+    <rdfs:label>Different Types</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#microcontrollers">
+    <rdfs:label>MicroControllers</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#rom">
+    <rdfs:label>ROM</rdfs:label>
+    <_3:mainComponents rdf:resource="http://www.weblyzard.com/2005/03/31/wl#hardware"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#differentTypesOfLanguages">
+    <rdfs:label>Different types of languages</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#cpu">
+    <rdfs:label>CPU</rdfs:label>
+    <_3:mainComponents rdf:resource="http://www.weblyzard.com/2005/03/31/wl#hardware"/>
+  </rdf:Description>
+</rdf:RDF>
