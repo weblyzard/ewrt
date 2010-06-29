@@ -29,6 +29,8 @@ from itertools import izip_longest
 from operator import mul, itemgetter
 from collections import defaultdict
 
+from eWRT.lib.thirdparty.advas.phonetics import caverphone, metaphone, nysiis
+
 # define some basic mathematical functions
 dot=lambda x,y: map(mul, x, y)
 
@@ -122,6 +124,37 @@ def damerauLev(seq1, seq2):
                 thisrow[y] = min(thisrow[y], twoago[y - 2] + 1)
     return thisrow[len(seq2) - 1]
 
+def soundex(name, length=4):
+    """ soundex module conforming to Knuth's algorithm
+        implementation 2000-12-24 by Gregory Jorgensen
+
+        source : http://code.activestate.com/recipes/52213-soundex-algorithm/
+        license: public domain
+    """
+
+    # digits holds the soundex values for the alphabet
+    digits = '01230120022455012623010202'
+    sndx = ''
+    fc = ''
+
+    # translate alpha chars in name to soundex digits
+    for c in name.upper():
+        if c.isalpha():
+            if not fc: fc = c   # remember first letter
+            d = digits[ord(c)-ord('A')]
+            # duplicate consecutive soundex digits are skipped
+            if not sndx or (d != sndx[-1]):
+                sndx += d
+
+    # replace first digit with first alpha character
+    sndx = fc + sndx[1:]
+
+    # remove all 0s from the soundex code
+    sndx = sndx.replace('0','')
+
+    # return soundex code padded to length characters
+    return (sndx + (length * '0'))[:length]
+
 
 class VectorSpaceModel:
     """ a class used for vector space representations """
@@ -167,6 +200,42 @@ class VectorSpaceModel:
 # --------------------------------------------------------------------
 
 from unittest import TestCase
+
+def testMetaPhone():
+    """ compares output produced by the advas metaphone
+        module with the postgres fuzzymatch functions
+        @warning: the used metaphone implementation _does not_ correspond
+                  to the one used in postgresql.
+     """
+    from warnings import warn
+    warn("the used metaphone implementation _does not_ correspond to the one use in postgres")
+    print metaphone('Microprocessor')
+    assert metaphone('Albert') == 'albrt'
+    assert metaphone('John') == 'jhn'
+    assert metaphone('Microprocessor') == 'mkrprksr'
+    
+def testNysiis():
+    """ tests the New York State Identification and Intelligence
+        Algorithm (NYSIIS) code for the given term """
+    print nysiis("Microprocessor")
+    assert nysiis("Albert").lower() == 'albard'
+    
+def testCaverphone():
+    """ tests the caverphone algorithm """
+    print caverphone("Albert")
+    assert caverphone("Albert") == "APT1111111"
+     
+
+def testSoundex():
+    """ compares the output of the soundex algorithm with
+        the output provided by postgres """
+    assert soundex("Knuth") == "K530"
+    assert soundex("Weichselbraun") == "W224"
+    assert soundex("Smith") == "S530"
+    assert soundex("Albert") == "A416"
+
+    assert soundex("Weichselbraun",8) == "W2241650"
+    
 
 def testWordSimilarity():
     """ tests the per word similarity """
