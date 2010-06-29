@@ -25,7 +25,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 import math
-from operator import mul
+from itertools import izip_longest
+from operator import mul, itemgetter
 from collections import defaultdict
 
 # define some basic mathematical functions
@@ -41,13 +42,10 @@ def wordSimilarity(s1, s2, similarityMeasure):
                wordSimilarity("as you thought", "you thought", "") 
         
     """
-    words1, words2 = s1.split(), s2.split()
-    if len(words1) > len(words2):
-        words2 += [""] * (len(words1)-len(words2))
-    else:
-        words1 += [""] * (len(words2)-len(words1))
-        
+    wordList = list( izip_longest(s1.split(), s2.split(), fillvalue="") )
+    words1, words2 = map(itemgetter(0), wordList), map(itemgetter(1), wordList)
     assert len(words1) == len(words2)
+    
     score = float(sum([ min( [ similarityMeasure(w1,w2) for w1 in words1] ) 
                  for w2 in words2 ])) / len(words1)
     return score
