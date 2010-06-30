@@ -32,7 +32,12 @@ import cProfile, pstats
 def profile(fn, logfile="profile.awi"):
     """ profile function """
     prof = cProfile.Profile()
-    prof = prof.runctx("%s()" % fn.__name__, globals(), locals())
+    
+    import __main__
+    if __main__.__file__.endswith("nosetests"):
+        prof = prof.runctx("%s()" % fn.__name__, globals(), locals())
+    else:
+        prof = prof.runctx("%s()" % fn.__name__, __main__.__dict__, __main__.__dict__ )
 
     stream = StringIO()
     stats = pstats.Stats(prof, stream=stream)
