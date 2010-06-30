@@ -33,6 +33,7 @@ def profile(fn, logfile="profile.awi"):
     """ profile function """
     prof = cProfile.Profile()
     prof = prof.runctx("%s()" % fn.__name__, globals(), locals())
+
     stream = StringIO()
     stats = pstats.Stats(prof, stream=stream)
     stats.sort_stats("time")  # Or cumulative
@@ -42,10 +43,13 @@ def profile(fn, logfile="profile.awi"):
     stats.print_callers()
     open(logfile,"w").write( stream.getvalue() )
 
-def testProfile():
+def __testFunction():
     for a in xrange(1000):
         for b in range(1000):
-            a*b
+            c = a * b
+           
+    return c
 
-if __name__ == '__main__':
-    profile(testProfile)
+def testProfile():
+    profile(__testFunction)
+
