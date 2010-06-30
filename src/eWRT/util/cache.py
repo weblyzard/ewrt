@@ -167,7 +167,7 @@ class DiskCache(Cache):
         return join(obj_dir, obj_id+self.cache_file_suffix)
  
 
-class DiskCached():
+class DiskCached(object):
     """ Decorator based on Cache for caching arbitrary function calls
         usage:
           @DiskCached("./cache/myfunction")
@@ -208,6 +208,7 @@ class MemoryCache(Cache):
         
     def fetchObjectId(self, key, fetch_function, *args, **kargs):
         # update the object's last usage time stamp
+        key = self.getObjectId(key)
         self._usage[key]     = time()  
         try:
             return self._cacheData[key]
