@@ -219,6 +219,14 @@ class MemoryCache(Cache):
                 self._cacheData[key] = obj
             return obj
 
+    def __contains__(self, key):
+        """ returns whether the key is already stored in the cache """
+        return self.getObjectId(key) in self._cacheData 
+    
+    def __delitem__(self, key):
+        """ removes the given item from the cache """
+        del self._cacheData[ self.getObjectId(key) ]
+
     def garbage_collect_cache(self):
         """ removes the object which have not been in use for the 
             longest time """
@@ -343,6 +351,14 @@ class TestCached(object):
         for x in xrange(1,20):
             assert self.sub(x,5) == x-5
             assert self.sub(x,5) == x-5
+            
+    def testContainsDel(self):
+        """ tests the contains and del functions """
+        d = MemoryCache()
+        d.fetchObjectId("10", self.add, *(), **{'a':3, 'b':4})
+        assert "10" in d
+        del d["10"]
+        assert "10" not in d
 
     def testKeywordArguments(self):
         """ tests keyword arguments """
