@@ -26,13 +26,14 @@
 #
 import math
 from itertools import izip_longest
-from operator import mul, itemgetter
+from operator import mul, itemgetter, attrgetter
 from collections import defaultdict
 
+from eWRT.util.cache import MemoryCached
 from eWRT.lib.thirdparty.advas.phonetics import caverphone, metaphone, nysiis
 
 # define some basic mathematical functions
-dot=lambda x,y: map(mul, x, y)
+dot=lambda x,y: sum(map(mul, x, y))
 
 def wordSimilarity(s1, s2, similarityMeasure):
     """ computes the given similarity metric on a strings
@@ -52,7 +53,7 @@ def wordSimilarity(s1, s2, similarityMeasure):
                  for w2 in words2 ])) / len(words1)
     return score
     
-
+@MemoryCached
 def lev(s1, s2):
     """ Levenshtein string edit distance
         source: 
@@ -75,6 +76,7 @@ def lev(s1, s2):
  
     return previous_row[-1]
 
+@MemoryCached
 def damerauLev(seq1, seq2):
     """
     Calculate the Damerau-Levenshtein distance between sequences.
@@ -124,6 +126,7 @@ def damerauLev(seq1, seq2):
                 thisrow[y] = min(thisrow[y], twoago[y - 2] + 1)
     return thisrow[len(seq2) - 1]
 
+@MemoryCached
 def soundex(name, length=4):
     """ soundex module conforming to Knuth's algorithm
         implementation 2000-12-24 by Gregory Jorgensen
@@ -184,7 +187,6 @@ class VectorSpaceModel:
         """ creates the VSM representation for the two vectors
             to compare """
         common_token_list = set( v1.keys() + v2.keys() )
-
         vsm1 = [ v1[k] for k in common_token_list ]
         vsm2 = [ v2[k] for k in common_token_list ]
         return vsm1, vsm2
@@ -192,8 +194,7 @@ class VectorSpaceModel:
     def __mul__(self, o):
         """ returns the dot-product of two vectors """
         v1, v2 = self.createVSMRepresntation(self.v, o.v)        
-        return float(sum(dot(v1, v2) )) / float( math.sqrt(sum(dot(v1,v1))) * math.sqrt(sum(dot(v2,v2))) ) 
-        
+        return float(dot(v1, v2)) / ( math.sqrt(dot(v1,v1)) * math.sqrt(dot(v2,v2)) ) 
 
 # --------------------------------------------------------------------
 # UNITTESTS
