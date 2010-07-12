@@ -111,7 +111,7 @@ class PostgresqlDb(IDB):
         if PostgresqlDb.DEBUG: 
             print qu
         cur = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        [ cur.execute(q ) for q in qu ]
+        [ cur.execute(q) for q in qu ]
         return cur.fetchall()
 
 
