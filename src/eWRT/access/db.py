@@ -92,6 +92,7 @@ class PostgresqlDb(IDB):
     """ @class 
         provides generall database access """
 
+    __db = {}           # cache db connections
     DEBUG = False
 
     def __init__(self, dbname, host="", username="", passwd=""):
@@ -100,10 +101,16 @@ class PostgresqlDb(IDB):
         self.host     = host
         self.username = username
         self.passwd   = passwd
+        self.db       = None
         self.connect()
 
     def connect(self):
-        self.db=psycopg2.connect("dbname='%s' user='%s' host='%s' password='%s'" % (self.dbname, self.username, self.host, self.passwd))
+        dbKey = (self.dbname, self.username, self.host, self.passwd)
+        if dbKey in self.__db:
+            self.db = self.__db[dbKey]
+        else:
+            self.__db[dbKey] = psycopg2.connect("dbname='%s' user='%s' host='%s' password='%s'" % (self.dbname, self.username, self.host, self.passwd)) 
+            self.db= self.__db[dbKey]
 
     def query(self,qu):
         """ queries the postgresql database """
