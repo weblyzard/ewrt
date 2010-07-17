@@ -75,6 +75,10 @@ class TestWikiDistance(object):
         assert self.wd.isSibling("swimming (sport)", "butterfly stroke")
         assert not self.wd.isSibling("cpu", "front crawl")
 
+    def testTermPairs(self):
+        """ test specific term pairs"""
+        assert self.wd.isSibling("design area", "risk") == False
+
 if __name__ == '__main__':
     pass
     
