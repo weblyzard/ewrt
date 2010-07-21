@@ -37,6 +37,7 @@ setup(
                       'eWRT.lib',
                       'eWRT.stat',
                       'eWRT.stat.coherence',
+                      'eWRT.stat.eval',
                       'eWRT.stat.string',
                       'eWRT.ontology',
                       'eWRT.ontology.compare',
