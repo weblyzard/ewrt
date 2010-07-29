@@ -27,6 +27,7 @@ from eWRT.ws.TagInfoService import TagInfoService
 from urlparse import urlsplit
 from urllib import quote
 from HTMLParser import HTMLParser
+from time import sleep
 
 try:
     from hashlib import md5
@@ -150,6 +151,7 @@ class Delicious(TagInfoService):
         f = Retrieve(Delicious.__name__).open(url)
         content = f.read()
         f.close()
+        sleep(1)
         return content
 
 class TestDelicious(object):
