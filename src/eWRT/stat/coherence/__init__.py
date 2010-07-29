@@ -93,11 +93,10 @@ class PMICoherence(Coherence):
         nx, ny, nt = float(nx), float(ny), float(nt)
 
         nz = nx + ny + nt
-        fx = (nx/nz)*exp((nx/nz)*-1)
-        fy = (ny/nz)*exp((ny/nz)*-1)
-        ft = (nt/nz)*exp((nt/nz)*-1)
-        
         try:
+            fx = (nx/nz)*exp((nx/nz)*-1)
+            fy = (ny/nz)*exp((ny/nz)*-1)
+            ft = (nt/nz)*exp((nt/nz)*-1)
             return ft/(fx*fy)
         except ZeroDivisionError:
             return None
