@@ -48,9 +48,6 @@ class Yahoo(TagInfoService):
                              'format': 'json'
         })
         url = YAHOO_SEARCH_URL % "%2B".join(map( quote, terms) ) +"?"+ params
-        
-        print url
-        
         result = eval( self.r.open(url).read() )
 
         return result['ysearchresponse']
@@ -66,9 +63,7 @@ class Yahoo(TagInfoService):
                              'context': content,
                              'output': 'json'
         })
-
         result = eval ( self.r.open(self.YAHOO_TERM_EXTRACTION_URI, params).read() )
-
         return result['ResultSet']['Result']
 
 

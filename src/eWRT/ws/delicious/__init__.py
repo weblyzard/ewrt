@@ -2,7 +2,7 @@
 
 """ uses the del.icio.us API to access information about del.icio.us URLs """
 
-# (C)opyrights 2008-2009 by Albert Weichselbraun <albert@weichselbraun.net>
+# (C)opyrights 2008-2010 by Albert Weichselbraun <albert@weichselbraun.net>
 #                           Heinz Peter Lang <hplang@langatium.net>
 # 
 # This program is free software: you can redistribute it and/or modify
