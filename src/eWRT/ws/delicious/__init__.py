@@ -25,6 +25,7 @@ import re
 from eWRT.access.http import Retrieve
 from eWRT.ws.TagInfoService import TagInfoService
 from urlparse import urlsplit
+from urllib import quote
 from HTMLParser import HTMLParser
 
 try:
@@ -123,7 +124,7 @@ class Delicious(TagInfoService):
             @param tuple/list of tags 
             @returns delicious tag url
         """
-        tags = [tag.replace(" ", "+") for tag in tags ]        
+        tags = [quote(tag.replace(" ", "+"), safe="+") for tag in tags ]        
         return Delicious.DELICIOUS_TAG_URL % "+".join(tags)
 
     @staticmethod
@@ -177,11 +178,13 @@ class TestDelicious(object):
 
         assert 'linux' not in related_tags
 
+    def testCriticalTagNames(self):
+        """ tests tag names which contain slashes, quotes, etc """
+        assert Delicious.getTagInfo( ("consequence/frequency matrix", ) ) != None
+        assert Delicious.getTagInfo( ("it's", )) != None
 
-    def testGetNextPage(self):
-        
-        
-        Delicious.DELICIOUS_NEXT_EXP
+
+
 
 
 if __name__ == '__main__':
