@@ -86,12 +86,15 @@ class YahooSearchResult(object):
 
     def getPageContent(self):
         """ @returns the content of the found web page """
+        print self.search_result['url']
         return self.r.open( self.search_result['url'] ).read()
 
     def getPageText(self):
         """ @returns the text of the found web page """
-        return HtmlToText.getText( self.getPageContent() )
-
+        try:
+            return HtmlToText.getText( self.getPageContent() )
+        except:
+            return ""
 
 class TestYahoo(object):
     """ tests the yahoo search API """
@@ -129,7 +132,6 @@ class TestYahoo(object):
     def testBorderlineYahooSearchResult(self):
         """ tests borderline cases such as empty search results """
         assert len( Yahoo.getSearchResults(self.y.query( ('ksdaf', 'sadfj93', 'kd9', ), count=10, queryParams={'view':'keyterms', 'abstract': 'long'}) ) ) == 0
-
 
 
 if __name__ == '__main__':

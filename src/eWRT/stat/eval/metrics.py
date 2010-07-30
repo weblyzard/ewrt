@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
- @package eWRT.ws.stat.eval.measures
+ @package eWRT.ws.stat.eval.metrics
  Evaluation metrics
 """
 

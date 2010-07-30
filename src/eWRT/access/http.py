@@ -49,7 +49,10 @@ class Retrieve(object):
             @returns a file object for reading the url
         """
         request = urllib2.Request( url, data )
-        request.add_header('User-Agent', USER_AGENT % self.module)
+        try:
+            request.add_header('User-Agent', USER_AGENT % self.module)
+        except TypeError:
+            request.add_header('User-Agent', USER_AGENT )
         request.add_header('Accept-encoding', 'gzip')
         self._throttle()
 

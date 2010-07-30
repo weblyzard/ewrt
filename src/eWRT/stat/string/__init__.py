@@ -182,6 +182,9 @@ class VectorSpaceModel:
             v[t] =1
         return v
 
+    def __str__(self):
+        return str(self.v)
+
     @staticmethod
     def createVSMRepresntation(v1, v2):
         """ creates the VSM representation for the two vectors
