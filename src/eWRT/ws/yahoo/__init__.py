@@ -24,47 +24,72 @@ from eWRT.access.http import Retrieve
 from urllib import urlencode, quote
 from eWRT.ws.TagInfoService import TagInfoService
 from eWRT.config import YAHOO_APP_ID, YAHOO_SEARCH_URL
+from eWRT.input.conv.html import HtmlToText
 
 class Yahoo(TagInfoService):
-    """ interfaces with yahoo's search service """
-
+    """ interfaces with yahoo's search service 
+        * Search: Yahoo! BOSS
+          (see http://developer.yahoo.com/search/boss)
+    """
     __slots__ = ('r', )
-
-    YAHOO_TERM_EXTRACTION_URI = 'http://search.yahooapis.com/ContentAnalysisService/V1/termExtraction'
 
     def __init__(self):
         self.r = Retrieve( Yahoo.__name__ )
 
-    def query(self, terms, count=0):
+    def query(self, terms, count=0, queryParams={} ):
         """ returns search results for the given terms
-            @param[in] terms ... a list of search terms
-            @param[in] count ... number of results to return (0 if we are
-                                 interested on the search meta data only).
+            @param[in] terms       ... a list of search terms
+            @param[in] count       ... number of results to return (0 if we are
+                                       interested on the search meta data only).
+            @param[in] queryParams ... a dictionary of query parameters to add to
+                                          the request
             @returns the search results
         """
         assert ( isinstance(terms, tuple) or isinstance(terms, list) )
-        params = urlencode( {'appid': YAHOO_APP_ID,
+        queryParams.update( {'appid': YAHOO_APP_ID,
                              'count': count,
                              'format': 'json'
-        })
+        } )
+        params = urlencode( queryParams )
         url = YAHOO_SEARCH_URL % "%2B".join(map( quote, terms) ) +"?"+ params
-        result = eval( self.r.open(url).read() )
-
+        result = eval( self.r.open(url).read().replace("\\/", "/" ))
         return result['ysearchresponse']
-    
+
+    @staticmethod
+    def getSearchResults(query_result):
+        """ returns a list of all search results returned by the given
+            query result.
+            @param[in] query_result     Result of the query
+        """
+        return [ YahooSearchResult(r) for r in query_result['resultset_web'] ]
+
+
     def getTagInfo(self, tag):
         """ @Override """
         return int( self.query(tag)['totalhits'] )
 
-    def extractTerms(self, content):
-        """ extract terms from yahoo search, see http://developer.yahoo.com/search/content/V1/termExtraction.html """ 
 
-        params = urlencode( {'appid': YAHOO_APP_ID,
-                             'context': content,
-                             'output': 'json'
-        })
-        result = eval ( self.r.open(self.YAHOO_TERM_EXTRACTION_URI, params).read() )
-        return result['ResultSet']['Result']
+class YahooSearchResult(object):
+    """ Perfom manipulations on yahoo search results """
+
+    __slots__ = ('r', 'search_result')
+    r = Retrieve( Yahoo.__name__, sleep_time=0 )
+
+    def __init__(self, search_result):
+        """ @param[in] search_result ... search result to query """
+        self.search_result = search_result
+
+    def getKeywords(self):
+        """ @returns the keywords for the given search_result """
+        return self.search_result['keywords']['terms']
+
+    def getPageContent(self):
+        """ @returns the content of the found web page """
+        return self.r.open( self.search_result['url'] ).read()
+
+    def getPageText(self):
+        """ @returns the text of the found web page """
+        return HtmlToText.getText( self.getPageContent() )
 
 
 class TestYahoo(object):
@@ -91,20 +116,29 @@ class TestYahoo(object):
         assert self.y.getTagInfo( ('weblyzard',)) > 10
         assert self.y.getTagInfo( ('a_query_which_should_not_appear_at_all', )) == 0
 
+    def testYahooSearchResult(self):
+        """ tests the Yahoo Search Result objects """
+        for resultSite in Yahoo.getSearchResults(self.y.query( ("linux", "firefox", ),  \
+                            count=1, queryParams={'view':'keyterms', 'abstract': 'long'} )):
+
+            print resultSite.search_result['keyterms']['terms']
+            assert len( resultSite.getPageText() ) > len(resultSite.search_result['abstract'])
+            assert 'http' in resultSite.search_result['url']
+        
 
 
 
 if __name__ == '__main__':
     y = Yahoo()
-    print y.query( ("energy",) )
-    print y.query( ("energy", "coal") )
-    print y.query( ("d'alembert", "law") )
+    #print y.query( ("energy",) )
+    #print y.query( ("energy", "coal") )
+    #print y.query( ("d'alembert", "law") )
+    r = y.query( ("linux", "python", ), count=5, queryParams={'view': 'keyterms', 'abstract': 'long'} )
+    print r
+    for entry in r['resultset_web']:
+        print entry.keys()
+        print entry['keyterms']['terms']
+        print entry['url']
+        print entry['abstract']
 
-    text = ''' 
-        appid       string (required)       The application ID. See Application IDs for more information.
-        context     string (required)     The context to extract terms from (UTF-8 encoded).
-        query     string     An optional query to help with the extraction process.
-        output     string: xml (default), json, php     The format for the output. If json is requested, the results will be returned in JSON format. If php is requested, the results will be returned in Serialized PHP format.
-        callback     string     The name of the callback function to wrap around the JSON data. The following characters are allowed: A-Z a-z 0-9 . [] and _. If output=json has not been requested, this parameter has no effect. More information on the callback can be found in the Yahoo! Developer Network JSON Documentation. ''' 
 
-    print y.extractTerms(text)
