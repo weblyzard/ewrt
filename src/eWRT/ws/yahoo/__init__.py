@@ -61,7 +61,8 @@ class Yahoo(TagInfoService):
             query result.
             @param[in] query_result     Result of the query
         """
-        return [ YahooSearchResult(r) for r in query_result['resultset_web'] ]
+        return [ YahooSearchResult(r) for r in query_result['resultset_web'] ] \
+           if 'resultset_web' in query_result else []
 
 
     def getTagInfo(self, tag):
@@ -124,7 +125,10 @@ class TestYahoo(object):
             print resultSite.search_result['keyterms']['terms']
             assert len( resultSite.getPageText() ) > len(resultSite.search_result['abstract'])
             assert 'http' in resultSite.search_result['url']
-        
+
+    def testBorderlineYahooSearchResult(self):
+        """ tests borderline cases such as empty search results """
+        assert len( Yahoo.getSearchResults(self.y.query( ('ksdaf', 'sadfj93', 'kd9', ), count=10, queryParams={'view':'keyterms', 'abstract': 'long'}) ) ) == 0
 
 
 
