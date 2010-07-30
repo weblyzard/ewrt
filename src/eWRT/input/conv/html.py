@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
- @package eWRT.convert.html
+ @package eWRT.input.conv.html
  converts HTML pages into text
 """
 
