@@ -23,7 +23,11 @@
 __Revision__="$Header$"
 
 import sys
-from os.path import expanduser
+from warnings import warn
+from os.path import expanduser, exists, dirname
+
+SYS_EWRT_CONF = "/etc/eWRT/sysconfig.py"
+USR_EWRT_CONF = expanduser("~/.eWRT/siteconfig.py")
 
 CMD_HTML_CONV="/usr/bin/lynx -stdin -width=20000 -force_html -nocolor -dump -nolist -nobold -pseudo_inlines=0 -assume_charset=%s -display_charset=utf8"
 
@@ -32,12 +36,18 @@ CMD_HTML_CONV="/usr/bin/lynx -stdin -width=20000 -force_html -nocolor -dump -nol
 #  Import config variables from locatl siteconfig
 #
 # --------------------------------------------------------------------------
-try:
-    sys.path.append( expanduser("~/.eWRT/") )
-    from siteconfig import *
-except ImportError:
-    from warnings import warn
-    warn("Could not finde siteconfig.py in ~/.eWRT")
-    
+if exists( SYS_EWRT_CONF ):
+    sys.path.append( dirname(SYS_EWRT_CONF) )
+    try:
+        from sysconfig import *
+    except ImportError:
+        warn("No siteconfig in present.")
+
+if exists( USR_EWRT_CONF ):
+    sys.path.append( dirname(USR_EWRT_CONF) )
+    try:
+        from siteconfig import *
+    except ImportError:
+        warn("Could not finde siteconfig.py in ~/.eWRT")
     
 # $Id$
