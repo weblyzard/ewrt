@@ -83,7 +83,7 @@ class StringCleanupModule(object):
 
 class RemovePunctationAndBrakets(StringCleanupModule):
     def __call__(self, s):
-        return s.replace(")", "").replace("(","").replace(",", "").replace(".", "") 
+        return s.replace(")", "").replace("(","").replace(".", "") 
 
 class RemovePossessive(StringCleanupModule):
     """ @class RemovePossessive
@@ -98,18 +98,16 @@ class FixDashSpace(StringCleanupModule):
              "semi -quantitative" -> "semi-quantitative"
     """
     RE_DASH = re.compile("(\w)(?:\s-\s?|-\s)(\w)")
-
     def __call__(self, s):
         return FixDashSpace.RE_DASH.sub(r"\1-\2", s)
 
 class RemoveEnumerations(StringCleanupModule):
     """ @class RemoveEnumerations
         removes enumerations such as
-         a) first, b) second, ... """
-
+         a) first, b) second, ... 
+    """
     RE_ENUM = re.compile("\(?[1-9a-h*][).] ")
-
-    def call(self,s).
+    def __call__(self,s):
         return RemoveEnumerations.RE_ENUM.sub("",s)
 
 
@@ -129,14 +127,15 @@ class SplitMultiTerms(PhraseCleanupModule):
     def __call__(self, l):
         result = []
         for p in l:
-            if "/" in p:
-                m = SplitMultiTerms.RE_CHOICES.search(p)
-                if m:
-                    result.append("%s %s" % (m.group(1), m.group(3)) )
-                    result.append("%s %s" % (m.group(2), m.group(3)) )
-                    continue
+            for pp in p.split(", "):
+                if "/" in p:
+                    m = SplitMultiTerms.RE_CHOICES.search(pp)
+                    if m:
+                        result.append("%s %s" % (m.group(1), m.group(3)) )
+                        result.append("%s %s" % (m.group(2), m.group(3)) )
+                        continue
 
-            result.append(p)
+                result.append(pp)
         return result
 
 class WordCleanupModule(object):
@@ -180,6 +179,7 @@ class TestPhraseCleanup(object):
         assert self.p.clean(u"run-/config") == [u"run-/config"]
 
     def testRemoveEnumerations(self):
+        print self.p.clean(u"1. fix it, 2. do it")
         assert self.p.clean(u"1. fix it, 2. do it") == [u"fix it", u"do it"]
         assert self.p.clean(u"1) fix it, 2) do it") == [u"fix it", u"do it"]
         assert self.p.clean(u"(1) fix it, (2) do it") == [u"fix it", u"do it"]
