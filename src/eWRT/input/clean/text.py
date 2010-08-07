@@ -42,7 +42,7 @@ class PhraseCleanup(object):
     @staticmethod
     def getFullCleanupProfile():
         """ returns the full cleanup profile using all cleanup modules """
-        strCleanupPipe = (unicode.lower, RemovePunctationAndBrakets(), RemovePossessive(), FixDashSpace() )
+        strCleanupPipe = (unicode.lower, RemoveEnumerations(), RemovePossessive(), FixDashSpace(), RemovePunctationAndBrakets(), )
         phrCleanupPipe = (SplitMultiTerms(), )
         wrdCleanupPipe = (FixSpeeling(), )
         return PhraseCleanup(strCleanupPipe, phrCleanupPipe, wrdCleanupPipe )
@@ -101,6 +101,16 @@ class FixDashSpace(StringCleanupModule):
 
     def __call__(self, s):
         return FixDashSpace.RE_DASH.sub(r"\1-\2", s)
+
+class RemoveEnumerations(StringCleanupModule):
+    """ @class RemoveEnumerations
+        removes enumerations such as
+         a) first, b) second, ... """
+
+    RE_ENUM = re.compile("\(?[1-9a-h*][).] ")
+
+    def call(self,s).
+        return RemoveEnumerations.RE_ENUM.sub("",s)
 
 
 class PhraseCleanupModule(object):
@@ -168,4 +178,11 @@ class TestPhraseCleanup(object):
     def testFixDashSpace(self):
         assert self.p.clean(u"semi -automatically and semi- quick") == [u"semi-automatically and semi-quick"]
         assert self.p.clean(u"run-/config") == [u"run-/config"]
+
+    def testRemoveEnumerations(self):
+        assert self.p.clean(u"1. fix it, 2. do it") == [u"fix it", u"do it"]
+        assert self.p.clean(u"1) fix it, 2) do it") == [u"fix it", u"do it"]
+        assert self.p.clean(u"(1) fix it, (2) do it") == [u"fix it", u"do it"]
+        assert self.p.clean(u"(*) fix it, (*) do it") == [u"fix it", u"do it"]
+        assert self.p.clean(u"a) fix it, b) do it") == [u"fix it", u"do it"]
 
