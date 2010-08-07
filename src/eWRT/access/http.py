@@ -27,6 +27,10 @@ from gzip import GzipFile
 
 getHostName = lambda x: "://".join( urlsplit(x)[:2] )
 
+# set default socket timeout (otherwise urllib might hang!)
+from socket import setdefaulttimeout
+setdefaulttimeout = 30  
+
 class Retrieve(object):
     """ retrieves URL's using HTTP supporting transparent
         * authentication and

@@ -31,6 +31,7 @@ setup(
                       'eWRT.access',
                       'eWRT.config',
                       'eWRT.input',
+                      'eWRT.input.clean',
                       'eWRT.input.corpus',
                       'eWRT.input.corpus.reuters',
                       'eWRT.input.corpus.bbc',

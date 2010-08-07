@@ -25,6 +25,7 @@ from urllib import urlencode, quote
 from eWRT.ws.TagInfoService import TagInfoService
 from eWRT.config import YAHOO_APP_ID, YAHOO_SEARCH_URL
 from eWRT.input.conv.html import HtmlToText
+from urllib2 import URLError
 
 class Yahoo(TagInfoService):
     """ interfaces with yahoo's search service 
@@ -52,8 +53,11 @@ class Yahoo(TagInfoService):
         } )
         params = urlencode( queryParams )
         url = YAHOO_SEARCH_URL % "%2B".join(map( quote, terms) ) +"?"+ params
-        result = eval( self.r.open(url).read().replace("\\/", "/" ))
-        return result['ysearchresponse']
+        try:
+            result = eval( self.r.open(url).read().replace("\\/", "/" ))
+            return result['ysearchresponse']
+        except URLError:
+            return ""
 
     @staticmethod
     def getSearchResults(query_result):
@@ -67,6 +71,7 @@ class Yahoo(TagInfoService):
 
     def getTagInfo(self, tag):
         """ @Override """
+        print "---", self.query(tag)
         return int( self.query(tag)['totalhits'] )
 
 

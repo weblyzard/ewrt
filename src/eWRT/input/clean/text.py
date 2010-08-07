@@ -82,8 +82,12 @@ class StringCleanupModule(object):
         raise NotImplemented
 
 class RemovePunctationAndBrakets(StringCleanupModule):
+    """ @class RemovePunctationAndBrakets
+        this should be the last string module to call, as it removes too much for
+        many other modules to work correctly
+    """
     def __call__(self, s):
-        return s.replace(")", "").replace("(","").replace(".", "") 
+        return s.replace(")", "").replace("(","").replace(".", "").replace("'", "").replace("!", "")
 
 class RemovePossessive(StringCleanupModule):
     """ @class RemovePossessive
