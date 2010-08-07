@@ -5,7 +5,7 @@
 """
 
 # (C)opyrights 2010 by Albert Weichselbraun <albert@weichselbraun.net>
-#                   and others (as outlined in the functions.
+#                   and others (as outlined in the functions).
 #
 # The code published in this module is either under the GNU General
 # Public License (see below) or under the license specified in the 
