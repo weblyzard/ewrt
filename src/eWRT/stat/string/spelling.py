@@ -96,8 +96,11 @@ class SpellSuggestion(object):
         """
 
         # we found the word in the dictionary
+        # or ignore words containing "/" and numbers
         if word in self.model:
             return (True, word)
+        elif "/" in word or not word.isalpha():
+            return (False, word)
 
         candidates = self.known(self.edits1(word)) or self.known_edits2(word) or [word]
         return (False, max(candidates, key=self.model.get) )
@@ -119,6 +122,10 @@ class TestSpellSuggestion(object):
         # return the original term if we cannot find a better suggestion
         assert self.s.correct("weichselbraun") == (False, "weichselbraun")
         assert self.s.correct("rangersdorf") == (False, "rangersdorf")
+
+    def testExceptions(self):
+        assert self.s.correct("co2") == (False, "co2")
+        assert self.s.correct("i/o") == (False, "i/o")
 
 
 
