@@ -114,7 +114,7 @@ class SplitMultiTerms(PhraseCleanupModule):
     """ @class SplitMultiTerms
         splits multiple meanings into single phrases """
 
-    RE_CHOICES = re.compile("(\w{2,})\s*/\s*(\w{2,})\s+(.*)")
+    RE_CHOICES = re.compile("(\w{2,})\s*/\s*(\w{2,})\s*(.*)")
 
     def __call__(self, l):
         result = []
@@ -159,6 +159,7 @@ class TestPhraseCleanup(object):
             meanings get split"""
         assert self.p.clean(u"quick/speedy output") == [u"quick output", u"speedy output"]
         assert self.p.clean(u"i/o error") == [u"i/o error",]
+        assert self.p.clean(u"planning/design") == [u"planning", u"design"]
 
     def testFixSpellingErrors(self):
         print self.p.clean(u"determine mening")
