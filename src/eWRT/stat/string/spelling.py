@@ -33,6 +33,7 @@ from cPickle import dump, load
 from os.path import dirname, join as pjoin
 
 DEFAULT_MODEL = pjoin(dirname(__file__), "eWRT.stat.string.spelling.data.bz2")
+valid_word_characters = ascii_lowercase+"-"
 
 class SpellSuggestion(object):
     """
@@ -46,7 +47,7 @@ class SpellSuggestion(object):
 
     model = None
 
-    def __init__(self, serializedModel=""):
+    def __init__(self, serializedModel=DEFAULT_MODEL):
         """
         @param[in] filename of the cPickle dump of the model
         """
@@ -76,8 +77,8 @@ class SpellSuggestion(object):
        splits     = [(word[:i], word[i:]) for i in range(len(word) + 1)]
        deletes    = [a + b[1:] for a, b in splits if b]
        transposes = [a + b[1] + b[0] + b[2:] for a, b in splits if len(b)>1]
-       replaces   = [a + c + b[1:] for a, b in splits for c in ascii_lowercase if b]
-       inserts    = [a + c + b     for a, b in splits for c in ascii_lowercase]
+       replaces   = [a + c + b[1:] for a, b in splits for c in valid_word_characters if b]
+       inserts    = [a + c + b     for a, b in splits for c in valid_word_characters ]
        return set(deletes + transposes + replaces + inserts)
 
     def known_edits2(self, word):
@@ -105,7 +106,7 @@ class SpellSuggestion(object):
 class TestSpellSuggestion(object):
     
     def __init__(self):
-        self.s = SpellSuggestion(DEFAULT_MODEL)
+        self.s = SpellSuggestion()
 
     def testSpellSuggestion(self):
         assert self.s.correct("determinned") == (False, "determined")
