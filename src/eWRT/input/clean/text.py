@@ -154,8 +154,14 @@ class WordCleanupModule(object):
 class FixSpeeling(WordCleanupModule):
     """ @class FixSpeeling 
         fixes spelling mistakes """
-    def __init__(self):
-        self.s = SpellSuggestion()
+    def __init__(self, s=None):
+        """ @param[in] s optional SpellSuggestion object to use
+                         for the spell checking 
+        """
+        if s==None:
+            self.s = SpellSuggestion()
+        else:
+            self.s = s
 
     def __call__(self, l):
         return [ self.s.correct(w)[1] for w in l ]
