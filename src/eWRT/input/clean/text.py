@@ -44,7 +44,7 @@ class PhraseCleanup(object):
         """ returns the full cleanup profile using all cleanup modules """
         strCleanupPipe = (unicode.lower, RemoveEnumerations(), RemovePossessive(), FixDashSpace(), RemovePunctationAndBrakets(), )
         phrCleanupPipe = (SplitMultiTerms(), )
-        wrdCleanupPipe = (FixSpeeling(), )
+        wrdCleanupPipe = (FixSpelling(), )
         return PhraseCleanup(strCleanupPipe, phrCleanupPipe, wrdCleanupPipe )
 
     def clean(self, phrase):
@@ -151,8 +151,8 @@ class WordCleanupModule(object):
         """
         raise NotImplemented
 
-class FixSpeeling(WordCleanupModule):
-    """ @class FixSpeeling 
+class FixSpelling(WordCleanupModule):
+    """ @class FixSpelling 
         fixes spelling mistakes """
     def __init__(self, s=None):
         """ @param[in] s optional SpellSuggestion object to use
