@@ -45,15 +45,16 @@ class SpellSuggestion(object):
     Peter Norvig <http://norvig.com/spell-correct.html>.
     """
 
-    model = None
+    model = collections.defaultdict(lambda :1)
 
-    def __init__(self, serializedModel=DEFAULT_MODEL):
+    def __init__(self, serializedModel=DEFAULT_MODEL, verbose=False):
         """
         @param[in] filename of the cPickle dump of the model
         """
         if serializedModel:
-            self.model = collections.defaultdict(lambda :1)
             self.model.update( load(BZ2File(serializedModel)) )
+
+        self.verbose = verbose
 
     def serializeModel(self, serializedModel):
         """
@@ -68,7 +69,11 @@ class SpellSuggestion(object):
     def words(text): return re.findall('[a-z]+', text.lower()) 
 
     def train(self, features):
-        self.model = collections.defaultdict(lambda: 1)
+        """ @param[in] features a list of terms to consider as correct
+                                for the spell checking (including repetitions as
+                                they increase a words probability to get selected
+                                as spelling suggestion.
+        """
         for f in features:
             self.model[f] += 1
 
@@ -103,7 +108,10 @@ class SpellSuggestion(object):
             return (False, word)
 
         candidates = self.known(self.edits1(word)) or self.known_edits2(word) or [word]
-        return (False, max(candidates, key=self.model.get) )
+        suggestion = max(candidates, key=self.model.get)
+        if self.verbose:
+            print ">>>", word, "->", suggestion
+        return (False,  suggestion)
 
 
 class TestSpellSuggestion(object):
