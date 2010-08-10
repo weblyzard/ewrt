@@ -109,7 +109,7 @@ class SpellSuggestion(object):
 
         candidates = self.known(self.edits1(word)) or self.known_edits2(word) or [word]
         suggestion = max(candidates, key=self.model.get)
-        if self.verbose:
+        if self.verbose and word != suggestion:
             print ">>>", word, "->", suggestion
         return (False,  suggestion)
 
