@@ -138,7 +138,7 @@ class SplitMultiTerms(PhraseCleanupModule):
     """ @class SplitMultiTerms
         splits multiple meanings into single phrases """
 
-    RE_CHOICES = re.compile("(\w{2,})\s*/\s*(\w{2,})\s*(.*)")
+    RE_CHOICES = re.compile("(.*?)(\w{2,}[^-])\s*/\s*(\w{2,})\s*(.*)")
 
     def __call__(self, l):
         result = []
@@ -147,8 +147,8 @@ class SplitMultiTerms(PhraseCleanupModule):
                 if "/" in p:
                     m = SplitMultiTerms.RE_CHOICES.search(pp)
                     if m:
-                        result.append("%s %s" % (m.group(1), m.group(3)) )
-                        result.append("%s %s" % (m.group(2), m.group(3)) )
+                        result.append("%s%s %s" % (m.group(1), m.group(2), m.group(4)) )
+                        result.append("%s%s %s" % (m.group(1), m.group(3), m.group(4)) )
                         continue
 
                 result.append(pp)
@@ -198,6 +198,8 @@ class TestPhraseCleanup(object):
         assert self.p.clean(u"quick/speedy output") == [u"quick output", u"speedy output"]
         assert self.p.clean(u"i/o error") == [u"i/o error",]
         assert self.p.clean(u"planning/design") == [u"planning", u"design"]
+        print self.p.clean(u'defective product/ services')
+        assert self.p.clean(u'defective product/ services') == [u'defective product', u'defective services']
 
     def testFixSpellingErrors(self):
         print self.p.clean(u"determine mening")
