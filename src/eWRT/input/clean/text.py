@@ -43,8 +43,8 @@ class PhraseCleanup(object):
     def getFullCleanupProfile():
         """ returns the full cleanup profile using all cleanup modules """
         strCleanupPipe = (unicode.lower, RemovePossessive(), FixDashSpace() )
-        phrCleanupPipe = (SplitEnumerations(), SplitMultiTerms(), )
-        wrdCleanupPipe = (FixSpelling(), RemovePunctationAndBrakets(),)
+        phrCleanupPipe = (SplitEnumerations(), SplitMultiTerms(), SplitBracketExplanations() )
+        wrdCleanupPipe = (FixSpelling(), RemovePunctationAndBrackets(),)
         return PhraseCleanup(strCleanupPipe, phrCleanupPipe, wrdCleanupPipe )
 
     def clean(self, phrase):
@@ -119,6 +119,20 @@ class SplitEnumerations(PhraseCleanupModule):
 
         return result
 
+class SplitBracketExplanations(PhraseCleanupModule):
+    """ @class SplitBracketExplanations
+        removes additional information/explanations provided in brackets
+        fire alert procedure (fap) -> ['fire alert procedure', 'fae' ]
+    """
+    RE_BRACKET = re.compile("(.+?)\(([^)]{2,})\)")
+    def __call__(self, l):
+        result = []
+        for p in l:
+            result.extend( [ s.strip() for s in SplitBracketExplanations.RE_BRACKET.split(p) if s ] )
+
+        return result
+
+
 
 class SplitMultiTerms(PhraseCleanupModule):
     """ @class SplitMultiTerms
@@ -164,8 +178,8 @@ class FixSpelling(WordCleanupModule):
     def __call__(self, l):
         return [ self.s.correct(w)[1] for w in l ]
 
-class RemovePunctationAndBrakets(WordCleanupModule):
-    """ @class RemovePunctationAndBrakets
+class RemovePunctationAndBrackets(WordCleanupModule):
+    """ @class RemovePunctationAndBrackets
         this should be the last module to call, as it removes too much for
         many other modules to work correctly
     """
@@ -205,5 +219,12 @@ class TestPhraseCleanup(object):
         print self.p.clean(u"1. life cycle phase 2. risk management tasks 3. risk management activities")
         assert self.p.clean(u"1. life cycle phase 2. risk management tasks 3. risk management activities") == \
            [u"life cycle phase", u"risk management tasks", u"risk management activities"]
+
+    def testSplitBracketExplanations(self):
+        # mistakes found in applications
+        ## cha -> ha; dow -> now due to the non risk-specific spell checking!
+        assert self.p.clean(u'concept hazard analysis(cha)') == [ u'concept hazard analysis', u'ha' ] 
+        print self.p.clean(u'dow fire and explosion index (f&ei)')
+        assert self.p.clean(u'dow fire and explosion index (f&ei)') == [u'now fire and explosion index', u'f&ei']
 
 
