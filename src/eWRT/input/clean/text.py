@@ -42,9 +42,9 @@ class PhraseCleanup(object):
     @staticmethod
     def getFullCleanupProfile():
         """ returns the full cleanup profile using all cleanup modules """
-        strCleanupPipe = (unicode.lower, RemovePossessive(), FixDashSpace(), RemovePunctationAndBrakets(), )
+        strCleanupPipe = (unicode.lower, RemovePossessive(), FixDashSpace() )
         phrCleanupPipe = (SplitEnumerations(), SplitMultiTerms(), )
-        wrdCleanupPipe = (FixSpelling(), )
+        wrdCleanupPipe = (FixSpelling(), RemovePunctationAndBrakets(),)
         return PhraseCleanup(strCleanupPipe, phrCleanupPipe, wrdCleanupPipe )
 
     def clean(self, phrase):
@@ -80,14 +80,6 @@ class StringCleanupModule(object):
             @param[in] s the string to clean
         """
         raise NotImplemented
-
-class RemovePunctationAndBrakets(StringCleanupModule):
-    """ @class RemovePunctationAndBrakets
-        this should be the last string module to call, as it removes too much for
-        many other modules to work correctly
-    """
-    def __call__(self, s):
-        return s.replace(")", "").replace("(","").replace(".", "").replace("'", "").replace("!", "")
 
 class RemovePossessive(StringCleanupModule):
     """ @class RemovePossessive
@@ -172,6 +164,13 @@ class FixSpelling(WordCleanupModule):
     def __call__(self, l):
         return [ self.s.correct(w)[1] for w in l ]
 
+class RemovePunctationAndBrakets(WordCleanupModule):
+    """ @class RemovePunctationAndBrakets
+        this should be the last module to call, as it removes too much for
+        many other modules to work correctly
+    """
+    def __call__(self, l):
+        return [ s.replace(")", "").replace("(","").replace(".", "").replace("'", "").replace("!", "") for s in l ]
 
 
 class TestPhraseCleanup(object):
