@@ -32,6 +32,9 @@ from bz2 import BZ2File
 from cPickle import dump, load
 from os.path import dirname, join as pjoin
 
+from logging import getLogger
+log = getLogger(__name__)
+
 DEFAULT_MODEL = pjoin(dirname(__file__), "eWRT.stat.string.spelling.data.bz2")
 valid_word_characters = ascii_lowercase+"-"
 
@@ -110,7 +113,7 @@ class SpellSuggestion(object):
         candidates = self.known(self.edits1(word)) or self.known_edits2(word) or [word]
         suggestion = max(candidates, key=self.model.get)
         if self.verbose and word != suggestion:
-            print ">>>", word, "->", suggestion
+            log.debug("Replacing '%s' with '%s'" % (word, suggestion) )
         return (False,  suggestion)
 
 

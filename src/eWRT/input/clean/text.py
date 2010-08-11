@@ -42,8 +42,8 @@ class PhraseCleanup(object):
     @staticmethod
     def getFullCleanupProfile():
         """ returns the full cleanup profile using all cleanup modules """
-        strCleanupPipe = (unicode.lower, RemoveEnumerations(), RemovePossessive(), FixDashSpace(), RemovePunctationAndBrakets(), )
-        phrCleanupPipe = (SplitMultiTerms(), )
+        strCleanupPipe = (unicode.lower, RemovePossessive(), FixDashSpace(), RemovePunctationAndBrakets(), )
+        phrCleanupPipe = (SplitEnumerations(), SplitMultiTerms(), )
         wrdCleanupPipe = (FixSpelling(), )
         return PhraseCleanup(strCleanupPipe, phrCleanupPipe, wrdCleanupPipe )
 
@@ -105,15 +105,6 @@ class FixDashSpace(StringCleanupModule):
     def __call__(self, s):
         return FixDashSpace.RE_DASH.sub(r"\1-\2", s)
 
-class RemoveEnumerations(StringCleanupModule):
-    """ @class RemoveEnumerations
-        removes enumerations such as
-         a) first, b) second, ... 
-    """
-    RE_ENUM = re.compile("\(?[1-9a-h*][).] ")
-    def __call__(self,s):
-        return RemoveEnumerations.RE_ENUM.sub("",s)
-
 
 class PhraseCleanupModule(object):
     """ @cleanup PhraseCleanup
@@ -121,6 +112,21 @@ class PhraseCleanupModule(object):
     def __class__(self, ph):
         """ @param[in] ph a list of phrases to cleanup """
         raise NotImplemented
+
+
+class SplitEnumerations(PhraseCleanupModule):
+    """ @class SplitEnumerations
+        splits enumerations such as
+         a) first, b) second, ...  -> ['first', 'second', ...  ]
+    """
+    RE_ENUM = re.compile("\(?[1-9a-h*][).] ")
+    def __call__(self,l):
+        result = []
+        for p in l:
+            result.extend( [ s.replace(",", "").strip() for s in SplitEnumerations.RE_ENUM.split(p) if s ] )
+
+        return result
+
 
 class SplitMultiTerms(PhraseCleanupModule):
     """ @class SplitMultiTerms
@@ -189,10 +195,16 @@ class TestPhraseCleanup(object):
         assert self.p.clean(u"run-/config") == [u"run-/config"]
 
     def testRemoveEnumerations(self):
-        print self.p.clean(u"1. fix it, 2. do it")
+        print self.p.clean(u"1. fix it, 2. do it") 
         assert self.p.clean(u"1. fix it, 2. do it") == [u"fix it", u"do it"]
         assert self.p.clean(u"1) fix it, 2) do it") == [u"fix it", u"do it"]
         assert self.p.clean(u"(1) fix it, (2) do it") == [u"fix it", u"do it"]
         assert self.p.clean(u"(*) fix it, (*) do it") == [u"fix it", u"do it"]
         assert self.p.clean(u"a) fix it, b) do it") == [u"fix it", u"do it"]
+
+        # mistakes found in applications
+        print self.p.clean(u"1. life cycle phase 2. risk management tasks 3. risk management activities")
+        assert self.p.clean(u"1. life cycle phase 2. risk management tasks 3. risk management activities") == \
+           [u"life cycle phase", u"risk management tasks", u"risk management activities"]
+
 
