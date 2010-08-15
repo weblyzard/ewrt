@@ -32,6 +32,7 @@ from operator import itemgetter
 from hashlib import sha1 
 from fcntl import flock, LOCK_EX, LOCK_NB
 from gzip import GzipFile
+from os import link
 
 LOCK_SLEEP_TIME = 0.2
 
@@ -148,32 +149,24 @@ class DiskCache(Cache):
         # check whether the cache file exists and try to create
         # it otherwise
         while not exists(cache_file) or exists(cache_file+".lock"):
-            if exists(cache_file + ".lock"):
-                sleep(LOCK_SLEEP_TIME)
-                continue
-                
-            l = open( cache_file + ".lock", "w")
-            try:
-                flock(l.fileno(), LOCK_EX | LOCK_NB )
-                if not exists( cache_file + ".lock"):
-                    l.close()
-                    continue
+            f = GzipFile( cache_file + ".lock", "a")
+            try: 
+                # ensure a single lock on this file :)
+                link( cache_file + ".lock", cache_file )
 
                 # compute and save the cache object
                 self._cache_miss += 1
                 obj = fetch_function(*args, **kargs)
                 if obj != None: 
-                    f=GzipFile(cache_file, "w")
                     dump(obj, f)
                     f.close()
+                else: 
+                    remove( cache_file )
 
-                remove( cache_file+".lock" )
-                l.close()
+                remove( cache_file + ".lock" )
                 return obj
-
-            except IOError:
-                l.close()
-                sleep(LOCK_SLEEP_TIME)
+            except:
+                sleep( LOCK_SLEEP_TIME ) 
 
         # return the cached result
         self._cache_hit += 1
