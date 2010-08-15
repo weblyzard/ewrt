@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-""" caches arbitrary objects """
+""" @package eWRT.util.cache
+    caches arbitrary objects 
+"""
 
 # (C)opyrights 2008-2010 by Albert Weichselbraun <albert@weichselbraun.net>
 # 
@@ -25,9 +27,13 @@ from os import makedirs, remove
 from os.path import join, exists
 from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
 from cPickle import dump, load
-from time import time
+from time import time, sleep
 from operator import itemgetter
 from hashlib import sha1 
+from fcntl import flock, LOCK_EX, LOCK_NB
+from gzip import GzipFile
+
+LOCK_SLEEP_TIME = 0.2
 
 class Cache(object):
     """ An abstract class for caching functions """
@@ -72,7 +78,13 @@ class Cache(object):
 
 
 class DiskCache(Cache):
-    """ caches abitrary functions based on the function's arguments """
+    """ @class DiskCache
+        Caches abitrary functions based on the function's arguments (fetch) or 
+        on a user defined key (fetchObjectId)
+
+        @remarks 
+        This version of DiskCached is threadsafe
+    """
 
     def __init__(self, cache_dir, cache_nesting_level=0, cache_file_suffix="", fn=None):
         """ initializes the Cache object 
@@ -132,26 +144,46 @@ class DiskCache(Cache):
             @returns the object (retrieved from the cache or computed)
         """
         cache_file = self._get_fname( self.getObjectId(key)  ) 
-        # try to fetch the object from the cache
-        if exists(cache_file):
-            self._cache_hit += 1
-            try:
-                return load(open(cache_file))
-            except EOFError:
-                pass
 
-        # compute and cache it otherwise
-        self._cache_miss += 1
-        obj = fetch_function(*args, **kargs)
-        if obj != None:
-            f = open(cache_file, "w")
-            dump(obj, f)
-            f.close()
-        return obj
+        # check whether the cache file exists and try to create
+        # it otherwise
+        while not exists(cache_file) or exists(cache_file+".lock"):
+            if exists(cache_file + ".lock"):
+                sleep(LOCK_SLEEP_TIME)
+                continue
+                
+            l = open( cache_file + ".lock", "w")
+            try:
+                flock(l.fileno(), LOCK_EX | LOCK_NB )
+                if not exists( cache_file + ".lock"):
+                    l.close()
+                    continue
+
+                # compute and save the cache object
+                self._cache_miss += 1
+                obj = fetch_function(*args, **kargs)
+                if obj != None: 
+                    f=GzipFile(cache_file, "w")
+                    dump(obj, f)
+                    f.close()
+
+                remove( cache_file+".lock" )
+                l.close()
+                return obj
+
+            except IOError:
+                l.close()
+                sleep(LOCK_SLEEP_TIME)
+
+        # return the cached result
+        self._cache_hit += 1
+        return load(GzipFile(cache_file))
+
 
     def getCacheStatistics(self):
         """ returns statistics regarding the cache's hit/miss ratio """
         return {'cache_hits': self._cache_hit, 'cache_misses': self._cache_miss}
+
 
     def _get_fname( self, obj_id ):
         """ computes the filename of the file with the given
@@ -162,7 +194,10 @@ class DiskCache(Cache):
 
         obj_dir = join( *( [self.cache_dir] + list( obj_id[:self.cache_nesting_level] )) )
         if not exists(obj_dir):
-            makedirs(obj_dir)
+            try:
+                makedirs(obj_dir)
+            except OSError:            # required for multithreading
+                pass
 
         return join(obj_dir, obj_id+self.cache_file_suffix)
  
@@ -172,7 +207,9 @@ class DiskCached(object):
         usage:
           @DiskCached("./cache/myfunction")
           def myfunction(*args):
-             ...
+
+        @remarks
+        This version of DiskCached is threadsafe
     """
     __slots__ = ('cache', )
     
@@ -191,8 +228,12 @@ class DiskCached(object):
 
 
 class MemoryCache(Cache):
-    """ Cache arbitrary functions based on the function's arguments """
+    """
+        @class MemoryCached
 
+        Caches abitrary functions based on the function's arguments (fetch) or 
+        on a user defined key (fetchObjectId)
+    """
     __slots__ = ('max_cache_size', '_cacheData', '_usage' )
 
     def __init__(self, max_cache_size =0, fn=None):
@@ -242,8 +283,7 @@ class MemoryCached(MemoryCache):
     """ Decorator based on MemoryCache for caching arbitrary function calls
         usage:
           @MemoryCached or @MemoryCached(max_cache_size)
-          def myfunction(*args):
-             ...
+          def myfunction(*args):            ...
     """
     def __init__(self, arg):
         """ initializes the MemoryCache object 
@@ -390,13 +430,13 @@ class TestDiskCached(TestCached):
         return a-b 
     
     def __init__(self):
-        self.diskCache = DiskCache("./unittest-temp4")
+        self.diskCache = DiskCache("./.unittest-temp4")
 
     def teardown(self):
         """ remove the cache directories """
         from shutil import rmtree
 
-        for cacheDirNo in range(6):
+        for cacheDirNo in range(10):
             if exists("./.unittest-temp%d" % cacheDirNo):
                 rmtree("./.unittest-temp%d" % cacheDirNo)
         
@@ -465,5 +505,32 @@ class TestDiskCached(TestCached):
             for x,y in zip(cachedIterator, getTestIterator(iteratorSize)):
                 print x,y
                 assert x == y
+
+    def testThreadSafety(self):
+        """  tests whether everything is thread safe """
+        from multiprocessing import Pool
+        from shutil import rmtree
+
+        for a in xrange(10000):
+            print a
+            c = DiskCache("./.unittest-temp6")
+            p = Pool(12)
+
+            p.map(f, 60*[c] )
+            p.close()
+            p.join()
+
+            rmtree("./.unittest-temp6")
+
+
+def f(c):
+    """ check Diskcached including None """
+    from random import randint
+    r = randint(1, 17)
+    blow = lambda x: x not in (7,8) and 100000*str(x) or None
+    assert c.fetch( blow, r ) == blow(r)
+    return 0
+
+
                            
 # $Id$
