@@ -27,14 +27,13 @@ from os import makedirs, remove
 from os.path import join, exists
 from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
 from cPickle import dump, load
-from time import time, sleep
+from time import time
 from operator import itemgetter
 from hashlib import sha1 
-from fcntl import flock, LOCK_EX, LOCK_NB
+from fcntl import lockf, LOCK_EX
 from gzip import GzipFile
-from os import link
+from nose.plugins.attrib import attr
 
-LOCK_SLEEP_TIME = 0.2
 
 class Cache(object):
     """ An abstract class for caching functions """
@@ -103,6 +102,7 @@ class DiskCache(Cache):
         self._cache_hit  = 0
         self._cache_miss = 0      
         
+
     def fetch(self, fetch_function, *args, **kargs):
         """ fetches the object with the given id, querying
              a) the cache and
@@ -119,10 +119,12 @@ class DiskCache(Cache):
         objectId = self.getKey(*args, **kargs) 
         return self.fetchObjectId(objectId, fetch_function, *args, **kargs)
 
+
     def __contains__(self, key):
         """ returns whether the key is already stored in the cache """
         cache_file = self._get_fname( self.getObjectId(key)  ) 
         return exists(cache_file)
+
     
     def __delitem__(self, key):
         """ removes the given item from the cache """
@@ -149,28 +151,37 @@ class DiskCache(Cache):
         # check whether the cache file exists and try to create
         # it otherwise
         while not exists(cache_file) or exists(cache_file+".lock"):
-            f = GzipFile( cache_file + ".lock", "a")
-            try: 
-                # ensure a single lock on this file :)
-                link( cache_file + ".lock", cache_file )
+            l = open( cache_file+".lock", "w")
+            lockf(l.fileno(), LOCK_EX )
 
-                # compute and save the cache object
-                self._cache_miss += 1
-                obj = fetch_function(*args, **kargs)
-                if obj != None: 
-                    dump(obj, f)
-                    f.close()
-                else: 
-                    remove( cache_file )
+            # this is necessary to prevent deadlocks
+            if exists(cache_file):
+                self._remove( cache_file + ".lock" )
+                l.close()
+                continue
 
-                remove( cache_file + ".lock" )
-                return obj
-            except:
-                sleep( LOCK_SLEEP_TIME ) 
+            # compute and save the cache object
+            self._cache_miss += 1
+            obj = fetch_function(*args, **kargs)
+            if obj != None: 
+                f = GzipFile( cache_file, "w")
+                dump(obj, f)
+                f.close()
+
+            self._remove( cache_file + ".lock" )
+            l.close()
+            return obj
 
         # return the cached result
         self._cache_hit += 1
         return load(GzipFile(cache_file))
+
+    def _remove(self, fname):
+        """ removes the given files (if it exists) """
+        try:
+            remove(fname)
+        except OSError:
+            pass
 
 
     def getCacheStatistics(self):
@@ -179,9 +190,11 @@ class DiskCache(Cache):
 
 
     def _get_fname( self, obj_id ):
-        """ computes the filename of the file with the given
+        """ Computes the filename of the file with the given
             object identifier and creates the required directory
             structure (if necessary).
+
+            @returns the full path of the given object's cache file
         """
         assert( len(obj_id) >= self.cache_nesting_level )
 
@@ -499,17 +512,20 @@ class TestDiskCached(TestCached):
                 print x,y
                 assert x == y
 
+    @attr("slow")
     def testThreadSafety(self):
         """  tests whether everything is thread safe """
         from multiprocessing import Pool
         from shutil import rmtree
 
-        for a in xrange(10000):
+        for a in xrange(1000):
             print a
             c = DiskCache("./.unittest-temp6")
             p = Pool(12)
 
             p.map(f, 60*[c] )
+            p.map(g, 60*[c] )
+
             p.close()
             p.join()
 
@@ -517,13 +533,28 @@ class TestDiskCached(TestCached):
 
 
 def f(c):
-    """ check Diskcached including None """
+    """ Function for checking Diskcach with larger files.
+
+        @remarks 
+        required for the testThreadSafety unittest. 
+        considers None results.
+    """
     from random import randint
     r = randint(1, 17)
     blow = lambda x: x not in (7,8) and 100000*str(x) or None
     assert c.fetch( blow, r ) == blow(r)
     return 0
 
+def g(c):
+    """ Function for checking DiskCache with small files.
 
-                           
-# $Id$
+        @remarks 
+        required for the testThreadSafety unittest.
+        considers None results.
+    """
+ 
+    from random import randint
+    r = randint(111, 117)
+    assert c.fetch( str, r ) == str(r)
+    return 0
+
