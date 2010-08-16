@@ -91,14 +91,13 @@ class YahooSearchResult(object):
 
     def getPageContent(self):
         """ @returns the content of the found web page """
-        print self.search_result['url']
         return self.r.open( self.search_result['url'] ).read()
 
     def getPageText(self):
         """ @returns the text of the found web page """
         try:
             return HtmlToText.getText( self.getPageContent() )
-        except:
+        except URLError:
             return ""
 
 class TestYahoo(object):
