@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-""" http.py
-    - accesses resources using http """
+""" @package eWRT.access.http
+    provides access to resources using http """
 
-# (C)opyrights 2008 by Albert Weichselbraun <albert@weichselbraun.net>
+# (C)opyrights 2008-2010 by Albert Weichselbraun <albert@weichselbraun.net>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,16 +25,23 @@ import time
 from StringIO import StringIO
 from gzip import GzipFile
 
+from nose.tools import raises
+
 getHostName = lambda x: "://".join( urlsplit(x)[:2] )
 
 # set default socket timeout (otherwise urllib might hang!)
 from socket import setdefaulttimeout
-setdefaulttimeout = 30  
+setdefaulttimeout(30)
 
 class Retrieve(object):
-    """ retrieves URL's using HTTP supporting transparent
+    """ @class Retrieve
+        retrieves URLs using HTTP 
+
+        @remarks: 
+        this class supports transparent
         * authentication and
-        * compression """
+        * compression 
+    """
 
     __slots__ = ('module', 'sleep_time', 'last_access_time')
 
@@ -42,7 +49,7 @@ class Retrieve(object):
         self.module = module
         self.sleep_time       = sleep_time
         self.last_access_time = 0
-        # request object
+
 
     def open(self, url, data=None, user=None, pwd=None ):
         """ Opens an URL and returns the matching file object 
@@ -75,8 +82,6 @@ class Retrieve(object):
 
         return urlObj
 
-
-
     @staticmethod
     def _getHTTPBasicAuthOpener(url, user, pwd):
         """ returns an opener, capable of handling http-auth """
@@ -93,7 +98,6 @@ class Retrieve(object):
         compressedStream = StringIO( urlObj.read() )
         return GzipFile(fileobj=compressedStream) 
 
-
     def _throttle( self ):
         """ delays web access according to the content provider's policy """
         if (time.time() - self.last_access_time) < DEFAULT_WEB_REQUEST_SLEEP_TIME:
@@ -102,24 +106,35 @@ class Retrieve(object):
 
 
 
-if __name__ == '__main__':
-    
-    from unittest import TestCase, main
+class TestHttp(object):
+    """ tests the http class """
+    TEST_URLS = ('http://www.google.at/search?hl=de&q=andreas&btnG=Google-Suche&meta=', 
+                 'http://www.heise.de' )
 
-    class TestHttp(TestCase):
-        """ tests the http class """
-        TEST_URLS = ('http://www.google.at/search?hl=de&q=andreas&btnG=Google-Suche&meta=', 
-                     'http://www.heise.de' )
+    def __init__(self):
+        from socket import getdefaulttimeout
+        self.default_timeout = getdefaulttimeout()
 
-        def testRetrieval(self):
-            """ tries to retrieve the following url's from the list """
+    def tearDown(self):
+        setdefaulttimeout( self.default_timeout )
 
-            r_handler = Retrieve( self.__class__.__name__ )
-            for url in self.TEST_URLS:
-                print url
-                r=r_handler.open( url )
-                r.read()
-                r.close()
+    def testRetrieval(self):
+        """ tries to retrieve the following url's from the list """
 
-    main()
+        r_handler = Retrieve( self.__class__.__name__ )
+        for url in self.TEST_URLS:
+            print url
+            r=r_handler.open( url )
+            r.read()
+            r.close()
+
+    @raises(urllib2.URLError)
+    def testRetrievalTimeout(self):
+        """ tests whether the socket timeout is honored by our class """
+        SLOW_URL = "http://www.iub.edu.bd/"
+        setdefaulttimeout( 1 )
+
+        r = Retrieve( self.__class__.__name__).open( SLOW_URL )
+        content = r.read()
+        r.close()
 
