@@ -436,6 +436,11 @@ class TestDiskCached(TestCached):
         return a-b 
     
     def __init__(self):
+	try:
+           import psyco
+           psyco.full()
+	except ImportError:
+	   pass
         self.diskCache = DiskCache("./.unittest-temp4")
 
     def teardown(self):
