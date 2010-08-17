@@ -46,6 +46,9 @@ log = logging.getLogger(__name__)
 class IDB(object):
     """ @interface IDB
         database access interface
+
+        @remarks
+        supports the context protocal
      """
 
     def connect(self):
@@ -63,34 +66,46 @@ class IDB(object):
         """ closes the database connection """
         raise NotImplementedError
 
+    def __enter__(self):
+        """ support fo the context protocol """
+        self.connect()
+
+    def __exit__(self):
+        """ context protocol support """
+        self.close()
+        
+
 
 class MysqlDb(IDB):
 
-        def __init__(self, dbname, host="", username="", passwd=""):
-                self.dbname   = dbname
-                self.host     = host
-                self.username = username
-                self.passwd   = passwd
-                self.connect()
+    def __init__(self, dbname, host="", username="", passwd="", connect=True):
+        """ @param[in] connect immediately connect to the database
+        """
+        self.dbname   = dbname
+        self.host     = host
+        self.username = username
+        self.passwd   = passwd
 
-        def connect(self):
-                self.db=MySQLdb.connect(host=self.host, user=self.username, passwd=self.passwd, db=self.dbname)
+        if connect:
+            self.connect()
+
+    def connect(self):
+        self.db=MySQLdb.connect(host=self.host, user=self.username, passwd=self.passwd, db=self.dbname)
+
+    def query(self,query):
+        """ queries the database and stores the result in a dict """
+        crs=self.db.cursor(MySQLdb.cursors.DictCursor)
+
+        if type(query) in StringTypes: query=(query,)
+        for q in query:
+            crs.execute(q)
+        tmp=crs.fetchall()
+        crs.close()
+        return tmp
 
 
-        def query(self,query):
-                """ queries the database and stores the result in a dict """
-                crs=self.db.cursor(MySQLdb.cursors.DictCursor)
-
-                if type(query) in StringTypes: query=(query,)
-                for q in query:
-                    crs.execute(q)
-                tmp=crs.fetchall()
-                crs.close()
-                return tmp
-
-
-        def close(self):
-                self.db.close()
+    def close(self):
+        self.db.close()
 
 
 class PostgresqlDb(IDB):
@@ -150,6 +165,12 @@ class TestDB(object):
     """ @class TestDB
         db test cases 
     """
+    @attr("db")
+    def testContextProtocol(self):
+        """ tests the db module's support for the context protocoll """
+        with PostgresqlDb( **DATABASE_CONNECTION['wikipedia'], connect=False) as q:
+            assert len( q.query("SELECT * FROM concept LIMIT 5")) == 5
+
     @attr("db")
     def testMultiProcessing(self):
         """ tests multiprocessing """
