@@ -26,6 +26,7 @@ from StringIO import StringIO
 from gzip import GzipFile
 
 from nose.tools import raises
+from nose.plugins.attrib import attr
 
 getHostName = lambda x: "://".join( urlsplit(x)[:2] )
 
@@ -43,12 +44,15 @@ class Retrieve(object):
         * compression 
     """
 
-    __slots__ = ('module', 'sleep_time', 'last_access_time')
+    __slots__ = ('module', 'sleep_time', 'last_access_time', 'user_agent')
 
     def __init__(self, module, sleep_time=DEFAULT_WEB_REQUEST_SLEEP_TIME):
-        self.module = module
+        self.module           = module
         self.sleep_time       = sleep_time
         self.last_access_time = 0
+        
+        self.user_agent = USER_AGENT % self.module \
+                            if "%s" in USER_AGENT else USER_AGENT
 
 
     def open(self, url, data=None, user=None, pwd=None ):
@@ -60,10 +64,7 @@ class Retrieve(object):
             @returns a file object for reading the url
         """
         request = urllib2.Request( url, data )
-        try:
-            request.add_header('User-Agent', USER_AGENT % self.module)
-        except TypeError:
-            request.add_header('User-Agent', USER_AGENT )
+        request.add_header( 'User-Agent', self.user_agent )
         request.add_header('Accept-encoding', 'gzip')
         self._throttle()
 
@@ -106,7 +107,7 @@ class Retrieve(object):
 
 
 
-class TestHttp(object):
+class TestRetrieve(object):
     """ tests the http class """
     TEST_URLS = ('http://www.google.at/search?hl=de&q=andreas&btnG=Google-Suche&meta=', 
                  'http://www.heise.de' )
@@ -118,6 +119,7 @@ class TestHttp(object):
     def tearDown(self):
         setdefaulttimeout( self.default_timeout )
 
+    @attr("remote")
     def testRetrieval(self):
         """ tries to retrieve the following url's from the list """
 
@@ -128,6 +130,7 @@ class TestHttp(object):
             r.read()
             r.close()
 
+    @attr("remote")
     @raises(urllib2.URLError)
     def testRetrievalTimeout(self):
         """ tests whether the socket timeout is honored by our class """
@@ -137,4 +140,34 @@ class TestHttp(object):
         r = Retrieve( self.__class__.__name__).open( SLOW_URL )
         content = r.read()
         r.close()
+
+    @attr("remote")
+    def testMultiProcessing(self):
+        """ verifies that retrieves works with multi-processing """
+        from multiprocessing import Pool
+        p = Pool(4)
+
+        TEST_URLS = ['http://www.heise.de', 
+                     'http://linuxtoday.com',
+                     'http://www.kurier.at',
+                     'http://www.diepresse.com',
+                     'http://www.spiegel.de',
+                     'http://www.sueddeutsche.de',
+                    ]
+
+        for res in  p.map(t_retrieve, TEST_URLS):
+            assert len(res) > 20
+
+
+def t_retrieve(url):
+    """ retrieves the given url from the web
+        
+        @remarks
+        helper module for the testMultiProcessing unit test.
+    """
+    r = Retrieve( __name__ ).open( url )
+    content = r.read()
+    r.close()
+
+    return content
 
