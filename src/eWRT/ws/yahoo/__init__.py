@@ -99,7 +99,8 @@ class YahooSearchResult(object):
 
     def getPageContent(self):
         """ @returns the content of the found web page """
-        return self.r.open( self.search_result['url'] ).read()
+        with self.r as r:
+            return r.open( self.search_result['url'] ).read()
 
     def getPageText(self):
         """ @returns the text of the found web page """
