@@ -32,7 +32,7 @@ getHostName = lambda x: "://".join( urlsplit(x)[:2] )
 
 # set default socket timeout (otherwise urllib might hang!)
 from socket import setdefaulttimeout
-setdefaulttimeout(30)
+setdefaulttimeout(60)
 
 class Retrieve(object):
     """ @class Retrieve
@@ -104,7 +104,6 @@ class Retrieve(object):
         if (time.time() - self.last_access_time) < DEFAULT_WEB_REQUEST_SLEEP_TIME:
             time.sleep( self.sleep_time )
         self.last_access_time= time.time()
-
 
 
 class TestRetrieve(object):
