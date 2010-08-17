@@ -45,8 +45,9 @@ class WikiDistance(object):
             @return True if both terms are siblings
         """
         tt = WikiDistance.escape_terms( (t1,t2) ) 
-        q="SELECT * FROM vw_siblings WHERE dname IN (%s) AND sname IN (%s)" % (tt, tt)
-        return len(self.db.query(q)) > 0 
+        with self.db as c:
+            q="SELECT * FROM vw_siblings WHERE dname IN (%s) AND sname IN (%s)" % (tt, tt)
+            return len(c.query(q)) > 0 
 
     def isSameAs(self, t1, t2):
         """ determines whether the given terms refer to the same concept
@@ -55,8 +56,9 @@ class WikiDistance(object):
             @return True if both terms refer to the same concept
         """
         tt = WikiDistance.escape_terms( (t1,t2) )
-        q="SELECT * FROM vw_sameas WHERE dname IN (%s) AND sname IN (%s)" % (tt, tt)
-        return len(self.db.query(q)) > 0 
+        with self.db as c:
+            q="SELECT * FROM vw_sameas WHERE dname IN (%s) AND sname IN (%s)" % (tt, tt)
+            return len(c.query(q)) > 0 
         
         
 
@@ -92,8 +94,7 @@ class TestWikiDistance(object):
                                   ('austria', 'carinthia'), ('linux', 'bsd'),
                                   ('microsoft', 'microsoft inc.'), ('anna', 'ana') ]
                                  )
-        assert res == [ False, True, False, False, True, False ]
-
+        assert [ same for same, sibling in res ] == [ False, True, False, False, True, False ]
 
 
 def p_isSibling( concepts ):
@@ -105,5 +106,5 @@ def p_isSibling( concepts ):
     """
     assert len(concepts) == 2
     w = WikiDistance()
-    return w.isSameAs( *concepts )
+    return w.isSameAs( *concepts ), w.isSibling( *concepts )
 
