@@ -137,6 +137,19 @@ class TestYahoo(object):
         """ tests borderline cases such as empty search results """
         assert len( Yahoo.getSearchResults(self.y.query( ('ksdaf', 'sadfj93', 'kd9', ), count=10, queryParams={'view':'keyterms', 'abstract': 'long'}) ) ) == 0
 
+    def testMultiProcessing(self):
+        """ tests the multi processing capabilities of this module """
+        from mulitprocessing import Pool
+        p = Pool(4)
+
+
+def p_fetchWebPage(yObj):
+    """ fetches the web page specified in the given yahoo result object
+        @param[in] yObj a yahoo result object
+
+        @remarks
+        helper function for the testMultiProcessing test
+    """
 
 if __name__ == '__main__':
     y = Yahoo()

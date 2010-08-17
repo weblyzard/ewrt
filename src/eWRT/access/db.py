@@ -25,6 +25,7 @@ __revision__ = "$Revision$"
 
 
 from types import StringTypes
+from nose.plugins.attrib import attr
 from warnings import warn
 try:
     import psycopg2 
@@ -149,6 +150,7 @@ class TestDB(object):
     """ @class TestDB
         db test cases 
     """
+    @attr("db")
     def testMultiProcessing(self):
         """ tests multiprocessing """
         from multiprocessing import Pool

@@ -1,0 +1,8 @@
+eWRT Programming Guidelines:
+============================
+
+1. Tags used in test-cases
+
+ slow   ... slow test case
+ db     ... requires a database connection
+

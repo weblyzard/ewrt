@@ -28,6 +28,7 @@ __revision__ = "$Revision: 1 $"
 from eWRT.util.cache import DiskCached
 from eWRT.access.db import PostgresqlDb
 from eWRT.config import DATABASE_CONNECTION
+from nose.plugins.attrib import attr
 
 class WikiDistance(object):
     
@@ -64,21 +65,45 @@ class TestWikiDistance(object):
     def __init__(self):
         self.wd = WikiDistance()
         
+    @attr("db")
     def testSameAs(self):
         """ tests the sameAs method """
         assert self.wd.isSameAs("cpu", "central processing unit")
         assert not self.wd.isSameAs("cpu", "desk")
-        
+
+    @attr("db")
     def testIsSibling(self):
         """ tests whether terms are siblings """
         assert self.wd.isSibling("swimming (sport)", "front crawl")
         assert self.wd.isSibling("swimming (sport)", "butterfly stroke")
         assert not self.wd.isSibling("cpu", "front crawl")
-
+ 
+    @attr("db")
     def testTermPairs(self):
         """ test specific term pairs"""
         assert self.wd.isSibling("design area", "risk") == False
 
-if __name__ == '__main__':
-    pass
-    
+    @attr("db")
+    def testMultiProcessing(self):
+        """ tests the multi processing capabilities of this module """
+        from multiprocessing import Pool
+        p = Pool(4)
+        res = p.map(p_isSibling, [('cpu', 'desk'), ('cpu', 'central processing unit'),
+                                  ('austria', 'carinthia'), ('linux', 'bsd'),
+                                  ('microsoft', 'microsoft inc.'), ('anna', 'ana') ]
+                                 )
+        assert res == [ False, True, False, False, True, False ]
+
+
+
+def p_isSibling( concepts ):
+    """ 
+        @param[concepts] a tuple containing the two concepts to check
+
+        @remarks
+        helper function for the testMultiProcessing test
+    """
+    assert len(concepts) == 2
+    w = WikiDistance()
+    return w.isSameAs( *concepts )
+
