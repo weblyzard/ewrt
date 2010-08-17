@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """
  @package eWRT.access.db
- interfaces for access classes
+ database access classes
 """
 
-# (C)opyrights 2004-2009 by Albert Weichselbraun <albert@weichselbraun.net>
+# (C)opyrights 2004-2010 by Albert Weichselbraun <albert@weichselbraun.net>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,10 +36,14 @@ try:
 except ImportError:
     warn("Cannot import mysql library.")
 
+# logging
+import logging
+log = logging.getLogger(__name__)
+
 
 
 class IDB(object):
-    """ @interface
+    """ @interface IDB
         database access interface
      """
 
@@ -89,34 +93,49 @@ class MysqlDb(IDB):
 
 
 class PostgresqlDb(IDB):
-    """ @class 
+    """ @class  PostgresqlDb
         provides generall database access """
 
     __db = {}           # cache db connections
     DEBUG = False
 
-    def __init__(self, dbname, host="", username="", passwd=""):
-        """ inits the database class """
+    def __init__(self, dbname, host="", username="", passwd="", multiThreaded=True):
+        """ inits the database class 
+            @param[in] multiThreaded specifies whether the connection will be used
+                                     in a multi-threaded environment.
+        """
         self.dbname   = dbname
         self.host     = host
         self.username = username
         self.passwd   = passwd
         self.db       = None
+        self.multiThreaded = multiThreaded
         self.connect()
 
     def connect(self):
-        dbKey = (self.dbname, self.username, self.host, self.passwd)
-        if dbKey in self.__db:
-            self.db = self.__db[dbKey]
+        """ connects to the database
+
+            @remarks 
+            caches the connection if multiThreaded is False; the connection caching does not
+            work in multi-threaded environments
+        """
+        if self.multiThreaded:
+            self.db = psycopg2.connect("dbname='%s' user='%s' host='%s' password='%s'" % (self.dbname, self.username, self.host, self.passwd)) 
+
         else:
-            self.__db[dbKey] = psycopg2.connect("dbname='%s' user='%s' host='%s' password='%s'" % (self.dbname, self.username, self.host, self.passwd)) 
+            dbKey = (self.dbname, self.username, self.host, self.passwd)
+            if dbKey not in self.__db:
+                self.__db[dbKey] = psycopg2.connect("dbname='%s' user='%s' host='%s' password='%s'" % (self.dbname, self.username, self.host, self.passwd)) 
             self.db= self.__db[dbKey]
 
+
     def query(self,qu):
-        """ queries the postgresql database """
+        """ @param[in] qu a list or string containing the database quer(y|ies)
+            @returns the query results
+         """
         if type(qu) in StringTypes: qu=(qu,)
         if PostgresqlDb.DEBUG: 
-            print qu
+            log.debug( "Query: %s" % qu )
         cur = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
         [ cur.execute(q) for q in qu ]
         return cur.fetchall()
@@ -124,3 +143,29 @@ class PostgresqlDb(IDB):
 
     def close(self):
         self.db.close()
+
+
+class TestDB(object):
+    """ @class TestDB
+        db test cases 
+    """
+    def testMultiProcessing(self):
+        """ tests multiprocessing """
+        from multiprocessing import Pool
+        p = Pool(4)
+        qq = 8 * ["SELECT * FROM concept LIMIT 1"]
+
+        res = p.map(t_multiprocessing, qq)
+
+
+def t_multiprocessing(q):
+    """ @remarks
+        helper function for the multi processing test case
+    """
+    from eWRT.config import DATABASE_CONNECTION
+
+    db = PostgresqlDb( **DATABASE_CONNECTION['wikipedia'] )
+    r = db.query( q )
+    db.close()
+    return r
+    
