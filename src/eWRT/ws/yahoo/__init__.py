@@ -79,7 +79,6 @@ class Yahoo(TagInfoService):
 
     def getTagInfo(self, tag):
         """ @Override """
-        print "---", self.query(tag)
         return int( self.query(tag)['totalhits'] )
 
 

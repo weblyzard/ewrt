@@ -1,8 +1,12 @@
 eWRT Programming Guidelines:
 ============================
 
-1. Tags used in test-cases
+1. Recommended unit-test tags:
 
+ db     ... test case requires a database connection
+ new    ... indicates new test case (run with 'nosetest ./mypackage.py -a new')
+ remote ... test case requires remote resources (e.g. Web Services, ...)
  slow   ... slow test case
- db     ... requires a database connection
+
+
 
