@@ -69,9 +69,12 @@ class IDB(object):
     def __enter__(self):
         """ support fo the context protocol """
         self.connect()
+        return self
 
-    def __exit__(self):
+    def __exit__(self, exc_type, exc_value, traceback):
         """ context protocol support """
+        if exc_type != None:
+            log.critical("Database error: %s" % exc_type)
         self.close()
         
 
@@ -168,7 +171,8 @@ class TestDB(object):
     @attr("db")
     def testContextProtocol(self):
         """ tests the db module's support for the context protocoll """
-        with PostgresqlDb( **DATABASE_CONNECTION['wikipedia'], connect=False) as q:
+        from eWRT.config import DATABASE_CONNECTION
+        with PostgresqlDb( **DATABASE_CONNECTION['wikipedia'] ) as q:
             assert len( q.query("SELECT * FROM concept LIMIT 5")) == 5
 
     @attr("db")
