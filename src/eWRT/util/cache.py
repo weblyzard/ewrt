@@ -525,7 +525,7 @@ class TestDiskCached(TestCached):
 
         for a in xrange(1000):
             print a
-            c = DiskCache("./.unittest-temp6")
+            c = DiskCache("./.unittest-temp6", cache_nesting_level=2)
             p = Pool(12)
 
             p.map(f, 60*[c] )

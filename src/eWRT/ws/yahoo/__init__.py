@@ -1,8 +1,13 @@
 #!/usr/bin/env python
 
-""" yahoo! - uses yahoo's boss search service """
+""" @package eWRT.ws.yahoo
+    support for the yahoo! search 
+    
+    @remarks
+    this module is based on yahoo's boss search service 
+"""
 
-# (C)opyrights 2008-2009 by Albert Weichselbraun <albert@weichselbraun.net>
+# (C)opyrights 2008-2010 by Albert Weichselbraun <albert@weichselbraun.net>
 #                           Heinz Peter Lang <hplang@langatium.net>
 # 
 # This program is free software: you can redistribute it and/or modify
@@ -27,6 +32,9 @@ from eWRT.config import YAHOO_APP_ID, YAHOO_SEARCH_URL
 from eWRT.input.conv.html import HtmlToText
 from urllib2 import URLError
 
+from nose.plugins.attrib import attr
+
+
 class Yahoo(TagInfoService):
     """ interfaces with yahoo's search service 
         * Search: Yahoo! BOSS
@@ -35,7 +43,7 @@ class Yahoo(TagInfoService):
     __slots__ = ('r', )
 
     def __init__(self):
-        self.r = Retrieve( Yahoo.__name__ )
+        self.r = Retrieve( Yahoo.__name__, sleep_time=0 )
 
     def query(self, terms, count=0, queryParams={} ):
         """ returns search results for the given terms
@@ -79,10 +87,10 @@ class YahooSearchResult(object):
     """ Perfom manipulations on yahoo search results """
 
     __slots__ = ('r', 'search_result')
-    r = Retrieve( Yahoo.__name__, sleep_time=0 )
 
     def __init__(self, search_result):
         """ @param[in] search_result ... search result to query """
+        self.r = Retrieve( Yahoo.__name__, sleep_time=0 )
         self.search_result = search_result
 
     def getKeywords(self):
@@ -111,6 +119,7 @@ class TestYahoo(object):
     def __init__(self):
         self.y = Yahoo()
 
+    @attr("remote")
     def testSearchCounts(self):
         for query, refinedQueries in self.SEARCH_QUERIES.iteritems():
             qCount = int(self.y.query( (query, ) )['totalhits'])
@@ -119,11 +128,13 @@ class TestYahoo(object):
                 print query, q, "**",qCount, int(self.y.query( q )['totalhits'])
                 assert qCount > int(self.y.query( q )['totalhits'])
     
+    @attr("remote")
     def testTagInfo(self):
         """ tests the tag info service """
         assert self.y.getTagInfo( ('weblyzard',)) > 10
         assert self.y.getTagInfo( ('a_query_which_should_not_appear_at_all', )) == 0
 
+    @attr("remote")
     def testYahooSearchResult(self):
         """ tests the Yahoo Search Result objects """
         for resultSite in Yahoo.getSearchResults(self.y.query( ("linux", "firefox", ),  \
@@ -133,23 +144,45 @@ class TestYahoo(object):
             assert len( resultSite.getPageText() ) > len(resultSite.search_result['abstract'])
             assert 'http' in resultSite.search_result['url']
 
+    @attr("remote")
     def testBorderlineYahooSearchResult(self):
         """ tests borderline cases such as empty search results """
         assert len( Yahoo.getSearchResults(self.y.query( ('ksdaf', 'sadfj93', 'kd9', ), count=10, queryParams={'view':'keyterms', 'abstract': 'long'}) ) ) == 0
 
-    def testMultiProcessing(self):
+    @attr("remote")
+    def testMultiProcessingRetrieve(self):
         """ tests the multi processing capabilities of this module """
-        from mulitprocessing import Pool
+        from multiprocessing import Pool
         p = Pool(4)
 
+        TEST_URLS = ['http://www.derstandard.at', 
+                     'http://www.dilbert.com',
+                     'http://www.wetter.at',
+                     'http://www.wu.ac.at',
+                     'http://www.ai.wu.ac.at',
+                     'http://www.tuwien.ac.at',
+                     'http://www.boku.ac.at',
+                     'http://www.univie.ac.at',
+                    ]
+        # f=open("/tmp/aw", "w")
+        for res in p.map( p_fetchWebPage, TEST_URLS ):
+            # f.write(res)
+            # f.write("\n-----\n\n\n")
+            assert len(res) > 20
+        # f.close()
 
-def p_fetchWebPage(yObj):
+
+
+def p_fetchWebPage(url):
     """ fetches the web page specified in the given yahoo result object
-        @param[in] yObj a yahoo result object
+        @param[in] url the url to fetch
 
         @remarks
         helper function for the testMultiProcessing test
     """
+    r = YahooSearchResult( {'url': url} )
+    return r.getPageText()
+
 
 if __name__ == '__main__':
     y = Yahoo()

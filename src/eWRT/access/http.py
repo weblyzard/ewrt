@@ -42,6 +42,7 @@ class Retrieve(object):
         this class supports transparent
         * authentication and
         * compression 
+        * support for the context protocol (python)
     """
 
     __slots__ = ('module', 'sleep_time', 'last_access_time', 'user_agent')
@@ -105,6 +106,15 @@ class Retrieve(object):
             time.sleep( self.sleep_time )
         self.last_access_time= time.time()
 
+    def __enter__(self):
+        """ support fo the context protocol """
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        """ context protocol support """
+        if exc_type != None:
+            log.critical("%s" % exc_type)
+ 
 
 class TestRetrieve(object):
     """ tests the http class """
@@ -128,6 +138,15 @@ class TestRetrieve(object):
             r=r_handler.open( url )
             r.read()
             r.close()
+
+    @attr("remote")
+    def testRetrieveContext(self):
+        """ tests the retrieve context module """
+        with Retrieve( self.__class__.__name__ ) as r:
+            c = r.open("http://www.heise.de")
+            content = c.read()
+        assert len(content) > 100
+
 
     @attr("remote")
     @raises(urllib2.URLError)
