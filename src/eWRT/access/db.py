@@ -118,7 +118,7 @@ class PostgresqlDb(IDB):
     __db = {}           # cache db connections
     DEBUG = False
 
-    def __init__(self, dbname, host="", username="", passwd="", multiThreaded=True):
+    def __init__(self, dbname, host="", username="", passwd="", multiThreaded=True, connect=True):
         """ inits the database class 
             @param[in] multiThreaded specifies whether the connection will be used
                                      in a multi-threaded environment.
@@ -129,7 +129,8 @@ class PostgresqlDb(IDB):
         self.passwd   = passwd
         self.db       = None
         self.multiThreaded = multiThreaded
-        self.connect()
+        if connect:
+            self.connect()
 
     def connect(self):
         """ connects to the database

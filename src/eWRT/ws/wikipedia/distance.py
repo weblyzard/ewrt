@@ -36,7 +36,9 @@ class WikiDistance(object):
     
     def __init__(self):
         """ open the database connection """
-        self.db = PostgresqlDb( **DATABASE_CONNECTION['wikipedia'])
+        dbParam = DATABASE_CONNECTION['wikipedia'].copy()
+        dbParam['connect'] = False
+        self.db = PostgresqlDb( **dbParam)
 
     def isSibling(self, t1, t2):
         """ determines whether the given concepts are siblings
@@ -47,7 +49,8 @@ class WikiDistance(object):
         tt = WikiDistance.escape_terms( (t1,t2) ) 
         with self.db as c:
             q="SELECT * FROM vw_siblings WHERE dname IN (%s) AND sname IN (%s)" % (tt, tt)
-            return len(c.query(q)) > 0 
+            cnt = len(c.query(q))
+        return cnt > 0 
 
     def isSameAs(self, t1, t2):
         """ determines whether the given terms refer to the same concept
@@ -58,7 +61,8 @@ class WikiDistance(object):
         tt = WikiDistance.escape_terms( (t1,t2) )
         with self.db as c:
             q="SELECT * FROM vw_sameas WHERE dname IN (%s) AND sname IN (%s)" % (tt, tt)
-            return len(c.query(q)) > 0 
+            cnt = len(c.query(q))
+        return cnt > 0 
         
         
 
@@ -95,6 +99,11 @@ class TestWikiDistance(object):
                                   ('microsoft', 'microsoft inc.'), ('anna', 'ana') ]
                                  )
         assert [ same for same, sibling in res ] == [ False, True, False, False, True, False ]
+
+    @attr("db")
+    def testConnectionLimit(self):
+        for x in xrange(300):
+            assert self.wd.isSameAs("design area", "risk") == False
 
 
 def p_isSibling( concepts ):

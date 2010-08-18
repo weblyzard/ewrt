@@ -28,6 +28,10 @@ from gzip import GzipFile
 from nose.tools import raises
 from nose.plugins.attrib import attr
 
+# logging
+import logging
+log = logging.getLogger(__name__)
+
 getHostName = lambda x: "://".join( urlsplit(x)[:2] )
 
 # set default socket timeout (otherwise urllib might hang!)
