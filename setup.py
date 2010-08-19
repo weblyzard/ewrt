@@ -22,6 +22,10 @@ setup(
       package_dir  = {'': 'src'},
 
       ###########################################
+      ## Run unittests
+      test_suite = 'nose.collector',
+
+      ###########################################
       ## Scripts
       scripts = ['src/eWRT/input/corpus/reuters/reuters.py' ],
  
