@@ -14,8 +14,8 @@
 __revision__ = "$Revision: 545 $"
 __author__   = "Albert Weichselbraun"
 
-from eWRT.config import BBC_CORPUS_HOME_LOW
-from eWRT.convert.html import HtmlToText
+from eWRT.config import BBC_CORPUS_LOW
+from eWRT.input.conv.html import HtmlToText
 from glob import glob
 import os
 
