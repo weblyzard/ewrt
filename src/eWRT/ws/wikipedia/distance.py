@@ -88,8 +88,9 @@ class TestWikiDistance(object):
         """ test specific term pairs"""
         assert self.wd.isSibling("design area", "risk") == False
 
+    @staticmethod
     @attr("db")
-    def testMultiProcessing(self):
+    def testMultiProcessing():
         """ tests the multi processing capabilities of this module """
         from multiprocessing import Pool
         p = Pool(4)
@@ -97,11 +98,11 @@ class TestWikiDistance(object):
                                   ('austria', 'carinthia'), ('linux', 'bsd'),
                                   ('microsoft', 'microsoft inc.'), ('anna', 'ana') ]
                                  )
-        assert [ same for same, sibling in res ] == [ False, True, False, False, True, False ]
+        assert [ same for same, _ in res ] == [ False, True, False, False, True, False ]
 
     @attr("db")
     def testConnectionLimit(self):
-        for x in xrange(300):
+        for _ in xrange(300):
             assert self.wd.isSameAs("design area", "risk") == False
 
 

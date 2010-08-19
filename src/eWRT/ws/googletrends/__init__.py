@@ -2,10 +2,12 @@ from eWRT.config import GOOGLE_USER, GOOGLE_PASS
 
 try:
     from eWRTlibs.googleTrends.pyGTrends import pyGTrends
+    LOADED = True
 except ImportError:
     from warnings import warn
     from sys import exit
     warn("This module requires google Trends ")
+    LOADED = False
     
 class GoogleTrends(object):
     ''' ## Documentation for the Class Google Trends

@@ -5,10 +5,12 @@ from eWRT.lib.ResultSet import ResultSet
 
 try:
     from eWRTlibs.facebook.facebook_api import Facebook
+    LOADED = True
 except ImportError:
     from warnings import warn
     from sys import exit
     warn("This module requires the facebook library.")
+    LOADED = False
 
 class FacebookWS(Webservice):
     """ class for fetching and storing the data of a user
