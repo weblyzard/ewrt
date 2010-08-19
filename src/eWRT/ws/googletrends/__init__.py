@@ -6,7 +6,6 @@ except ImportError:
     from warnings import warn
     from sys import exit
     warn("This module requires google Trends ")
-    exit(-1)
     
 class GoogleTrends(object):
     ''' ## Documentation for the Class Google Trends
@@ -44,5 +43,4 @@ class GoogleTrends(object):
 
 if __name__ == "__main__":
     a = GoogleTrends()
-#    print a.getTrends(('Terminator', 'Rambo'))
     print a.getTrends(('Apple', 'Microsoft'))
