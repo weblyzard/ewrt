@@ -21,8 +21,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-import sys
 from eWRT.access.db import PostgresqlDb
 from eWRT.util.cache import MemoryCached
 from eWRT.config import DATABASE_CONNECTION, GEO_ENTITY_SEPARATOR

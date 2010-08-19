@@ -21,7 +21,7 @@
 __version__ = "$Header$"
 
 from eWRT.access.http import Retrieve
-from urllib import urlencode, quote
+from urllib import urlencode
 from eWRT.config import YAHOO_APP_ID
 
 YAHOO_TERM_EXTRACTION_URI = 'http://search.yahooapis.com/ContentAnalysisService/V1/termExtraction'

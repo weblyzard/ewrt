@@ -23,13 +23,9 @@
 
 __version__ = "$Header$"
 
-import sys
 import re
 from eWRT.access.http import Retrieve
 from eWRT.ws.TagInfoService import TagInfoService
-from urlparse import urlsplit
-
-import unittest
 
 class Flickr(TagInfoService):
     """ retrieves data using the del.icio.us API """

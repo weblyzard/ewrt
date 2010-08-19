@@ -19,18 +19,11 @@
 
 __version__ = "$Header$"
 
-import sys
 import re
 from eWRT.access.http import Retrieve
 from eWRT.ws.TagInfoService import TagInfoService
-from urlparse import urlsplit
 from eWRT.config import TECHNORATI_API_KEY
-import xml.sax
 import time
-
-from warnings import warn
-
-import unittest
 
 SLEEP_TIME=30
 

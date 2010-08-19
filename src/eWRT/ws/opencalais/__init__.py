@@ -28,12 +28,8 @@ Usage:
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import os.path
-import time
-from os import makedirs
 from random import choice
 from xml.dom import minidom
-from StringIO import StringIO
 from eWRT.access.http import Retrieve
 from urllib import urlencode
 from eWRT.config import OPENCALAIS_KEY, OPENCALAIS_CACHE_DIR, OPENCALAIS_URL, USER_AGENT

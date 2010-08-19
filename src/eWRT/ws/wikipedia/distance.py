@@ -25,7 +25,6 @@
 __author__   = "albert"
 __revision__ = "$Revision: 1 $"
 
-from eWRT.util.cache import DiskCached
 from eWRT.access.db import PostgresqlDb
 from eWRT.config import DATABASE_CONNECTION
 from nose.plugins.attrib import attr

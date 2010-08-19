@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from eWRT.stat.coherence import Coherence, DiceCoherence, PMICoherence
+#from eWRT.stat.coherence import Coherence, DiceCoherence, PMICoherence
 from rdflib.Graph import Graph
 from rdflib import Namespace
 

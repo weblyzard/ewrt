@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import sys
 from eWRT.config import FACEBOOK_API_KEY, FACEBOOK_SECRET_KEY, FACEBOOK_SESSION_KEY
 from eWRT.lib import Webservice, Result 
 from eWRT.lib.ResultSet import ResultSet

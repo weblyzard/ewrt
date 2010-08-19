@@ -105,7 +105,7 @@ class YahooSearchResult(object):
         """ @returns the text of the found web page """
         try:
             return HtmlToText.getText( self.getPageContent() )
-        except URLError:
+        except:
             return ""
 
 class TestYahoo(object):

@@ -3,7 +3,8 @@
 """ @package eWRT.util.async
     asynchronous procedure calls 
 
-    WARNING: this library is still a draft and might change considerable
+    @warning
+    this library is still a draft and might change considerable
     
 """
 
@@ -28,13 +29,11 @@ __revision__  = "$Id$"
 __copyright__ = "GPL"
 
 from eWRT.util.cache import Cache
-from os import makedirs
 from shutil import rmtree
 from os.path import join, exists
 from cPickle import load
 import time
 from subprocess import Popen
-from fcntl import fcntl, F_GETFL, F_SETFL
 from glob import glob
 import os
 

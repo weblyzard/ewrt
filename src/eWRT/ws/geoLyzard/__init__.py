@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 
-from xmlrpclib import ServerProxy, Error
-from eWRT.config import GEOLYZARD_URL, GEOLYZARD_GAZETTEERS
+from xmlrpclib import ServerProxy
+from eWRT.config import GEOLYZARD_URL
 from eWRT.util.cache import DiskCached
 from base64 import b64decode, b64encode
-from operator import itemgetter
 from gzip import GzipFile
 from StringIO import StringIO
-import csv
-import sys
 try:
     import psyco
     psyco.full()

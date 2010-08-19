@@ -3,7 +3,8 @@
 """ @package eWRT.util.profile
     google like profiling :)
 
-    WARNING: this library is still a draft and might change considerable
+    @warning
+    this library is still a draft and might change considerable
     
 """
 

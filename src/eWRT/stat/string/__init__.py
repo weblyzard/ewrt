@@ -26,7 +26,7 @@
 #
 import math
 from itertools import izip_longest
-from operator import mul, itemgetter, attrgetter
+from operator import mul, itemgetter
 from collections import defaultdict
 
 from eWRT.util.cache import MemoryCached
