@@ -9,7 +9,6 @@ except ImportError:
     from warnings import warn
     from sys import exit
     warn("This module requires the facebook library.")
-    exit(-1)
 
 class FacebookWS(Webservice):
     """ class for fetching and storing the data of a user
@@ -113,8 +112,6 @@ class FacebookWS(Webservice):
         ResultSet.printRS(self.groups)
 
 if __name__ == "__main__":
-
-    
     facebook = FacebookWS()
     facebook.printAllData()
 
