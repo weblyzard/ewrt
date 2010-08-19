@@ -12,7 +12,7 @@ except ImportError:
     warn("This module requires the facebook library.")
     LOADED = False
 
-class FacebookWS(Webservice):
+class FacebookWS(Webservice.Webservice):
     """ class for fetching and storing the data of a user
     requires that the facebook API key and the facebook secret key are
     set in the configuration file. These can be retrieved from facebook
@@ -113,7 +113,7 @@ class FacebookWS(Webservice):
         ResultSet.printRS(self.albums)
         ResultSet.printRS(self.groups)
 
-if __name__ == "__main__":
-    facebook = FacebookWS()
-    facebook.printAllData()
+#if __name__ == "__main__":
+#    facebook = FacebookWS()
+#    facebook.printAllData()
 
