@@ -72,7 +72,7 @@ class PhraseCleanup(object):
 
 
 class StringCleanupModule(object):
-    """ @class CleanupPipeEntry
+    """ @interface CleanupPipeEntry
         abstract class for all string based cleanup modules
     """
     def __call__(self, s):
@@ -99,9 +99,9 @@ class FixDashSpace(StringCleanupModule):
 
 
 class PhraseCleanupModule(object):
-    """ @cleanup PhraseCleanup
+    """ @interface PhraseCleanupModule
     """
-    def __class__(self, ph):
+    def __call__(self, ph):
         """ @param[in] ph a list of phrases to cleanup """
         raise NotImplemented
 
@@ -166,10 +166,13 @@ class WordCleanupModule(object):
 class FixSpelling(WordCleanupModule):
     """ @class FixSpelling 
         fixes spelling mistakes """
+
     def __init__(self, s=None):
         """ @param[in] s optional SpellSuggestion object to use
                          for the spell checking 
         """
+        WordCleanupModule.__init__(self)
+
         if s==None:
             self.s = SpellSuggestion()
         else:
@@ -177,6 +180,12 @@ class FixSpelling(WordCleanupModule):
 
     def __call__(self, l):
         return [ self.s.correct(w)[1] for w in l ]
+
+    def numMistakesFixed(self, l):
+        """ @returns the number of mistakes fixed by the
+                     spelling module """
+        return len( [ True for w in l if self.s.correct(w)[1] != w ] )
+
 
 class RemovePunctationAndBrackets(WordCleanupModule):
     """ @class RemovePunctationAndBrackets
@@ -229,4 +238,11 @@ class TestPhraseCleanup(object):
         print self.p.clean(u'dow fire and explosion index (f&ei)')
         assert self.p.clean(u'dow fire and explosion index (f&ei)') == [u'now fire and explosion index', u'f&ei']
 
+    def testNumMistakesFixed(self):
+        """ @test 
+            returns the number of mistakes fixed in the given phrase 
+        """
+        s = FixSpelling()
+        print s.numMistakesFixed(u'dow fire and explossion index (f&ei)'.split(" ")) 
+        assert s.numMistakesFixed(u'dow fire and explossion index (f&ei)'.split(" ")) == 2
 
