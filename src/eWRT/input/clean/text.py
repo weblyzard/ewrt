@@ -69,10 +69,13 @@ class PhraseCleanup(object):
         return result
 
 
-
-
-class StringCleanupModule(object):
+class CleanupPipeEntry(object):
     """ @interface CleanupPipeEntry
+        an entry of the cleanup pipe """
+
+
+class StringCleanupModule(CleanupPipeEntry):
+    """ @interface StringCleanupModule
         abstract class for all string based cleanup modules
     """
     def __call__(self, s):
@@ -98,11 +101,11 @@ class FixDashSpace(StringCleanupModule):
         return FixDashSpace.RE_DASH.sub(r"\1-\2", s)
 
 
-class PhraseCleanupModule(object):
+class PhraseCleanupModule(CleanupPipeEntry):
     """ @interface PhraseCleanupModule
     """
-    def __call__(self, ph):
-        """ @param[in] ph a list of phrases to cleanup """
+    def __call__(self, l):
+        """ @param[in] l a list of phrases to cleanup """
         raise NotImplemented
 
 
@@ -154,7 +157,7 @@ class SplitMultiTerms(PhraseCleanupModule):
                 result.append(pp)
         return result
 
-class WordCleanupModule(object):
+class WordCleanupModule(CleanupPipeEntry):
     """ @cleanup WordCleanupModule
     """
     def __call__(self, l):
