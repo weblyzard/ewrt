@@ -16,3 +16,5 @@ to your setting and save it as config.py
    - oauth - http://oauth.googlecode.com/
    - simplejson - http://pypi.python.org/pypi/simplejson/ 
    - tango - http://tango.ryanmcgrath.org/
+   - python-rdflib
+   - python-nltk
