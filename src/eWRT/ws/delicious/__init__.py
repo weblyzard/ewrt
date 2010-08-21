@@ -24,9 +24,12 @@ import re
 from eWRT.access.http import Retrieve
 from eWRT.ws.TagInfoService import TagInfoService
 from urllib import quote
+import urllib2
 from time import sleep
 from hashlib import md5
-from eWRT.config import DELICIOUS_USER, DELICIOUS_PASS
+
+from nose.plugins.attrib import attr
+#from eWRT.config import DELICIOUS_USER, DELICIOUS_PASS
 
 class Delicious(TagInfoService):
     """ retrieves data using the del.icio.us API """
@@ -54,8 +57,11 @@ class Delicious(TagInfoService):
         """
         assert( isinstance(tags, tuple) or isinstance(tags, list) )
         url = Delicious._parse_tag_url(tags)
-        content = Delicious.get_content(url)
-        return Delicious._parse_counts(content)
+        try:
+            content = Delicious._get_content(url)
+            return Delicious._parse_counts(content)
+        except urllib2.HTTPError:
+            return 0
 
     @staticmethod
     def getRelatedTags( tags, retrieveTagInfo=False, pageNum=0 ):
@@ -71,7 +77,7 @@ class Delicious(TagInfoService):
         if not pageNum == 0:
             tag_url = '%s?page=%s' % (tag_url, pageNum)
 
-        content = Delicious.get_content( tag_url )
+        content = Delicious._get_content( tag_url )
 
         m = Delicious.NEXT_EXP.search(content)
 
@@ -134,10 +140,10 @@ class Delicious(TagInfoService):
 
         md5_url = md5( Delicious._normalize_url(url)).hexdigest()
         request = Delicious.DELICIOUS_SERVICE_URL % md5_url
-        return Delicious._parse_counts( Delicious.get_content(request) )
+        return Delicious._parse_counts( Delicious._get_content(request) )
     
     @staticmethod
-    def get_content( url ):
+    def _get_content( url ):
         """ returns the content from delicious """
         assert( url.startswith("http") )
 
@@ -173,6 +179,7 @@ class TestDelicious(object):
 
         assert 'linux' not in related_tags
 
+    @attr("remote")
     def testCriticalTagNames(self):
         """ tests tag names which contain slashes, quotes, etc """
         assert Delicious.getTagInfo( ("consequence/frequency matrix", ) ) != None
