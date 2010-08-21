@@ -38,11 +38,11 @@ class HtmlToText(object):
         if not "<" in html_content or not ">" in html_content:
             return html_content
 
-        html = HtmlToText.execute( CMD_HTML_CONV, html_content )
+        html = HtmlToText._execute( CMD_HTML_CONV, html_content )
         return html[1]
 
     @staticmethod
-    def execute(cmd, stdin=None):
+    def _execute(cmd, stdin=None):
         """ @param[in] cmd command to be executed
             @param[in] stdin
             @param[in] stdout
