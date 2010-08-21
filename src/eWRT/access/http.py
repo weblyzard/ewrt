@@ -42,16 +42,16 @@ class Retrieve(object):
     """ @class Retrieve
         retrieves URLs using HTTP 
 
-        @remarks: 
+        @remarks  
         this class supports transparent
-        * authentication and
-        * compression 
-        * support for the context protocol (python)
+        - authentication and
+        - compression 
+        - support for the context protocol (python)
 
-        @warning:
+        @warning
         There are certain urls such as http://www.mfsa.com.mt/insguide/english/glossarysearch.jsp?letter=all
         which are _not_ handled correctly by the underlying urllib2 library(!)
-        - please use urllib in such cases
+        Please use urllib in such cases.
     """
 
     __slots__ = ('module', 'sleep_time', 'last_access_time', 'user_agent')
