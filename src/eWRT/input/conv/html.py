@@ -4,7 +4,7 @@
  converts HTML pages into text
 """
 
-# (C)opyrights 2009 by Albert Weichselbraun <albert@weichselbraun.net>
+# (C)opyrights 2009-2010 by Albert Weichselbraun <albert@weichselbraun.net>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,8 +29,16 @@ class HtmlToText(object):
     """
 
     @staticmethod
-    def getText(text, encoding="utf8"):
-        html = HtmlToText.execute( CMD_HTML_CONV, text )
+    def getText(html_content, encoding="utf8"):
+        """ @param[in] html_content the content of the html page to convert 
+            @param[in] encoding the document encoding 
+            @returns the text representation of the Web page
+        """
+        # check whether this is really a html file
+        if not "<" in html_content or not ">" in html_content:
+            return html_content
+
+        html = HtmlToText.execute( CMD_HTML_CONV, html_content )
         return html[1]
 
     @staticmethod
@@ -67,3 +75,9 @@ class TestHtmlToText(object):
     def testConversion(self):
         text =  HtmlToText.getText( "<html><body><h1>Hallo</h1><ul><li>1</li><li>Jasna</li></ul></body></html>" )
         assert 'Jasna' in text
+
+    def testBorderCases(self):
+        assert HtmlToText.getText("") == ""
+        assert HtmlToText.getText("   ") == "   "
+
+
