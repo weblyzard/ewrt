@@ -26,13 +26,14 @@
 __version__ = "$Header$"
 
 from eWRT.access.http import Retrieve
-from urllib import urlencode, quote
+from urllib import urlopen, urlencode, quote
 from eWRT.ws.TagInfoService import TagInfoService
 from eWRT.config import YAHOO_APP_ID, YAHOO_SEARCH_URL
 from eWRT.input.conv.html import HtmlToText
 from urllib2 import URLError
-
 from nose.plugins.attrib import attr
+from socket import setdefaulttimeout
+setdefaulttimeout(60)
 
 
 class Yahoo(TagInfoService):
@@ -85,11 +86,10 @@ class Yahoo(TagInfoService):
 class YahooSearchResult(object):
     """ Perfom manipulations on yahoo search results """
 
-    __slots__ = ('r', 'search_result')
+    __slots__ = ('search_result')
 
     def __init__(self, search_result):
         """ @param[in] search_result ... search result to query """
-        self.r = Retrieve( Yahoo.__name__, sleep_time=0 )
         self.search_result = search_result
 
     def getKeywords(self):
@@ -98,8 +98,7 @@ class YahooSearchResult(object):
 
     def getPageContent(self):
         """ @returns the content of the found web page """
-        with self.r as r:
-            return r.open( self.search_result['url'] ).read()
+        return urlopen( self.search_result['url'] ).read()
 
     def getPageText(self):
         """ @returns the text of the found web page """
@@ -170,6 +169,14 @@ class TestYahoo(object):
             # f.write("\n-----\n\n\n")
             assert len(res) > 20
         # f.close()
+
+    @attr("remote")
+    def testFailingUrls(self):
+        """ tests the module with URLs known to fail(!) """
+        TEST_URLS = ['http://www.mfsa.com.mt/insguide/english/glossarysearch.jsp?letter=all',
+                    ]
+        for url in TEST_URLS:
+            assert len( p_fetchWebPage(url).strip() ) > 0
 
 
 

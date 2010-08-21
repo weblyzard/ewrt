@@ -108,7 +108,7 @@ class TestWikiDistance(object):
 
 def p_isSibling( concepts ):
     """ 
-        @param[concepts] a tuple containing the two concepts to check
+        @param[in] concepts a tuple containing the two concepts to check
 
         @remarks
         helper function for the testMultiProcessing test

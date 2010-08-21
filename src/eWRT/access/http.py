@@ -47,6 +47,11 @@ class Retrieve(object):
         * authentication and
         * compression 
         * support for the context protocol (python)
+
+        @warning:
+        There are certain urls such as http://www.mfsa.com.mt/insguide/english/glossarysearch.jsp?letter=all
+        which are _not_ handled correctly by the underlying urllib2 library(!)
+        - please use urllib in such cases
     """
 
     __slots__ = ('module', 'sleep_time', 'last_access_time', 'user_agent')
@@ -117,7 +122,7 @@ class Retrieve(object):
     def __exit__(self, exc_type, exc_value, traceback):
         """ context protocol support """
         if exc_type != None:
-            log.critical("%s" % exc_type)
+           log.critical("%s" % exc_type)
  
 
 class TestRetrieve(object):
@@ -127,7 +132,11 @@ class TestRetrieve(object):
 
     def __init__(self):
         from socket import getdefaulttimeout
+        from logging import StreamHandler
         self.default_timeout = getdefaulttimeout()
+
+        # set logging handler
+        log.addHandler( StreamHandler() )
 
     def tearDown(self):
         setdefaulttimeout( self.default_timeout )
@@ -180,6 +189,16 @@ class TestRetrieve(object):
         for res in  p.map(t_retrieve, TEST_URLS):
             assert len(res) > 20
 
+    #@attr("new")
+    #@attr("remote")
+    #def testProblematicUrls(self):
+    #    """ tests urls which are known to be problematic """
+    #    TEST_URLS = ['http://www.mfsa.com.mt/insguide/english/glossarysearch.jsp?letter=all', ]
+
+    #    for t in TEST_URLS:
+    #        r = Retrieve(self.__class__.__name__).open( t )
+    #        assert len(r.read().strip()) > 0
+
 
 def t_retrieve(url):
     """ retrieves the given url from the web
@@ -187,9 +206,7 @@ def t_retrieve(url):
         @remarks
         helper module for the testMultiProcessing unit test.
     """
-    r = Retrieve( __name__ ).open( url )
-    content = r.read()
-    r.close()
-
+    with Retrieve( __name__ ).open( url ) as r:
+        content = r.read()
     return content
 
