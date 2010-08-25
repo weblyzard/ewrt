@@ -92,17 +92,24 @@ class Delicious(TagInfoService):
 
     @staticmethod
     def _getMonogramRelatedTags( content ):
-        """ returns the related tags for the given monogram
+        """ Returns the related tags for the given monogram.
             @param content of the tag's page
             @return a list of related tags
+
+            @remark
+            this method parses the delicious "Related Tags" box.
         """
         return re.findall('<span class="m" title="(\w*?)">', content, re.IGNORECASE|re.DOTALL)
 
     @staticmethod
     def _getNGramRelatedTags( content ):
-        """ returns the related tags for the given n-gram
+        """ Returns the related tags for the given n-gram.
             @param content of the tags' page
             @return a list of related tags
+
+            @remark
+            this method retrieves all other tags from the page and sorts
+            them by the number of occurrences.
         """
         return re.findall('<span class="(?:tag-chain-item-span|tagItem)">(\w*?)</span>', content, re.IGNORECASE|re.DOTALL)
  
