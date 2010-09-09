@@ -29,7 +29,11 @@ NS_RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
 
 
 class XCL2RDF(object):
-    """ converts XCL  to RDF """
+    """ converts XCL  to RDF 
+
+        @warning
+        XCL2RDF will _ignore_ statements with empty s, o or p.
+    """
     
     @staticmethod
     def _createResourceDictionary(dom):
@@ -59,6 +63,9 @@ class XCL2RDF(object):
         """ adds the given statement to the ontology using the
             wl-syntax 
         """
+        # ignore statements with empty s, p, or o.
+        if not p or not s or not o:
+            return
         
         # returns the resource's identifier
         rid = lambda r: NS_WL[ XCL2RDF._getIdentifier(r)] 
@@ -104,15 +111,18 @@ class XCL2RDF(object):
         
 def testXCL2RDF():
         """ tests the XCL2RDF class """
-        pass
+        txt = open("./test/test.cxl").read()
+        rdfGraph = XCL2RDF.toRDF(txt)
+        open("./test/result.rdf", "w").write( rdfGraph.serialize() )
     
 def testGetIdentifier():
     """ tests the creation of identifiers """
     assert XCL2RDF._getIdentifier("is true") == "isTrue"
     assert XCL2RDF._getIdentifier("IS") == "is" 
-    
-if __name__ == '__main__':
-    txt = open("test.cxl").read()
+
+def testEmptyPredicates():
+    """ tests whether we are able to translate unnamed predicates """
+    txt = open("./test/test_empty_concepts.cxl").read()
     rdfGraph = XCL2RDF.toRDF(txt)
-    open("result.rdf", "w").write( rdfGraph.serialize() )
-    
+    open("./test/result2.rdf", "w").write( rdfGraph.serialize() )
+
