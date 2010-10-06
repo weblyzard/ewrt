@@ -62,6 +62,11 @@ class Output(object):
     """ abstract webLyzard ontology visualization superclass """
     
     def __init__(self, ontology, sparqlQuery=OutputQueries._webLyzardSparqlQuery):
+        """ @param[in] ontology    ... the ontology to visualize
+            @param[in] sparqlQuery ... returns the sparqlQuery required to select the node names
+          
+            @see OutputQueries for possible sparqlQueries
+        """
         self.ontology    = ontology if isinstance( ontology, Graph ) else Graph().parse( ontology)
         self.sparqlQuery = sparqlQuery
         
@@ -102,7 +107,10 @@ class GraphvizVisualize(Output):
         splines=true
         minsep="1.5"
     """
-    
+    def __init__(self, ontology, sparqlQuery=OutputQueries._webLyzardSparqlQuery):
+        self.graphTitle = ""
+        Output.__init__(self, ontology, sparqlQuery)
+   
     def mapPredicate(self, p):
         """ maps a predicate to a graphviz link label
             @param[in] p
@@ -113,6 +121,14 @@ class GraphvizVisualize(Output):
             return GraphvizVisualize.WL_PREDICATE_MAPPING[ wl_predicate_type ]
         except IndexError:
             return u'[label="%s",dir="back"]' % p
+
+    def getTitle(self):
+        """ returns the graph's title, if a title has been set """
+        if not self.graphTitle:
+            return ""
+
+        return '\ngraph [ fontsize=20, label="%s", size="6,6" ];\n ' % self.graphTitle
+
         
     def __str__(self):
         stmts = self.getOntologyStatements()
@@ -120,8 +136,9 @@ class GraphvizVisualize(Output):
                                for c in set( chain( map(itemgetter(0), stmts), map(itemgetter(2), stmts) ) ) ]
         relationDefinitions = ['"%s" -> "%s" %s' % (s,o,self.mapPredicate(p)) for s,p,o in stmts ]
         
-        return "digraph G{%s\n%s\n\n%s\n}" % (GraphvizVisualize.GRAPHVIZ_HEADER,
-                                               "\n".join(conceptDefinitions), "\n".join(relationDefinitions) )
+        return "digraph G{%s\n%s\n\n%s\n\n\n%s\n}" % (GraphvizVisualize.GRAPHVIZ_HEADER,
+                                                      self.getTitle(),
+                                                      "\n".join(conceptDefinitions), "\n".join(relationDefinitions) )
 
     def createImage(self, fname, imgFormat):
         """ creates an image based on the ontology 
@@ -142,5 +159,6 @@ class TestVisualizationClass(object):
 
 if __name__ == '__main__':
     g = GraphvizVisualize('./test/test.rdf')
+    g.graphTitle="Test"
     g.createImage( "test.rdf", "png" )
 
