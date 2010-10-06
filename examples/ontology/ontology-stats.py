@@ -4,6 +4,7 @@
     computes the top overlapping concepts of ontologies """
 
 from glob import glob
+from os import path
 from bz2 import BZ2File
 
 from eWRT.input.conv.cxl import XCL2RDF
@@ -87,6 +88,41 @@ def computeStatistics( ff ):
            relationCounts[r] += 1
 
     csvOutput( conceptCounts, relationCounts )
+    return conceptCounts, relationCounts
+
+
+def computeOntologyStatistics( ff, cc, rc, ccCutOffCount, rcCutOffCount):
+    """ computes per ontology statistics (R, P, F1)
+        @param[in] ff list of ontology files
+        @param[in] cc concept counts dictionary
+        @param[in] rc relation counts dictionary
+        @param[in] ccCutOffCount min cc required for a term to be considered
+        @param[in] rcCutOffCount min cc required for a term to be considered
+    """
+    goldStandardConcepts  = set([ c for c, cnt in cc.items() if cnt >= ccCutOffCount ])
+    goldStandardRelations = set([ r for r, cnt in rc.items() if cnt >= rcCutOffCount ])
+    c = open("ontology-stats.csv", "w")
+    w = writer(c) 
+
+    for f in ff:
+       concepts  = set(map(str, extractConceptSet( XCL2RDF.toRDF(open(f).read() ))))
+       relations = set(map(str, extractRelationSet(XCL2RDF.toRDF(open(f).read() ))))
+
+       cPrecision = len(goldStandardConcepts.intersection( concepts ))/float( len(concepts) )
+       cRecall    = len(goldStandardConcepts.intersection( concepts ))/float( len(goldStandardConcepts) )
+       cF1        = 2 * cPrecision * cRecall / (cPrecision + cRecall)
+
+       rPrecision = len(goldStandardRelations.intersection( relations ))/float( len(relations) )
+       rRecall    = len(goldStandardRelations.intersection( relations ))/float( len(goldStandardRelations) )
+       rF1        = 2 * rPrecision * rRecall / (rPrecision + rRecall)
+
+       w.writerow( ("ontology", "concept precision", "concept recall", "concept F1", 
+                                "relation precision", "relation recall", "relation F1") )
+       w.writerow( (path.basename(f), cPrecision, cRecall, cF1, rPrecision, rRecall, rF1) )
+
+    c.close()
+
+   
 
 
 def csvOutput( termCnt, relCnt ):
@@ -100,4 +136,5 @@ def csvOutput( termCnt, relCnt ):
 
 
 # main
-computeStatistics( glob(ONTOLOGY_DIR +"/*.cxl") )
+cc, rc = computeStatistics( glob(ONTOLOGY_DIR +"/*.cxl") )
+computeOntologyStatistics( glob(ONTOLOGY_DIR +"/*.cxl"), cc, rc, ccCutOffCount=4, rcCutOffCount=3 )

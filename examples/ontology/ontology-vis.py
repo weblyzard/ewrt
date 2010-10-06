@@ -29,6 +29,7 @@ def visualizeOntologies( ff ):
         rdfOntology = XCL2RDF.toRDF(open(f).read() )
 
         g = GraphvizVisualize( rdfOntology, sparqlQuery=OutputQueries._labeledGraphSparqlQuery )
+        g.graphTitle = fName
         g.createImage( path.join(IMG_OUTPUT_DIR, fName), "pdf" )
 
 
