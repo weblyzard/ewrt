@@ -3,7 +3,6 @@
 """ ontology-overlap.py
     computes the top overlapping concepts of ontologies """
 
-import os.path
 from glob import glob
 from bz2 import BZ2File
 
@@ -12,10 +11,9 @@ from eWRT.input.conv.cxl import XCL2RDF
 from eWRT.input.clean.text import *
 from eWRT.stat.string.spelling import SpellSuggestion
 
-from rdflib.Graph import Graph
-from rdflib import Namespace, Literal
+from rdflib import Namespace
 from collections import defaultdict
-from itertools import izip_longest, chain
+from itertools import izip_longest
 from operator import itemgetter
 from csv import writer
 
