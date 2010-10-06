@@ -27,10 +27,21 @@ from itertools import chain
 from operator import itemgetter
 from os.path import splitext
 
+from tempfile import NamedTemporaryFile
+
+
 NS_RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
 NS_WL   = Namespace("http://www.weblyzard.com/2005/03/31/wl#")
 
 RELATION_PREDICATES = ('rdfs:subClassOf', 'wl:isRelatedTo', 'wl:modifierOf', 'wl:social', 'wl:deleted')
+
+# ontology cleanup
+from eWRT.input.clean.text import *
+
+strCleanupPipe = (lambda s:s.replace(u'\xd7', " "), RemovePossessive(), FixDashSpace() )
+phrCleanupPipe = (SplitEnumerations(), SplitMultiTerms(), SplitBracketExplanations() )
+wrdCleanupPipe = (RemovePunctationAndBrackets(),)
+phraseCleanup = PhraseCleanup(strCleanupPipe, phrCleanupPipe, wrdCleanupPipe )
 
 class OutputQueries(object):
     """ @class OutputQueries
@@ -54,22 +65,15 @@ class Output(object):
         self.ontology    = ontology if isinstance( ontology, Graph ) else Graph().parse( ontology)
         self.sparqlQuery = sparqlQuery
         
-   
-    @staticmethod
-    def _getFilename(fname, ext):
-        """ returns a filename with the new extension
-            @param[in] fname original fname
-            @param[in] ext - new extension
-        """
-        return splitext(fname)[0]+"."+ext if "." in fname else fname+"."+ext
-        
-
     def getOntologyStatements(self):
         """ @param[in] ontology
             @returns A list of type [(s,p,o), (s,p,o)] for all statements in the ontology
         """
         q = self.sparqlQuery()
-        return [ (s,p,o) for s,p,o in self.ontology.query( q, initNs=dict(rdfs=NS_RDFS, wl=NS_WL) ) ]
+        rel = set()
+        for ss, pp, oo in self.ontology.query( q, initNs=dict(rdfs=NS_RDFS, wl=NS_WL) ):
+            rel = rel.union( [ (s, p, o) for s in phraseCleanup.clean(ss) for p in phraseCleanup.clean(pp) for o in phraseCleanup.clean(oo) ] )
+        return rel
     
     def __str__(self):
         """ returns the visualization in the given format """
@@ -84,11 +88,11 @@ class SubjectObjectPairOutput(Output):
 class GraphvizVisualize(Output):
     """ Provides graphviz visualizations of webLyzard ontology """
     
-    WL_PREDICATE_MAPPING = {u'subClassOf': "[]",
+    WL_PREDICATE_MAPPING = {u'subClassOf' : "[]",
                             u'isRelatedTo': '[style="dashed", dir="none", label="r"]',
-                            u'modifierOf':  '[style="dashed", label="m"]',
-                            u'deleted'   :  '[style="dotted", arrowhead="invempty"]',
-                            u'social'    :  '[style="bold", dir="none"]'
+                            u'modifierOf' :  '[style="dashed", label="m"]',
+                            u'deleted'    :  '[style="dotted", arrowhead="invempty"]',
+                            u'social'     :  '[style="bold", dir="none"]'
                             }
     GRAPHVIZ_HEADER = """
         rotate="90"
@@ -104,9 +108,11 @@ class GraphvizVisualize(Output):
             @param[in] p
             @returns the link label [...]
         """
-        wl_predicate_type = p.split("#")[1]
-        return GraphvizVisualize.WL_PREDICATE_MAPPING[ wl_predicate_type ]
-    
+        try:
+            wl_predicate_type = p.split("#")[1]
+            return GraphvizVisualize.WL_PREDICATE_MAPPING[ wl_predicate_type ]
+        except IndexError:
+            return u'[label="%s",dir="back"]' % p
         
     def __str__(self):
         stmts = self.getOntologyStatements()
@@ -122,16 +128,17 @@ class GraphvizVisualize(Output):
             @param[in] fname     ... output file name 
             @param[in] imgFormat ... image format (such as eps, png) to use
         """
-        open(Output._getFilename(fname, "dot"), "w").write( str(self) )
-        getoutput('fdp -T%s %s.dot -Elen=0.1 -Eweight=3  -Gmindist=0.05 -Nmargin="0.0,0.0" -Nfontname="Helvetica" -Nheight=0.6 -Nwidth=1.1 -Nfontsize=15 -Goverlap="4:" -Goutputorder="edgesfirst" -Gsplines="true" -Gratio=0.7 -o%s.%s' % (imgFormat, fname, fname, imgFormat) )
+        dotFile = NamedTemporaryFile(suffix=".dot", delete=False)
+        dotFile.write( str(self) )
+        dotFile.flush()
+
+        getoutput('fdp -T%s %s -Elen=0.1 -Eweight=3  -Gmindist=0.05 -Nmargin="0.0,0.0" -Nfontname="Helvetica" -Nheight=0.6 -Nwidth=1.1 -Nfontsize=15 -Goverlap="4:" -Goutputorder="edgesfirst" -Gsplines="true" -Gratio=0.7 -o%s.%s' % (imgFormat, dotFile.name, fname, imgFormat) )
 
 
 class TestVisualizationClass(object):
 
-    def testGetFname(self):
-        assert Output._getFilename("test", "rdf") == "test.rdf"
-        assert Output._getFilename("test.rdf", "dot") == "test.dot"
-
+    def __init__(self):
+        pass
 
 if __name__ == '__main__':
     g = GraphvizVisualize('./test/test.rdf')

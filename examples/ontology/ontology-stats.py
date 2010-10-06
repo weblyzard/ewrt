@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-""" ontology-overlap.py
+""" ontology-stats.py
     computes the top overlapping concepts of ontologies """
 
 from glob import glob
