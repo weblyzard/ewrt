@@ -30,20 +30,31 @@ from os.path import splitext
 NS_RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
 NS_WL   = Namespace("http://www.weblyzard.com/2005/03/31/wl#")
 
-RELATION_PREDICATES = ('rdfs:subClassOf', 'wl:isRelatedTo', 'wl:modifierOf','wl:social', 'wl:deleted')
+RELATION_PREDICATES = ('rdfs:subClassOf', 'wl:isRelatedTo', 'wl:modifierOf', 'wl:social', 'wl:deleted')
+
+class OutputQueries(object):
+    """ @class OutputQueries
+        static class which collects all supported sparql queries
+        for the ontology visualization """
+
+    @staticmethod
+    def _webLyzardSparqlQuery():
+        constraints = [ "{ ?c1 %s ?c2; ?p ?c2; rdfs:label ?s. ?c2 rdfs:label ?o. }" % p for p in RELATION_PREDICATES ]
+        return "SELECT ?s ?p ?o WHERE { %s }" % " UNION ".join( constraints )
+
+    @staticmethod
+    def _labeledGraphSparqlQuery():
+        return "SELECT ?s ?p ?o WHERE { ?cs ?cp ?co. ?cs rdfs:label ?s. ?co rdfs:label ?o. ?cp rdfs:label ?p. }"
 
 
 class Output(object):
     """ abstract webLyzard ontology visualization superclass """
     
-    def __init__(self, ontology):
-        self.ontology = ontology if isinstance( ontology, Graph ) else Graph().parse( ontology)
+    def __init__(self, ontology, sparqlQuery=OutputQueries._webLyzardSparqlQuery):
+        self.ontology    = ontology if isinstance( ontology, Graph ) else Graph().parse( ontology)
+        self.sparqlQuery = sparqlQuery
         
-    @staticmethod
-    def _buildSparqlQuery():
-        constraints = [ "{ ?c1 %s ?c2; ?p ?c2; rdfs:label ?s. ?c2 rdfs:label ?o. }" % p for p in RELATION_PREDICATES ]
-        return "SELECT ?s ?p ?o WHERE { %s }" % " UNION ".join( constraints )
-    
+   
     @staticmethod
     def _getFilename(fname, ext):
         """ returns a filename with the new extension
@@ -57,17 +68,17 @@ class Output(object):
         """ @param[in] ontology
             @returns A list of type [(s,p,o), (s,p,o)] for all statements in the ontology
         """
-        q = Output._buildSparqlQuery()
+        q = self.sparqlQuery()
         return [ (s,p,o) for s,p,o in self.ontology.query( q, initNs=dict(rdfs=NS_RDFS, wl=NS_WL) ) ]
     
     def __str__(self):
         """ returns the visualization in the given format """
-        raise NotImplemented
+        raise NotImplementedError
     
 class SubjectObjectPairOutput(Output):
     
     def __str__(self):
-        return "\n".join( ["%s,%s" % (s,o) for s,p,o in self.getOntologyStatements() ] )    
+        return "\n".join( ["%s,%s" % (s,o) for s,_,o in self.getOntologyStatements() ] )    
 
 
 class GraphvizVisualize(Output):
@@ -106,13 +117,13 @@ class GraphvizVisualize(Output):
         return "digraph G{%s\n%s\n\n%s\n}" % (GraphvizVisualize.GRAPHVIZ_HEADER,
                                                "\n".join(conceptDefinitions), "\n".join(relationDefinitions) )
 
-    def createImage(self, fname, format):
+    def createImage(self, fname, imgFormat):
         """ creates an image based on the ontology 
-            @param[in] fname  ... output file name 
-            @param[in] format ... image format (such as eps, png) to use
+            @param[in] fname     ... output file name 
+            @param[in] imgFormat ... image format (such as eps, png) to use
         """
         open(Output._getFilename(fname, "dot"), "w").write( str(self) )
-        getoutput('fdp -T%s %s.dot -Elen=0.1 -Eweight=3  -Gmindist=0.05 -Nmargin="0.0,0.0" -Nfontname="Helvetica" -Nheight=0.6 -Nwidth=1.1 -Nfontsize=15 -Goverlap="4:" -Goutputorder="edgesfirst" -Gsplines="true" -Gratio=0.7 -o%s.%s' % (format, fname, fname, format) )
+        getoutput('fdp -T%s %s.dot -Elen=0.1 -Eweight=3  -Gmindist=0.05 -Nmargin="0.0,0.0" -Nfontname="Helvetica" -Nheight=0.6 -Nwidth=1.1 -Nfontsize=15 -Goverlap="4:" -Goutputorder="edgesfirst" -Gsplines="true" -Gratio=0.7 -o%s.%s' % (imgFormat, fname, fname, imgFormat) )
 
 
 class TestVisualizationClass(object):
