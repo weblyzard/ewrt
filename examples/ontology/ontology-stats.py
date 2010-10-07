@@ -103,6 +103,8 @@ def computeOntologyStatistics( ff, cc, rc, ccCutOffCount, rcCutOffCount):
     goldStandardRelations = set([ r for r, cnt in rc.items() if cnt >= rcCutOffCount ])
     c = open("ontology-stats.csv", "w")
     w = writer(c) 
+    w.writerow( ("ontology", "concept precision", "concept recall", "concept F1", 
+                                "relation precision", "relation recall", "relation F1") )
 
     for f in ff:
        concepts  = set(map(str, extractConceptSet( XCL2RDF.toRDF(open(f).read() ))))
@@ -116,8 +118,6 @@ def computeOntologyStatistics( ff, cc, rc, ccCutOffCount, rcCutOffCount):
        rRecall    = len(goldStandardRelations.intersection( relations ))/float( len(goldStandardRelations) )
        rF1        = 2 * rPrecision * rRecall / (rPrecision + rRecall)
 
-       w.writerow( ("ontology", "concept precision", "concept recall", "concept F1", 
-                                "relation precision", "relation recall", "relation F1") )
        w.writerow( (path.basename(f), cPrecision, cRecall, cF1, rPrecision, rRecall, rF1) )
 
     c.close()
