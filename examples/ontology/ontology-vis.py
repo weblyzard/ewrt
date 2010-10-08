@@ -8,11 +8,12 @@ from eWRT.ontology.visualize import GraphvizVisualize, OutputQueries
 from glob import glob
 from os import path
 from os import mkdir
+from getopt import getopt, GetoptError
+from rdflib.Graph import Graph
+import sys
 
 # a directory containing all cxl ontology files
-ONTOLOGY_DIR   = "/home/albert/data/ac/research/inwork/pakdd2011-ontology-evaluation/data/ontologies/risk/week8"
 IMG_OUTPUT_DIR = "./images"
-
 
 def _createOutputDir( d ):
     if not path.exists( d ):
@@ -32,8 +33,38 @@ def visualizeOntologies( ff ):
         g.graphTitle = fName
         g.createImage( path.join(IMG_OUTPUT_DIR, fName), "pdf" )
 
+def visualizeOntologyFile( f ):
+    """ visualizes the given ontology file
+        @param[in] f   the filename of the ontology to visualize
+    """
+    print "Visualizing "+f
+    rdfOntology = Graph()
+    fName, fExt = path.splitext( path.basename(f))
 
+    rdfOntology.parse( f, format="xml" )
+
+    g = GraphvizVisualize( rdfOntology, sparqlQuery=OutputQueries._labeledGraphSparqlQuery )
+    g.graphTitle = f
+    g.createImage( path.join(IMG_OUTPUT_DIR, fName), "pdf" )
+ 
+
+def usage():
+    print "ontology-vis.py -d [ontology-directory] -f [ontology-file] -h"
 
 # main
-visualizeOntologies( glob(ONTOLOGY_DIR +"/*.cxl") )
+try:
+    opts, args = getopt( sys.argv[1:], "hd:f:", ["help", "input-dir=", "input-file="] )
+except GetoptError, err:
+    print str(err)
+    usage()
+    sys.exit(2)
+
+for o, a in opts:
+    if o in ("-d", "--input-dir"):
+        visualizeOntologies( glob(a +"/*.cxl") )
+    elif o in ("-f", "--input-file"):
+        visualizeOntologyFile( a )
+    elif o in ("-h", "--help"):
+        usage()
+        sys.exit()
 
