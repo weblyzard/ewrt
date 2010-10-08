@@ -101,6 +101,7 @@ def computeHybridOntology( ff, topConcepts ):
               usedTopConcepts.add( s )
               usedTopConcepts.add( o )
 
+    _addUseCaseSpecificUnusedConcepts(g)
     with open("hybrid-graph.rdf", "w") as f:
         f.write( g.serialize() )
 
@@ -109,6 +110,20 @@ def computeHybridOntology( ff, topConcepts ):
     print ", ".join( list(unusedConcepts) )
 
 
+def _addUseCaseSpecificUnusedConcepts( g ):
+    """ adds the four missing concepts from the risk management
+        use case """
+    g.add( (getUrl("mond indices"), NS_RDFS['label'], Literal("Mond indices")) )
+    g.add( (getUrl("dow indices"), NS_RDFS['label'], Literal("DOW indices")) )
+    g.add( (getUrl("flixborough"), NS_RDFS['label'], Literal("Flixborough")) )
+    g.add( (getUrl("piper alpha"), NS_RDFS['label'], Literal("Piper Alpha")) )
+
+    g.add( (getUrl("quantitative"), getUrl("related"), getUrl("mond indices")) ) 
+    g.add( (getUrl("quantitative"), getUrl("related"), getUrl("dow indices")) )  
+    g.add( (getUrl("events"), getUrl("related"), getUrl("flixborough")) )
+    g.add( (getUrl("events"), getUrl("related"), getUrl("piper alpha")) )
+
 # main
 topConcepts = map(None, map(str.strip, open( IMPORTANT_CONCEPTS_LIST )) )
 computeHybridOntology( glob(ONTOLOGY_DIR +"/*.cxl"), topConcepts )
+
