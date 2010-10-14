@@ -2,15 +2,18 @@
 from eWRT.config import FACEBOOK_API_KEY, FACEBOOK_SECRET_KEY, FACEBOOK_SESSION_KEY
 from eWRT.lib import Webservice, Result 
 from eWRT.lib.ResultSet import ResultSet
+import unittest
 
 try:
-    from eWRTlibs.facebook.facebook_api import Facebook
+    from facebook import Facebook
     LOADED = True
 except ImportError:
     from warnings import warn
     from sys import exit
-    warn("This module requires the facebook library.")
+    warn("This module requires the facebook library - run aptitude install python-facebook ")
     LOADED = False
+
+GRAPH_API_URL = 'https://graph.facebook.com/'
 
 class FacebookWS(Webservice.Webservice):
     """ class for fetching and storing the data of a user
@@ -113,7 +116,29 @@ class FacebookWS(Webservice.Webservice):
         ResultSet.printRS(self.albums)
         ResultSet.printRS(self.groups)
 
-#if __name__ == "__main__":
-#    facebook = FacebookWS()
-#    facebook.printAllData()
+
+    def getObjectWall(self, objId, object=None):
+        ''' tries to fetch a '''
+        
+        
+        ''' facebook knows 3 (???) different types of objects, that are of interest for use'''
+
+class TestFacebookWS( unittest.TestCase ):
+    
+    def setUp(self):
+        ''' '''
+        self.fb = FacebookWS()
+        self.fb.printAllData()
+    
+    
+    def testFetchingWallData(self):
+        ''' tests fetching updates of a users wall '''
+        
+        
+        
+        
+        
+
+if __name__ == "__main__":
+    unittest.main()
 
