@@ -26,7 +26,7 @@ from operator import itemgetter
 from csv import writer
 
 # a directory containing all cxl ontology files
-ONTOLOGY_DIR            = "/home/albert/data/ac/research/inwork/pakdd2011-ontology-evaluation/data/ontologies/risk/week8"
+ONTOLOGY_DIR            = "/home/albert/data/ac/research/inwork/pakdd2011-ontology-evaluation/data/ontologies/risk/week2"
 IMPORTANT_CONCEPTS_LIST = "top-terms.text"
 
 # required namespaces

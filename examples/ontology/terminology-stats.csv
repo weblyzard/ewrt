@@ -1,1030 +1,849 @@
 terms,termCnt,relation,relationCnt
-risk,40,such as,15
-process control,15,is,11
-injury,14,of,10
-process design,13,includes,9
-hazop,13,can be,8
-hazard,13,to,7
-calculated,13,measured by,7
-conscious,12,include,6
-unknown,12,involves,6
-predictable,12,example,6
-unconscious,12,????,6
-temporary,12,using,6
-operational factors,11,causes,5
-death,11,categories,5
-liability,10,classification,5
-human factors,10,and,5
-fmea,10,based on,5
-environmental,9,like,5
-societal risk,9,by,5
-business interruption,9,lead to,5
-qualitative,9,including,4
-accidents,9,may cause,4
-design,8,caused by,4
-individual risk,8,are,4
-probability,8,related to,4
-risk matrices,8,is a,4
-occupational,8,examples,4
-environment,7,defined as,3
-cha,7,from,3
-project risk,7,due to,3
-environmental risk,7,can be reduced by,3
-project,7,definition,3
-risk graph,7,contributing factors,3
-quantitative,7,determines,3
-area risk,6,reduces,3
-plant property loss,6,which include,3
-training,6,is caused by,3
-occupational risk,6,uses,3
-consequences,6,is related to,3
-property loss,6,is the,3
-hazards,6,can cause,3
-process risk,6,leads to,3
-mond indices,5,can be avoided by,3
-employees,5,for,3
-toxicity,5,requires,3
-minor,5,consider,2
-incidents,5,direct,2
-hazard identification,5,mitigated by,2
-product,5,needs to be,2
-dow indices,5,examples include,2
-frequency,5,properties,2
-safety,5,must,2
-contributing factors,5,conducted by,2
-explosive,5,can lead to,2
-maintenance,5,types,2
-natural disasters,5,addressed by,2
-bankruptcy,5,can be identified by,2
-risk assessment,4,results in,2
-piper alpha,4,characterized,2
-risk management,4,examples are,2
-loss,4,measure,2
-damage,4,safeguarded by,2
-flixborough,4,minimise by,2
-likelihood,4,could be,2
-natural disaster,4,which are,2
-individual,4,must be,2
-layout,4,incorporated,2
-fire,4,in terms of,2
-severity,4,leading to,2
-environmental damage,4,can range from,2
-events,4,causing,2
-plant property,4,which,2
-analysis,4,towards,2
-occupational risks,4,reduced by,2
-rare,4,with,2
-fractional exposure,4,process risk categories,2
-communication,4,cause by,2
-societal,4,between,2
-properties of hazardous materials,4,occupational,2
-air pollution,4,for example,2
-major variables,3,need,2
-temporary risks,3,in,2
-liability risks,3,has,2
-impact of event,3,either,2
-flammable,3,defined by,2
-casualty probability,3,considers,2
-decisions,3,prevents,2
-public,3,to ensure,2
-explosion,3,is associated with,2
-experience,3,measurements,1
-water pollution,3,seem as a,1
-sir,3,can include,1
-stir,3,need to be controlled by,1
-data,3,depending on,1
-complexity,3,is managed by,1
-operations,3,represents to the business a,1
-soil contamination,3,degree of acceptance and tolerabiltiy depends on,1
-disasters,3,calculate,1
-property damage,3,characterises,1
-consequence,3,can be impacted by,1
-hazan,3,function of,1
-concealed risks,3,by the lack of,1
-unknown risk,3,can be divide as,1
-temperature,3,may lead to,1
-conscious risk,3,are subject to,1
-time of actions,3,analyzed by,1
-equipment failure,3,in workplace,1
-predictable risks,3,further broken down to,1
-planning,3,triggers the presence of,1
-employer,3,is produced by,1
-catastrophic,3,is complete freedom from,1
-voluntary,3,important term in,1
-incident,3,is unavoidable,1
-uncertainty,3,distinct from,1
-hygiene,3,can help reduce,1
-human factor,3,surrounding,1
-accident,3,must be managed because,1
-industrial accidents,3,design,1
-workforce,3,identify problem,1
-business interruption risks,3,types of,1
-predictable risk,3,are related to,1
-business interruption risk,3,occuring frequently,1
-involuntary,3,is measured using,1
-people,3,can cost,1
-pressure,3,should implement,1
-failure to service,3,cannot always be realised,1
-qra,3,define as,1
-heritage,3,public,1
-layer of protection analysis,3,counters,1
-quantitatively,3,is often,1
-workplace injury,3,employed by,1
-flammability,3,issues with,1
-liability risk,3,which affect,1
-irpa,3,safer,1
-human error,3,the model,1
-explosions,3,by comparing specific case as a reference,1
-time,3,focus in,1
-fundamental methods,2,is also,1
-case studies,2,through,1
-process layout,2,leaving,1
-level,2,can be managed by,1
-standards,2,implement,1
-intensification,2,which involved,1
-possibility,2,via,1
-likely,2,lack of awareness leads to,1
-cost,2,analysis leads to,1
-pollution,2,creates problems with,1
-individual risk data,2,can be saved by,1
-policies,2,is because of poor,1
-calculated risk,2,through in-depth systematic analysis,1
-others,2,natural events,1
-safety awareness,2,associated with,1
-inherent safety design,2,use,1
-action,2,marine,1
-studies,2,predict,1
-control,2,works by,1
-danger,2,taken,1
-comparative methods,2,methods such as,1
-assessment,2,type,1
-acceptable,2,by using measurement of,1
-employee,2,contributing factors include,1
-everywhere,2,factor,1
-design standards,2,extends to,1
-high,2,producing,1
-attention,2,classified into,1
-ionizing radiation,2,that categories,1
-process,2,of many discipline,1
-temporary risk,2,is the probability of a,1
-major disasters,2,avoiding,1
-low,2,monitor effectiveness,1
-checklists,2,making,1
-quantitative measures,2,in form of,1
-pemex,2,consider to,1
-major,2,process,1
-society,2,long term consequence,1
-driving,2,of what?,1
-miss,2,needs,1
-reporting,2,reduces the occurrence of a,1
-calculated risks,2,analysis of,1
-liability issues,2,provide,1
-process complexity,2,only taken because of,1
-threat,2,can be categories as,1
-frequent,2,can stem from,1
-delayed effects,2,classify,1
-safety officer,2,with individuals aware of,1
-management,2,include risks in process industry,1
-poor planning,2,may,1
-semi-quantitative,2,in the form of,1
-keyword,2,minimizes,1
-finances,2,severity,1
-compensation,2,some examples include,1
-semi-qualitative,2,that rank,1
-plant design,2,indirect: drop in,1
-financial risk,2,is encountered by,1
-hazardous materials,2,classified by,1
-measured,2,by indices,1
-delivery,2,revived through,1
-disease,2,maintained by,1
-safety measures,2,sometimes cannot be,1
-impact,2,needs some form of,1
-common sense,2,examples of risk,1
-evacuation procedures,2,gauge by,1
-hazard identification methods,2,while or before performing,1
-swept,2,can be lowered by taking,1
-past experience,2,measure of,1
-engineers,2,can be broken down as,1
-identification,2,which addresses,1
-broadly acceptable,2,is divided to,1
-hazid,2,types include,1
-contract,2,not always =,1
-workers,2,can be broken into,1
-workplace fatality,2,can result in,1
-political risk,2,is studied by,1
-earthquake,2,created by,1
-budget,2,categories as,1
-unknown risks,2,occuring within,1
-property,2,always,1
-if,2,expressed in mathematical forms involving,1
-f&ei,2,identifies how,1
-geographical,2,is a function of,1
-conscious risks,2,managed by,1
-concept hazard analysis,2,is evaluated at,1
-money,2,has many,1
-lawsuit,2,financial,1
-safeguards,2,eg,1
-human,2,help prevent,1
-facts,2,whether something is,1
-tolerable,2,use of,1
-government,2,s&h,1
-frequency of event,2,set by,1
-unconscious risk,2,characterised by,1
-damage to environment,2,of an occurring,1
-business risk,2,which included,1
-specified level of harm,2,factors,1
-business,2,denotes,1
-concept hazard,2,increase,1
-substitution,2,cause,1
-costs and benefits,2,safe environment,1
-probability of result,2,shows how,1
-limitation,2,classified as,1
-simplification,2,specialising in,1
-ppe,2,is classified into,1
-project risks,2,likelihood,1
-area,2,has caused,1
-construction,2,steps are,1
-loss of profit,2,could result to,1
-qualitative measures,2,3 types,1
-measurement,2,leading,1
-education,2,is defined as,1
-injury risk,2,assign,1
-event,2,that is,1
-probability of undesired consequences,2,utilizes,1
-oneself,2,divides the plant into,1
-security breach,2,will,1
-alarp,2,employer to provide,1
-safety procedures,1,potential for,1
-being injured,1,can be summoned by,1
-managed,1,can be reduced by by,1
-procedures facilitate marshaling and organise efforts of available experts,1,together with,1
-caused,1,which is,1
-walking,1,of a,1
-risk =,1,semi-quantitative,1
-cameron,1,allows us to,1
-good safety practices,1,is categories in,1
-dangerous disturbances,1,can be avoided in,1
-causes,1,tree,1
-fta,1,divided into,1
-indicator of threat,1,is important to know for,1
-improper disposal,1,individual,1
-graph,1,usually leads to,1
-pemex mexico city,1,taking into count,1
-texas city disaster,1,and their,1
-being safe,1,do not become,1
-critical,1,may control,1
-dow chemical exposure index,1,represented by,1
-harmful practices,1,have,1
-health,1,improved by,1
-circumstances,1,is reduced by,1
-negative outcomes,1,calculate using,1
-safety weighted hazard index,1,also,1
-frequency of event x casualty probability x fractional exposure,1,biophysical environment,1
-engineered safety,1,measures,1
-far,1,factors that can increase,1
-process variables,1,involving,1
-not absolute risk measure,1,measured,1
-corporate negligance,1,specialists in,1
-personal experience of the adverse event,1,can be define as,1
-affect,1,lowered,1
-hazards can be detected by senses,1,principle,1
-categories,1,hard because of,1
-funding constraints,1,using a,1
-dow measurements,1,may be different due to,1
-desired consequence,1,should have,1
-acceptance level,1,lack leads to,1
-risk analysis theory,1,can be broken down to,1
-risks of which both the probability and the consequence can be estimated with some degree of confidence,1,operational,1
-incompetent employees,1,is measured,1
-define the system,1,local,1
-start up,1,do,1
-inspection,1,can be measured by,1
-procedure using less harmful practices,1,followed up by,1
-lack of personal experience of risk,1,is important for,1
-insignificant,1,contributed by,1
-probabilities,1,is created by,1
-guidelines,1,quantified by,1
-no of people,1,a 5 step process consisting of,1
-average risk to population,1,method,1
-good safety,1,better understood,1
-eating,1,investigate,1
-work load distributed equally,1,does not necessary denote,1
-estimated,1,common,1
-perception risk,1,dangerous,1
-index,1,x,1
-undetectable through senses,1,enforced by,1
-working environment,1,can be examined,1
-dow index,1,can be calc,1
-failure of instruments,1,by eliminating,1
-2 dimensions,1,relationship of,1
-segregation so,1,unit of risk,1
-international,1,techniques,1
-lack of knowledge,1,identified by,1
-emergency medical situation,1,may reduced by,1
-process routes,1,aimed to,1
-operational consequences,1,continually,1
-use of hazardous materials,1,can be prevented by,1
-number of people,1,these are,1
-poor human control interface,1,determine the,1
-protection,1,must consider,1
-operating,1,can analyse,1
-probability of event,1,done by studying,1
-method,1,can be classified as,1
-hazard identification technique,1,improve,1
-data gathering,1,by reducing,1
-dow fire and explosion,1,to be,1
-extreme,1,categories into,1
-chemical storage,1,considering,1
-buildings,1,in called,1
-technical,1,create,1
-economics,1,minimise,1
-credit,1,in a,1
-social,1,define,1
-residents,1,relationship between,1
-poisonous mid gas,1,can be controlled by,1
-criticism,1,related by,1
-identify causes,1,awareness is a responsibility of,1
-exceeding completion time,1,calculated by,1
-consequence matrix,1,with tasks of,1
-personal protection,1,evaluate effectiveness,1
-advantages of the desired consequence,1,consist of,1
-licensing,1,forced by,1
-complexity of design,1,because of,1
-reduce hazards to people environment property and production continuity,1,air,1
-undesired consequence,1,and does not lead to,1
-everybody,1,depends on,1
-biophysical,1,is increased by,1
-automatic process control,1,to identify,1
-relative risk,1,balance,1
-process knowledge,1,achieved by,1
-standards & codes,1,violate may cause,1
-residential area,1,to maintain,1
-societal risk data,1,is classified differently in the industry,1
-competition,1,encountered,1
-risk control,1,can be divided into,1
-until,1,learn from,1
-longer equipment hire,1,taken by,1
-appropriate training,1,uncontrolled sequence,1
-personal risk,1,undivided into,1
-unknown probability of outcome,1,evaluated by,1
-large perceived gain - knowingly taken,1,decreased by,1
-level control,1,can be categories into,1
-commissioning phase,1,divided to,1
-risk-sensitive industries,1,series of,1
-looking into the faults,1,exists in,1
-fatal,1,but usually,1
-waste storage,1,is based on,1
-economic crisis,1,is performed by,1
-eta,1,must involved,1
-stocks and investments,1,effect,1
-work,1,is approached by,1
-measures,1,increased by the factor of,1
-guide words,1,analysis,1
-processing routes,1,to meet,1
-regions,1,can be analyzed,1
-industry,1,can be from,1
-benefits and costs,1,the,1
-identify dangerous disturbances and consequences generated by each keyword,1,can be cause by,1
-social risk,1,which is caused by a,1
-challenging,1,comes from,1
-product value,1,when conducted properly will save,1
-india,1,could harm,1
-deciding who is at harm,1,is concerned because,1
-types of risk,1,human,1
-material hazards,1,is maintained by,1
-long term,1,apply to,1
-poor time management,1,can be experience through,1
-to general public,1,degree of measure,1
-general public,1,is present in,1
-wearing personal protective equipment,1,as,1
-probability of negative situation,1,aspects,1
-1 chance of fatality per 10000 per year,1,loss,1
-client relationships,1,taken because of,1
-responsible person,1,increases,1
-local communities,1,increases with,1
-make tolerable,1,these can be,1
-can be reduced by,1,are used to,1
-pre-hazop,1,comes from a,1
-outsourcing contracts,1,never made in,1
-large storage on site,1,qualitative,1
-increased safety,1,conducts,1
-toxic,1,become,1
-minimizes risk,1,responsible for,1
-poor training,1,is taken by,1
-risk to most exposed worker,1,because,1
-gamble,1,sequence,1
-properties of material,1,over the entire,1
-safety reasons,1,is due to,1
-external audit,1,is exposure to a,1
-sequence of operations,1,can be measured,1
-lead transportation,1,important to,1
-looking at wider range of hazards and operation,1,indirect,1
-masks,1,that assess,1
-routes,1,by techniques like,1
-identify parameters,1,affects,1
-age-colon cancer,1,avoid,1
-employer to provide,1,is a measure of,1
-environmental disasters,1,exceeding,1
-employ more worker,1,legal,1
-complacent,1,can potentially be,1
-breach of securities,1,economical,1
-development philosophy,1,determined by,1
-safety interlock system,1,refer,1
-unnormal operation conditions,1,may be,1
-fundamental hazard identification methods,1,should consider,1
-emergency training,1,consisting of,1
-hazard and operability study hazop,1,uses a set of,1
-different sections,1,is involved while performing,1
-human rather than natural causes,1,may cause by,1
-health concerns,1,can be quantified by,1
-geographic,1,could affect,1
-better understanding,1,is measured in,1
-planned task observation,1,on,1
-accidents and disaster,1,industry,1
-damage to property,1,should address,1
-unknown consequences,1,takes many forms,1
-semi-quantitative methods,1,occuring at,1
-prioritize with strategy,1,which is measured in terms of,1
-fatalities,1,controlled through,1
-feed & detail design,1,within,1
-f-n curve,1,balances,1
-unfavourable outcomes,1,accounts,1
-emergency procedures,1,area,1
-inherent safe design,1,is relationship between,1
-safety boots,1,people,1
-multiple feedback,1,specifically,1
-chemical,1,accountability,1
-risk management specialists,1,heritage,1
-plant equipment,1,societal,1
-time of action,1,problems include,1
-facility,1,linked to,1
-design engineers,1,cant exist without,1
-number of people involved,1,quantitatively,1
-concept design,1,major variable,1
-inadequate instruments,1,is an,1
-criminal liability,1,can impact upon,1
-operational policies and practices,1,is a philosophy,1
-instruments,1,is contributed by,1
-process systems,1,aided by,1
-process hazard identification matrix,1,result in,1
-poor human-machine interface,1,contributory,1
-estimated probability and consequence,1,covers,1
-loss of money,1,units eg,1
-property value,1,main types,1
-prevented,1,studied by,1
-adequate training,1,allows compensation for,1
-corporate decisions,1,needs to be managed to minimise,1
-perceived,1,is a factor of,1
-modification,1,when,1
-management techniques,1,duty to,1
-seriousness,1,is achieved by,1
-risk individuals are aware of,1,reduces risk of,1
-appropriate signage,1,risk categories,1
-day,1,prevented by,1
-association,1,multiplied by,1
-job termination,1,required,1
-poor human-machine-interface,1,need to be signed with,1
-exceeding budget,1,can be caused by,1
-classified,1,is perceived as,1
-occupational risk to workforce,1,examples of,1
-identified,1,seen as a,1
-instrument failure,1,,
-almost certain,1,,
-ranking purposes,1,,
-workplace facility,1,,
-first aid officers,1,,
-high low consequences,1,,
-constraints,1,,
-natural caused,1,,
-harm,1,,
-local environment,1,,
-exposure: the extent to which the likely recipient of the consequences from the materialization of hazard is exposed to-or can be influenced by-the hazard,1,,
-damaged equipment cost,1,,
-risk identification techniques,1,,
-answering test questions,1,,
-acid rain,1,,
-fires,1,,
-natural causes,1,,
-not adhering to engineering standards,1,,
-safer designs,1,,
-detailed design phase,1,,
-lack of awareness,1,,
-risk of getting burned in the event of a fire,1,,
-poor control,1,,
-vce,1,,
-fault trees analysis,1,,
-multiple casualties long term detriment,1,,
-increase,1,,
-machine failure,1,,
-investigation,1,,
-policies and practices,1,,
-gloves,1,,
-negative impact,1,,
-quantification risk,1,,
-semi-quantitive,1,,
-bhopal,1,,
-theory,1,,
-circumstance,1,,
-safety protocol,1,,
-implement measure,1,,
-hiram,1,,
-agree a set of keyword,1,,
-long term detriment,1,,
-risks will be ranked in order of magnitude,1,,
-decisions facilitated on most cost-effective means,1,,
-shut down,1,,
-obligation,1,,
-identify consequences of failure,1,,
-proper enforcement of regulations,1,,
-guidewords,1,,
-acceptable due to short time occurrence,1,,
-corrosion,1,,
-the probability of a situation occuring,1,,
-control loop components failure,1,,
-poor operators,1,,
-undesirable consequences,1,,
-icams,1,,
+risk,42,such as,11
+injury,15,can be,10
+death,13,by,10
+hazard,12,is,9
+environment,9,of,8
+training,9,to,7
+probability,9,leads to,7
+hazards,9,causes,6
+consequences,7,based on,6
+risk assessment,6,????,6
+human factors,6,due to,5
+liability,5,example,4
+hazop,5,can lead to,4
+loss,5,uses,4
+damage,5,may cause,4
+safety,5,can be reduced by,4
+likelihood,5,are,4
+environmental,5,is a,4
+property,5,increases,4
+property loss,5,includes,4
+accidents,5,include,3
+case studies,4,mitigated by,3
+decisions,4,from,3
+design,4,in the form of,3
+employees,4,addressed by,3
+risk management,4,characterized,3
+data,4,definition,3
+society,4,and,3
+disasters,4,reduced by,3
+predictable,4,caused by,3
+unknown risks,4,resulting in,3
+calculated,4,determines,3
+disaster,4,between,3
+fire,4,because of,3
+conscious risks,4,has,3
+money,4,affects,3
+managed,3,examples,3
+temporary risks,3,consider,2
+process design,3,categories,2
+pollution,3,must be managed because,2
+possibility,3,involves,2
+danger,3,must,2
+conscious,3,can,2
+good management,3,conducted by,2
+harm,3,need to,2
+frequency,3,types,2
+natural causes,3,created by,2
+property damage,3,measured by,2
+calculated risk,3,factors,2
+calculated risks,3,could be,2
+consequence,3,which are,2
+delayed effects,3,must be,2
+management,3,that is,2
+unknown,3,gives,2
+conscious risk,3,is reduced by,2
+plant design,3,can be classified into,2
+agency,3,which,2
+predictable risks,3,which include,2
+inherently safe design,3,is complete freedom from,2
+planning,3,considers,2
+occupational,3,for example,2
+unconscious,3,minimise,2
+accident,3,which addresses,2
+others,3,in,2
+maintenance,3,ie,2
+societal risk,3,develop,2
+natural disasters,3,is defined as,2
+temporary,3,identify,2
+predictable risk,3,human,2
+facts,3,is the,2
+qualitative,3,like,2
+people,3,reduces,2
+communication,3,either,2
+bankruptcy,3,is a measure of,2
+oneself,3,may be,2
+regulations,3,balances,2
+time,3,lead to,2
+categories,2,is influenced by,2
+companies,2,requires,2
+explosion,2,seen as a,2
+technical,2,seem as a,1
+experience,2,depending on,1
+engineers,2,is managed by,1
+damage to environment,2,represents to the business a,1
+properties of hazardous materials,2,forget,1
+everywhere,2,focuses on,1
+benefits,2,associated to,1
+operational factors,2,defined as,1
+control,2,characterises,1
+process,2,can be impacted by,1
+temporary risk,2,function of,1
+engineered safety,2,classified into,1
+chemical,2,risk,1
+safety interlock system,2,can be saved by,1
+operations,2,level,1
+damage to property,2,is produced by,1
+plant equipment,2,is contributed by factors such as,1
+production,2,to achieve,1
+permanent incapacity,2,have to comply with,1
+avoided,2,enforce,1
+driving,2,is unavoidable,1
+threat,2,categories to,1
+hazan,2,surrounding,1
+concealed risks,2,design,1
+unknown risk,2,could be related to,1
+decision making,2,occuring frequently,1
+poor planning,2,taking into count,1
+natural disaster,2,measures include,1
+employer,2,can cost,1
+project,2,used to,1
+compensation,2,cannot always be realised,1
+cost,2,a source of,1
+equipment,2,employed by,1
+automatic process control,2,which affect,1
+disease,2,not considering,1
+impact,2,leaving,1
+probability of event,2,implement,1
+knowledge,2,not usually,1
+hazardous substances,2,requiring,1
+individual,2,manage,1
+lawsuit,2,creates problems with,1
+community,2,reduces the occurrence of a,1
+earthquake,2,must protect,1
+process control,2,is because of poor,1
+life,2,apply,1
+poor maintenance,2,raised from,1
+human factor,2,impacts,1
+lives,2,examples include,1
+absolute safety,2,as a result of,1
+analysis,2,minimise impact,1
+costs,2,taken,1
+quantitative,2,effected by,1
+human,2,producing,1
+workers,2,to prevent,1
+government,2,triggers the presence of,1
+individual risk,2,is the probability of a,1
+process control systems,2,avoiding,1
+unconscious risk,2,factors result in a perceived increase of a risk,1
+business,2,incidents,1
+involuntary exposure,2,reduce by,1
+lack of training,2,makes a,1
+process safety management,2,is assessed by,1
+process risk,2,long term consequence,1
+human error,2,of what?,1
+explosions,2,studied via,1
+exposure,2,needs,1
+personal protective equipment,2,to avoid,1
+safety procedures,1,only taken because of,1
+being injured,1,can be categories as,1
+safe design,1,is proportional to,1
+walking,1,with individuals aware of,1
+labor rate uncertainty,1,characterised by,1
+time loss,1,may,1
+potential sources,1,some examples include,1
+risk-sensitive industries,1,maybe,1
+can be detected by senses,1,cannot always be realised in,1
+good safety practices,1,studies from,1
+first-aid knowledge equipped,1,maintained by,1
+hunger jumping,1,feedback,1
+public access,1,done by,1
+pemex 1984,1,classified as,1
+cost inadequate equipment,1,through,1
+toxic gas release,1,which assessed,1
+indicator of threat,1,while or before performing,1
+physiological,1,can be lowered by taking,1
+uncertainty of outcome,1,measure of,1
+issue that can be avoided,1,dependent of,1
+being safe,1,encompassed,1
+health,1,happened,1
+circumstances,1,then,1
+design engineers,1,can be broken into,1
+constructive assignment,1,records,1
+a situation,1,is very,1
+personnel availability,1,is the responsibility of,1
+far,1,occuring within,1
+priontise risk,1,assessed by,1
+cost cutting equipment,1,lack of counter measurements,1
+proper procedures & equipment,1,are required to,1
+technical risk,1,which lessens the impact of,1
+excavation sensitivity,1,classify,1
+on circumstances,1,managed by,1
+impact of event,1,is based on,1
+delivery,1,financial,1
+desired consequence,1,which have,1
+auditor,1,eg,1
+benefits consideration,1,help prevent,1
+productivity uncertainty,1,use of,1
+p,1,through proper,1
+accident on site,1,can be broken down into,1
+intensification,1,safeguarded by,1
+perform task,1,using techniques like,1
+past experience history,1,look after,1
+biological,1,cause,1
+negative market affects,1,is studied by,1
+sky diving,1,contributes to,1
+vague job description,1,steps are,1
+insignificant,1,benefits,1
+guidelines,1,could result to,1
+present for a short period,1,which involves the use of,1
+likely,1,to benefit,1
+stringent law,1,incorporated,1
+casualty probability,1,causes by,1
+good safety,1,can abuse,1
+eating,1,probability of,1
+individual risk data,1,could lead to,1
+possibility result,1,eg loss of gas containment,1
+not known,1,potential for,1
+following protocol,1,involved the use of,1
+fatigue,1,together with,1
+current,1,to maintain,1
+public,1,6 types,1
+volatile,1,that,1
+2 dimensions,1,are familiar with,1
+segregation so,1,that decreases,1
+collapsed structures,1,natural events,1
+international,1,can be considered by,1
+retention,1,is measured by,1
+emergency medical situation,1,safety measurements,1
+environmental reasons,1,is important to know for,1
+dangerous chemicals,1,leading to,1
+number of people,1,related to,1
+management techniques,1,compile into,1
+osha,1,may control,1
+skilled employee,1,links to,1
+budget risk,1,frequently occurs in,1
+data gathering,1,can range from,1
+chemical storage,1,is described as,1
+safety awareness,1,in terms of,1
+plant damage,1,of a,1
+low risk,1,depending,1
+economics,1,is maintained by,1
+hazard + exposure,1,practiced by,1
+credit,1,potential,1
+residents,1,can be done,1
+studies,1,which leads to loss in,1
+poisonous mid gas,1,is called,1
+criticism,1,=,1
+personal protection,1,measures,1
+manage,1,factors that can increase,1
+severity of loss,1,most,1
+increase pressure,1,plan,1
+complexity of design,1,is anything,1
+difficult to assess and comprehend,1,risk whereby,1
+undesired consequence,1,cant exist without,1
+everybody,1,upset,1
+a specified level of harm,1,using a,1
+compromising safety,1,will have,1
+mexico,1,expressed in,1
+predictions,1,that need to,1
+research study,1,can be broken down to,1
+assessment,1,operational,1
+probable risks,1,can be minimise through,1
+research done extensively so that safe to use,1,factor,1
+company,1,achieve,1
+unknown probability of outcome,1,means,1
+high,1,in the presence of,1
+fatal,1,can be measured by,1
+opportunity costs,1,report,1
+bigger criterion,1,proportional to,1
+assessing every possible situation thoroughly,1,broken down to,1
+good strategies,1,takes are,1
+stocks and investments,1,regarding,1
+work,1,who originate from,1
+multidisciplinary team,1,a 5 step process consisting of,1
+calculate contingency,1,taken and ignored because,1
+expected losses,1,investigate,1
+incidents,1,not fully understood,1
+integrity of protective equipment,1,needs some form of,1
+hazards analysis techniques,1,which increases,1
+occupational risk,1,responsible by,1
+benefits and costs,1,individual,1
+knowledge on risks,1,is different for,1
+loss of production,1,yes,1
+impacts,1,identified by,1
+extreme operating condition,1,can experience,1
+india,1,may reduced by,1
+inexperience,1,review,1
+concealed or unconscious risk,1,rather than,1
+semi-qualitatively,1,determine the,1
+poor time management,1,must consider,1
+poor personnel routine,1,improve,1
+poor control,1,both,1
+general public,1,equal,1
+lack of funding,1,unforeseen,1
+save lives,1,improves,1
+process hazards analysis,1,achieve by,1
+project risk,1,factor of,1
+hazard identification,1,pay attention to,1
+business risk,1,create,1
+poor training,1,combined,1
+civilians,1,is broken down into,1
+safety reasons,1,in a,1
+increase demand,1,weighted against,1
+lead transportation,1,define,1
+factors contributing to risk,1,is avoided by,1
+masks,1,jeopardized,1
+unknown responsibility areas,1,failure to consider lead to,1
+probability of results,1,handling,1
+people who work for you,1,forced by,1
+employers,1,depends on,1
+types,1,balance,1
+co2 emmisions,1,enforces,1
+quantitative measures,1,lack of awareness leads to,1
+good selection of equipment parts and material,1,encountered,1
+natural,1,improved by,1
+careful design,1,long term,1
+unnormal operation conditions,1,can result in,1
+dread,1,if,1
+careful planning of plant design,1,decreased by,1
+geographic,1,measured in terms of,1
+incompetent employees,1,factor contribute to risk,1
+fera,1,in creating,1
+diemnsionless,1,effect,1
+major,1,purpose,1
+semi-quantitative measures,1,due to lack of,1
+fatalities,1,is created by,1
+journals,1,suffering,1
+interruption of business,1,deal with,1
+major disasters,1,as a result of a,1
+risk management specialists,1,comes from,1
+business interaction,1,risk related to,1
+damage to production,1,when conducted properly will save,1
+is expected to sustain the realization of hazards,1,valuable,1
+varying perceptions,1,if given,1
+political factors,1,which examines,1
+positive outcomes,1,can be minimized by,1
+acceptable risk,1,causing,1
+-ensure communication between layer-ensure maintenance is done in time,1,taken by,1
+wrong layout sheets,1,by providing,1
+criminal liability,1,taken because of,1
+large perceived gain,1,using,1
+estimated probability and consequence,1,are used to,1
+corporate decisions,1,loss,1
+harm to human health,1,as well as,1
+proper equipment,1,may cause by,1
+balance capital costs and safety,1,is due to,1
+emergency evacuation plans,1,estimated by,1
+material availability,1,a factor of,1
+operating procedures,1,is exposure to a,1
+appropriate signage,1,can also be,1
+day,1,can cause,1
+high probability consequence,1,which shrinks,1
+site planning,1,foreseable,1
+materials,1,provides,1
+nature reserves,1,determined by,1
+relief valves,1,refer,1
+magnitude,1,consisting of,1
+careless,1,is involved while performing,1
+first aid officers,1,set by,1
+risk situation,1,who are,1
+natural caused,1,can be quantified by,1
+local environment,1,could affect,1
+financial,1,on,1
+dow indices,1,in to,1
+reduce,1,can be lowered,1
+answering test questions,1,types of risk,1
+drop in property value,1,range,1
+monitor safety on site,1,or,1
+lack of awareness,1,to stimulate,1
+evaluate potential impact of the risk,1,learns from,1
+funding,1,3 types,1
+psychology,1,analyze,1
+factors,1,assumes,1
+corporate negligance,1,linked to,1
+future generations,1,is exposed to,1
+contingent plan,1,not obvious,1
+increase,1,must avoid,1
+human cause,1,prevents,1
+internet,1,record,1
+lack of personal control over outcome,1,to ensure,1
+risk audit,1,studied by,1
+theory,1,can be avoided by,1
+undesired consequences,1,can be impact upon,1
+sensory,1,can involve,1
+global standard,1,no,1
+process control factors,1,risk to,1
+budget factors,1,perception factors,1
+acceptable due to short time occurrence,1,is achieved by,1
+qualitative & quantitative measures,1,can have,1
+the probability of a situation occuring,1,multiplied by,1
+poor maintenance checks,1,included,1
+identify analyse assist establish,1,awareness is a responsibility of,1
+precaution,1,required,1
+proffesionals,1,can be caused by,1
+times,1,should be,1
+failure of the equipment,1,risks that,1
+more equipment,1,can be increased by taking,1
 contingency,1,,
-dow fire and explosion index,1,,
+quantitative risk assessment qra,1,,
 technology advancement,1,,
-variables,1,,
-deaths per hours worked,1,,
-health impairment to public,1,,
-front end engineering design phase,1,,
-operability,1,,
-qualitively,1,,
+negative consequences,1,,
+local residents,1,,
+0 to 1,1,,
+people you work for,1,,
+ionizing radiation,1,,
 storage of hazardous materials on-site,1,,
 corporations,1,,
-wages,1,,
+flixborough 1974,1,,
 electronic,1,,
-averaged risk to total population,1,,
-high probability consequences,1,,
-system,1,,
-plant infrastructure,1,,
+hazard identification techniques,1,,
+highly explosive,1,,
+stimulation,1,,
+risk matrices,1,,
+temperature,1,,
+expressed in events per year,1,,
+infrastructure needs,1,,
+false sense of security,1,,
+extreme conditions,1,,
+monitor & review,1,,
+priority,1,,
 safety audit,1,,
-co2 emmisions,1,,
+environment damage,1,,
+drop in confidence,1,,
+geological weather,1,,
 enclosed footware,1,,
 business continuity,1,,
-6 types,1,,
-life cycle management,1,,
-checklist,1,,
-semi-quantitatively,1,,
-implicit costs,1,,
+better engineering future,1,,
+ability to take mitigation action,1,,
+save cost,1,,
+higher output,1,,
+relationship,1,,
+prevent disasters in plants,1,,
+relevant industries,1,,
+residual risk,1,,
+major event interruption,1,,
 bad safety record,1,,
-chemical properties,1,,
-sprinkler systems,1,,
-not performing the activity,1,,
-profit losses,1,,
-safety factors,1,,
-isolation,1,,
-database,1,,
-predictable risks which are taken knowingly because there is a large perceived gain,1,,
-risks,1,,
-historical,1,,
-safety glass,1,,
+emphasise safety in budget,1,,
+unqualified personnel,1,,
+jobs,1,,
+imposed risk,1,,
+finances,1,,
+high low consequence,1,,
+schedule risk,1,,
+lack of regulation,1,,
+seminary,1,,
+accidents will occur,1,,
+increased economic liability,1,,
+insure,1,,
 liabilities,1,,
 potential to harm,1,,
-different types,1,,
-share price,1,,
-layer of protection,1,,
-the extent to which information is gained from different sources,1,,
-short time,1,,
-direct,1,,
-corporate reputation,1,,
-marine coastlines,1,,
-unlikely,1,,
-frequency * casualty probability * fractional exposure risk to public,1,,
-risks which are present only for a short period of time and may be acceptable only for that reason,1,,
-seek,1,,
-protective equipment,1,,
-management plan,1,,
+chemical process industry,1,,
 result probability,1,,
-qra methods,1,,
+parties involved,1,,
+burial grounds,1,,
+customer demand,1,,
 record findings,1,,
 locations of chemical plants,1,,
-employers,1,,
-agency,1,,
-probability of event occuring,1,,
-equipment,1,,
-temperature control,1,,
-internal,1,,
-likelihood of event,1,,
 legal action,1,,
-failure of alarms,1,,
-responsibility,1,,
-effectiveness,1,,
-probability of accident x losses per accident,1,,
-lecturer,1,,
-probability of event x impact or loss,1,,
-residual risk,1,,
-departmental,1,,
-investigations,1,,
-life cycle risk management,1,,
-time loss,1,,
-undesired,1,,
-the importance of process hazard,1,,
-divide into sub-system,1,,
-environmental concerns,1,,
-services,1,,
+national & international,1,,
+large perceived gain-knwoingly taken,1,,
+well-established scientific facts,1,,
+aware of it yet may still happen,1,,
+plant infrastructure,1,,
+personal trading,1,,
+pain,1,,
+examine the context,1,,
+track,1,,
+interest rate,1,,
+financial risk,1,,
+past accidents,1,,
+maintenance operations,1,,
+plan,1,,
+comah,1,,
 assessed,1,,
 knowingly,1,,
-safety in design,1,,
+measured,1,,
+misfortune happening,1,,
+environmental factors,1,,
 reaction pathway,1,,
-balanced team,1,,
-spill,1,,
-reputation,1,,
-social risk data,1,,
-shut-down,1,,
+chemical spill,1,,
+implications,1,,
+inherent safety,1,,
+overpressure,1,,
+genetic engineering techniques,1,,
+occupational safety and health administration,1,,
 mechanical,1,,
-professional,1,,
-product loss,1,,
-dow,1,,
-$$$,1,,
+place flammable object beside oven,1,,
+association -astm/osha,1,,
+occupational health and safety,1,,
 financial loss,1,,
-issue that can be avoided,1,,
-toxic materials,1,,
-location and planning,1,,
-hazid study,1,,
+safety measures,1,,
+chances,1,,
+chemical properties,1,,
+group risk,1,,
 human injury or death,1,,
 process risks,1,,
-specialists,1,,
-demand decrease,1,,
-new projects,1,,
-bhopal india,1,,
+acceptability,1,,
+probability of casualty,1,,
+fear,1,,
+poor work design,1,,
+availability,1,,
 production of dangerous chemicals,1,,
 staff,1,,
-current,1,,
 foreign exchange,1,,
 identify risk,1,,
 delays,1,,
 risk of injury,1,,
-controls,1,,
+design appropriately,1,,
+operational,1,,
+equipment testing,1,,
 prevention and control,1,,
-outrage,1,,
-financial plant,1,,
-mechanism of occurrence,1,,
-local,1,,
+safety operating,1,,
 personality,1,,
-risk matrix,1,,
-national parks,1,,
-contracts,1,,
-qualitative risk assessment,1,,
+lose of money $$,1,,
+professional engineers,1,,
+design factors,1,,
+failed equipment,1,,
 quantified,1,,
-process life cycle,1,,
-risk analysis,1,,
-semi quantitatively,1,,
+environmental disasters,1,,
 likelihood of occuring,1,,
-semi-quantitative measures,1,,
-fatality risk far,1,,
-volatility,1,,
-stock share,1,,
+safety wearing,1,,
+lifetime injury,1,,
 properties of chemicals,1,,
-nature and extent of insurance appropriate to residual risk,1,,
+power failure,1,,
+smoking,1,,
+past incidents,1,,
 release of toxic material,1,,
-incident database,1,,
-define system,1,,
 exposure frequency,1,,
 scheduled checks,1,,
-lack of personal control over outcome,1,,
-risk management tasks,1,,
-improper storage,1,,
-x,1,,
-proper equipment,1,,
-precaution,1,,
-post incidents,1,,
-hazard identification techniques,1,,
-pristine environs,1,,
-chazop,1,,
-disaster,1,,
-feasability,1,,
+unforeseen incidents,1,,
+gloves,1,,
+dangerous concentration lapses,1,,
+temporary injury,1,,
+social cultural and personality,1,,
+past experience,1,,
+catastrophic,1,,
 national,1,,
 humans,1,,
-useful for ranking purposes,1,,
-culture,1,,
-bad communication,1,,
-changes,1,,
-jobs,1,,
+quantitatively,1,,
+high risk,1,,
 sport,1,,
+labour,1,,
 probability of occuring,1,,
+avoid task,1,,
 safety equipment,1,,
+conduct research,1,,
 lost work time,1,,
-review,1,,
-genetic engineering,1,,
-identify how the failure can be detected,1,,
-reassess probability of occuring,1,,
+toxic materials,1,,
+injuries,1,,
 lack of control over outcome,1,,
 state,1,,
-future,1,,
-fatality to public,1,,
-low probability and high consequences,1,,
-legal framework,1,,
-hazardous material,1,,
-sabotage,1,,
-local government,1,,
+identification,1,,
+severity of process hazards,1,,
+evacuation procedures,1,,
+inventor listing,1,,
 poor design,1,,
-involuntarily,1,,
-fauna and flora,1,,
-event trees analysis,1,,
-qualitative methods,1,,
-takeover,1,,
-governmental regulations,1,,
-fatality,1,,
+extra materials,1,,
+bicycle helmet,1,,
+process design factors,1,,
+nature,1,,
+negligance,1,,
+attention,1,,
+specialists,1,,
+incident,1,,
 ambiguous risk,1,,
-swift,1,,
+coma,1,,
+tertiary education institutes,1,,
+increased sales,1,,
+for significant risk estimate proximity,1,,
+prioritize safety,1,,
 local exhaust ventilation,1,,
-safe design,1,,
-unacceptable and intolerable,1,,
-three mile island,1,,
+license,1,,
+carelessness,1,,
+event happening,1,,
+project status,1,,
+prioritization uncertainty,1,,
 economic reasons,1,,
-instantaneous fractional annual loss,1,,
+planned,1,,
 nearby industries,1,,
-complexity of control structure,1,,
-insurance,1,,
+voluntary action,1,,
+miscommunication,1,,
 dangerous tasks,1,,
-procedures and responsibility,1,,
+irresponsible,1,,
 period,1,,
-community,1,,
-risk: the likelihood of a specified undesired event occurring within a specified period or in specified circumstances,1,,
+contamination,1,,
+very costly,1,,
 risk assessments,1,,
-frequency of incident,1,,
-layers of protection analysis,1,,
-flammiblity,1,,
-concept design phase,1,,
-standards and codes of practice,1,,
-climate changes,1,,
-frequency matrix,1,,
+wrong assumptions made in planning,1,,
+trust,1,,
+high pressure,1,,
+cycling,1,,
+buncefield 2005,1,,
+simplification,1,,
+acceptability of risk,1,,
+insurance and health risk,1,,
 safety valves,1,,
 hazard analysis,1,,
-sequence of operation,1,,
+predicted risks,1,,
 bleve,1,,
 oil transportation,1,,
-probabilityxconsequences,1,,
-hazop & operability,1,,
-failure modes and effects,1,,
-company risk profile,1,,
-slips,1,,
-near misses,1,,
-increased material usage,1,,
-controlled,1,,
-poor maintenance,1,,
+main assumption,1,,
+health scars,1,,
+detector explosion,1,,
+operators and maintenance,1,,
+risk graph,1,,
+displacement of important messages,1,,
 frequent checks on equipment,1,,
 down time,1,,
-fault tree analysis,1,,
-lives,1,,
-risks which are not obvious or the hazards are not readily detected by the senses,1,,
-smoking,1,,
-comah,1,,
+risk log,1,,
+indigenous people,1,,
+external,1,,
+adverse environmental effects,1,,
+geology,1,,
+voluntary actions,1,,
 review assessment & update if necessary,1,,
+estimate completeness,1,,
+lack of knowledge of consequences,1,,
+plant designers,1,,
 money loss,1,,
-no effect to workers or process,1,,
-environmental accidents,1,,
-hazop studies,1,,
-standard hazard index,1,,
-environmental reasons,1,,
-worth doing,1,,
-risks of which the consequences are either not known or not fully understood,1,,
+wrong flow sheets,1,,
+people are aware,1,,
+estimated with some confidence,1,,
+budget,1,,
+piper alpha 1988,1,,
+overcome,1,,
+disapprove inappropriate behaviour,1,,
+quantity project risk,1,,
+flooding,1,,
+relevant company or governments,1,,
+deciding who is at harm,1,,
 we calculate,1,,
-event tree analysis,1,,
-mexico,1,,
-dispersion modeling,1,,
-maintaining existing projects,1,,
-building to a budget,1,,
-logic trees,1,,
-community legislation,1,,
-social culture background and beliefs,1,,
-safety weighted hazard index swehi,1,,
-chemical exposure index,1,,
-multiple possibility,1,,
-absolute safety,1,,
-process operation,1,,
-various perceptions,1,,
+perceived judgement,1,,
+increase temperature,1,,
+losses,1,,
+costly,1,,
+societal risk data,1,,
+business interruption,1,,
+a negative incident,1,,
+risk data,1,,
+probability of accidents occuring,1,,
+out sourceing,1,,
+productivity,1,,
+checking pipeline & tanks,1,,
+media,1,,
+alarm system,1,,
+residential area,1,,
 environment-surrounding,1,,
-interest rate,1,,
 customer changes,1,,
-individual risk to general public,1,,
-undesired consequences to occur,1,,
-units,1,,
-legal requirements,1,,
+hazards are not readily detected,1,,
+environmental damage,1,,
+events,1,,
+natural disaster prone area,1,,
 injured,1,,
-subcompany,1,,
-hazard: a physical condition with a potential for human injury damage to property damage to the environment or some combination of these,1,,
-human errors,1,,
-number of people suffering,1,,
-following protocol,1,,
-design stage,1,,
-levels,1,,
-widespread,1,,
+periodic evaluation,1,,
+lack of knowledge,1,,
+insurance companies,1,,
+risk of getting burnt in the event of fire,1,,
+estimate probability,1,,
 enclosure so,1,,
 contractors,1,,
-process plant,1,,
-service delivery,1,,
-judgment,1,,
+facilitate risk management concepts,1,,
 the environment,1,,
-all level of organization,1,,
-process control failures,1,,
-sector risks,1,,
-skelton,1,,
-quantitive,1,,
-commercial requirements,1,,
+event tree methods,1,,
+significant monetary losses,1,,
 everyday tasks,1,,
 stock market fluctuations,1,,
-loss of heritage,1,,
-indigenous sites,1,,
-severe,1,,
-costs,1,,
-fault trees,1,,
-qualities,1,,
-nimby syndrome,1,,
-whole life cycle,1,,
-inherently safety design,1,,
-quantitative methods,1,,
-low probability consequences,1,,
+inherently unsafe operations,1,,
+machinery,1,,
+process hard analysis,1,,
+storage of toxic substances,1,,
+prevention,1,,
+responsible,1,,
 protocol,1,,
 negligence,1,,
-before modifications,1,,
 inherent risk,1,,
-the process industry,1,,
-control feedback complexity,1,,
-????,1,,
-hazardous substances,1,,
+proper enforcement of regulations,1,,
 goggles,1,,
-identify,1,,
+poor safety routine,1,,
+site engineers,1,,
 injury to public,1,,
-injuries,1,,
+patrol in the plant,1,,
+mortality statistics,1,,
 commercial incentive,1,,
 probability of undesired consequence,1,,
 human injury,1,,
-poor layout,1,,
-property losses,1,,
-not individual,1,,
 evaluating risks,1,,
-self judgement,1,,
-monitor,1,,
-qualitative matrix,1,,
-treatment,1,,
-decide on assessment format,1,,
-unsafe practices,1,,
+checklist,1,,
+heritage,1,,
+increase production,1,,
+internal,1,,
+managing uncertainty,1,,
+piping isolation,1,,
 highly flammable materials,1,,
-real,1,,
-single occurrence,1,,
-lopa,1,,
-difficult to assess,1,,
-possible,1,,
-severity of loss,1,,
-injury cost,1,,
-perception of risk,1,,
-cost exceeds budget,1,,
-right attitude,1,,
-burns,1,,
-critical operations,1,,
+brainstorm,1,,
+likelihood analysis,1,,
+risk treatment,1,,
+measurement,1,,
+expected benefits,1,,
+nearby residents,1,,
+accepted,1,,
+experienced personnel,1,,
 nuclear power and waste disposal,1,,
-negligence and complacency,1,,
-public backlash,1,,
-drop in property value,1,,
+imposed,1,,
+equipment investment,1,,
 risk to public,1,,
 duty of care,1,,
-property loss risk,1,,
+tsunami,1,,
 history,1,,
-plant damage,1,,
-apply guidewords,1,,
-voluntarily,1,,
+well trained,1,,
+environmental accident,1,,
+frequency of event,1,,
 poor housekeeping,1,,
-process control systems,1,,
-number of people exposed,1,,
-feedback structure incompatibility,1,,
-methods,1,,
-eliminate or reduce,1,,
+unaware employees,1,,
 risk of fatality,1,,
-hazop study,1,,
-personal trading,1,,
-decommisioning,1,,
-complexity of process,1,,
+low high consequence,1,,
+mitigated,1,,
+economic,1,,
 specified,1,,
-indirect,1,,
+make decisions,1,,
+precautions,1,,
 consequence analysis,1,,
 employment,1,,
-process hazard analysis,1,,
+strengthen safety management,1,,
+specified level of harm,1,,
+sociology,1,,
 consequence not known,1,,
-dimensions,1,,
-operation,1,,
-low high consequences,1,,
+risk identification,1,,
 decision,1,,
 business reputation,1,,
-not worth doing,1,,
-legal,1,,
-determine protection or safeguards,1,,
-magnitude,1,,
-moral or ethical requirements,1,,
-risks of which people are aware,1,,
-moderate,1,,
-fire & explosion index f&ei,1,,
-damaged public image cost,1,,
+area risk,1,,
+tornado,1,,
+calculate the probability of earning from customers,1,,
+using safe design method,1,,
+an issue,1,,
+pay employees and contractor,1,,
+measuring,1,,
 financial gain,1,,
-hse,1,,
-project management,1,,
-natural gas leakage,1,,
-hazards register,1,,
-sequence of events,1,,
+schedule,1,,
+malfunctioning,1,,
+loss of certain senses,1,,
+technology maturity,1,,
+monetary,1,,
+expansion,1,,
+pressure,1,,
+toxic leakage,1,,
+substitution,1,,
+ensure correct standards used to design,1,,
+costs and benefits,1,,
 guaranteed,1,,
-qualitative risk assesmentqr,1,,
+work environment,1,,
+seriousness,1,,
+limitation,1,,
 safe practices,1,,
-involuntary exposure,1,,
-divide into sub-systems,1,,
-risk management activities,1,,
-estimate of likely damage,1,,
+rare,1,,
+poor procedures,1,,
+the importance of process hazard,1,,
+risk response planning,1,,
+agency -astm/osha,1,,
+probability of result,1,,
+equipment availability,1,,
 human lives,1,,
-waste disposal,1,,
-rules & regulations,1,,
+not fully understand,1,,
+climate changes,1,,
+age-colon cancer,1,,
 lose of life,1,,
+book,1,,
+underestimation of hazard in chemicals,1,,
 swimming,1,,
+detector failure,1,,
+qra,1,,
+fractional exposure,1,,
 managers,1,,
+ppe,1,,
 severity of an undesired consequence,1,,
-civil,1,,
-public access,1,,
-insurance and health risk,1,,
-nothing,1,,
+negative outcomes,1,,
 the importance of personal protective equipment,1,,
-hearing protection,1,,
-the ability to exercise control over a particular risk,1,,
-multiple casualties,1,,
-health damage,1,,
 regular maintenance,1,,
-frequency of events,1,,
-failure in control loop components,1,,
-burial grounds,1,,
-pressure control,1,,
-inadequate instruments alarms interlocks,1,,
+human injuries,1,,
 statistics,1,,
 chance of incidents,1,,
-take 5,1,,
-careful technique,1,,
-failure mode effect,1,,
-value drop,1,,
-analyze,1,,
-company,1,,
+familiar with plant,1,,
+vce,1,,
+low,1,,
+gains from the process e,1,,
+unconscious risks,1,,
+lack of experience of hazard,1,,
+costs consideration,1,,
+low probability consequence,1,,
+budget blowouts,1,,
 undetected hazard,1,,
 motives,1,,
-customer demand,1,,
-personal protective equipment,1,,
-routine tasks,1,,
-all stages of life cycle,1,,
-need approval,1,,
-failure,1,,
-field leadership,1,,
-every process stage,1,,
+area conditions that accelerate corrosion,1,,
+product of likelihood & consequence,1,,
+knowledge of hazards involved,1,,
+lowered,1,,
+worst case scenario,1,,
+competition,1,,
+not obvious,1,,
 elimination,1,,
-safeguard,1,,
-process safety management,1,,
-dread risk,1,,
-exposure,1,,
+forms standards,1,,
+loss of profit,1,,
+layer of protection analysis,1,,
 radioactive materials,1,,
-lack of risk assessment,1,,
+qualitative measures,1,,
+advantages of the desired consequence,1,,
+workplace injury,1,,
+landslide,1,,
+minor,1,,
 uk,1,,
-drop in share price,1,,
-high contribution,1,,
-heightened awareness,1,,
-personal safety,1,,
-increased cost,1,,
+aversion,1,,
+cost risk,1,,
+minor incidence,1,,
+economic project,1,,
 calculation errors,1,,
 relaxed safety procedures,1,,
-rearrange the timetable,1,,
-analysis of incident statistics,1,,
-pressure to deliver,1,,
-start-up,1,,
-identify ways in which each sub-system can fail,1,,
-senses,1,,
-average risk to individual,1,,
-inherent safety,1,,
-all phases of facility life cycle,1,,
+constant maintenance,1,,
+deaths,1,,
+funding constraints,1,,
+frequency of past similar event,1,,
+warning,1,,
+group discussions,1,,
 nuclear power,1,,
-good risk management,1,,
+playing sports,1,,
+education,1,,
+process operation,1,,
+physical,1,,
+willingly,1,,
 liquidity and cash flow,1,,
 data sampling period,1,,
-report issues,1,,
-concept hazard analysis cha,1,,
+taking precautions,1,,
+personnel,1,,
+treatment,1,,
+event,1,,
+reputation,1,,
 electrical,1,,
-life cycle phase,1,,
-toxic release,1,,
-no accidents per usage time,1,,
-occupational hygiene,1,,
+probability of accident x losses per accident,1,,
+gambling,1,,
+other side reactions,1,,
 qualitative and quantitatively,1,,
-operators,1,,
-gas leaks,1,,
+acceptable,1,,
+include safety factors in calculation,1,,
 hurricane,1,,
 students,1,,
-high probability and low consequences,1,,
-regulations,1,,
+design data availability,1,,
+problems,1,,
 identify risks,1,,
-intent,1,,
+important,1,,
 the probability of undesired consequences,1,,
-failures,1,,
 authorities,1,,
-change in product price,1,,
-matrix,1,,
-building,1,,
-regular basis,1,,
+mind indices,1,,
+a number,1,,
+longer,1,,
+lessons learned,1,,
 third party,1,,
-detailed technical knowledge,1,,
-past experiences,1,,
+profits,1,,
+proper planning,1,,
+avoid,1,,
 hazardous material spills,1,,
-external,1,,

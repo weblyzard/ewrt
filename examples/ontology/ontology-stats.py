@@ -19,7 +19,7 @@ from operator import itemgetter
 from csv import writer
 
 # a directory containing all cxl ontology files
-ONTOLOGY_DIR = "/home/albert/data/ac/research/inwork/pakdd2011-ontology-evaluation/data/ontologies/risk/week8"
+ONTOLOGY_DIR = "/home/albert/data/ac/research/inwork/pakdd2011-ontology-evaluation/data/ontologies/risk/week2"
 
 # required namespaces
 NS_RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
@@ -112,11 +112,17 @@ def computeOntologyStatistics( ff, cc, rc, ccCutOffCount, rcCutOffCount):
 
        cPrecision = len(goldStandardConcepts.intersection( concepts ))/float( len(concepts) )
        cRecall    = len(goldStandardConcepts.intersection( concepts ))/float( len(goldStandardConcepts) )
-       cF1        = 2 * cPrecision * cRecall / (cPrecision + cRecall)
+       if (cPrecision + cRecall) == 0.:
+           cF1 = "NaN"
+       else:
+           cF1        = 2 * cPrecision * cRecall / (cPrecision + cRecall)
 
        rPrecision = len(goldStandardRelations.intersection( relations ))/float( len(relations) )
        rRecall    = len(goldStandardRelations.intersection( relations ))/float( len(goldStandardRelations) )
-       rF1        = 2 * rPrecision * rRecall / (rPrecision + rRecall)
+       if (rPrecision + rRecall) == 0.:
+           rF1 = "NaN"
+       else:
+           rF1        = 2 * rPrecision * rRecall / (rPrecision + rRecall)
 
        w.writerow( (path.basename(f), cPrecision, cRecall, cF1, rPrecision, rRecall, rF1) )
 

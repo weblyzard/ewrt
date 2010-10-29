@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+   xmlns:_3="http://www.weblyzard.com/2005/03/31/wl#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#types_of_risk">
+    <rdfs:label>types of risk</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#conscious_risks">
+    <_3:is_broken_down_into rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:can_be_broken_into rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <rdfs:label>conscious risks</rdfs:label>
+    <_3:can_be_broken_down_into rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#using_a">
+    <rdfs:label>using a</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#is_exposure_to_a">
+    <rdfs:label>is exposure to a</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#defined_as">
+    <rdfs:label>defined as</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#characterized">
+    <rdfs:label>characterized</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#to">
+    <rdfs:label>to</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#disasters">
+    <_3:includes rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <rdfs:label>disasters</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#cause">
+    <rdfs:label>cause</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#can_be_broken_into">
+    <rdfs:label>can be broken into</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#xxx">
+    <rdfs:label>????</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#of_what">
+    <rdfs:label>of what?</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#proportional_to">
+    <rdfs:label>proportional to</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#assumes">
+    <rdfs:label>assumes</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#is_based_on">
+    <rdfs:label>is based on</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#when_conducted_properly_will_save">
+    <rdfs:label>when conducted properly will save</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#is_maintained_by">
+    <rdfs:label>is maintained by</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#can_be_considered_by">
+    <rdfs:label>can be considered by</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#leads_to">
+    <rdfs:label>leads to</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#lack_of_awareness_leads_to">
+    <rdfs:label>lack of awareness leads to</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#risk_management">
+    <_3:studied_via rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <rdfs:label>risk management</rdfs:label>
+    <_3:assessed_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#classified_as">
+    <rdfs:label>classified as</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#equal">
+    <rdfs:label>equal</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#some_examples_include">
+    <rdfs:label>some examples include</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#of">
+    <rdfs:label>of</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#function_of">
+    <rdfs:label>function of</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#probability">
+    <_3:defined_as rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:function_of rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:measure_of rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:determined_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#likelihood"/>
+    <_3:is_a_measure_of rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:is_a rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <rdfs:label>probability</rdfs:label>
+    <_3:definition rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#lack_of_counter_measurements">
+    <rdfs:label>lack of counter measurements</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#risk">
+    <_3:triggers_the_presence_of rdf:resource="http://www.weblyzard.com/2005/03/31/wl#hazard"/>
+    <_3:most rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk_assessment"/>
+    <rdfs:label>risk</rdfs:label>
+    <_3:identify rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk_assessment"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#is_created_by">
+    <rdfs:label>is created by</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#determined_by">
+    <rdfs:label>determined by</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#as_a_result_of_a">
+    <rdfs:label>as a result of a</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#incorporated">
+    <rdfs:label>incorporated</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#dow_indices">
+    <rdfs:label>DOW indices</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#employees">
+    <rdfs:label>employees</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#case_studies">
+    <_3:is_studied_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <rdfs:label>case studies</rdfs:label>
+    <_3:can_be_considered_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:requires rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk_management"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#risk_assessment">
+    <_3:addressed_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#decisions"/>
+    <rdfs:label>risk assessment</rdfs:label>
+    <_3:refer rdf:resource="http://www.weblyzard.com/2005/03/31/wl#decisions"/>
+    <_3:using_a rdf:resource="http://www.weblyzard.com/2005/03/31/wl#calculated"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#predictable">
+    <_3:classified_as rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <rdfs:label>predictable</rdfs:label>
+    <_3:types rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:can_be_classified_into rdf:resource="http://www.weblyzard.com/2005/03/31/wl#property_loss"/>
+    <_3:can_be_classified_into rdf:resource="http://www.weblyzard.com/2005/03/31/wl#environmental"/>
+    <_3:can_be_classified_into rdf:resource="http://www.weblyzard.com/2005/03/31/wl#liability"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#design">
+    <_3:can_be_minimise_through rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <rdfs:label>design</rdfs:label>
+    <_3:mitigated_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:can_be_avoided_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#hazard"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#could_be_related_to">
+    <rdfs:label>could be related to</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#quantitative">
+    <_3:related rdf:resource="http://www.weblyzard.com/2005/03/31/wl#mond_indices"/>
+    <_3:related rdf:resource="http://www.weblyzard.com/2005/03/31/wl#dow_indices"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#can_cause">
+    <rdfs:label>can cause</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#may_control">
+    <rdfs:label>may control</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#involves">
+    <rdfs:label>involves</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#is_avoided_by">
+    <rdfs:label>is avoided by</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#society">
+    <rdfs:label>society</rdfs:label>
+    <_3:awareness_is_a_responsibility_of rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:may_control rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#is_broken_down_into">
+    <rdfs:label>is broken down into</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#environment">
+    <_3:to rdf:resource="http://www.weblyzard.com/2005/03/31/wl#damage"/>
+    <rdfs:label>environment</rdfs:label>
+    <_3:can_be_impact_upon rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:could_affect rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#studied_via">
+    <rdfs:label>studied via</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#hazard">
+    <_3:links_to rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:cant_exist_without rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:seen_as_a rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:as_a_result_of_a rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:leads_to rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:is_exposure_to_a rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:seem_as_a rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:of_a rdf:resource="http://www.weblyzard.com/2005/03/31/wl#probability"/>
+    <_3:has rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:is_a_measure_of rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <rdfs:label>hazard</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#can_be_classified_into">
+    <rdfs:label>can be classified into</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#links_to">
+    <rdfs:label>links to</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#must_consider">
+    <rdfs:label>must consider</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#linked_to">
+    <rdfs:label>linked to</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#seem_as_a">
+    <rdfs:label>seem as a</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#human_factors">
+    <rdfs:label>human factors</rdfs:label>
+    <_3:caused_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:a_factor_of rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:is_contributed_by_factors_such_as rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#environmental">
+    <_3:types_of_risk rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:can_be rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <rdfs:label>environmental</rdfs:label>
+    <_3:caused_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:types rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#is_contributed_by_factors_such_as">
+    <rdfs:label>is contributed by factors such as</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#measure_of">
+    <rdfs:label>measure of</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#cant_exist_without">
+    <rdfs:label>cant exist without</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#can_be_broken_down_into">
+    <rdfs:label>can be broken down into</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#can_be_impact_upon">
+    <rdfs:label>can be impact upon</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#associated_to">
+    <rdfs:label>associated to</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#hazop">
+    <_3:incorporated rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk_assessment"/>
+    <rdfs:label>hazop</rdfs:label>
+    <_3:identified_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#hazards">
+    <_3:in_creating rdf:resource="http://www.weblyzard.com/2005/03/31/wl#human_factors"/>
+    <_3:together_with rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:seen_as_a rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:raised_from rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:associated_to rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:created_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#death"/>
+    <_3:created_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#loss"/>
+    <_3:created_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#injury"/>
+    <_3:created_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#accidents"/>
+    <rdfs:label>hazards</rdfs:label>
+    <_3:of rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:is_created_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#mitigated_by">
+    <rdfs:label>mitigated by</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#lead_to">
+    <rdfs:label>lead to</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#death">
+    <rdfs:label>death</rdfs:label>
+    <_3:may_cause rdf:resource="http://www.weblyzard.com/2005/03/31/wl#hazard"/>
+    <_3:leads_to rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:can_cause rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:xxx rdf:resource="http://www.weblyzard.com/2005/03/31/wl#money"/>
+    <_3:effect rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:can_lead_to rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:can_lead_to rdf:resource="http://www.weblyzard.com/2005/03/31/wl#hazard"/>
+    <_3:cause rdf:resource="http://www.weblyzard.com/2005/03/31/wl#hazard"/>
+    <_3:causes rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#could_affect">
+    <rdfs:label>could affect</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#can_be">
+    <rdfs:label>can be</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#raised_from">
+    <rdfs:label>raised from</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#assessed_by">
+    <rdfs:label>assessed by</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#ie">
+    <rdfs:label>ie</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#of_a">
+    <rdfs:label>of a</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#affects">
+    <rdfs:label>affects</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#property_loss">
+    <_3:types_of_risk rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <rdfs:label>property loss</rdfs:label>
+    <_3:types rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:lead_to rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#based_on">
+    <rdfs:label>based on</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#together_with">
+    <rdfs:label>together with</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#injury">
+    <rdfs:label>injury</rdfs:label>
+    <_3:may_cause rdf:resource="http://www.weblyzard.com/2005/03/31/wl#hazards"/>
+    <_3:may_cause rdf:resource="http://www.weblyzard.com/2005/03/31/wl#hazard"/>
+    <_3:lead_to rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:of_what rdf:resource="http://www.weblyzard.com/2005/03/31/wl#probability"/>
+    <_3:can_cause rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:leads_to rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:can_lead_to rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:can_lead_to rdf:resource="http://www.weblyzard.com/2005/03/31/wl#hazard"/>
+    <_3:xxx rdf:resource="http://www.weblyzard.com/2005/03/31/wl#money"/>
+    <_3:causes rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#has">
+    <rdfs:label>has</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#accidents">
+    <_3:includes rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:lack_of_awareness_leads_to rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <rdfs:label>accidents</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#can_be_avoided_by">
+    <rdfs:label>can be avoided by</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#calculated">
+    <_3:classified_as rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:can_be rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <rdfs:label>calculated</rdfs:label>
+    <_3:types rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:can_be_classified_into rdf:resource="http://www.weblyzard.com/2005/03/31/wl#property_loss"/>
+    <_3:can_be_classified_into rdf:resource="http://www.weblyzard.com/2005/03/31/wl#environmental"/>
+    <_3:can_be_classified_into rdf:resource="http://www.weblyzard.com/2005/03/31/wl#liability"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#decisions">
+    <_3:based_on rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <rdfs:label>decisions</rdfs:label>
+    <_3:is_based_on rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#money">
+    <_3:when_conducted_properly_will_save rdf:resource="http://www.weblyzard.com/2005/03/31/wl#design"/>
+    <_3:can_cost rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <rdfs:label>money</rdfs:label>
+    <_3:involves rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk_management"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#managed_by">
+    <rdfs:label>managed by</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#loss">
+    <_3:causes rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:of_what rdf:resource="http://www.weblyzard.com/2005/03/31/wl#probability"/>
+    <rdfs:label>loss</rdfs:label>
+    <_3:effect rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#may_reduced_by">
+    <rdfs:label>may reduced by</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#likelihood">
+    <_3:factor_of rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:proportional_to rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:assumes rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <rdfs:label>likelihood</rdfs:label>
+    <_3:is_a rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#caused_by">
+    <rdfs:label>caused by</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#effect">
+    <rdfs:label>effect</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#definition">
+    <rdfs:label>definition</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#characterises">
+    <rdfs:label>characterises</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#can_lead_to">
+    <rdfs:label>can lead to</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#created_by">
+    <rdfs:label>created by</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#is_a_measure_of">
+    <rdfs:label>is a measure of</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#can_cost">
+    <rdfs:label>can cost</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#awareness_is_a_responsibility_of">
+    <rdfs:label>awareness is a responsibility of</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#fire">
+    <_3:leads_to rdf:resource="http://www.weblyzard.com/2005/03/31/wl#hazards"/>
+    <rdfs:label>fire</rdfs:label>
+    <_3:caused_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#environment"/>
+    <_3:caused_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#damage"/>
+    <_3:ie rdf:resource="http://www.weblyzard.com/2005/03/31/wl#disaster"/>
+    <_3:some_examples_include rdf:resource="http://www.weblyzard.com/2005/03/31/wl#hazard"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#unknown_risks">
+    <_3:is_broken_down_into rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:can_be_broken_into rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <rdfs:label>unknown risks</rdfs:label>
+    <_3:can_be_broken_down_into rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#safety">
+    <_3:affects rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:affects rdf:resource="http://www.weblyzard.com/2005/03/31/wl#employees"/>
+    <_3:must_consider rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <rdfs:label>safety</rdfs:label>
+    <_3:linked_to rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#maintained_by">
+    <rdfs:label>maintained by</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#uses">
+    <rdfs:label>uses</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#factor_of">
+    <rdfs:label>factor of</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#requires">
+    <rdfs:label>requires</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#refer">
+    <rdfs:label>refer</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#include">
+    <rdfs:label>include</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#is_a">
+    <rdfs:label>is a</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#in_creating">
+    <rdfs:label>in creating</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#piper_alpha">
+    <rdfs:label>Piper Alpha</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#most">
+    <rdfs:label>most</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#identify">
+    <rdfs:label>identify</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#a_factor_of">
+    <rdfs:label>a factor of</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#damage">
+    <_3:of_what rdf:resource="http://www.weblyzard.com/2005/03/31/wl#probability"/>
+    <_3:include rdf:resource="http://www.weblyzard.com/2005/03/31/wl#property"/>
+    <rdfs:label>damage</rdfs:label>
+    <_3:effect rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:leads_to rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#causes">
+    <rdfs:label>causes</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#events">
+    <_3:related rdf:resource="http://www.weblyzard.com/2005/03/31/wl#piper_alpha"/>
+    <_3:related rdf:resource="http://www.weblyzard.com/2005/03/31/wl#flixborough"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#seen_as_a">
+    <rdfs:label>seen as a</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#consequences">
+    <_3:equal rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:characterized rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk_assessment"/>
+    <_3:assumes rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <rdfs:label>consequences</rdfs:label>
+    <_3:characterises rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk_assessment"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#is_studied_by">
+    <rdfs:label>is studied by</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#types">
+    <rdfs:label>types</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#mond_indices">
+    <rdfs:label>Mond indices</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#flixborough">
+    <rdfs:label>Flixborough</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#data">
+    <rdfs:label>data</rdfs:label>
+    <_3:uses rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk_assessment"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#property">
+    <rdfs:label>property</rdfs:label>
+    <_3:of rdf:resource="http://www.weblyzard.com/2005/03/31/wl#loss"/>
+    <_3:could_affect rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#can_be_minimise_through">
+    <rdfs:label>can be minimise through</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#training">
+    <_3:managed_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:is_maintained_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:may_reduced_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:can_be_minimise_through rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:is_avoided_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:maintained_by rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <rdfs:label>training</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#may_cause">
+    <rdfs:label>may cause</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#disaster">
+    <_3:lack_of_counter_measurements rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <rdfs:label>disaster</rdfs:label>
+    <_3:may_cause rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:may_cause rdf:resource="http://www.weblyzard.com/2005/03/31/wl#hazards"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#includes">
+    <rdfs:label>includes</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#triggers_the_presence_of">
+    <rdfs:label>triggers the presence of</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#addressed_by">
+    <rdfs:label>addressed by</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#liability">
+    <_3:of_what rdf:resource="http://www.weblyzard.com/2005/03/31/wl#probability"/>
+    <_3:types_of_risk rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <_3:could_be_related_to rdf:resource="http://www.weblyzard.com/2005/03/31/wl#risk"/>
+    <rdfs:label>liability</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.weblyzard.com/2005/03/31/wl#identified_by">
+    <rdfs:label>identified by</rdfs:label>
+  </rdf:Description>
+</rdf:RDF>
