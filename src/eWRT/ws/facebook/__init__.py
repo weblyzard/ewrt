@@ -1,21 +1,12 @@
 #!/usr/bin/env python
-from eWRT.config import FACEBOOK_API_KEY, FACEBOOK_SECRET_KEY, FACEBOOK_SESSION_KEY
+import logging, json, sys, unittest, urllib
+from eWRT.config import FACEBOOK_ACCESS_KEY
 from eWRT.lib import Webservice, Result 
 from eWRT.lib.ResultSet import ResultSet
-import unittest
+from eWRT.access.http import Retrieve
+from urllib2 import HTTPError
 
-try:
-    from facebook import Facebook
-    LOADED = True
-except ImportError:
-    from warnings import warn
-    from sys import exit
-    warn("This module requires the facebook library - run aptitude install python-facebook ")
-    LOADED = False
-
-GRAPH_API_URL = 'https://graph.facebook.com/'
-
-class FacebookWS(Webservice.Webservice):
+class FacebookWS(object):
     """ class for fetching and storing the data of a user
     requires that the facebook API key and the facebook secret key are
     set in the configuration file. These can be retrieved from facebook
@@ -144,29 +135,7 @@ class TestFacebookWS(unittest.TestCase):
         assert [] == result
         
 
-
-    def getObjectWall(self, objId, object=None):
-        ''' tries to fetch a '''
-        
-        
-        ''' facebook knows 3 (???) different types of objects, that are of interest for use'''
-
-class TestFacebookWS( unittest.TestCase ):
-    
-    def setUp(self):
-        ''' '''
-        self.fb = FacebookWS()
-        self.fb.printAllData()
-    
-    
-    def testFetchingWallData(self):
-        ''' tests fetching updates of a users wall '''
-        
-        
-        
-        
-        
-
 if __name__ == "__main__":
+
     unittest.main()
 
