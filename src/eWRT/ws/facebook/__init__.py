@@ -83,11 +83,14 @@ class FacebookWS(object):
                 if fetched.has_key('paging'):
                     if fetched['paging'].has_key('previous'):
                         result.extend(self.requestURL(fetched['paging']['next']))
-                
+                        print 'After processing paging', len(result)
                 result.extend(fetched['data'])
+                print 'After adding data', len(result)
+                print result
             else:
                 # profiles for example don't contain a data dictionary
                 result.append(fetched)
+                print 'After appending fetched', len(result)
         
         except HTTPError:
             print 'Error: Bad Request for url', url
@@ -125,7 +128,6 @@ class TestFacebookWS(unittest.TestCase):
         assert len(result) == 1
         assert result[0].has_key('first_name')
         
-
     def testBadRequest(self):
         ''' tests that a bad request won't disturb the program'''
 
@@ -134,6 +136,12 @@ class TestFacebookWS(unittest.TestCase):
         result = self.fb.requestURL(url)
         assert [] == result
         
+
+    def testFetchingPaging(self):
+        ''' tests if the results are correctly fetched '''
+        param = {'path': '1145817399/feed', 'args': {}}
+        result = self.fb.makeRequest(param['path'], param['args'])
+        assert result
 
 if __name__ == "__main__":
 
