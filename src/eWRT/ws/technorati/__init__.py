@@ -24,6 +24,7 @@ from eWRT.access.http import Retrieve
 from eWRT.ws.TagInfoService import TagInfoService
 from eWRT.config import TECHNORATI_API_KEY
 import time
+from lxml import etree
 
 SLEEP_TIME=30
 
@@ -157,6 +158,40 @@ class Technorati(TagInfoService):
         content = f.read()
         f.close()
         return content
+
+    @staticmethod
+    def get_blog_links ( searchTerm, maxResults=100, offset=0):
+        
+        resultsPerPage = 10
+        links = []
+        foundNewLinks = False
+#        searchTerm = re.sub(' ', '+', searchTerm)
+        if offset >= resultsPerPage:
+            page = (offset / resultsPerPage) + 1
+        else:
+            page = 1
+            
+        url = '%s&page=%s' % (Technorati._parseURL(searchTerm), page)
+        content = Technorati.get_content(url)
+#        content = open('searchResults.html').read()
+        tree = etree.HTML( content )
+        
+        resultList = tree.xpath('//ol[@class="search-results post-list"]')
+
+        for result in resultList[0].iterchildren():
+            foundNewLinks = True
+            links.append(result.xpath('.//a[@class="offsite"]')[0])
+            offset += 1
+            if offset == maxResults:
+                break
+             # TODO: add here an SNMP trap -> errors mustn't occur here
+        
+        if offset < maxResults:
+            links.extend(Technorati.get_blog_links(searchTerm, maxResults, offset))
+        
+        return links
+
+
 
 if __name__ == '__main__':
     print Technorati.test()
