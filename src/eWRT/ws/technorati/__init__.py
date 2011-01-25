@@ -16,23 +16,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 __version__ = "$Header$"
 
-import re
+import re, logging, sys
 from eWRT.access.http import Retrieve
 from eWRT.ws.TagInfoService import TagInfoService
-from eWRT.config import TECHNORATI_API_KEY
 import time
 from lxml import etree
 
 SLEEP_TIME=30
+NON_ABSTRACT_TEXT = ['a', 'h3']
+
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout )
+
+cleanText = lambda text: trim(re.sub('\n', ' ', text))
 
 class Technorati(TagInfoService):
     """ retrieves data using the del.icio.us API """
-#    TECHNORATI_URL = 'http://api.technorati.com/tag?key='+TECHNORATI_API_KEY+'&tag=%s' 
     TECHNORATI_URL = 'http://technorati.com/r/tag/%s?authority=n&language=n'
-    #RE_TAG_COUNT = re.compile('<postsmatched>(\d+)</postsmatched>')
     RE_TAG_COUNT = re.compile('Posts relating to &ldquo;.*?&rdquo; \((\S+)\)',
         re.IGNORECASE|re.DOTALL)
     RE_TAG_CONTAINER = re.compile('<div id="related-tags".*?<ul>(.*?)</ul>.*?</div>',
@@ -165,32 +166,59 @@ class Technorati(TagInfoService):
         resultsPerPage = 10
         links = []
         foundNewLinks = False
-#        searchTerm = re.sub(' ', '+', searchTerm)
+        searchTerm = re.sub(' ', '+', searchTerm)
         if offset >= resultsPerPage:
             page = (offset / resultsPerPage) + 1
         else:
             page = 1
             
         url = '%s&page=%s' % (Technorati._parseURL(searchTerm), page)
+        logging.debug("Getting links for %s" % url)
         content = Technorati.get_content(url)
-#        content = open('searchResults.html').read()
         tree = etree.HTML( content )
         
         resultList = tree.xpath('//ol[@class="search-results post-list"]')
 
-        for result in resultList[0].iterchildren():
-            foundNewLinks = True
-            links.append(result.xpath('.//a[@class="offsite"]')[0])
-            offset += 1
-            if offset == maxResults:
-                break
-             # TODO: add here an SNMP trap -> errors mustn't occur here
-        
-        if offset < maxResults:
-            links.extend(Technorati.get_blog_links(searchTerm, maxResults, offset))
+        if len(resultList) > 0:
+
+            for element in resultList[0].iterchildren():
+                foundNewLinks = True
+                blogLink = {}
+                blogLink['url'] = element.xpath('.//a[@class="offsite"]')[0].attrib['href']
+                blogLink['source'] = 'Technorati - Keyword "%s"' % searchTerm
+                blogLink['abstract'] = Technorati._getAbstract(element)
+                blogLink['authority'] = int(re.sub('Authority ', '', result.xpath('.//a[@class="authority"]')[0].text))
+                blogLink['reach'] = '0'
+                links.append(blogLink)
+                offset += 1
+                if offset == maxResults:
+                    break
+                 # TODO: add here an SNMP trap -> errors mustn't occur here
+                 # this could mean, that the structure of the site has changed
+            if offset < maxResults:
+                links.extend(Technorati.get_blog_links(searchTerm, maxResults, offset))
+
+        else:
+            
+            logging.error('Could not find anything for %s' % url)
         
         return links
+    
+    @staticmethod
+    def _getAbstract(element):
+        ''' gets the abstract from the element '''
+        text = []
+            
+        if not element.tag in NON_ABSTRACT_TEXT and not element.text == None:
+            text.append(element.text.lstrip())
 
+        for child in element.getchildren():
+            text.extend(Technorati._getAbstract(child))
+            
+        if not element.tag in NON_ABSTRACT_TEXT and not element.tail == None:
+            text.append(element.tail.lstrip())
+        
+        return ''.join(text)
 
 
 if __name__ == '__main__':

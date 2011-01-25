@@ -41,7 +41,11 @@ class TestTechnorati( unittest.TestCase ):
     def test_get_blog_links(self):
         ''' tests retrieving the blog links '''
         
-        links = Technorati.get_blog_links(['climate', 'change'])
+        links = Technorati.get_blog_links('climate change', maxResults=10)
+        print links
+        print len(links)
+        assert False
+        
         assert len(links) > 0
         
         links = Technorati.get_blog_links(['climate', 'change'], 20)
@@ -50,6 +54,12 @@ class TestTechnorati( unittest.TestCase ):
         links = Technorati.get_blog_links(['climate', 'change'], 33)
         assert len(links) == 33
 
+        print links[0]
+        assert False
+
+
+    def test_get_abstract(self):
+        ''' tests fetching the abstract ''' 
 
 if __name__ == '__main__':
     unittest.main()
