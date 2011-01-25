@@ -187,7 +187,7 @@ class Technorati(TagInfoService):
                 blogLink['url'] = element.xpath('.//a[@class="offsite"]')[0].attrib['href']
                 blogLink['source'] = 'Technorati - Keyword "%s"' % searchTerm
                 blogLink['abstract'] = Technorati._getAbstract(element)
-                blogLink['authority'] = int(re.sub('Authority ', '', result.xpath('.//a[@class="authority"]')[0].text))
+                blogLink['authority'] = int(re.sub('Authority ', '', element.xpath('.//a[@class="authority"]')[0].text))
                 blogLink['reach'] = '0'
                 links.append(blogLink)
                 offset += 1
