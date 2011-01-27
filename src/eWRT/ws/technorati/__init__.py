@@ -23,6 +23,7 @@ from eWRT.access.http import Retrieve
 from eWRT.ws.TagInfoService import TagInfoService
 import time
 from lxml import etree
+from datetime import timedelta, date
 
 SLEEP_TIME=30
 NON_ABSTRACT_TEXT = ['a', 'h3']
@@ -66,11 +67,7 @@ class Technorati(TagInfoService):
         content = Technorati.get_content(url)
 
         return Technorati._parse_tag_counts(content)
-
-    @staticmethod
-    def test ():
-        url = 'http://api.technorati.com/tag?key='+TECHNORATI_API_KEY+'&tag=linux'
-        return Technorati.get_content(url)
+    
 
     @staticmethod
     def getRelatedTags( tags, withCounts = True ):
@@ -161,18 +158,34 @@ class Technorati(TagInfoService):
         return content
 
     @staticmethod
-    def get_blog_links ( searchTerm, maxResults=100, offset=0):
+    def get_blog_links ( searchTerm, maxResults=100, offset=0, maxAge=0):
+        '''
+        Searches Technorati for the given term and returns a list of links 
+        to the blogs
+        @param searchTerm: term to search
+        @param maxResults: max search results 
+        @param offset:
+        @param maxAge: maximum age of the articles in days,
+            if set links are ordered by relevance and not by date
+        @return: dictionary with all the relevant info
+        '''
         
         resultsPerPage = 10
         links = []
         foundNewLinks = False
         searchTerm = re.sub(' ', '+', searchTerm)
+        
         if offset >= resultsPerPage:
             page = (offset / resultsPerPage) + 1
         else:
             page = 1
-            
-        url = '%s&page=%s' % (Technorati._parseURL(searchTerm), page)
+        
+        if maxAge == 0:
+            orderBy = 'relevance'
+        else:
+            orderBy = 'date'
+        
+        url = '%s&page=%s&sort=%s' % (Technorati._parseURL(searchTerm), page, orderBy)
         logging.debug("Getting links for %s" % url)
         content = Technorati.get_content(url)
         tree = etree.HTML( content )
@@ -184,22 +197,24 @@ class Technorati(TagInfoService):
             for element in resultList[0].iterchildren():
                 foundNewLinks = True
                 blogLink = {}
-                blogLink['url'] = element.xpath('.//a[@class="offsite"]')[0].attrib['href']
-                blogLink['source'] = 'Technorati - Keyword "%s"' % searchTerm
-                blogLink['abstract'] = Technorati._getAbstract(element)
-                blogLink['authority'] = int(re.sub('Authority ', '', element.xpath('.//a[@class="authority"]')[0].text))
-                blogLink['reach'] = '0'
-                links.append(blogLink)
-                offset += 1
-                if offset == maxResults:
-                    break
-                 # TODO: add here an SNMP trap -> errors mustn't occur here
-                 # this could mean, that the structure of the site has changed
+                linkDate = Technorati._getDate(element, maxAge)
+                if not linkDate == None:
+                    blogLink['url'] = element.xpath('.//a[@class="offsite"]')[0].attrib['href']
+                    blogLink['source'] = 'Technorati - Keyword "%s"' % searchTerm
+                    blogLink['abstract'] = Technorati._getAbstract(element)
+                    blogLink['authority'] = int(re.sub('Authority ', '', element.xpath('.//a[@class="authority"]')[0].text))
+                    blogLink['reach'] = '0'
+                    blogLink['date'] = linkDate
+                    links.append(blogLink)
+                    offset += 1
+                    if offset == maxResults:
+                        break
+                # TODO: add here an SNMP trap -> errors mustn't occur here
+                # this could mean, that the structure of the site has changed
             if offset < maxResults:
-                links.extend(Technorati.get_blog_links(searchTerm, maxResults, offset))
+                links.extend(Technorati.get_blog_links(searchTerm, maxResults, offset, maxAge))
 
         else:
-            
             logging.error('Could not find anything for %s' % url)
         
         return links
@@ -219,6 +234,42 @@ class Technorati(TagInfoService):
             text.append(element.tail.lstrip())
         
         return ''.join(text)
+    
+    @staticmethod
+    def _getDate(element, maxAge=0):
+        ''' returns the date of the link '''
+        
+        p = re.compile('(\d+)\s(\w+)\sago')
+
+        minDate = (date.fromtimestamp(time.time()) - timedelta(days=maxAge))
+        linkDate = None
+        for div in element.xpath('.//div'):
+            m = p.search(div.text)
+            if m:
+                age = int(m.groups()[0])
+                timeDim = m.groups()[1]
+
+                if re.search('week.?', timeDim):
+                    hours = age * 7 * 24
+                elif re.search('day.?', timeDim):
+                    hours = age * 24
+                elif re.search('hour.?', timeDim):
+                    hours = age
+                elif re.search('minute.?', timeDim):
+                    hours = 1
+                else:
+                    hours = 0
+
+                if hours > 0:    
+                    linkDate = date.fromtimestamp(time.time()) - timedelta(hours=hours)
+                    
+                    if linkDate < minDate and maxAge > 0:
+                        linkDate = None
+            else:
+                # TODO: add SNMP trap here 
+                print 'no date found', div.text
+
+        return linkDate
 
 
 if __name__ == '__main__':
