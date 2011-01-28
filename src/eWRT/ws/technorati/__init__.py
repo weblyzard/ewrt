@@ -27,10 +27,19 @@ from datetime import timedelta, date
 
 SLEEP_TIME=30
 NON_ABSTRACT_TEXT = ['a', 'h3']
-
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout )
+RESULTS_PER_PAGE = 10
 
 cleanText = lambda text: trim(re.sub('\n', ' ', text))
+
+from eWRT.util.advLogging import SNMPHandler
+
+logger = logging.getLogger('Technorati')
+streamHandler = logging.StreamHandler()
+streamHandler.setLevel(logging.DEBUG)
+logger.addHandler(streamHandler)
+snmpHandler = SNMPHandler('webLyzard.dataSources.technorati')
+snmpHandler.setLevel(logging.DEBUG)
+logger.addHandler(snmpHandler)
 
 class Technorati(TagInfoService):
     """ retrieves data using the del.icio.us API """
@@ -52,7 +61,7 @@ class Technorati(TagInfoService):
     SOURCE = 'advanced-source-all'
     RETURN = 'posts'
 
-    TECHNORATI_URL = 'http://technorati.com/search?usingAdvanced=1&q=%s&return=%s&source=%s&topic=%s&authority=%s'
+    TECHNORATI_URL = 'http://technorati.com/search?usingAdvanced=1&q="%s"&return=%s&source=%s&topic=%s&authority=%s'
 
     __slots__ = ()
     last_access = 0
@@ -169,53 +178,66 @@ class Technorati(TagInfoService):
             if set links are ordered by relevance and not by date
         @return: dictionary with all the relevant info
         '''
+
+        if isinstance(searchTerm, list):
+            searchTerm = '+'.join(searchTerm)
         
-        resultsPerPage = 10
-        links = []
-        foundNewLinks = False
         searchTerm = re.sub(' ', '+', searchTerm)
-        
-        if offset >= resultsPerPage:
-            page = (offset / resultsPerPage) + 1
+        if offset >= RESULTS_PER_PAGE:
+            page = (offset / RESULTS_PER_PAGE) + 1
         else:
             page = 1
         
-        if maxAge == 0:
-            orderBy = 'relevance'
-        else:
-            orderBy = 'date'
+        if maxAge == 0: orderBy = 'relevance'
+        else: orderBy = 'date'
         
         url = '%s&page=%s&sort=%s' % (Technorati._parseURL(searchTerm), page, orderBy)
-        logging.debug("Getting links for %s" % url)
         content = Technorati.get_content(url)
-        tree = etree.HTML( content )
+        return Technorati._parseLinksFromContent(content, searchTerm, maxResults=maxResults, offset=offset, maxAge=maxAge)
         
+        
+    @staticmethod
+    def _parseLinksFromContent(content, searchTerm, maxResults=100, offset=0, maxAge=0):
+        ''' parses the links from the content '''
+        tree = etree.HTML( content )
+        links = []
         resultList = tree.xpath('//ol[@class="search-results post-list"]')
-
+    
         if len(resultList) > 0:
-
+            counter = 0
             for element in resultList[0].iterchildren():
-                foundNewLinks = True
+                counter += 1
                 blogLink = {}
                 linkDate = Technorati._getDate(element, maxAge)
                 if not linkDate == None:
-                    blogLink['url'] = element.xpath('.//a[@class="offsite"]')[0].attrib['href']
+                    
+                    try:
+                        blogLink['url'] = element.xpath('.//a[@class="offsite"]')[0].attrib['href']
+                    except IndexError:
+                        logging.error('Could not parse the URL')
+                    
+                    try:
+                        blogLink['authority'] = int(re.sub('Authority ', '', element.xpath('.//a[@class="authority"]')[0].text))
+                    except:
+                        logging.error('Could not parse the authority!')
+                    
                     blogLink['source'] = 'Technorati - Keyword "%s"' % searchTerm
                     blogLink['abstract'] = Technorati._getAbstract(element)
-                    blogLink['authority'] = int(re.sub('Authority ', '', element.xpath('.//a[@class="authority"]')[0].text))
                     blogLink['reach'] = '0'
                     blogLink['date'] = linkDate
-                    links.append(blogLink)
-                    offset += 1
-                    if offset == maxResults:
-                        break
-                # TODO: add here an SNMP trap -> errors mustn't occur here
-                # this could mean, that the structure of the site has changed
-            if offset < maxResults:
+                    
+                    if blogLink.has_key('url') and blogLink.has_key('authority'):
+                        links.append(blogLink)
+                        offset += 1
+                        if offset == maxResults:
+                            break
+
+            if offset < maxResults and counter == RESULTS_PER_PAGE:
                 links.extend(Technorati.get_blog_links(searchTerm, maxResults, offset, maxAge))
 
         else:
-            logging.error('Could not find anything for %s' % url)
+            if offset == 0:
+                logging.warning('At the first page - should find a result for %s -> Changes in the site structure' %  searchTerm)
         
         return links
     
@@ -267,7 +289,8 @@ class Technorati(TagInfoService):
                         linkDate = None
             else:
                 # TODO: add SNMP trap here 
-                print 'no date found', div.text
+                logging.warning("Could not find a date")
+#                print 'no date found', div.text
 
         return linkDate
 
