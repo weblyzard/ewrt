@@ -21,6 +21,11 @@ __version__ = "$Header$"
 import logging
 from eWRT.util.exception import SNMPException
 
+eWRTlogger = logging.getLogger('eWRT')
+fileHandler = logging.FileHandler('/tmp/eWRT.log')
+fileHandler.setLevel(logging.DEBUG)
+eWRTlogger.addHandler(fileHandler)
+
 def sendSNMPTrap(message, module, level):
     '''
     sends a SNMP message
@@ -44,12 +49,21 @@ class SNMPHandler(logging.Handler):
     def emit(self, record):
         ''' sends the message '''
         level = record.levelname
-        if level == ('ERROR' or 'CRITICAL'):
+        if level == 'CRITICAL':
             level = 'critical'
-        elif level == 'CRITICAL':
+            eWRTlogger.critical(record.msg)
+        elif level == 'ERROR':
+            level = 'critical'
+            eWRTlogger.error(record.msg)
+        elif level == 'WARNING':
             level = 'warning'
-        elif level == ('DEBUG' or 'INFO'):
+            eWRTlogger.warning(record.msg)
+        elif level == 'INFO':
             level = 'ok'
+            eWRTlogger.info(record.msg)
+        elif level == 'DEBUG':
+            level = 'ok'
+            eWRTlogger.debug(record.msg)
         else:
             level = 'unknown'
         
@@ -58,7 +72,7 @@ class SNMPHandler(logging.Handler):
 if __name__ == '__main__':
     
     # Testing the snmp logging
-    logger = logging.getLogger()
+    logger = logging.getLogger('snmp')
     snmpHandler = SNMPHandler('webLyzard.test')
     snmpHandler.setLevel(logging.ERROR)
     logger.addHandler(snmpHandler)

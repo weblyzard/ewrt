@@ -34,11 +34,8 @@ cleanText = lambda text: trim(re.sub('\n', ' ', text))
 from eWRT.util.advLogging import SNMPHandler
 
 logger = logging.getLogger('Technorati')
-streamHandler = logging.StreamHandler()
-streamHandler.setLevel(logging.DEBUG)
-logger.addHandler(streamHandler)
 snmpHandler = SNMPHandler('webLyzard.dataSources.technorati')
-snmpHandler.setLevel(logging.DEBUG)
+snmpHandler.setLevel(logging.ERROR)
 logger.addHandler(snmpHandler)
 
 class Technorati(TagInfoService):
