@@ -35,7 +35,7 @@ from eWRT.util.advLogging import SNMPHandler
 
 logger = logging.getLogger('Technorati')
 snmpHandler = SNMPHandler('webLyzard.dataSources.technorati')
-snmpHandler.setLevel(logging.ERROR)
+snmpHandler.setLevel(logger.error)
 logger.addHandler(snmpHandler)
 
 class Technorati(TagInfoService):
@@ -211,12 +211,12 @@ class Technorati(TagInfoService):
                     try:
                         blogLink['url'] = element.xpath('.//a[@class="offsite"]')[0].attrib['href']
                     except IndexError:
-                        logging.error('Could not parse the URL')
+                        logger.error('Could not parse the URL')
                     
                     try:
                         blogLink['authority'] = int(re.sub('Authority ', '', element.xpath('.//a[@class="authority"]')[0].text))
                     except:
-                        logging.error('Could not parse the authority!')
+                        logger.error('Could not parse the authority!')
                     
                     blogLink['source'] = 'Technorati - Keyword "%s"' % searchTerm
                     blogLink['abstract'] = Technorati._getAbstract(element)
@@ -234,7 +234,7 @@ class Technorati(TagInfoService):
 
         else:
             if offset == 0:
-                logging.warning('At the first page - should find a result for %s -> Changes in the site structure' %  searchTerm)
+                logger.warning('At the first page - should find a result for %s -> Changes in the site structure' %  searchTerm)
         
         return links
     
@@ -286,7 +286,7 @@ class Technorati(TagInfoService):
                         linkDate = None
             else:
                 # TODO: add SNMP trap here 
-                logging.warning("Could not find a date")
+                logger.warning("Could not find a date")
 #                print 'no date found', div.text
 
         return linkDate
