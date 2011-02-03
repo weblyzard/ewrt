@@ -77,9 +77,9 @@ if __name__ == '__main__':
     snmpHandler.setLevel(logging.ERROR)
     logger.addHandler(snmpHandler)
     
-    logging.debug('debug')
-    logging.info('info')
-    logging.warning('warning')
-    logging.error('error')
-    logging.critical('critical')
+    logger.debug('debug')
+    logger.info('info')
+    logger.warning('warning')
+    logger.error('error')
+    logger.critical('critical')
     
