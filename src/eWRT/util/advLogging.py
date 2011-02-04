@@ -18,13 +18,8 @@
 
 __version__ = "$Header$"
 
-import logging
+import logging, unittest
 from eWRT.util.exception import SNMPException
-
-eWRTlogger = logging.getLogger('eWRT')
-fileHandler = logging.FileHandler('/tmp/eWRT.log')
-fileHandler.setLevel(logging.DEBUG)
-eWRTlogger.addHandler(fileHandler)
 
 def sendSNMPTrap(message, module, level):
     '''
@@ -49,37 +44,35 @@ class SNMPHandler(logging.Handler):
     def emit(self, record):
         ''' sends the message '''
         level = record.levelname
-        if level == 'CRITICAL':
+        if level == 'CRITICAL' or level == 'ERROR':
             level = 'critical'
-            eWRTlogger.critical(record.msg)
-        elif level == 'ERROR':
-            level = 'critical'
-            eWRTlogger.error(record.msg)
         elif level == 'WARNING':
             level = 'warning'
-            eWRTlogger.warning(record.msg)
-        elif level == 'INFO':
+        elif level == 'DEBUG' or level == 'INFO':
             level = 'ok'
-            eWRTlogger.info(record.msg)
-        elif level == 'DEBUG':
-            level = 'ok'
-            eWRTlogger.debug(record.msg)
         else:
             level = 'unknown'
         
         sendSNMPTrap(record.msg, self.moduleName, level)
+
+class TestHandler( unittest.TestCase ):
+    
+    def testHandler(self):
+        ''' tests the handler '''
+        
+        # Testing the snmp logging
+        logger = logging.getLogger('snmp')
+        snmpHandler = SNMPHandler('webLyzard.test')
+        snmpHandler.setLevel(logging.ERROR)
+        logger.addHandler(snmpHandler)
+        
+        logging.debug('debug')
+        logging.info('info')
+        logging.warning('warning')
+        logging.error('error')
+        logging.critical('critical')
+    
         
 if __name__ == '__main__':
     
-    # Testing the snmp logging
-    logger = logging.getLogger('snmp')
-    snmpHandler = SNMPHandler('webLyzard.test')
-    snmpHandler.setLevel(logging.ERROR)
-    logger.addHandler(snmpHandler)
-    
-    logger.debug('debug')
-    logger.info('info')
-    logger.warning('warning')
-    logger.error('error')
-    logger.critical('critical')
-    
+    unittest.main()
