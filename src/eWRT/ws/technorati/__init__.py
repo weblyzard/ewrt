@@ -37,6 +37,11 @@ logger = logging.getLogger('Technorati')
 snmpHandler = SNMPHandler('webLyzard.dataSources.technorati')
 snmpHandler.setLevel(logger.error)
 logger.addHandler(snmpHandler)
+#
+#handler = logging.StreamHandler()
+#handler.setLevel(logging.DEBUG)
+#logger.addHandler(handler)
+#logger.setLevel(logging.DEBUG)
 
 class Technorati(TagInfoService):
     """ retrieves data using the del.icio.us API """
@@ -58,7 +63,7 @@ class Technorati(TagInfoService):
     SOURCE = 'advanced-source-all'
     RETURN = 'posts'
 
-    TECHNORATI_URL = 'http://technorati.com/search?usingAdvanced=1&q="%s"&return=%s&source=%s&topic=%s&authority=%s'
+    TECHNORATI_URL = 'http://technorati.com/search?usingAdvanced=1&q=%s&return=%s&source=%s&topic=%s&authority=%s'
 
     __slots__ = ()
     last_access = 0
@@ -154,11 +159,15 @@ class Technorati(TagInfoService):
         """ returns the content from Technorati """
         assert( url.startswith("http") )
 
+        logger.debug('Fetching content for URL %s' % url)
+
         if (time.time() - Technorati.last_access) < SLEEP_TIME:
+            logger.debug('Sleeping %s seconds!' % SLEEP_TIME)
             time.sleep( SLEEP_TIME )
+            
         Technorati.last_access= time.time()
 
-        f = Retrieve(Technorati.__name__).open(url)
+        f = Retrieve("%s_new" % Technorati.__name__).open(url)
         content = f.read()
         f.close()
         return content
@@ -190,6 +199,7 @@ class Technorati(TagInfoService):
         
         url = '%s&page=%s&sort=%s' % (Technorati._parseURL(searchTerm), page, orderBy)
         content = Technorati.get_content(url)
+        print '.'
         return Technorati._parseLinksFromContent(content, searchTerm, maxResults=maxResults, offset=offset, maxAge=maxAge)
         
         
@@ -199,6 +209,8 @@ class Technorati(TagInfoService):
         tree = etree.HTML( content )
         links = []
         resultList = tree.xpath('//ol[@class="search-results post-list"]')
+    
+        logger.debug('Parsing links from Technorati result: %s, %s, %s, %s ' %(searchTerm, maxResults, offset, maxAge))
     
         if len(resultList) > 0:
             counter = 0
@@ -224,6 +236,7 @@ class Technorati(TagInfoService):
                     blogLink['date'] = linkDate
                     
                     if blogLink.has_key('url') and blogLink.has_key('authority'):
+                        logger.debug('Found URL %s' % blogLink['url'])
                         links.append(blogLink)
                         offset += 1
                         if offset == maxResults:
@@ -287,7 +300,7 @@ class Technorati(TagInfoService):
             else:
                 # TODO: add SNMP trap here 
                 logger.warning("Could not find a date")
-#                print 'no date found', div.text
+
 
         return linkDate
 
