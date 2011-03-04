@@ -13,25 +13,25 @@ setup(
       ###########################################
       ## Metadata
       name="eWRT",
-      version      = "0.7.0", 
-      description  = 'eWRT',
-      author       = 'Albert Weichselbraun, Heinz Lang, Gerhard Wohlgenannt, Johannes Duong',
-      author_email = 'albert.weichselbraun@wu.ac.at, heinz.lang@wu.ac.at, wohlg@ai.wu.ac.at, johannes.duong@wu.ac.at',
-      url          = 'http://www.semanticlab.net/index.php/EWRT',
-      license      = "GPL3", 
-      package_dir  = {'': 'src'},
+      version="0.7.0",
+      description='eWRT',
+      author='Albert Weichselbraun, Heinz Lang, Gerhard Wohlgenannt, Johannes Duong',
+      author_email='albert.weichselbraun@wu.ac.at, heinz.lang@wu.ac.at, wohlg@ai.wu.ac.at, johannes.duong@wu.ac.at',
+      url='http://www.semanticlab.net/index.php/EWRT',
+      license="GPL3",
+      package_dir={'': 'src'},
 
       ###########################################
       ## Run unittests
-      test_suite = 'nose.collector',
+      test_suite='nose.collector',
 
       ###########################################
       ## Scripts
-      scripts = ['src/eWRT/input/corpus/reuters/reuters.py' ],
- 
+      scripts=['src/eWRT/input/corpus/reuters/reuters.py' ],
+
       ###########################################
       ## Package List
-      packages     = ['eWRT',
+      packages=['eWRT',
                       'eWRT.access',
                       'eWRT.config',
                       'eWRT.input',
@@ -62,6 +62,7 @@ setup(
                       'eWRT.ws.geonames',
                       'eWRT.ws.geonames.gazetteer',
                       'eWRT.ws.geonames.util',
+                      'eWRT.ws.google',
                       'eWRT.ws.googletrends',
                       'eWRT.ws.opencalais',
                       'eWRT.ws.technorati',
