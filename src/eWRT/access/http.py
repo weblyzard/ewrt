@@ -24,6 +24,7 @@ from urlparse import urlsplit
 import time
 from StringIO import StringIO
 from gzip import GzipFile
+from time import sleep
 
 from nose.tools import raises
 from nose.plugins.attrib import attr
@@ -37,6 +38,8 @@ getHostName = lambda x: "://".join( urlsplit(x)[:2] )
 # set default socket timeout (otherwise urllib might hang!)
 from socket import setdefaulttimeout
 setdefaulttimeout(60)
+
+DEFAULT_RETRY = 5
 
 class Retrieve(object):
     """ @class Retrieve
@@ -73,23 +76,34 @@ class Retrieve(object):
             @param[in] pwd   optional password
             @returns a file object for reading the url
         """
-        request = urllib2.Request( url, data )
-        request.add_header( 'User-Agent', self.user_agent )
-        request.add_header('Accept-encoding', 'gzip')
-        self._throttle()
+        urlObj = None
+        tries  = 0
+        while not urlObj:
+            request = urllib2.Request( url, data )
+            request.add_header( 'User-Agent', self.user_agent )
+            request.add_header('Accept-encoding', 'gzip')
+            self._throttle()
 
-        opener = []
-        if PROXY_SERVER:
-            opener.append( urllib2.ProxyHandler({"http" :PROXY_SERVER} ) )
-        if user and pwd:
-            opener.append( self._getHTTPBasicAuthOpener(url, user, pwd) )
+            opener = []
+            if PROXY_SERVER:
+                opener.append( urllib2.ProxyHandler({"http" :PROXY_SERVER} ) )
+            if user and pwd:
+                opener.append( self._getHTTPBasicAuthOpener(url, user, pwd) )
 
-        urllib2.install_opener( urllib2.build_opener( *opener ) )
-        urlObj = urllib2.urlopen( request )
+            urllib2.install_opener( urllib2.build_opener( *opener ) )
+            try:
+                urlObj = urllib2.urlopen( request )
+            except urllib2.HTTPError, e:
+                tries =+1
+                time.sleep(5)
+                if tries > DEFAULT_RETRY:
+                    print "Cannot open URL '%s'" % url
+                    raise e
+                continue
 
-        # check whether the data stream is compressed
-        if urlObj.headers.get('Content-Encoding') == 'gzip':
-            return self._getUncompressedStream( urlObj )
+            # check whether the data stream is compressed
+            if urlObj.headers.get('Content-Encoding') == 'gzip':
+                return self._getUncompressedStream( urlObj )
 
         return urlObj
 
