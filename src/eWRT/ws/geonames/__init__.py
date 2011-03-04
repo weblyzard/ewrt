@@ -142,7 +142,6 @@ class GeoNames(object):
             @returns a list containing the neighbours of the given country """
 
         url = GeoNames.NEIGHBOURS_SERVICE_URL % geo_entity.id
-        print "**", url
     	jsonData = eval( Retrieve('eWRT.ws.geonames').open(url).read() )
         if 'geonames' in jsonData:
             return filter( None, [ GeoNames.getGeoEntity( GeoEntity.factory( id = e['geonameId'] )) for e in jsonData['geonames'] ] )
