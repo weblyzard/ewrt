@@ -28,7 +28,7 @@ __author__    = "Albert Weichselbraun"
 __revision__  = "$Id$"
 __copyright__ = "GPL"
 
-from eWRT.util.cache import Cache
+from eWRT.util.cache import DiskCache
 from shutil import rmtree
 from os.path import join, exists
 from cPickle import load
@@ -45,7 +45,7 @@ except ImportError:
     HASH = sha.sha
 
 
-class Async(Cache):
+class Async(DiskCache):
     """ Asynchronous Call Handling """
 
     def __init__(self, cache_dir, cache_nesting_level=0, cache_file_suffix="", max_processes=8, debug_dir=None):
@@ -68,7 +68,7 @@ class Async(Cache):
         """ returns an identifier representing the object which is compatible 
             to the identifiers returned by the eWRT.util.cache.* classes. """
         args = ( tuple(cmd[1:]), ())  # required to produce the same hash as DiskCache's fetch method
-        return self._get_fname( Cache.getObjectId( args ) ) 
+        return self._get_fname( DiskCache.getObjectId( args ) ) 
         
    
     def post(self, cmd):
