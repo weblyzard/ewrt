@@ -36,6 +36,7 @@ import time
 from subprocess import Popen
 from glob import glob
 import os
+import gzip
 
 try:
     import hashlib
@@ -130,8 +131,9 @@ class Async(DiskCache):
         while True:
             if exists(cache_file):
                 try: 
-                    return load(open(cache_file))
-                except EOFError:
+                    return load( gzip.open(cache_file))
+                except (EOFError, UnpicklingError) as e:
+                    print "Error opening %s" % cache_file, e
                     pass
 
             time.sleep(10)
