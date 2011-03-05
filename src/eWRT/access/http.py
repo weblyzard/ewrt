@@ -3,7 +3,7 @@
 """ @package eWRT.access.http
     provides access to resources using http """
 
-# (C)opyrights 2008-2010 by Albert Weichselbraun <albert@weichselbraun.net>
+# (C)opyrights 2008-2011 by Albert Weichselbraun <albert@weichselbraun.net>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import time
 from StringIO import StringIO
 from gzip import GzipFile
 from time import sleep
+from random import randint
 
 from nose.tools import raises
 from nose.plugins.attrib import attr
@@ -33,13 +34,14 @@ from nose.plugins.attrib import attr
 import logging
 log = logging.getLogger(__name__)
 
-getHostName = lambda x: "://".join( urlsplit(x)[:2] )
+RETRY_WAIT_TIME_RANGE      = (2, 10)         # in seconds
+HTTP_TEMPORARY_ERROR_CODES = (500, 503, 504) # error codes which might trigger a retry
 
 # set default socket timeout (otherwise urllib might hang!)
 from socket import setdefaulttimeout
 setdefaulttimeout(60)
 
-DEFAULT_RETRY = 5
+getHostName = lambda x: "://".join( urlsplit(x)[:2] )
 
 class Retrieve(object):
     """ @class Retrieve
@@ -68,12 +70,14 @@ class Retrieve(object):
                             if "%s" in USER_AGENT else USER_AGENT
 
 
-    def open(self, url, data=None, user=None, pwd=None ):
+    def open(self, url, data=None, user=None, pwd=None, retry=0 ):
         """ Opens an URL and returns the matching file object 
             @param[in] url 
             @param[in] data  optional data to submit
             @param[in] user  optional user name
             @param[in] pwd   optional password
+            @param[in] retry number of retries in case of an temporary error
+
             @returns a file object for reading the url
         """
         urlObj = None
@@ -93,13 +97,13 @@ class Retrieve(object):
             urllib2.install_opener( urllib2.build_opener( *opener ) )
             try:
                 urlObj = urllib2.urlopen( request )
-            except urllib2.HTTPError, e:
-                tries =+1
-                time.sleep(5)
-                if tries > DEFAULT_RETRY:
-                    print "Cannot open URL '%s'" % url
+            except urllib2.HTTPError as e:
+                if e.code in HTTP_TEMPORARY_ERROR_CODES and tries < retry:
+                    time.sleep( randint( *RETRY_WAIT_TIME_RANGE) )
+                    tries =+1
+                    continue 
+                else:
                     raise e
-                continue
 
             # check whether the data stream is compressed
             if urlObj.headers.get('Content-Encoding') == 'gzip':
@@ -220,7 +224,11 @@ def t_retrieve(url):
         @remarks
         helper module for the testMultiProcessing unit test.
     """
-    with Retrieve( __name__ ).open( url ) as r:
+    r = Retrieve( __name__ ).open( url )
+    try:
         content = r.read()
+    finally:               # this is required as GzipFile does not support the context protocol in python 2.6
+        r.close()
+
     return content
 

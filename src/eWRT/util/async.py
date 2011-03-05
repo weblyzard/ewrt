@@ -9,7 +9,7 @@
 """
 
 
-# (C)opyrights 2008-2009 by Albert Weichselbraun <albert@weichselbraun.net>
+# (C)opyrights 2008-2010 by Albert Weichselbraun <albert@weichselbraun.net>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ __copyright__ = "GPL"
 from eWRT.util.cache import DiskCache
 from shutil import rmtree
 from os.path import join, exists
-from cPickle import load
+from cPickle import load, UnpicklingError
 import time
 from subprocess import Popen
 from glob import glob
@@ -78,12 +78,14 @@ class Async(DiskCache):
             @returns the hash required to fetch this object
         """
         cache_file = self.getPostHashfile( cmd )  
+        # print "I will return %s for %s." % (cache_file, " ".join(cmd) )
+
         # try to fetch the object from the cache
         if exists(cache_file):
             try:
                 load(open(cache_file))
                 return cache_file
-            except EOFError:
+            except (EOFError, UnpicklingError):
                 pass
 
         self._execute(cmd)
