@@ -35,7 +35,6 @@ logger = logging.getLogger('Technorati')
 handler = logging.StreamHandler()
 logger.addHandler(handler)
 
-
 class Technorati(TagInfoService):
     """ retrieves data using the del.icio.us API """
 
@@ -208,13 +207,13 @@ class Technorati(TagInfoService):
         if len(resultList) > 0:
             counter = 0
             for element in resultList[0].iterchildren():
-                counter += 1
                 blogLink = {}
                 linkDate = Technorati._getDate(element, maxAge)
                 if not linkDate == None:
 
                     try:
                         blogLink['url'] = element.xpath('.//a[@class="offsite"]')[0].attrib['href']
+                        logger.info('Found url %s' % blogLink['url'])
                     except IndexError:
                         logger.error('Could not parse the URL')
 
@@ -222,18 +221,22 @@ class Technorati(TagInfoService):
                         blogLink['authority'] = int(re.sub('Authority ', '', element.xpath('.//a[@class="authority"]')[0].text))
                     except:
                         logger.error('Could not parse the authority!')
+                        blogLink['authority'] = ''
 
                     blogLink['source'] = 'Technorati - Keyword "%s"' % searchTerm
                     blogLink['abstract'] = Technorati._getAbstract(element)
                     blogLink['reach'] = '0'
                     blogLink['date'] = linkDate
 
-                    if blogLink.has_key('url') and blogLink.has_key('authority'):
+                    if blogLink.has_key('url'):
                         logger.debug('Found URL %s' % blogLink['url'])
                         links.append(blogLink)
                         offset += 1
+                        counter += 1
                         if offset == maxResults:
                             break
+                    else:
+                        offset += 1
 
             if offset < maxResults and counter == RESULTS_PER_PAGE:
                 links.extend(Technorati.get_blog_links(searchTerm, maxResults, offset, maxAge))
@@ -291,9 +294,7 @@ class Technorati(TagInfoService):
                     if linkDate < minDate and maxAge > 0:
                         linkDate = None
             else:
-                # TODO: add SNMP trap here 
                 logger.warning("Could not find a date")
-
 
         return linkDate
 
