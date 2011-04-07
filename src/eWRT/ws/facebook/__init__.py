@@ -46,9 +46,7 @@ class FacebookWS(object):
     def makeRequest(self, path, args={}):
         '''
         makes a request to the graph API
-        @param path: path to query
-            e.g. userprofile of current user: me
-                 feed of user/group/page 122222: 122222/feed
+        @param path: path to query, e.g. feed of user/group/page 122222: 122222/feed
         @return: fetched data
         '''
         
