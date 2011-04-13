@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 import logging, json, sys, unittest, urllib
+
+from urllib2 import HTTPError
+
 from eWRT.config import FACEBOOK_ACCESS_KEY
-from eWRT.lib import Webservice, Result 
+from eWRT.lib import Webservice, Result
 from eWRT.lib.ResultSet import ResultSet
 from eWRT.access.http import Retrieve
-from urllib2 import HTTPError
+
 
 class FacebookWS(object):
     """ class for fetching and storing the data of a user
@@ -14,7 +17,7 @@ class FacebookWS(object):
     FB_OBJECT_TYPES = ['post', 'user', 'page', 'event', 'group']
 
     def __init__(self):
-        """ init """       
+        """ init """
         self.retrieve = Retrieve('facebookWS')
 
 
@@ -26,15 +29,15 @@ class FacebookWS(object):
         @return: search result
         '''
         args = {}
-        result= []
-        
+        result = []
+
         args['q'] = term
-        
+
         if objectType in self.FB_OBJECT_TYPES:
             args['type'] = objectType
             result = self.makeRequest('search', args)
         else:
-            
+
             # search all object types
             for type in self.FB_OBJECT_TYPES:
                 args['type'] = type
@@ -49,12 +52,12 @@ class FacebookWS(object):
         @param path: path to query, e.g. feed of user/group/page 122222: 122222/feed
         @return: fetched data
         '''
-        
+
         if not args.has_key('access_token'):
             args['access_token'] = FACEBOOK_ACCESS_KEY
-        
-        url = "https://graph.facebook.com/%s?%s" % (path, urllib.urlencode(args)) 
-        
+
+        url = "https://graph.facebook.com/%s?%s" % (path, urllib.urlencode(args))
+        print url
         return self.requestURL(url)
 
 
@@ -64,19 +67,19 @@ class FacebookWS(object):
         @param url: valid graph-api-url
         @return: fetched data 
         '''
-        
+
         result = []
-        
+
         try:
-        
+
             file = self.retrieve.open(url)
             fetched = json.loads(file.read())
-            
-            
+
+
             logging.debug('processing url %s' % url)
-            
+
             if fetched.has_key('data'):
-                
+
                 # process paging
                 if fetched.has_key('paging'):
                     if fetched['paging'].has_key('previous'):
@@ -89,10 +92,10 @@ class FacebookWS(object):
                 # profiles for example don't contain a data dictionary
                 result.append(fetched)
                 print 'After appending fetched', len(result)
-        
+
         except HTTPError:
             print 'Error: Bad Request for url', url
-        
+
         return result
 
 class TestFacebookWS(unittest.TestCase):
@@ -100,17 +103,20 @@ class TestFacebookWS(unittest.TestCase):
     def setUp(self):
         ''' setup the webservice '''
         self.fb = FacebookWS()
-        
+
     def testSearch(self):
         ''' tests the search '''
         resultPage = self.fb.search('Linus Torvalds', 'page')
+        print resultPage
         assert len(resultPage) > 5
         assert resultPage[0]['name'] == 'Linus Torvalds'
 
         resultAll = self.fb.search('Linus Torvalds')
+        print resultAll
         assert len(resultAll) > len(resultPage)
 
         result = self.fb.search('Heinz Lang', 'user')
+        print result
         assert len(result) > 5
 
     def testFetchingProfile(self):
@@ -125,7 +131,7 @@ class TestFacebookWS(unittest.TestCase):
         result = self.fb.requestURL(url)
         assert len(result) == 1
         assert result[0].has_key('first_name')
-        
+
     def testBadRequest(self):
         ''' tests that a bad request won't disturb the program'''
 
@@ -133,11 +139,11 @@ class TestFacebookWS(unittest.TestCase):
         url = 'https://graph.facebook.com/me?access_token=2227470867%7C2._jNijjNpTLF_OrmDqYTEA__.3600.1288695600-1145817399%7CECkapj6t0eZK8DjnNfSVRANS8lI'
         result = self.fb.requestURL(url)
         assert [] == result
-        
+
 
     def testFetchingPaging(self):
         ''' tests if the results are correctly fetched '''
-        param = {'path': '1145817399/feed', 'args': {}}
+        param = {'path': '358298686286/feed', 'args': {}}
         result = self.fb.makeRequest(param['path'], param['args'])
         assert result
 
