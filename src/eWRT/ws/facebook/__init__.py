@@ -46,7 +46,7 @@ class FacebookWS(object):
         return result
 
 
-    def makeRequest(self, path, args={}):
+    def makeRequest(self, path, args={}, maxDoc=0):
         '''
         makes a request to the graph API
         @param path: path to query, e.g. feed of user/group/page 122222: 122222/feed
@@ -58,10 +58,10 @@ class FacebookWS(object):
 
         url = "https://graph.facebook.com/%s?%s" % (path, urllib.urlencode(args))
         print url
-        return self.requestURL(url)
+        return self.requestURL(url, maxDoc)
 
 
-    def requestURL(self, url):
+    def requestURL(self, url, maxDoc=None):
         '''
         fetches the data for the give URL from the graph API
         @param url: valid graph-api-url
@@ -69,6 +69,9 @@ class FacebookWS(object):
         '''
 
         result = []
+
+        if maxDoc == None:
+            maxDoc = 1000
 
         try:
 
@@ -82,7 +85,8 @@ class FacebookWS(object):
 
                 # process paging
                 if fetched.has_key('paging'):
-                    if fetched['paging'].has_key('previous'):
+                    if (fetched['paging'].has_key('previous') and
+                        len(result) < maxDoc):
                         result.extend(self.requestURL(fetched['paging']['next']))
                         print 'After processing paging', len(result)
                 result.extend(fetched['data'])
