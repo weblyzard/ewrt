@@ -46,7 +46,7 @@ class FacebookWS(object):
         return result
 
 
-    def makeRequest(self, path, args={}, maxDoc=0):
+    def makeRequest(self, path, args={}, maxDoc=None):
         '''
         makes a request to the graph API
         @param path: path to query, e.g. feed of user/group/page 122222: 122222/feed
@@ -57,22 +57,23 @@ class FacebookWS(object):
             args['access_token'] = FACEBOOK_ACCESS_KEY
 
         url = "https://graph.facebook.com/%s?%s" % (path, urllib.urlencode(args))
-        print url
+        print 'makeRequest', maxDoc
         return self.requestURL(url, maxDoc)
 
 
-    def requestURL(self, url, maxDoc=None):
+    def requestURL(self, url, maxDoc=None, result=None):
         '''
         fetches the data for the give URL from the graph API
         @param url: valid graph-api-url
         @return: fetched data 
         '''
 
-        result = []
-
+        if result == None:
+            result = []
+        print 'requestURL', maxDoc
         if maxDoc == None:
             maxDoc = 1000
-
+        print 'requestURL2', maxDoc
         try:
 
             file = self.retrieve.open(url)
@@ -82,16 +83,16 @@ class FacebookWS(object):
             logging.debug('processing url %s' % url)
 
             if fetched.has_key('data'):
-
-                # process paging
-                if fetched.has_key('paging'):
-                    if (fetched['paging'].has_key('previous') and
-                        len(result) < maxDoc):
-                        result.extend(self.requestURL(fetched['paging']['next']))
-                        print 'After processing paging', len(result)
                 result.extend(fetched['data'])
-                print 'After adding data', len(result)
-                print result
+                print fetched['data']
+                print 'len result %s maxDoc %s' % (len(result), maxDoc)
+                # process paging
+                if len(result) < maxDoc:
+                    if fetched.has_key('paging') and fetched['paging'].has_key('previous'):
+                        result = (self.requestURL(fetched['paging']['previous'],
+                                                  maxDoc, result))
+                        print 'After processing paging', len(result)
+
             else:
                 # profiles for example don't contain a data dictionary
                 result.append(fetched)
@@ -144,12 +145,18 @@ class TestFacebookWS(unittest.TestCase):
         result = self.fb.requestURL(url)
         assert [] == result
 
-
     def testFetchingPaging(self):
         ''' tests if the results are correctly fetched '''
         param = {'path': '358298686286/feed', 'args': {}}
         result = self.fb.makeRequest(param['path'], param['args'])
         assert result
+
+    def testMakeSearchRequest(self):
+        '''Tests searching by making a request'''
+        args = {'limit':20, 'type':'post', 'q':'bildung'}
+        result = self.fb.makeRequest('search', args)
+        print result
+        assert False
 
 if __name__ == "__main__":
 
