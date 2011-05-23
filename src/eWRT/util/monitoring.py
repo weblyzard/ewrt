@@ -44,13 +44,12 @@ import os, subprocess, commands, socket, logging
 from string import Template
 
 SEND_NSCA_PATH = os.path.join(os.sep, 'usr', 'sbin', 'send_nsca')
-SEND_NSCA_CONFIG = os.path.join(os.sep, 'etc' ,'send_nsca.cfg')
+SEND_NSCA_CONFIG = os.path.join(os.sep, 'etc' , 'send_nsca.cfg')
 MONITORING_SERVER = '\'tor.wu.ac.at\''
 
-
-class NSCA( object ):
+class NSCA(object):
     ''' class NSCA Service helps sending test results to Nagios '''
-    
+
     @staticmethod
     ## sends a NSCA message to the monitoring server
     # @param status: service status (0->OK, 1->warning, 2->critical, 3->unknown)
@@ -58,23 +57,24 @@ class NSCA( object ):
     # @param src_host: name of the host the server is running on. by default the 
     #                  script will run socket.gethostname()
     # @param performance:     
-    def send(message, status, service_name, src_host=None, performance=[]):
+    def send(message, status, service_name, src_host=None, performance=[],
+             monitoringServer=MONITORING_SERVER):
         ''' sends the '''
-    
+
         if src_host == None:
-    
+
             src_host = socket.gethostname()
-    
+
         STATUS = [0, 1, 2, 3]
-    
+
         assert status in STATUS
-                
+
         message = '{src_host};{service_name};{status};{message}'.format(src_host=src_host, service_name=service_name, status=status, message=message)
-        
+
         if len(performance) > 0 :
             message = '%s | %s ' % (message, ' '.join([p.message for p in performance]))
-            
-        cmd = [SEND_NSCA_PATH, '-H',  MONITORING_SERVER, '-d', '\';\'', '-c', SEND_NSCA_CONFIG]
+
+        cmd = [SEND_NSCA_PATH, '-H', monitoringServer, '-d', '\';\'', '-c', SEND_NSCA_CONFIG]
         print "echo '%s' | %s " % (message, ' '.join(cmd))
         out = commands.getstatusoutput("echo '%s' | %s " % (message, ' '.join(cmd)))
 
@@ -82,11 +82,11 @@ class NSCA( object ):
             print 'Could not send the data packet:', out[1]
         else:
             print out[1]
-            
+
 
 ## Performance allows to add performance information to a NSCA message 
 class Performance(object):
-    
+
     ## constructor of Performance
     # @param label: name of the 'variable', e.g. time
     # @param value: value of the 'variable', e.g. 0.654
@@ -101,14 +101,14 @@ class Performance(object):
     # @param min: minimum value
     # @param max: maximum value  
     def __init__(self, label, value, unit='', warn='', critical='', min='', max=''):
-        
+
         lable = '\'%s\'' % label
         assert isinstance(value, (int, long, float, complex))
         assert unit in ('', 's', '%', 'B', 'KB', 'MB', 'TB', 'c')
-    
+
         self.message = '%s=%s%s;%s;%s;%s;%s' % (label, value, unit, warn, critical, min, max)
 
 
 if  __name__ == '__main__':
-    
-    NSCA.send('just a test!', 0, 'webLyzard notifications', 'tor',[Performance('test', 3, 's')])
+
+    NSCA.send('just a test!', 0, 'webLyzard notifications', 'tor', [Performance('test', 3, 's')])
