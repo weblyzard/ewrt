@@ -57,7 +57,6 @@ class FacebookWS(object):
             args['access_token'] = FACEBOOK_ACCESS_KEY
 
         url = "https://graph.facebook.com/%s?%s" % (path, urllib.urlencode(args))
-        print 'makeRequest', maxDoc
         return self.requestURL(url, maxDoc)
 
 
@@ -70,10 +69,9 @@ class FacebookWS(object):
 
         if result == None:
             result = []
-        print 'requestURL', maxDoc
         if maxDoc == None:
             maxDoc = 1000
-        print 'requestURL2', maxDoc
+
         try:
 
             file = self.retrieve.open(url)
@@ -84,8 +82,7 @@ class FacebookWS(object):
 
             if fetched.has_key('data'):
                 result.extend(fetched['data'])
-                print fetched['data']
-                print 'len result %s maxDoc %s' % (len(result), maxDoc)
+
                 # process paging
                 if len(result) < maxDoc:
                     if fetched.has_key('paging') and fetched['paging'].has_key('previous'):
