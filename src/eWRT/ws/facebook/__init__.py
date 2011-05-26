@@ -60,7 +60,7 @@ class FacebookWS(object):
         return self.requestURL(url, maxDoc)
 
 
-    def requestURL(self, url, maxDoc=None, result=None):
+    def requestURL(self, url, maxDoc=None, result=None, tried=None):
         '''
         fetches the data for the give URL from the graph API
         @param url: valid graph-api-url
@@ -71,6 +71,8 @@ class FacebookWS(object):
             result = []
         if maxDoc == None:
             maxDoc = 1000
+        if tried == None:
+            tried = False
 
         try:
 
@@ -97,10 +99,12 @@ class FacebookWS(object):
 
         except HTTPError:
             print 'Error: Bad Request for url', url
-            result = self.requestURL(url, maxDoc, result)
+            if not tried:
+                result = self.requestURL(url, maxDoc, result, True)
         except URLError:
             print 'URLError', url
-            result = self.requestURL(url, maxDoc, result)
+            if not tried:
+                result = self.requestURL(url, maxDoc, result, True)
 
         return result
 
