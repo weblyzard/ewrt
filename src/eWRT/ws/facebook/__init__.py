@@ -161,7 +161,6 @@ class TestFacebookWS(unittest.TestCase):
         args = {'limit':20, 'type':'post', 'q':'bildung'}
         result = self.fb.makeRequest('search', args)
         print result
-        assert False
 
 if __name__ == "__main__":
 
