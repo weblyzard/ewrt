@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import logging, json, sys, unittest, urllib
 
-from urllib2 import HTTPError
+from urllib2 import HTTPError, URLError
 
 from eWRT.config import FACEBOOK_ACCESS_KEY
 from eWRT.lib import Webservice, Result
@@ -97,6 +97,10 @@ class FacebookWS(object):
 
         except HTTPError:
             print 'Error: Bad Request for url', url
+            result = self.requestURL(url, maxDoc, result)
+        except URLError:
+            print 'URLError', url
+            result = self.requestURL(url, maxDoc, result)
 
         return result
 
