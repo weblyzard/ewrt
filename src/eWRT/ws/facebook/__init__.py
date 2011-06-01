@@ -77,25 +77,27 @@ class FacebookWS(object):
         try:
 
             file = self.retrieve.open(url)
-            fetched = json.loads(file.read())
 
+            fetched = json.loads(file.read())
 
             logging.debug('processing url %s' % url)
 
-            if fetched.has_key('data'):
-                result.extend(fetched['data'])
+            if isinstance(fetched, dict):
 
-                # process paging
-                if len(result) < maxDoc:
-                    if fetched.has_key('paging') and fetched['paging'].has_key('previous'):
-                        result = (self.requestURL(fetched['paging']['previous'],
-                                                  maxDoc, result))
-                        print 'After processing paging', len(result)
+                if fetched.has_key('data'):
+                    result.extend(fetched['data'])
 
-            else:
-                # profiles for example don't contain a data dictionary
-                result.append(fetched)
-                print 'After appending fetched', len(result)
+                    # process paging
+                    if len(result) < maxDoc:
+                        if fetched.has_key('paging') and fetched['paging'].has_key('previous'):
+                            result = (self.requestURL(fetched['paging']['previous'],
+                                                      maxDoc, result))
+                            print 'After processing paging', len(result)
+
+                else:
+                    # profiles for example don't contain a data dictionary
+                    result.append(fetched)
+                    print 'After appending fetched', len(result)
 
         except HTTPError:
             print 'Error: Bad Request for url', url
@@ -119,7 +121,6 @@ class TestFacebookWS(unittest.TestCase):
         resultPage = self.fb.search('Linus Torvalds', 'page')
         print resultPage
         assert len(resultPage) > 5
-        assert resultPage[0]['name'] == 'Linus Torvalds'
 
         resultAll = self.fb.search('Linus Torvalds')
         print resultAll
@@ -160,6 +161,11 @@ class TestFacebookWS(unittest.TestCase):
         '''Tests searching by making a request'''
         args = {'limit':20, 'type':'post', 'q':'bildung'}
         result = self.fb.makeRequest('search', args)
+        print result
+
+    def testBooleanReturn(self):
+        args = {}
+        result = self.fb.makeRequest('1450854928_205387146163105', args)
         print result
 
 if __name__ == "__main__":
