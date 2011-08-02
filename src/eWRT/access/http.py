@@ -61,13 +61,13 @@ class Retrieve(object):
 
     __slots__ = ('module', 'sleep_time', 'last_access_time', 'user_agent')
 
-    def __init__(self, module, sleep_time=DEFAULT_WEB_REQUEST_SLEEP_TIME):
+    def __init__(self, module, sleep_time=DEFAULT_WEB_REQUEST_SLEEP_TIME, user_agent=USER_AGENT):
         self.module           = module
         self.sleep_time       = sleep_time
         self.last_access_time = 0
         
-        self.user_agent = USER_AGENT % self.module \
-                            if "%s" in USER_AGENT else USER_AGENT
+        self.user_agent = user_agent % self.module \
+                            if "%s" in user_agent else user_agent
 
 
     def open(self, url, data=None, user=None, pwd=None, retry=0 ):
