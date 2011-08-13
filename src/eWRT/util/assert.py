@@ -26,69 +26,65 @@ __revision__  = "$Id$"
 __copyright__ = "GPL"
 
 from time import time
-from unittest import TestCase
+from collections import Counter
 
 class AssertReturnValue(object):
     """ decorator class used to time functions """
 
     def __init__(self, evalExpression, counterNameTrue, counterNameFalse):
+        """
+        @param evalExpression: the expression to verify (e.g. x>12); 
+        @note evalExpression uses the variable x for the return value
+        @param counterNameTrue: counter to increase if the condition is true
+        @param counterNameFalse:counter to increase if the condition is false  
+        """
+        self.fn               = None
         self.evalExpression = evalExpression
         self.counterNameTrue = counterNameTrue
         self.counterNameFalse = counterNameFalse
-
-    def assertReturnValue(self, x):
-        x = f(*args, **kwargs)
-        assert eval(condition)
-        return x
-
-    def __call__(self, f):
+        self.counter          = Counter()
         
+    def _assertReturnValue(self, x):
+        if eval(self.evalExpression):
+            self.counter[self.counterNameTrue] += 1
+        else:
+            self.counter[self.counterNameFalse] += 1
 
-        
-    def __call__(self, f):
+    def __call__(self, fn):
+        """
+        returns the wrapper object which is called instead of the original
+        function ones the decorator is used.
+        """
         def wrapper(*fargs, **kw):
-            '''
-              Combine decorator arguments and function arguments and pass to wrapped
-              class instance-aware function/method.
-
-              Note: the first argument cannot be "self" because we get a parse error
-              "takes at least 1 argument" unless the instance is actually included in
-              the argument list, which is redundant.  If this wraps a class instance,
-              the "self" will be the first argument.
-            '''
-
-            self._showargs(*fargs, **kw)
-
-            # merge decorator keywords into the kw argument list
-            kw.update(self.dec_kw)
-
-            # Does this wrap a class instance?
-            if fargs and getattr(fargs[0], '__class__', None):
-
-                # pull out the instance and combine function and
-                # decorator args
-                instance, fargs = fargs[0], fargs[1:]+self.dec_args
-                self._showinstance(instance)
-
-                # call the method
-                ret=f(instance, *fargs, **kw)
-            else:
-                # just send in the give args and kw
-                ret=f(*(fargs + self.dec_args), **kw)
-
-            self._aftercall(ret)
-            return ret
+            returnValue = self.fn(*fargs, **kw) 
+            self._assertReturnValue(returnValue)
+            return returnValue
 
         # Save wrapped function reference
-        self.f = f
-        wrapper.__name__ = f.__name__
-        wrapper.__dict__.update(f.__dict__)
-        wrapper.__doc__ = f.__doc__
+        self.fn = fn
+        wrapper.__name__ = fn.__name__
+        wrapper.__dict__.update(fn.__dict__)
+        wrapper.__doc__ = fn.__doc__
+        wrapper.counter = self.counter
         return wrapper
 
 
-class TimedTest(TestCase):
+class TestAssertReturnValue(object):
 
-    @assertReturnValue("int(x)>12", "countPassed", "countFailed")
-    def testAssertReturnValue(object):
-         return 24
+    @AssertReturnValue("int(x)>12", "countPassed", "countFailed")
+    def _assertReturnValue(self, value):
+        return value
+     
+    def testAssertCounter(self):
+        """ 
+        verifies the assertion counters
+        """
+        self._assertReturnValue(24)
+        assert self._assertReturnValue.counter['countPassed'] == 1
+        assert self._assertReturnValue.counter['countFailed'] == 0
+
+        self._assertReturnValue(-2)
+        assert self._assertReturnValue.counter['countPassed'] == 1
+        assert self._assertReturnValue.counter['countFailed'] == 1
+
+
