@@ -41,34 +41,9 @@ class AssertReturnValue(object):
         assert eval(condition)
         return x
 
+    def __call__(self, f):
+        
 
-class DecoTraceWithArgs(object):
-    '''decorator class with ARGUMENTS
-
-       This can be used for unbounded functions and methods.  If this wraps a
-       class instance, then extract it and pass to the wrapped method as the
-       first arg.
-    '''
-    
-    def __init__(self, *dec_args, **dec_kw):
-        '''The decorator arguments are passed here.  Save them for runtime.'''
-        self.dec_args = dec_args
-        self.dec_kw = dec_kw
-
-        self.label = dec_kw.get('label', 'T')
-        self.fid = dec_kw.get('stream', stderr)
-
-    def _showargs(self, *fargs, **kw):
-
-        print >> self.fid, \
-              '%s: enter %s with args=%s, kw=%s' % (self.label, self.f.__name__, str(fargs), str(kw))
-        print >> self.fid, \
-              '%s:   passing decorator args=%s, kw=%s' % (self.label, str(self.dec_args), str(self.dec_kw))
-
-    def _aftercall(self, status):
-        print >> self.fid, '%s: exit %s with status=%s' % (self.label, self.f.__name__, str(status))
-    def _showinstance(self, instance):
-        print >> self.fid, '%s: instance=%s' % (self.label, instance)
         
     def __call__(self, f):
         def wrapper(*fargs, **kw):
