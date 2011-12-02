@@ -18,19 +18,32 @@
 
 __version__ = "$Header$"
 
-import re, unittest, optparse, sys, logging, StringIO
-from eWRT.access.http import Retrieve
+import re
+import unittest
+import optparse
+import sys
+import logging
+import StringIO
 import time
-import datetime
+from datetime import datetime, timedelta
+
 from xml.dom.minidom import parse, parseString
 from lxml import etree
 
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+from eWRT.access.http import Retrieve
+
 SEARCH_URL = 'http://www.google.com/search?hl=en&ie=UTF-8&lr=&tbm=blg{maxAge}&q={searchTerm}&num={number}&safe=active&start={start}'
+
+XPATHS = {'blog_url': './h3[@class="r"]/a',
+          'blog_date': './div[@class="s"]/span[@class="f"]',
+          'search_result': './/div[@id="ires"]/ol',
+          'blog_abstract': './div[@class="s"]/text()'}
 
 # Google displays a maximum 100 results per page
 MAX_RESULTS_PAGE = 100
 SLEEP_TIME = 10
+
+logger = logging.getLogger('eWRT')
 
 class GoogleBlogSearch(object):
     ''' implements functions for accessing Google's Blogsearch '''
@@ -71,8 +84,9 @@ class GoogleBlogSearch(object):
 
         url = SEARCH_URL.format(searchTerm=searchTerm, start=offset,
                                 number=maxResults, maxAge=maxAgeString)
-
-        tree = etree.HTML(GoogleBlogSearch.get_content(url))
+        logger.debug('Searching URL %s' % url)
+        html_content = GoogleBlogSearch.get_content(url)
+        tree = etree.HTML(html_content)
         resultList = tree.xpath('.//div[@id="ires"]/ol')
 
         counter = 0
@@ -84,7 +98,6 @@ class GoogleBlogSearch(object):
                 firstElement = False
             else:
                 url = element.xpath('./h3[@class="r"]/a')[0].attrib['href']
-                linkDate = element.xpath('./div[@class="s"]/span[@class="f"]')[0].text
                 abstract = ' '.join(element.xpath('./div[@class="s"]/text()'))
 
                 blogLink = {}
@@ -92,13 +105,7 @@ class GoogleBlogSearch(object):
                 blogLink['source'] = 'GoogleBlogSearch - Keyword "%s"' % searchTerm
                 blogLink['abstract'] = abstract
                 blogLink['reach'] = '0'
-                blogLink['date'] = linkDate
-
-                m = re.match('(\d{1,2} \w* \d{2,4})', linkDate)
-
-                if m:
-                    linkDate = datetime.datetime.strptime(m.groups()[0], '%d %b %Y')
-                    blogLink['date'] = linkDate
+                blogLink['date'] = GoogleBlogSearch.get_link_date(element)
 
                 urls.append(blogLink)
 
@@ -114,20 +121,52 @@ class GoogleBlogSearch(object):
                         maxAge=maxAge))
         return urls
 
+    @staticmethod
+    def get_link_date(element):
+        linkDate = element.xpath('./div[@class="f"]/text()')[0]
+        linkDate = linkDate.split('by')[0]
+        
+        m = re.match('(\d{1,2} \w* \d{2,4})', linkDate)
+
+        if m:
+            linkDate = datetime.strptime(m.groups()[0], '%d %b %Y')
+        else:
+            now = datetime.today()
+            if 'ago' in linkDate:
+
+                tdelta = None
+                if 'day' in linkDate:
+                    days = int(re.split(' ', linkDate)[0])
+                    tdelta = timedelta(days=days)
+                elif 'hour' in linkDate:
+                    hours = int(re.split(' ', linkDate)[0])
+                    tdelta = timedelta(hours=hours)
+                elif 'minute' in linkDate:
+                    minutes = int(re.split(' ', linkDate)[0])
+                    tdelta = timedelta(minutes=minutes)
+                    
+                linkDate = now - tdelta
+            
+        return linkDate
+    
 class TestGoogleSearch(unittest.TestCase):
     ''' '''
 
     def setUp(self):
         ''' set up'''
         self.search = GoogleBlogSearch()
-
+        logger.addHandler(logging.StreamHandler())
+        logger.setLevel(logging.DEBUG)
+        
     def test_get_url(self):
         ''' tests getting the urls '''
 
         urls = GoogleBlogSearch.get_blog_links('hallo welt', maxResults=10)
         assert len(urls) == 10
+        for url in urls:
+            print url
 
-    def test_paging(self):
+    def no_test_paging(self):
         ''' tests if paging working '''
         urls = GoogleBlogSearch.get_blog_links('hallo welt', maxResults=101)
         assert len(urls) == 101
