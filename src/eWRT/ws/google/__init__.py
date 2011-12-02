@@ -25,7 +25,7 @@ import sys
 import logging
 import StringIO
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 from xml.dom.minidom import parse, parseString
 from lxml import etree
@@ -75,8 +75,8 @@ class GoogleBlogSearch(object):
 
         if maxAge > 0:
             dateFormat = '%m/%d/%Y'
-            max = datetime.date.today().strftime(dateFormat)
-            min = (datetime.date.today() - datetime.timedelta(days=maxAge)).strftime(dateFormat)
+            max = date.today().strftime(dateFormat)
+            min = (date.today() - timedelta(days=maxAge)).strftime(dateFormat)
             maxAgeString = '&tbs=cdr:1,cd_min:{min},cd_max:{max}'.format(
                                                 min=min, max=max)
         else:
