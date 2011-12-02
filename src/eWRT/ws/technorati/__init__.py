@@ -189,14 +189,18 @@ class Technorati(TagInfoService):
         if maxAge == 0: orderBy = 'relevance'
         else: orderBy = 'date'
 
-        url = '%s&page=%s&sort=%s' % (Technorati._parseURL(searchTerm), page, orderBy)
+        url = '%s&page=%s&sort=%s' % (Technorati._parseURL(searchTerm), 
+                                      page, orderBy)
         content = Technorati.get_content(url)
         print '.'
-        return Technorati._parseLinksFromContent(content, searchTerm, maxResults=maxResults, offset=offset, maxAge=maxAge)
+        return Technorati._parseLinksFromContent(content, searchTerm, 
+                                                 maxResults=maxResults, 
+                                                 offset=offset, maxAge=maxAge)
 
 
     @staticmethod
-    def _parseLinksFromContent(content, searchTerm, maxResults=100, offset=0, maxAge=0):
+    def _parseLinksFromContent(content, searchTerm, maxResults=100, 
+                               offset=0, maxAge=0):
         ''' parses the links from the content '''
         tree = etree.HTML(content)
         links = []
@@ -239,7 +243,8 @@ class Technorati(TagInfoService):
                         offset += 1
 
             if offset < maxResults and counter == RESULTS_PER_PAGE:
-                links.extend(Technorati.get_blog_links(searchTerm, maxResults, offset, maxAge))
+                links.extend(Technorati.get_blog_links(searchTerm, maxResults, 
+                                                       offset, maxAge))
 
         else:
             if offset == 0:

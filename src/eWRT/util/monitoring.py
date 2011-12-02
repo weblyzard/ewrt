@@ -102,13 +102,13 @@ class Performance(object):
     # @param max: maximum value  
     def __init__(self, label, value, unit='', warn='', critical='', min='', max=''):
 
-        lable = '\'%s\'' % label
+        label = '\'%s\'' % label
         assert isinstance(value, (int, long, float, complex))
         assert unit in ('', 's', '%', 'B', 'KB', 'MB', 'TB', 'c')
 
         self.message = '%s=%s%s;%s;%s;%s;%s' % (label, value, unit, warn, critical, min, max)
-
+        print self.message
 
 if  __name__ == '__main__':
 
-    NSCA.send('just a test!', 0, 'webLyzard notifications', 'tor', [Performance('test', 3, 's')])
+    NSCA.send('just a test!', 0, 'webLyzard notifications', 'tor.wu.ac.at', [Performance('test', 3, 's')])

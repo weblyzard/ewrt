@@ -61,7 +61,7 @@ class GoogleBlogSearch(object):
         searchTerm = re.sub(' ', '+', searchTerm)
 
         if maxAge > 0:
-            dateFormat = '%d/%s/%Y'
+            dateFormat = '%m/%d/%Y'
             max = datetime.date.today().strftime(dateFormat)
             min = (datetime.date.today() - datetime.timedelta(days=maxAge)).strftime(dateFormat)
             maxAgeString = '&tbs=cdr:1,cd_min:{min},cd_max:{max}'.format(

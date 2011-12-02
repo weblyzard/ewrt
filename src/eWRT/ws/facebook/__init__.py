@@ -57,7 +57,10 @@ class FacebookWS(object):
             args['access_token'] = FACEBOOK_ACCESS_KEY
 
         url = "https://graph.facebook.com/%s?%s" % (path, urllib.urlencode(args))
-        return self.requestURL(url, maxDoc)
+        result = self.requestURL(url, maxDoc)
+        print '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&'
+        print result
+        return result
 
 
     def requestURL(self, url, maxDoc=None, result=None, tried=None):
