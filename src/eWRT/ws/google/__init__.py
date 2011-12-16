@@ -42,6 +42,7 @@ XPATHS = {'blog_url': './h3[@class="r"]/a',
 # Google displays a maximum 100 results per page
 MAX_RESULTS_PAGE = 100
 SLEEP_TIME = 10
+SUPPORTED_COUNTRIES = ('AT', 'DE')
 
 logger = logging.getLogger('eWRT')
 
@@ -59,12 +60,14 @@ class GoogleBlogSearch(object):
                         sleep_time=sleep_time).open(url).read()
 
     @staticmethod
-    def get_blog_links(searchTerm, maxResults=100, offset=0, maxAge=0):
+    def get_blog_links(searchTerm, maxResults=100, offset=0, maxAge=0,
+                       country=None):
         ''' returns a list of URLs 
         @param searchTerm:
         @param maxResult:
         @param offset:
         @param maxAge:
+        @param country: country code, e.g. AT, DE, ... 
         @return:     
         '''
 
@@ -84,6 +87,14 @@ class GoogleBlogSearch(object):
 
         url = SEARCH_URL.format(searchTerm=searchTerm, start=offset,
                                 number=maxResults, maxAge=maxAgeString)
+        
+        if country: 
+            if country in SUPPORTED_COUNTRIES:
+                url = '%s&cr=country%s' % (url, country.upper())
+                url = url.replace('.com/', '.%s/' % country.lower())
+            else: 
+                logger.error('Do not recognize country "%s"' % country)
+                
         logger.debug('Searching URL %s' % url)
         html_content = GoogleBlogSearch.get_content(url)
         tree = etree.HTML(html_content)
@@ -158,13 +169,13 @@ class TestGoogleSearch(unittest.TestCase):
         logger.addHandler(logging.StreamHandler())
         logger.setLevel(logging.DEBUG)
         
-    def test_get_url(self):
-        ''' tests getting the urls '''
-
-        urls = GoogleBlogSearch.get_blog_links('hallo welt', maxResults=10)
-        assert len(urls) == 10
-        for url in urls:
-            print url
+#    def test_get_url(self):
+#        ''' tests getting the urls '''
+#
+#        urls = GoogleBlogSearch.get_blog_links('hallo welt', maxResults=10)
+#        assert len(urls) == 10
+#        for url in urls:
+#            print url
 
     def no_test_paging(self):
         ''' tests if paging working '''
@@ -176,6 +187,11 @@ class TestGoogleSearch(unittest.TestCase):
         assert len(urls) == 137
         urls = GoogleBlogSearch.get_blog_links('hallo welt', maxResults=200)
         assert len(urls) == 200
+
+    def test_country(self):
+        urls = GoogleBlogSearch.get_blog_links('finanzkrise', maxResults=10, country='AT')
+        for url in urls:
+            print url
 
 if __name__ == '__main__':
 
