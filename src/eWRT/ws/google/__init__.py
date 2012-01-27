@@ -97,7 +97,6 @@ class GoogleBlogSearch(object):
                 
         logger.debug('Searching URL %s' % url)
         html_content = GoogleBlogSearch.get_content(url)
-        print html_content
         tree = etree.HTML(html_content)
         resultList = tree.xpath('.//div[@id="ires"]/ol')
 
@@ -198,6 +197,7 @@ class TestGoogleSearch(unittest.TestCase):
         urls = GoogleBlogSearch.get_blog_links('finanzkrise', maxResults=10, country='AT')
         for url in urls:
             print url
+            assert url['url'].startswith('http')
 
 if __name__ == '__main__':
 
