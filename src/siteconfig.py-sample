@@ -97,8 +97,10 @@ OPENCALAIS_URL       = "http://api.opencalais.com/enlighten/calais.asmx/Enlighte
 OPENCALAIS_KEY       = ""
 OPENCALAIS_CACHE_DIR = "./cache"
 
+# GOOGLE_PLUS_API_KEY = https://code.google.com/apis/console#access
+
 # Technorati
-TECHNORATI_API_KEY  = ""
+TECHNORATI_API_KEY  = "" 
 
 #
 # NEURAL NETWORK

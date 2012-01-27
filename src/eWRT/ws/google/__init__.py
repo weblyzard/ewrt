@@ -86,6 +86,7 @@ class GoogleBlogSearch(object):
                                 number=maxResults, maxAge=maxAgeString)
         logger.debug('Searching URL %s' % url)
         html_content = GoogleBlogSearch.get_content(url)
+        print html_content
         tree = etree.HTML(html_content)
         resultList = tree.xpath('.//div[@id="ires"]/ol')
 
@@ -99,7 +100,11 @@ class GoogleBlogSearch(object):
             else:
                 url = element.xpath('./h3[@class="r"]/a')[0].attrib['href']
                 abstract = ' '.join(element.xpath('./div[@class="s"]/text()'))
-
+                if not url.startswith('http'):
+                    url = url.replace('/url?q=', '')
+                    url = re.sub('/\&sa=U\&ei=.*', '', url)
+                if not url.startswith('http'):
+                    logger.critical('Url does not start with http: %s' % url)
                 blogLink = {}
                 blogLink['url'] = url
                 blogLink['source'] = 'GoogleBlogSearch - Keyword "%s"' % searchTerm
@@ -165,6 +170,7 @@ class TestGoogleSearch(unittest.TestCase):
         assert len(urls) == 10
         for url in urls:
             print url
+            assert url['url'].startswith('http')
 
     def no_test_paging(self):
         ''' tests if paging working '''
