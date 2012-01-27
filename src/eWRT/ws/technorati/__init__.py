@@ -165,7 +165,8 @@ class Technorati(TagInfoService):
         return content
 
     @staticmethod
-    def get_blog_links (searchTerm, maxResults=100, offset=0, maxAge=0):
+    def get_blog_links (searchTerm, maxResults=100, offset=0, maxAge=0, 
+                        country=None):
         '''
         Searches Technorati for the given term and returns a list of links 
         to the blogs
@@ -174,6 +175,7 @@ class Technorati(TagInfoService):
         @param offset:
         @param maxAge: maximum age of the articles in days,
             if set links are ordered by relevance and not by date
+        @param country: currently not supported
         @return: dictionary with all the relevant info
         '''
 
