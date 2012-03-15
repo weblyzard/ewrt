@@ -3,7 +3,7 @@
 """ @package eWRT.config
     evaluates ~/.eWRT/siteconfig.py and publishes the values"""
 
-# (C)opyrights 2004-2009 by Albert Weichselbraun <albert@weichselbraun.net>
+# (C)opyrights 2004-2012 by Albert Weichselbraun <albert@weichselbraun.net>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ CMD_HTML_CONV="/usr/bin/lynx -stdin -width=20000 -force_html -nocolor -dump -nol
 
 # --------------------------------------------------------------------------
 #
-#  Import config variables from locatl siteconfig
+#  Import config variables from local siteconfig
 #
 # --------------------------------------------------------------------------
 if exists( SYS_EWRT_CONF ):

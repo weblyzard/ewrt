@@ -3,7 +3,7 @@
 """ @package eWRT.access.http
     provides access to resources using http """
 
-# (C)opyrights 2008-2011 by Albert Weichselbraun <albert@weichselbraun.net>
+# (C)opyrights 2008-2012 by Albert Weichselbraun <albert@weblyzard.com>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -43,6 +43,7 @@ setdefaulttimeout(60)
 
 getHostName = lambda x: "://".join( urlsplit(x)[:2] )
 
+
 class Retrieve(object):
     """ @class Retrieve
         retrieves URLs using HTTP 
@@ -52,25 +53,32 @@ class Retrieve(object):
         - authentication and
         - compression 
         - support for the context protocol (python)
+        - automatic throttling support
 
         @warning
         There are certain urls such as http://www.mfsa.com.mt/insguide/english/glossarysearch.jsp?letter=all
         which are _not_ handled correctly by the underlying urllib2 library(!)
         Please use urllib in such cases.
+                
     """
 
-    __slots__ = ('module', 'sleep_time', 'last_access_time', 'user_agent')
+    __slots__ = ('module', 'sleep_time', 'last_access_time', 'user_agent', '_supported_http_authentification_methods')   
 
     def __init__(self, module, sleep_time=DEFAULT_WEB_REQUEST_SLEEP_TIME, user_agent=USER_AGENT):
         self.module           = module
         self.sleep_time       = sleep_time
         self.last_access_time = 0
+
+        self._supported_http_authentification_methods =  { 
+                'basic' : Retrieve._getHTTPBasicAuthOpener,    
+                'digest': Retrieve._getHTTPDigestAuthOpener } 
+    
         
         self.user_agent = user_agent % self.module \
                             if "%s" in user_agent else user_agent
 
 
-    def open(self, url, data=None, user=None, pwd=None, retry=0 ):
+    def open(self, url, data=None, user=None, pwd=None, retry=0, authentification_method="basic" ):
         """ Opens an URL and returns the matching file object 
             @param[in] url 
             @param[in] data  optional data to submit
@@ -80,6 +88,7 @@ class Retrieve(object):
 
             @returns a file object for reading the url
         """
+        auth_handler = self._supported_http_authentification_methods[ authentification_method ]
         urlObj = None
         tries  = 0
         while not urlObj:
@@ -92,7 +101,7 @@ class Retrieve(object):
             if PROXY_SERVER:
                 opener.append( urllib2.ProxyHandler({"http" :PROXY_SERVER} ) )
             if user and pwd:
-                opener.append( self._getHTTPBasicAuthOpener(url, user, pwd) )
+                opener.append( auth_handler )
 
             urllib2.install_opener( urllib2.build_opener( *opener ) )
             try:
@@ -111,12 +120,23 @@ class Retrieve(object):
 
         return urlObj
 
+
     @staticmethod
     def _getHTTPBasicAuthOpener(url, user, pwd):
         """ returns an opener, capable of handling http-auth """
         auth_handler = urllib2.HTTPBasicAuthHandler()
         auth_handler.add_password('realm', getHostName(url), user, pwd)
         return auth_handler
+    
+    
+    @staticmethod
+    def _getHTTPDigestAuthOpener(url, user, pwd):
+        """ returns an opener, capable of handling http-digest authentification """
+        passwdmngr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+        passwdmngr.add_password('realm', url, user, pwd)
+        auth_handler = urllib2.HTTPDigestAuthHandler(passwdmngr)
+        return auth_handler
+
 
     @staticmethod
     def _getUncompressedStream(urlObj):
@@ -141,6 +161,7 @@ class Retrieve(object):
         """ context protocol support """
         if exc_type != None:
            log.critical("%s" % exc_type)
+
  
 
 class TestRetrieve(object):
