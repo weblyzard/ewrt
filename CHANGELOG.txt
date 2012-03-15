@@ -1,0 +1,4 @@
+0.7.1 
+* eWRT.access.http - add support for http digest authentification
+
+ 
