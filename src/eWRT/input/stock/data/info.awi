@@ -1,0 +1,12 @@
+Stock Quotes Dataset
+====================
+
+source: www.forexpros.com
+
+files : *.idx   - historical stock quotes
+        *.ftidx - futures CFDs historical data
+
+
+colons:
+ date, last, open, high, low, change%
+
