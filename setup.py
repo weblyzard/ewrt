@@ -13,7 +13,7 @@ setup(
       ###########################################
       ## Metadata
       name="eWRT",
-      version="0.7.1",
+      version="0.7.2",
       description='eWRT',
       author='Albert Weichselbraun, Heinz Lang, Gerhard Wohlgenannt, Johannes Duong',
       author_email='albert.weichselbraun@wu.ac.at, heinz.lang@wu.ac.at, wohlg@ai.wu.ac.at, johannes.duong@wu.ac.at',
@@ -39,10 +39,12 @@ setup(
                       'eWRT.input.corpus',
                       'eWRT.input.corpus.reuters',
                       'eWRT.input.corpus.bbc',
+                      'eWRT.input.stock',
                       'eWRT.lib',
                       'eWRT.stat',
                       'eWRT.stat.coherence',
                       'eWRT.stat.eval',
+                      'eWRT.stat.language',
                       'eWRT.stat.string',
                       'eWRT.ontology',
                       'eWRT.ontology.compare',
@@ -73,4 +75,5 @@ setup(
 
       ###########################################
       ## Package Data
+      package_data={'eWRT.stat.language': ['data/*.csv']},
 )

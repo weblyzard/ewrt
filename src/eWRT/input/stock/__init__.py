@@ -27,7 +27,7 @@ class StockIndex(object):
     SUPPORTED_INDICES = { extract_index_name(fname):fname 
                          for fname in glob(DATA_DIR+"/*.idx.bz2")  }
     SUPPORTED_FUTURES = { extract_index_name(fname):fname 
-                         for fname in glob(DATA_DIR+"/*.ftidx.bz2")  }
+                          for fname in glob(DATA_DIR+"/*.ftidx.bz2")  }
     DATE_FORMAT = "%b %d, %Y"
 
     @classmethod
@@ -43,7 +43,8 @@ class StockIndex(object):
         """retrieves data from the given future in csv format
            @param future_name: the name of the future
         """
-        return cls._read_index_filen(cls.SUPPORTED_FUTURES[future_name])
+        print cls.SUPPORTED_FUTURES[future_name]
+        return cls._read_index_filen(cls.SUPPORTED_FUTURES[future_name])[1:]
         
         
     @classmethod
@@ -52,7 +53,7 @@ class StockIndex(object):
         """
         with BZ2File(fname) as f:
             result =[Quote._make(cls._convert_tuple(row)) 
-                     for row in reader(f, delimiter="\t")] 
+                     for row in reader(f, delimiter="\t") if row] 
             
         return result
     
@@ -71,5 +72,15 @@ class StockIndex(object):
         
     
 if __name__ == '__main__':
-    s = StockIndex.get_index('dax')
-    print len(s), s
+    s_list = StockIndex.get_index('dax')
+    f_list = StockIndex.get_future('dax')
+    delta = []
+    Analysis = namedtuple('analysis', "delta volatility change_percentage")
+    for s,f in zip(s_list,f_list):
+        print s.date, f.date
+        assert s.date == f.date
+        delta.append( (s.date, Analysis(f.last-s.last, s.last-s.open, s.change_percentage)) )
+    
+    delta.sort(key=lambda x:x[1].delta)
+    print delta[:10]
+        
