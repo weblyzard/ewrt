@@ -75,5 +75,7 @@ setup(
 
       ###########################################
       ## Package Data
-      package_data={'eWRT.stat.language': ['data/*.csv']},
+      package_data={'eWRT.stat.language': ['data/*.csv'],
+                    'eWRT.input.stock': ['data/*.csv'],
+      },
 )
