@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """ 
-eWRT.stat.language
+@package eWRT.stat.language
 
 language detection
 
