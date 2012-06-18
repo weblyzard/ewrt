@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+"""
+@package eWRT.ws.facebook
+Access to the Facebook API.
+"""
 import logging, json, sys, unittest, urllib
 
 from urllib2 import HTTPError, URLError
@@ -10,7 +14,9 @@ from eWRT.access.http import Retrieve
 
 
 class FacebookWS(object):
-    """ class for fetching and storing the data of a user
+    """ 
+    @class FacebookWS
+    class for fetching and storing the data of a user
     requires that the facebook API key and the facebook secret key are
     set in the configuration file. These can be retrieved from facebook
     """
