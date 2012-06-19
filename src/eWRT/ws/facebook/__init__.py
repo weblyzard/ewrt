@@ -41,18 +41,19 @@ class FacebookWS(object):
 
         if objectType in self.FB_OBJECT_TYPES:
             args['type'] = objectType
-            result = self.makeRequest('search', args)
-        else:
-
+            result = self._makeRequest('search', args)
+        elif objectType == 'all':
             # search all object types
-            for type in self.FB_OBJECT_TYPES:
-                args['type'] = type
-                result.extend(self.makeRequest('search', args))
+            for obj_type in self.FB_OBJECT_TYPES:
+                args['type'] = obj_type
+                result.extend(self._makeRequest('search', args))
+        else:
+            raise ValueError, 'Illegal Object type %s' % (objectType)
 
         return result
 
 
-    def makeRequest(self, path, args={}, maxDoc=None):
+    def _makeRequest(self, path, args={}, maxDoc=None):
         '''
         makes a request to the graph API
         @param path: path to query, e.g. feed of user/group/page 122222: 122222/feed
@@ -63,13 +64,13 @@ class FacebookWS(object):
             args['access_token'] = FACEBOOK_ACCESS_KEY
 
         url = "https://graph.facebook.com/%s?%s" % (path, urllib.urlencode(args))
-        result = self.requestURL(url, maxDoc)
+        result = self._requestURL(url, maxDoc)
         print '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&'
         print result
         return result
 
 
-    def requestURL(self, url, maxDoc=None, result=None, tried=None):
+    def _requestURL(self, url, maxDoc=None, result=None, tried=None):
         '''
         fetches the data for the give URL from the graph API
         @param url: valid graph-api-url
@@ -85,9 +86,8 @@ class FacebookWS(object):
 
         try:
 
-            file = self.retrieve.open(url)
-
-            fetched = json.loads(file.read())
+            f = self.retrieve.open(url)
+            fetched = json.loads(f.read())
 
             logging.debug('processing url %s' % url)
 
@@ -99,7 +99,7 @@ class FacebookWS(object):
                     # process paging
                     if len(result) < maxDoc:
                         if fetched.has_key('paging') and fetched['paging'].has_key('previous'):
-                            result = (self.requestURL(fetched['paging']['previous'],
+                            result = (self._requestURL(fetched['paging']['previous'],
                                                       maxDoc, result))
                             print 'After processing paging', len(result)
 
@@ -111,13 +111,14 @@ class FacebookWS(object):
         except HTTPError:
             print 'Error: Bad Request for url', url
             if not tried:
-                result = self.requestURL(url, maxDoc, result, True)
+                result = self._requestURL(url, maxDoc, result, True)
         except URLError:
             print 'URLError', url
             if not tried:
-                result = self.requestURL(url, maxDoc, result, True)
+                result = self._requestURL(url, maxDoc, result, True)
 
         return result
+
 
 class TestFacebookWS(unittest.TestCase):
 
@@ -141,14 +142,14 @@ class TestFacebookWS(unittest.TestCase):
 
     def testFetchingProfile(self):
         ''' tests fetching the profile '''
-        result = self.fb.makeRequest('me')
+        result = self.fb._makeRequest('me')
         assert len(result) == 1
         assert result[0].has_key('first_name')
 
     def testRequestUrl(self):
         ''' tests request url '''
         url = 'https://graph.facebook.com/me?access_token=%s' % FACEBOOK_ACCESS_KEY
-        result = self.fb.requestURL(url)
+        result = self.fb._requestURL(url)
         assert len(result) == 1
         assert result[0].has_key('first_name')
 
@@ -157,24 +158,24 @@ class TestFacebookWS(unittest.TestCase):
 
         # this URL contains an invalid access token
         url = 'https://graph.facebook.com/me?access_token=2227470867%7C2._jNijjNpTLF_OrmDqYTEA__.3600.1288695600-1145817399%7CECkapj6t0eZK8DjnNfSVRANS8lI'
-        result = self.fb.requestURL(url)
+        result = self.fb._requestURL(url)
         assert [] == result
 
     def testFetchingPaging(self):
         ''' tests if the results are correctly fetched '''
         param = {'path': '358298686286/feed', 'args': {}}
-        result = self.fb.makeRequest(param['path'], param['args'])
+        result = self.fb._makeRequest(param['path'], param['args'])
         assert result
 
     def testMakeSearchRequest(self):
         '''Tests searching by making a request'''
         args = {'limit':20, 'type':'post', 'q':'bildung'}
-        result = self.fb.makeRequest('search', args)
+        result = self.fb._makeRequest('search', args)
         print result
 
     def testBooleanReturn(self):
         args = {}
-        result = self.fb.makeRequest('1450854928_205387146163105', args)
+        result = self.fb._makeRequest('1450854928_205387146163105', args)
         print result
 
 if __name__ == "__main__":
