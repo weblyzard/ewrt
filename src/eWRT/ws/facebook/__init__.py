@@ -1,17 +1,25 @@
 #!/usr/bin/env python
+# coding: UTF-8
 """
 @package eWRT.ws.facebook
 Access to the Facebook API.
 """
+
 import logging, json, sys, unittest, urllib
 
 from urllib2 import HTTPError, URLError
 
-from eWRT.config import FACEBOOK_ACCESS_KEY
+# from eWRT.config import FACEBOOK_ACCESS_KEY
+
+# facebook
+FACEBOOK_API_KEY = "322774841141994"
+FACEBOOK_SECRET_KEY = "b07f413baf9650d2363f1c8813ece6da"
+FACEBOOK_ACCESS_KEY = "AAAElj9ZBZCquoBANxb2ot9Trt7vA5WEH6X4JX1Pyxl0d2tGxjPjZBP3DGs7Rgh6vuuBx5vCHRfCG15sQThQJRZB0ylXHgQ4x6Cptq2B6BgZDZD"
+# FACEBOOK_SESSION_KEY = "session-key"
+
 from eWRT.lib import Webservice, Result
 from eWRT.lib.ResultSet import ResultSet
 from eWRT.access.http import Retrieve
-
 
 class FacebookWS(object):
     """ 
@@ -21,34 +29,41 @@ class FacebookWS(object):
     set in the configuration file. These can be retrieved from facebook
     """
     FB_OBJECT_TYPES = ['post', 'user', 'page', 'event', 'group']
+    
+    
+    # added: class properties for storing searchTerm and searchType
 
-    def __init__(self):
+    def __init__(self, term="", objectType='all'):
         """ init """
         self.retrieve = Retrieve('facebookWS')
+        self.term = term
+        self.objectType = 'all'
 
 
-    def search(self, term, objectType='all'):
+    def search(self, term, objectType="all"):
         '''
         searches for the given term 
         @param term: term to search
         @param objectType: objectType to search in (post, user, page, event, group)
         @return: search result
         '''
+        self.term = term
+        self.objectTyp = objectType
         args = {}
         result = []
 
-        args['q'] = term
+        args['q'] = self.term
 
-        if objectType in self.FB_OBJECT_TYPES:
-            args['type'] = objectType
+        if self.objectType in self.FB_OBJECT_TYPES:
+            args['type'] = self.objectType
             result = self._makeRequest('search', args)
-        elif objectType == 'all':
+        elif self.objectType == 'all':
             # search all object types
             for obj_type in self.FB_OBJECT_TYPES:
                 args['type'] = obj_type
                 result.extend(self._makeRequest('search', args))
         else:
-            raise ValueError, 'Illegal Object type %s' % (objectType)
+            raise ValueError, 'Illegal Object type %s' % (self.objectType)
 
         return result
 
@@ -61,6 +76,7 @@ class FacebookWS(object):
         '''
 
         if not args.has_key('access_token'):
+            # args['access_token'] = "b07f413baf9650d2363f1c8813ece6da" #very unflexible, its hardcoded...
             args['access_token'] = FACEBOOK_ACCESS_KEY
 
         url = "https://graph.facebook.com/%s?%s" % (path, urllib.urlencode(args))
@@ -68,7 +84,20 @@ class FacebookWS(object):
         print '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&'
         print result
         return result
-
+    
+    def getJsonListStructure(self):
+        jsonListStructure = []
+        args = {}
+        args['q'] = self.term
+        if self.objectType in self.FB_OBJECT_TYPES:
+            args['type'] = self.objectType
+            jsonListStructure.append({'method': "GET", "relative_url" : "/search?"+urllib.urlencode(args)});
+        elif self.objectType == 'all':
+            for obj_type in self.FB_OBJECT_TYPES:
+                args['type'] = obj_type
+                jsonListStructure.append({'method': "GET", "relative_url" : "/search?"+urllib.urlencode(args)});
+        return jsonListStructure
+                
 
     def _requestURL(self, url, maxDoc=None, result=None, tried=None):
         '''
