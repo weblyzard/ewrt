@@ -21,7 +21,8 @@ get_lang_name = lambda fname: basename(fname).split(".")[0]
 
 LANG_DATA_DIR =  os_join(dirname( __file__ ), 'data') 
 
-# @var STOPWORD_DICT: a dictionary of the 100 most common words in the given language
+##
+# \var STOPWORD_DICT: a dictionary of the 100 most common words in the given language
 STOPWORD_DICT = { get_lang_name(fname): read_wordlist(fname) for fname in glob( LANG_DATA_DIR+"/*.csv") }
 DELETE_CHARS = { ch: None for ch in ",.!?\"'" }
 
