@@ -20,7 +20,9 @@ def read_wordlist(fname):
 get_lang_name = lambda fname: basename(fname).split(".")[0]
 
 LANG_DATA_DIR =  os_join(dirname( __file__ ), 'data') 
-LANGUAGE_DICT = { get_lang_name(fname): read_wordlist(fname) for fname in glob( LANG_DATA_DIR+"/*.csv") }
+
+# @var STOPWORD_DICT: a dictionary of the 100 most common words in the given language
+STOPWORD_DICT = { get_lang_name(fname): read_wordlist(fname) for fname in glob( LANG_DATA_DIR+"/*.csv") }
 DELETE_CHARS = { ch: None for ch in ",.!?\"'" }
 
 
@@ -29,7 +31,7 @@ def detect_language(text):
     words = map( unicode.strip, text.translate(DELETE_CHARS).split(" "))
     current_lang      = None
     current_wordcount = 0 
-    for lang, reference_wordlist in LANGUAGE_DICT.items():
+    for lang, reference_wordlist in STOPWORD_DICT.items():
         wordcount = sum( [ 1 for word in words if word in reference_wordlist ] )
         if wordcount >= current_wordcount:
             current_wordcount = wordcount
