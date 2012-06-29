@@ -19,11 +19,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import urllib2
-#from eWRT.config import USER_AGENT, DEFAULT_WEB_REQUEST_SLEEP_TIME, PROXY_SERVER
+from eWRT.config import USER_AGENT, DEFAULT_WEB_REQUEST_SLEEP_TIME, PROXY_SERVER
 
-USER_AGENT = 'eWRT Version/0.1; Module %s +http://p.semanticlab.net/eWRT'
-DEFAULT_WEB_REQUEST_SLEEP_TIME = 1 
-PROXY_SERVER = None
+#USER_AGENT = 'eWRT Version/0.1; Module %s +http://p.semanticlab.net/eWRT'
+#DEFAULT_WEB_REQUEST_SLEEP_TIME = 1 
+#PROXY_SERVER = None
 
 
 from urlparse import urlsplit
