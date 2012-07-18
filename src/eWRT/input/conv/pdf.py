@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """
- @package eWRT.input.conv.html
- converts HTML pages into text
+ @package eWRT.input.conv.pdf
+ converts PDF documents into text
 """
 
-# (C)opyrights 2009-2010 by Albert Weichselbraun <albert@weichselbraun.net>
+# (C)opyrights 2009-2012 by Albert Weichselbraun <albert@weichselbraun.net>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,27 +29,12 @@ class HtmlToText(object):
     """
 
     @staticmethod
-    def getText(html_content, encoding="utf8"):
-        """ @param[in] html_content the content of the html page to convert 
+    def getText(pdf_content):
+        """ @param[in] pdf_content the content of the html page to convert 
             @param[in] encoding the document encoding 
             @returns the text representation of the Web page
         """
-        # check whether this is really a html file
-        if not "<" in html_content or not ">" in html_content:
-            return html_content
 
-        _, html = pipe_content( CMD_CONV['html'], html_content )
-        return html
-
-
-class TestHtmlToText(object):
-
-    def testConversion(self):
-        text =  HtmlToText.getText( "<html><body><h1>Hallo</h1><ul><li>1</li><li>Jasna</li></ul></body></html>" )
-        assert 'Jasna' in text
-
-    def testBorderCases(self):
-        assert HtmlToText.getText("") == ""
-        assert HtmlToText.getText("   ") == "   "
-
+        _, text = pipe_content( CMD_CONV['pdf'], pdf_content )
+        return text
 

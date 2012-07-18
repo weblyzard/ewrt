@@ -29,7 +29,11 @@ from os.path import expanduser, exists, dirname
 SYS_EWRT_CONF = "/etc/eWRT/sysconfig.py"
 USR_EWRT_CONF = expanduser("~/.eWRT/siteconfig.py")
 
-CMD_HTML_CONV="/usr/bin/lynx -stdin -width=20000 -force_html -nocolor -dump -nolist -nobold -pseudo_inlines=0 -assume_charset=%s -display_charset=utf8"
+# commands used to convert various formats to text
+CMD_CONV = {'html': '/usr/bin/lynx -stdin -width=20000 -force_html -nocolor -dump -nolist -nobold -pseudo_inlines=0 -assume_charset=%s -display_charset=utf8',
+            'pdf' : '/usr/bin/pdftotext -layout - - ',
+            'doc' : '/usr/bin/antiword -',
+            }
 
 # --------------------------------------------------------------------------
 #
