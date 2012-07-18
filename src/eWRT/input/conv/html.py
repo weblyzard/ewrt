@@ -21,7 +21,7 @@
 
 
 from eWRT.config import CMD_HTML_CONV
-import subprocess
+from eWRT.util.execute import pipe_content
 
 class HtmlToText(object):
     """ converts HTML into text
@@ -38,36 +38,8 @@ class HtmlToText(object):
         if not "<" in html_content or not ">" in html_content:
             return html_content
 
-        html = HtmlToText._execute( CMD_HTML_CONV, html_content )
-        return html[1]
-
-    @staticmethod
-    def _execute(cmd, stdin=None):
-        """ @param[in] cmd command to be executed
-            @param[in] stdin
-            @param[in] stdout
-        """
-        if stdin:
-            process_stdin = subprocess.PIPE
-        else:
-            process_stdin = None
-
-        process_stdout = subprocess.PIPE
-        p = subprocess.Popen( cmd.split(" "),
-                              bufsize= 0,
-                              shell  = False,
-                              stdin  = process_stdin,
-                              stdout = process_stdout )
-        
-        # write input to stdin, if present
-        if stdin:
-            p.stdin.write( stdin )
-            p.stdin.close()
-
-        # get stdout
-        content = p.stdout.read()
-        return ( p.wait(), content )
-
+        _, html = pipe_content( CMD_HTML_CONV, html_content )
+        return html
 
 
 class TestHtmlToText(object):
