@@ -9,7 +9,7 @@ import logging, json, sys, unittest, urllib
 
 from urllib2 import HTTPError, URLError
 
-# from eWRT.config import FACEBOOK_ACCESS_KEY
+from eWRT.config import FACEBOOK_ACCESS_KEY
 
 # facebook
 FACEBOOK_API_KEY = "322774841141994"
