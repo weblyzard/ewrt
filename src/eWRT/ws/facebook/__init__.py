@@ -39,7 +39,6 @@ class FacebookWS(object):
         self.term = term
         self.objectType = 'all'
 
-
     def search(self, term, objectType="all"):
         '''
         searches for the given term 
@@ -56,19 +55,19 @@ class FacebookWS(object):
 
         if self.objectType in self.FB_OBJECT_TYPES:
             args['type'] = self.objectType
-            result = self._makeRequest('search', args)
+            result = self.makeRequest('search', args)
         elif self.objectType == 'all':
             # search all object types
             for obj_type in self.FB_OBJECT_TYPES:
                 args['type'] = obj_type
-                result.extend(self._makeRequest('search', args))
+                result.extend(self.makeRequest('search', args))
         else:
             raise ValueError, 'Illegal Object type %s' % (self.objectType)
 
         return result
 
 
-    def _makeRequest(self, path, args={}, maxDoc=None):
+    def makeRequest(self, path, args={}, maxDoc=None):
         '''
         makes a request to the graph API
         @param path: path to query, e.g. feed of user/group/page 122222: 122222/feed
@@ -91,11 +90,13 @@ class FacebookWS(object):
         args['q'] = self.term
         if self.objectType in self.FB_OBJECT_TYPES:
             args['type'] = self.objectType
-            jsonListStructure.append({'method': "GET", "relative_url" : "/search?"+urllib.urlencode(args)});
+            jsonListStructure.append({'method': "GET", 
+                                      "relative_url" : "/search?"+urllib.urlencode(args)});
         elif self.objectType == 'all':
             for obj_type in self.FB_OBJECT_TYPES:
                 args['type'] = obj_type
-                jsonListStructure.append({'method': "GET", "relative_url" : "/search?"+urllib.urlencode(args)});
+                jsonListStructure.append({'method': "GET", 
+                                          "relative_url" : "/search?"+urllib.urlencode(args)});
         return jsonListStructure
                 
 
@@ -171,7 +172,7 @@ class TestFacebookWS(unittest.TestCase):
 
     def testFetchingProfile(self):
         ''' tests fetching the profile '''
-        result = self.fb._makeRequest('me')
+        result = self.fb.makeRequest('me')
         assert len(result) == 1
         assert result[0].has_key('first_name')
 
@@ -193,18 +194,18 @@ class TestFacebookWS(unittest.TestCase):
     def testFetchingPaging(self):
         ''' tests if the results are correctly fetched '''
         param = {'path': '358298686286/feed', 'args': {}}
-        result = self.fb._makeRequest(param['path'], param['args'])
+        result = self.fb.makeRequest(param['path'], param['args'])
         assert result
 
     def testMakeSearchRequest(self):
         '''Tests searching by making a request'''
         args = {'limit':20, 'type':'post', 'q':'bildung'}
-        result = self.fb._makeRequest('search', args)
+        result = self.fb.makeRequest('search', args)
         print result
 
     def testBooleanReturn(self):
         args = {}
-        result = self.fb._makeRequest('1450854928_205387146163105', args)
+        result = self.fb.makeRequest('1450854928_205387146163105', args)
         print result
 
 if __name__ == "__main__":
