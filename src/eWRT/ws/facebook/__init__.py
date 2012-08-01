@@ -14,7 +14,7 @@ from eWRT.config import FACEBOOK_ACCESS_KEY
 # facebook
 FACEBOOK_API_KEY = "322774841141994"
 FACEBOOK_SECRET_KEY = "b07f413baf9650d2363f1c8813ece6da"
-FACEBOOK_ACCESS_KEY = "AAAElj9ZBZCquoBANxb2ot9Trt7vA5WEH6X4JX1Pyxl0d2tGxjPjZBP3DGs7Rgh6vuuBx5vCHRfCG15sQThQJRZB0ylXHgQ4x6Cptq2B6BgZDZD"
+#FACEBOOK_ACCESS_KEY = "AAAElj9ZBZCquoBANxb2ot9Trt7vA5WEH6X4JX1Pyxl0d2tGxjPjZBP3DGs7Rgh6vuuBx5vCHRfCG15sQThQJRZB0ylXHgQ4x6Cptq2B6BgZDZD"
 # FACEBOOK_SESSION_KEY = "session-key"
 
 from eWRT.lib import Webservice, Result
@@ -106,7 +106,7 @@ class FacebookWS(object):
         @param url: valid graph-api-url
         @return: fetched data 
         '''
-
+        print '_requestURL'
         if result == None:
             result = []
         if maxDoc == None:
@@ -118,12 +118,15 @@ class FacebookWS(object):
 
             f = self.retrieve.open(url)
             fetched = json.loads(f.read())
-
+            tried = True
             logging.debug('processing url %s' % url)
-
+            
             if isinstance(fetched, dict):
 
                 if fetched.has_key('data'):
+                    if not len(fetched['data']):
+                        return result
+                    
                     result.extend(fetched['data'])
 
                     # process paging
