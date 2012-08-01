@@ -3,7 +3,7 @@
 """ @package eWRT.config
     evaluates ~/.eWRT/siteconfig.py and publishes the values"""
 
-# (C)opyrights 2004-2009 by Albert Weichselbraun <albert@weichselbraun.net>
+# (C)opyrights 2004-2012 by Albert Weichselbraun <albert@weichselbraun.net>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,11 +29,15 @@ from os.path import expanduser, exists, dirname
 SYS_EWRT_CONF = "/etc/eWRT/sysconfig.py"
 USR_EWRT_CONF = expanduser("~/.eWRT/siteconfig.py")
 
-CMD_HTML_CONV="/usr/bin/lynx -stdin -width=20000 -force_html -nocolor -dump -nolist -nobold -pseudo_inlines=0 -assume_charset=%s -display_charset=utf8"
+# commands used to convert various formats to text
+CMD_CONV = {'html': '/usr/bin/lynx -stdin -width=20000 -force_html -nocolor -dump -nolist -nobold -pseudo_inlines=0 -assume_charset=%s -display_charset=utf8',
+            'pdf' : '/usr/bin/pdftotext -layout - - ',
+            'doc' : '/usr/bin/antiword -',
+            }
 
 # --------------------------------------------------------------------------
 #
-#  Import config variables from locatl siteconfig
+#  Import config variables from local siteconfig
 #
 # --------------------------------------------------------------------------
 if exists( SYS_EWRT_CONF ):

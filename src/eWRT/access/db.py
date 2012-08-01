@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
- @package eWRT.access.db
- database access classes
+:mod:`eWRT.access.db` -- database access
+========================================
 """
 
 # (C)opyrights 2004-2010 by Albert Weichselbraun <albert@weichselbraun.net>

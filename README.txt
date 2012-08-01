@@ -18,3 +18,9 @@ to your setting and save it as config.py
    - tango - http://tango.ryanmcgrath.org/
    - python-rdflib
    - python-nltk
+
+   text conversion (eWRT.input.conv):
+   - lynx 
+   - pdftotext (poppler-utils)
+   - antiword
+

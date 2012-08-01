@@ -164,9 +164,8 @@ class DiskCache(Cache):
             self._cache_miss += 1
             obj = fetch_function(*args, **kargs)
             if obj != None: 
-                f = GzipFile( cache_file, "w")
-                dump(obj, f)
-                f.close()
+                with GzipFile( cache_file, "w") as f:
+                    dump(obj, f)
 
             self._remove( cache_file + ".lock" )
             l.close()
@@ -174,7 +173,8 @@ class DiskCache(Cache):
 
         # return the cached result
         self._cache_hit += 1
-        return load(GzipFile(cache_file))
+        with GzipFile(cache_file) as f:
+            return load(f)
 
     def _remove(self, fname):
         """ removes the given files (if it exists) """
