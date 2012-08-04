@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """ install eWRT :) """
 
@@ -13,10 +14,10 @@ setup(
       ###########################################
       ## Metadata
       name="eWRT",
-      version="0.7.3",
+      version="0.7.4",
       description='eWRT',
-      author='Albert Weichselbraun, Heinz Lang, Gerhard Wohlgenannt, Johannes Duong',
-      author_email='albert.weichselbraun@wu.ac.at, heinz.lang@wu.ac.at, wohlg@ai.wu.ac.at, johannes.duong@wu.ac.at',
+      author='Albert Weichselbraun, Heinz Lang, Gerhard Wohlgenannt, Johannes Duong, Norman Süsstrunk',
+      author_email='albert@weblyzard.com, lang@weblyzard.com, wohlg@ai.wu.ac.at, johannes.duong@wu.ac.at, norman.suesstrunk@htwchur.ch',
       url='http://www.semanticlab.net/index.php/EWRT',
       license="GPL3",
       package_dir={'': 'src'},
@@ -67,6 +68,7 @@ setup(
                       'eWRT.ws.google',
                       'eWRT.ws.googletrends',
                       'eWRT.ws.opencalais',
+                      'eWRT.ws.rss',
                       'eWRT.ws.technorati',
                       'eWRT.ws.twitter',
                       'eWRT.ws.wikipedia',
