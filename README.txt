@@ -18,6 +18,7 @@ to your setting and save it as config.py
    - tango - http://tango.ryanmcgrath.org/
    - python-rdflib
    - python-nltk
+   - python-feedparser (eWRT.ws.rss)
 
    text conversion (eWRT.input.conv):
    - lynx 
