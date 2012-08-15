@@ -41,6 +41,15 @@ class FbBatchRequest(object):
     
         return self.do_batch_search()
     
+    def get_path(self, paths, since=None, limit=None):
+        if not isinstance(paths, list):
+            paths = [paths]
+        
+        for path in paths: 
+            self.fbWSList.append(FacebookWS(path, 'path', since, limit))
+        
+        return self.do_batch_search()
+    
     def add_facebook_ws(self, faceBookWS):
         '''
         add a FacebookWS-Object to the batch
@@ -133,7 +142,14 @@ class TestFacebookWS(unittest.TestCase):
         fbBatchRequest = FbBatchRequest()
         result = fbBatchRequest.run_search(['Wien'], 'post', 100)
         assert len(result) > 0
-        
+    
+    def test_searching_page(self):
+        fbBatchRequest = FbBatchRequest()
+        result = fbBatchRequest.get_path('58220918250/feed')
+    
+        for x in result:
+            print x
+    
 if __name__ == "__main__":
 
     unittest.main()

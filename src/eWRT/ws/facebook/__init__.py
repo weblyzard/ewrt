@@ -21,7 +21,7 @@ class FacebookWS(object):
     requires that the facebook API key and the facebook secret key are
     set in the configuration file. These can be retrieved from facebook
     """
-    FB_OBJECT_TYPES = ['post', 'user', 'page', 'event', 'group']
+    FB_OBJECT_TYPES = ['post', 'user', 'page', 'event', 'group', 'path']
     
     retrieve = Retrieve('facebookWS')
     # added: class properties for storing searchTerm and searchType
@@ -91,7 +91,10 @@ class FacebookWS(object):
         if self.limit:
             args['limit'] = self.limit
         
-        if self.objectType in self.FB_OBJECT_TYPES:
+        if self.objectType == 'path':
+            jsonListStructure.append({'method': "GET", 
+                                      "relative_url" : self.term});
+        elif self.objectType in self.FB_OBJECT_TYPES:
             args['type'] = self.objectType
             jsonListStructure.append({'method': "GET", 
                                       "relative_url" : "/search?"+urllib.urlencode(args)});
