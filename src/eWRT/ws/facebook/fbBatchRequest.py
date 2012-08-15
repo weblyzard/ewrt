@@ -143,12 +143,13 @@ class TestFacebookWS(unittest.TestCase):
         result = fbBatchRequest.run_search(['Wien'], 'post', 100)
         assert len(result) > 0
     
-    def test_searching_page(self):
+    def test_feed_mirroring(self):
         fbBatchRequest = FbBatchRequest()
-        result = fbBatchRequest.get_path('58220918250/feed')
-    
+        result = fbBatchRequest.get_path('58220918250/feed', limit=1)
+        
         for x in result:
             print x
+        assert len(result) == 1
     
 if __name__ == "__main__":
 

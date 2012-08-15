@@ -92,8 +92,20 @@ class FacebookWS(object):
             args['limit'] = self.limit
         
         if self.objectType == 'path':
+            args_string = ''
+        
+            if 'q' in args:
+                del args['q']
+        
+            if len(args):
+                args_string = '?%s' % urllib.urlencode(args)
+                
             jsonListStructure.append({'method': "GET", 
-                                      "relative_url" : self.term});
+                                      "relative_url" : '%s%s' % (self.term,
+                                                                 args_string)});
+            print {'method': "GET", 
+                                      "relative_url" : '%s%s' % (self.term,
+                                                                 args_string)}                                               
         elif self.objectType in self.FB_OBJECT_TYPES:
             args['type'] = self.objectType
             jsonListStructure.append({'method': "GET", 
