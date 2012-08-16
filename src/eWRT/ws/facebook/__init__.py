@@ -4,22 +4,15 @@
 @package eWRT.ws.facebook
 Access to the Facebook API.
 """
-
+import time
 import logging, json, sys, unittest, urllib
 
 from urllib2 import HTTPError, URLError
 
-from eWRT.config import FACEBOOK_ACCESS_KEY
-
-# facebook
-FACEBOOK_API_KEY = "322774841141994"
-FACEBOOK_SECRET_KEY = "b07f413baf9650d2363f1c8813ece6da"
-#FACEBOOK_ACCESS_KEY = "AAAElj9ZBZCquoBANxb2ot9Trt7vA5WEH6X4JX1Pyxl0d2tGxjPjZBP3DGs7Rgh6vuuBx5vCHRfCG15sQThQJRZB0ylXHgQ4x6Cptq2B6BgZDZD"
-# FACEBOOK_SESSION_KEY = "session-key"
-
 from eWRT.lib import Webservice, Result
 from eWRT.lib.ResultSet import ResultSet
 from eWRT.access.http import Retrieve
+from eWRT.config import FACEBOOK_ACCESS_KEY
 
 class FacebookWS(object):
     """ 
@@ -28,46 +21,51 @@ class FacebookWS(object):
     requires that the facebook API key and the facebook secret key are
     set in the configuration file. These can be retrieved from facebook
     """
-    FB_OBJECT_TYPES = ['post', 'user', 'page', 'event', 'group']
+    FB_OBJECT_TYPES = ['post', 'user', 'page', 'event', 'group', 'path']
     
-    
+    retrieve = Retrieve('facebookWS')
     # added: class properties for storing searchTerm and searchType
 
-    def __init__(self, term="", objectType='all'):
+    def __init__(self, term, objectType='all', since=None, limit=None):
         """ init """
-        self.retrieve = Retrieve('facebookWS')
+#        self.retrieve = Retrieve('facebookWS')
         self.term = term
-        self.objectType = 'all'
+        self.objectType = objectType
 
-    def search(self, term, objectType="all"):
+        if since and not isinstance(since, int):
+            since = time.mktime(since.timetuple())
+            
+        self.since = since
+        self.limit = limit
+
+    @classmethod
+    def search(cls, term, objectType="all"):
         '''
         searches for the given term 
         @param term: term to search
         @param objectType: objectType to search in (post, user, page, event, group)
         @return: search result
         '''
-        self.term = term
-        self.objectTyp = objectType
         args = {}
         result = []
 
-        args['q'] = self.term
+        args['q'] = term
 
-        if self.objectType in self.FB_OBJECT_TYPES:
-            args['type'] = self.objectType
-            result = self.makeRequest('search', args)
-        elif self.objectType == 'all':
+        if objectType in cls.FB_OBJECT_TYPES:
+            args['type'] = objectType
+            result = cls.makeRequest('search', args)
+        elif objectType == 'all':
             # search all object types
-            for obj_type in self.FB_OBJECT_TYPES:
+            for obj_type in cls.FB_OBJECT_TYPES:
                 args['type'] = obj_type
-                result.extend(self.makeRequest('search', args))
+                result.extend(cls.makeRequest('search', args))
         else:
-            raise ValueError, 'Illegal Object type %s' % (self.objectType)
+            raise ValueError, 'Illegal Object type %s' % (objectType)
 
         return result
 
-
-    def makeRequest(self, path, args={}, maxDoc=None):
+    @classmethod
+    def makeRequest(cls, path, args={}, maxDoc=None):
         '''
         makes a request to the graph API
         @param path: path to query, e.g. feed of user/group/page 122222: 122222/feed
@@ -79,16 +77,36 @@ class FacebookWS(object):
             args['access_token'] = FACEBOOK_ACCESS_KEY
 
         url = "https://graph.facebook.com/%s?%s" % (path, urllib.urlencode(args))
-        result = self._requestURL(url, maxDoc)
-        print '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&'
-        print result
+        result = cls._requestURL(url, maxDoc)
         return result
     
     def getJsonListStructure(self):
         jsonListStructure = []
         args = {}
         args['q'] = self.term
-        if self.objectType in self.FB_OBJECT_TYPES:
+        
+        if self.since:
+            args['since'] = self.since
+            
+        if self.limit:
+            args['limit'] = self.limit
+        
+        if self.objectType == 'path':
+            args_string = ''
+        
+            if 'q' in args:
+                del args['q']
+        
+            if len(args):
+                args_string = '?%s' % urllib.urlencode(args)
+                
+            jsonListStructure.append({'method': "GET", 
+                                      "relative_url" : '%s%s' % (self.term,
+                                                                 args_string)});
+            print {'method': "GET", 
+                                      "relative_url" : '%s%s' % (self.term,
+                                                                 args_string)}                                               
+        elif self.objectType in self.FB_OBJECT_TYPES:
             args['type'] = self.objectType
             jsonListStructure.append({'method': "GET", 
                                       "relative_url" : "/search?"+urllib.urlencode(args)});
@@ -99,8 +117,9 @@ class FacebookWS(object):
                                           "relative_url" : "/search?"+urllib.urlencode(args)});
         return jsonListStructure
                 
-
-    def _requestURL(self, url, maxDoc=None, result=None, tried=None):
+    
+    @classmethod
+    def _requestURL(cls, url, maxDoc=None, result=None, tried=None):
         '''
         fetches the data for the give URL from the graph API
         @param url: valid graph-api-url
@@ -116,7 +135,7 @@ class FacebookWS(object):
 
         try:
 
-            f = self.retrieve.open(url)
+            f = cls.retrieve.open(url)
             fetched = json.loads(f.read())
             tried = True
             logging.debug('processing url %s' % url)
@@ -132,7 +151,7 @@ class FacebookWS(object):
                     # process paging
                     if len(result) < maxDoc:
                         if fetched.has_key('paging') and fetched['paging'].has_key('previous'):
-                            result = (self._requestURL(fetched['paging']['previous'],
+                            result = (cls._requestURL(fetched['paging']['previous'],
                                                       maxDoc, result))
                             print 'After processing paging', len(result)
 
@@ -141,14 +160,14 @@ class FacebookWS(object):
                     result.append(fetched)
                     print 'After appending fetched', len(result)
 
-        except HTTPError:
-            print 'Error: Bad Request for url', url
+        except HTTPError, e:
+            print 'Error: Bad Request for url %s: %s' % (url, e)
             if not tried:
-                result = self._requestURL(url, maxDoc, result, True)
-        except URLError:
-            print 'URLError', url
+                result = cls._requestURL(url, maxDoc, result, True)
+        except URLError, e:
+            print 'URLError for url %s: %s' % (url, e)
             if not tried:
-                result = self._requestURL(url, maxDoc, result, True)
+                result = cls._requestURL(url, maxDoc, result, True)
 
         return result
 

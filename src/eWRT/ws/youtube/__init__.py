@@ -13,17 +13,18 @@ import atom
 import gdata.youtube
 import gdata.youtube.service
 
-from jonas.UrlCollectionHandler import UrlCollectionHandler
-from jonas.handler.FacebookSchemaHandler import AT_RELEVANT_LOCATIONS
-
 CONTENT_TYPE= 'text/wl-plain'
 YOUTUBE_MAX_RESULTS_PER_QUERY = 50
 YOUTUBE_FEED_LIMIT = 1000 # number of feeds we can collect
-
+AT_RELEVANT_LOCATIONS = ['Vienna, Austria', 'Wien', 'Salzburg', 'Linz',
+                         'Klagenfurt', 'Graz', 'Bregenz', 'Eisenstadt',
+                         'Innsbruck', 'Bregenz', 'Österreich', 'Niederösterreich',
+                         'Oberösterreich', 'Burgenland', 'Steiermark', 'Kärnten',
+                         'Tirol', 'Vorarlberg', 'Austria']
 logger = logging.getLogger('jonas.youtube')
 
-class YoutubeSchemaHandler(UrlCollectionHandler):
-    ''' Class YoutubeSchemaHandler (subclass of SchemaHandler) '''
+class YoutubeSchemaHandler(object):
+    ''' Class YoutubeSchemaHandler '''
 
     schemaIdentifier = 'youtube'
 
@@ -70,7 +71,7 @@ class YoutubeSchemaHandler(UrlCollectionHandler):
         if pos >= 0:
             print 'pos, search_term', pos, search_term
             self.location_filter = search_term[pos + len(' & location='):]
-            if self.location_filter.lower() == 'austria':
+            if self.location_filter.lower()=='austria':
                 self.location_filter = AT_RELEVANT_LOCATIONS
             else:
                 self.location_filter = [self.location_filter]
