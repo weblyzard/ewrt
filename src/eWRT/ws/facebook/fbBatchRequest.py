@@ -108,6 +108,7 @@ class FbBatchRequest(object):
                     for comment in post['comments']['data']:
                         comment['type'] = 'comment'
                         comment['parent_url'] = url
+                        comment['url'] = url
                         result.append(comment)
             
         return result
