@@ -104,7 +104,7 @@ class FbBatchRequest(object):
             
             for post in json.loads(row['body'])['data']:
                 result.append(post)
-                url = post['actions'][0]['link']
+                url = 'http://www.facebook.com/%s' % post['id'].replace('_', '/posts/')
                 if 'comments' in post and post['comments']['count'] > 0:
                     
                     for comment in post['comments']['data']:
