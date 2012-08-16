@@ -100,23 +100,15 @@ class FbBatchRequest(object):
             raise Exception(json_search_result['error']['message'])
         
         for row in json_search_result: 
-#            data = json.loads(row['body'])['data']
-            
+
             for post in json.loads(row['body'])['data']:
                 result.append(post)
                 url = 'http://www.facebook.com/%s' % post['id'].replace('_', '/posts/')
-                if 'comments' in post and post['comments']['count'] > 0:
-                    
+                if 'comments' in post and 'data' in post['comments']:
                     for comment in post['comments']['data']:
                         comment['type'] = 'comment'
                         comment['parent_url'] = url
                         result.append(comment)
-#                    result.extend(post['comments']['data'])
-            
-#            result.extend(json.loads(row['body'])['data'])
-#            
-#            if 'comments' in data:
-#                result.extend(data['comments'])
             
         return result
         
