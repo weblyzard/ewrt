@@ -29,12 +29,15 @@ DELETE_CHARS = { ch: None for ch in ",.!?\"'" }
 
 def detect_language(text):
     """ detects the most probable languge for the given text """
+    if not text.strip():
+        return None
+
     words = map( unicode.strip, text.translate(DELETE_CHARS).split(" "))
     current_lang      = None
     current_wordcount = 0 
     for lang, reference_wordlist in STOPWORD_DICT.items():
         wordcount = sum( [ 1 for word in words if word in reference_wordlist ] )
-        if wordcount >= current_wordcount:
+        if wordcount >= current_wordcount and wordcount > 0:
             current_wordcount = wordcount
             current_lang = lang
             
@@ -64,3 +67,8 @@ def test_detect_language():
 
     assert detect_language(text) == 'de'
    
+
+def test_exceptions():
+    """ results for empyt strings """
+    assert detect_language(u" ") == None
+    assert detect_language(u"") == None
