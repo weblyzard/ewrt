@@ -1,8 +1,11 @@
+#!/usr/bin/env python
+# coding: UTF-8
 '''
 Created on Oct 6, 2010
 
 @author: johannes
 '''
+
 import unittest
 import re
 import logging

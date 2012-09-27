@@ -6,5 +6,7 @@
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_VERSION">python 2.7</pydev_property>
 <pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH">
 <path>/eWRT/src</path>
+<path>/eWRT/src/eWRT/lib/thirdparty/gdata-2.0.17/src/atom</path>
+<path>/eWRT/src/eWRT/lib/thirdparty/gdata-2.0.17/src/gdata</path>
 </pydev_pathproperty>
 </pydev_project>
