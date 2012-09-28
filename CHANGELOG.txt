@@ -1,3 +1,6 @@
+0.7.5
+* added working youtube support <norman.suesstrunk@htwchur.ch>
+
 0.7.1 
 * eWRT.access.http - add support for http digest authentification
 
