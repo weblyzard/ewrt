@@ -9,7 +9,7 @@ import unittest
 
 import gdata.youtube.service
 
-from eWRT.lib.apihelber import info
+#from eWRT.lib.apihelber import info
 from eWRT.ws.WebDataSource import WebDataSource
 from operator import attrgetter
 
@@ -19,14 +19,14 @@ class YouTube(WebDataSource):
     '''
     
     YT_ATOM_RESULT_TO_DICT_MAPPING = {
-                                         'media.title.text': 'title',
-                                         'published.text':'published text',
-                                         'media.description.text': 'description',
-                                         'media.keywords.text':'keywords',
-                                         'media.player.url':'player ulr',
-                                         'media.duration.seconds':'duration', 
-                                         'statistics.view_count': 'view count', 
-                                         'rating.average': 'average rating'
+                                       'media.title.text': 'title',
+                                       'published.text':'published text',
+                                       'media.description.text': 'description',
+                                       'media.keywords.text':'keywords',
+                                       'media.player.url':'player ulr',
+                                       'media.duration.seconds':'duration', 
+                                       'statistics.view_count': 'view count', 
+                                       'rating.average': 'average rating'
     }
     
     def __init__(self):
@@ -49,59 +49,59 @@ class YouTube(WebDataSource):
             location=37.42307,-122.08427
         
         """
-        search_query_youtube = self.concat_list_to_yt_term_sq(search_terms)
+        search_query_youtube = ", ".join(search_terms)
         query = gdata.youtube.service.YouTubeVideoQuery()
         query.vq = search_query_youtube
         query.orderby = 'viewCount'
         query.racy = 'include'
         query.time = time
-        if not (location is None):
+        if location is not None:
             query.location = location
         query.max_results = max_results
         feed = self.youtube_service.YouTubeQuery(query)
-        self.self_convert_feed_to_result_dictionary(feed)
+        return self.convert_feed_to_result_dictionary(feed)
                 
-    def self_convert_feed_to_result_dictionary(self, feed):
-         # result = [{key: attrgetter(attr)(entry) for attr, key in self.YT_ATOM_RESULT_TO_DICT_MAPPING.items()}  for entry in feed.entry ]
+    @classmethod
+    def convert_feed_to_result_dictionary(cls, feed):
+        """ Converts youtube feed results to the eWRT dictionary
+            format.
+            @param feed: the youtube feed object
+            @return: a list of dictionaries containing the query
+                     results.
+        """
+        # result = [{key: attrgetter(attr)(entry) for attr, key in self.YT_ATOM_RESULT_TO_DICT_MAPPING.items()}  for entry in feed.entry ]
         result = []
         for entry in feed.entry: # iterate over all  
-            youtube_result_dict = {}
-            for attr, key in self.YT_ATOM_RESULT_TO_DICT_MAPPING.items(): 
-                youtube_result_dict[key] = attrgetter(attr)(entry)
+            youtube_result_dict = { key: attrgetter(attr)(entry) 
+                  for attr, key in cls.YT_ATOM_RESULT_TO_DICT_MAPPING.items() }
                  
             youtube_result_dict['swf url'] = entry.GetSwfUrl()
             
-            if not (entry.geo is None): # can be none
+            if entry.geo is not None: # can be none
                 youtube_result_dict['geo location'] = entry.geo.location()
             
             # alternative media type
-            alternativ_format_type = []
-            for alternate_format in entry.media.content:
-                if 'isDefault' not in alternate_format.extension_attributes:
-                    alternativ_format_type.append( 'Alternate format: %s | url: %s ' % (alternate_format.type, alternate_format.url))
-            youtube_result_dict['alternativ formats'] = alternativ_format_type
+            youtube_result_dict['alternativ formats'] = [ 
+                  'Alternate format: %s | url: %s '  
+                  % (alternative_format.type, alternative_format.url) 
+                  for alternative_format in entry.media.content 
+                  if 'isDefault' not in alternative_format.extension_attributes ]
         
             # thumbnails
-            thumbnails = []
-            for thumbnail in entry.media.thumbnail:
-                thumbnails.append(thumbnail.url)
-            youtube_result_dict['thumbnails'] = thumbnails 
+            youtube_result_dict['thumbnails'] = [ thumbnail.url for thumbnail in entry.media.thumbnail ]
                 
             result.append(youtube_result_dict)
         return result
     
-    def concat_list_to_yt_term_sq(self, term_list):
-        return ", ".join(term_list)
-    
-    def print_video_feed(self):
-        for entry in self.feed.entry:
+    def print_video_feed(self, feed):
+        for entry in feed.entry:
             self.print_entry_details(entry)
     
     def print_entry_details(self, entry):
         print 'Video title: %s' % entry.media.title.text
         print 'Video published on: %s ' % entry.published.text
         print 'Video description: %s' % entry.media.description.text
-        '''print 'Video category: %s' % entry.media.category[[0]].text'''
+        #'''print 'Video category: %s' % entry.media.category[[0]].text'''
         print 'Video tags: %s' % entry.media.keywords.text
         print 'Video watch page: %s' % entry.media.player.url
         print 'Video flash player URL: %s' % entry.GetSwfUrl()
@@ -127,13 +127,10 @@ class YouTubeTest(unittest.TestCase):
         self.search_terms = ["Linus Torvalds","Ubuntu"]
         self.youtube = YouTube()
     
-    def test_concat_list_to_yt_term_sq(self):
-        search_term_query = self.youtube.concat_list_to_yt_term_sq(self.search_terms)
-        self.assertEqual("Linus Torvalds, Ubuntu", search_term_query)
-         
     def test_search(self):
-        self.youtube.search(self.search_terms, None)
+        print self.youtube.search(self.search_terms, None)
         # self.assertGreaterEqual(len(self.youtube.feed.entry), 0 )
+
 
 if __name__ == "__main__":
     unittest.main()
