@@ -1,440 +1,312 @@
 #!/usr/bin/env python
 # coding: UTF-8
 '''
-Created on Oct 6, 2010
+Created on 25.09.2012
 
-@author: johannes
+@author: Norman Süsstrunk, Heinz-Peter Lang, Albert Weichselbraun
 '''
-
 import unittest
-import re
 import logging
-from urlparse import urlparse
+from operator import attrgetter
+from datetime import datetime, timedelta
 
-import atom
+from gdata.youtube.service import YouTubeService, YouTubeVideoQuery
+from eWRT.ws.WebDataSource import WebDataSource
 
-import gdata.youtube
-import gdata.youtube.service
+MAX_RESULTS_PER_QUERY = 50 
+logger = logging.getLogger('eWRT.ws.youtube')
 
-CONTENT_TYPE= 'text/wl-plain'
-YOUTUBE_MAX_RESULTS_PER_QUERY = 50
-YOUTUBE_FEED_LIMIT = 1000 # number of feeds we can collect
-AT_RELEVANT_LOCATIONS = ['Vienna, Austria', 'Wien', 'Salzburg', 'Linz',
-                         'Klagenfurt', 'Graz', 'Bregenz', 'Eisenstadt',
-                         'Innsbruck', 'Bregenz', 'Österreich', 'Niederösterreich',
-                         'Oberösterreich', 'Burgenland', 'Steiermark', 'Kärnten',
-                         'Tirol', 'Vorarlberg', 'Austria']
-logger = logging.getLogger('jonas.youtube')
+# ToDO: comment rating, once it get's supported by the gdata API.
+# TODO: query.location --> radius available?
 
-class YoutubeSchemaHandler(object):
-    ''' Class YoutubeSchemaHandler '''
 
-    schemaIdentifier = 'youtube'
+class YouTube(WebDataSource):
+    '''
+    searches youtube video library
+    '''
+    
+    YT_ATOM_RESULT_TO_DICT_MAPPING = {
+        'media.title.text': 'title',
+        'published.text':'published',
+        'media.description.text': 'content',
+        'media.keywords.text':'keywords',
+        'media.duration.seconds':'duration', 
+        'rating.average': 'average rating', 
+        'statistics.view_count': 'statistics_viewcount', 
+        'statistics.favorite_count': 'statistics_favoritecount', 
+        'rating.average': 'rating_average',
+        'rating.max': 'rating_max',
+        'rating.min': 'rating_min',
+        'rating.num_raters': 'rating_numraters', 
+        'summary': 'summary', 
+        'rights': 'rights', 
+        'updated.text': 'last_modified', 
+        'source': 'yt_source'
+    }
+    
+    def __init__(self):
+        self.youtube_service = YouTubeService()
 
-    def searchHandler(self, schema_Url):
-        ''' generate results for a given schema_Url
-        @schema_Url .. the configuration for the search
-        @schema_Url['url'] .. includes the search term
-        @schema_Url['max_doc'] .. max number of videos to return 
-        @schema_Url['max_age'] .. either 'today', 'this_week', 'this_month' or 'all_time' 
-        @schema_Url['location_filter'] ..  if given,
-            does the location_filter term occur in the videos title, content or keywords? - else skip the vid
-        @schema_Url['do_check_relevance'] .. do the relevance check, ie:
-            does the search_term occur in the videos title, content or keywords? 
+        
+    def search(self, search_terms, location=None, 
+               max_results=MAX_RESULTS_PER_QUERY, max_age=None,
+               orderby= 'published',
+               max_comment_count=0):
+        """ 
+        Searches for youtube videos.
+        
+        @param search_terms: list of search terms
+        @param location: tuple latitude, longitue, e.g. 37.42307,-122.08427
+        @param max_results:
+        @param max_age: datetime of the oldest entry  
+        @param orderby: order search results by (relevance, published, viewCount, rating)
+        @param max_comment_count: maximum number of comments to fetch (default: 0)
+        """
+        
+        # all youtube search parameter are here: 
+        # https://developers.google.com/youtube/2.0/reference?hl=de#Custom_parameters
+        query = YouTubeVideoQuery()
+        query.vq = ', '.join(search_terms)
+        query.orderby = orderby
+        query.racy = 'include'
+        query.time = self.get_query_time(max_age)
+        query.max_results = MAX_RESULTS_PER_QUERY
 
-        remark: the API location does not work, because the python api client only supports v1 ---> wait for v2
-                see: http://code.google.com/apis/youtube/2.0/migration.html#Location
+        if location:
+            query.location = location
+                        
+        return self.search_youtube(query, max_results, max_comment_count)
+    
+
+    @classmethod
+    def get_query_time(cls, max_age):
+        ''' converts a datetime or int (age in minutes) to the youtube specific
+        query parameter (e.g. this_month, today ...)
+        @param max_age: int or datetime object
+        @return: youtube specific query_time 
         '''
-
-        result = [] # all result data in here 
-        foundVideoIDs = [] # collect videoIDs to ensure unique results
-
-        self.source_id = schema_Url['source_id']
-        self.max_doc = int(schema_Url['max_doc'])
-        self.max_age = schema_Url['max_age']
+        if not max_age:
+            return 'all_time'
         
-        if self.max_age == 0:
-            self.max_age = 'all_time'
-        elif self.max_age <= 1440:
-            self.max_age = 'today'
-        elif self.max_age > 1440 and self.max_age <= 10080:
-            self.max_age = 'this_week'
+        if isinstance(max_age, datetime):
+            # convert datetime to minutes
+            max_age = (datetime.now() - max_age).total_seconds() / 60  
+
+        if max_age <= 1440:
+            query_time = 'today'
+        elif max_age > 1440 and max_age <= 10080:
+            query_time = 'this_week'
         else: 
-            self.max_age = 'this_month'
-        
-        self.do_check_relevance = schema_Url['do_check_relevance']
-        #relevance_filter = schema_Url['relevance_filter']
-
-        # urlparse for getting query-term from url 
-        search_term = urlparse(schema_Url['url']).path
-        search_term = search_term.split('=',1)[1]
-
-        # extract location from url if exists
-        pos = search_term.find(' & location=')
-        if pos >= 0:
-            print 'pos, search_term', pos, search_term
-            self.location_filter = search_term[pos + len(' & location='):]
-            if self.location_filter.lower()=='austria':
-                self.location_filter = AT_RELEVANT_LOCATIONS
-            else:
-                self.location_filter = [self.location_filter]
-
-
-            search_term = search_term[:pos]
-        else:
-            self.location_filter = [] 
-
-        if search_term.find('AND') > 0:
-            print "AND is not yet supported"
-            # see http://code.google.com/apis/youtube/1.0/reference.html#Query_parameter_definitions
-            # on how to add "AND" (vq)
-            raise Exception("AND is not yet supported")
-
-        split_terms = re.split('\sOR\s', re.sub('[\(|\)]', '', search_term))
-        print "split_terms", split_terms
-        # for an OR you need to join the terms with and url-enc "|" symbol 
-        # see http://code.google.com/apis/youtube/1.0/reference.html#Query_parameter_definitions
-        search_term = "%7C".join(split_terms)
-        search_term = "|".join(split_terms)
-
-        print "YoutubeSchemaHandler.searchHandler(): *********** search_term *******", search_term
-        print "YoutubeSchemaHandler.searchHandler(): *********** location_filter *******", self.location_filter
-
-        # get yt service instance
-        yt_service = gdata.youtube.service.YouTubeService()
-
-        '''construct the youtube query'''
-        query = gdata.youtube.service.YouTubeVideoQuery()
-        query.vq = search_term
-        query.max_results = YOUTUBE_MAX_RESULTS_PER_QUERY 
-        query.orderby = 'relevance'
-        query.time = self.max_age
-        # location is not yet working properly --> see in doc_string
-        #query.location = '-77.02,38.53'  
-        #query.location = '51.49757766723633,-0.12958288192749023'
-        #query.location = 'Washington'
-        #query.location_radius = '10000km'
-
-        # start values for iterative generation of result-set
-        start_index, counter = 1, 0
-        query.start_index = start_index
-        continue_querying = True
-
-        # while we have results and counter<self.max_doc
-        while continue_querying:
-
-            '''execute the query'''
-            feed = yt_service.YouTubeQuery(query)
-
-            if feed.entry:
-
-                '''feed containing video data'''
-                for f in feed.entry:
+            query_time = 'this_month'
             
-                    videoData = self.extract_data_from_feed(f)
-
-                    # uniqueness check 
-                    if videoData['id'] in foundVideoIDs:
-                        continue # we already got this vid, skip
-                    foundVideoIDs.append(videoData['id'])
-
-                    # location filter check ?
-                    if self.location_filter and not self.check_occurs(videoData, self.location_filter):
-                        continue # skip this vid ..
-
-                    # relevance check ?
-                    if self.do_check_relevance and not self.check_occurs(videoData, split_terms):
-                        continue # skip this vid ..
-
-                    # --------- all good -------- we will use this data -------------------- ##
-                    # get and append comments
-                    try: 
-                        comment_feed = yt_service.GetYouTubeVideoCommentFeed(video_id=videoData['id'])
-                    except Exception,e:
-                        print "ERROR on fetching GetYouTubeVideoCommentFeed for id %s, will skip it" % videoData['id']
-                        continue
-                    for cf in comment_feed.entry:
-                        videoData['comments'].append(cf.content.text)
-
-
-                    # append video data to result
-                    result.append(videoData)
-
-                    # new vid added, increase counter
-                    counter += 1
-                    print "Current number of feeds: %d" % counter 
-
-                    if counter>=self.max_doc:
-                        print "Stopping because counter (%d) > max_doc(%d)" % (counter, self.max_doc)
-                        return result # CAUTION -- return in here
-
-
-                # raise start index for next batch of results    
-                start_index += 50
-                query.start_index = start_index
-                print "Set start index to %d" % start_index
-
-                if start_index >= YOUTUBE_FEED_LIMIT:
-                    continue_querying = False
-
-            else:
-                print "No more results found, current start_index: %d" % start_index
-                continue_querying = False
-
+        return query_time
+    
+    
+    def search_youtube(self, query, max_results=MAX_RESULTS_PER_QUERY, 
+                       max_comment_count=0):
+        ''' executes the youtube query and facilitates paging of the resultset
+        @param query: YouTubeVideoQuery
+        @param max_results: 
+        @param max_comment_count: maximum number of comments to fetch
+        @return: list of dictionaries 
+        '''
+        result = []
+        feed = self.youtube_service.YouTubeQuery(query)
+        
+        while feed:
+                        
+            for entry in feed.entry: 
+                try: 
+                    yt_dict = self.convert_feed_entry(entry, max_comment_count)
+                    result.append(yt_dict)
+                except Exception, e: 
+                    logger.exception('Exception converting entry: %s' % e)
+                    
+                if len(result) == max_results:
+                    return result
+                
+            if not feed.GetNextLink():
+                break
+            
+            feed = self.youtube_service.Query(feed.GetNextLink().href)
+            
         return result
 
-    def extract_data_from_feed(self, f): 
-        ''' save all the relevant data from the video into the videoData dict 
-            @param f  ... the video feed
-        '''
 
-
-        print "\n-------------- in extract_data_from_feed() ------------------"
-
-        videoData = {}
-
-        # extract first thumbnail as picture
-        try:
-            # info: <ns0:thumbnail height="90" time="00:02:17" url="http://i.ytimg.com/vi/m5f_lth7zdA/2.jpg" width="120" xmlns:ns0="http://search.yahoo.com/mrss/" /
-            videoData['picture'] = f.media.thumbnail[0].url
-        except:
-            videoData['picture'] = ''
-
-        duration = int(f.media.duration.seconds)
-        if duration>0:
-            # transform to min:sec
-            videoData['duration'] = "%d:%02d" % (duration/60, duration%60)
-            print "xxxxxxxxxxxxxX", duration, videoData['duration']
-
-        # capture some basic data
-        videoData['source_id'] = self.source_id 
-        videoData['content_type'] = CONTENT_TYPE
-        videoData['source'] = self.schemaIdentifier 
-        videoData['encoding'] = 'utf8' 
-        videoData['max_doc'] = self.max_doc 
-        videoData['max_age'] = self.max_age
-        videoData['location'] = []
-        videoData['comments'] = []
-        videoData['content'] = f.media.description.text
-
-        if type(f.media.description.text) != type(''):
-            print "INFO, content is not of type text. content: ", f.media.description.text
-            videoData['content'] = ""
-
-        videoData['id'] = f.id.text.split('/')[-1]
-        videoData['url'] = "http://www.youtube.com/watch?v=" + videoData['id']
-        videoData['title'] = f.title.text
-        videoData['updated'] = f.updated.text
-        videoData['last_modified'] = f.updated.text
-        videoData['published'] = f.published.text
-        videoData['user_name'] = f.author[0].name.text
-        videoData['yt_source'] = f.source 
-        videoData['source'] = self.schemaIdentifier
-        videoData['rights'] = f.rights
-        videoData['summary'] = f.summary
-        videoData['keywords'] = []
-
-        # extension_elements ...
-        for el in f.extension_elements:
-            if el.tag == 'location':
-                videoData['location'].append(el.text)
-            #if el.tag == 'description':
-            #    videoData['description'] = el.text
-
-        # get the related videos feed url
-        for i in f.link:
-            if i.href.endswith('related'):
-                videoData['related_url'] = i.href
-
-
-        # get statistics
-        if not f.statistics is None:
-            videoData['statistics_viewcount'] = f.statistics.view_count
-            videoData['statistics_favoritecount'] = f.statistics.favorite_count
-
-        # get rating stuff
-        if not f.rating is None:
-            videoData['rating_average'] = f.rating.average
-            videoData['rating_max'] = f.rating.max
-            videoData['rating_min'] = f.rating.min
-            videoData['rating_numraters'] = f.rating.num_raters
-
-        # extract keywords
-        for category in f.category:
-            if 'http://gdata.youtube.com/schemas' not in category.term:
-                videoData['keywords'].append(category.term)
-
-        return videoData
-
- 
-    def check_occurs(self, videoData, search_terms):
-        '''
-        check the relevance of a videoData entry -- does the search_term occur in the videos title, content or keywords?
-        @param videoData 
-        @param search_terms: list of searching term
-        @returns Boolean
-        '''
-        for search_term in search_terms:
-
-            if isinstance(videoData['title'], str):
-                videoData['title'] = videoData['title'].decode(videoData['encoding'])
-    
-            if search_term.lower() in videoData['title'].lower():
-                print 'check_occurs(): title (%s) includes search_term (%s)' % (videoData['title'], search_term)
-                return True
+    def convert_feed_entry(self, entry, max_comment_count):
+        ''' 1. converts the feed entry to a dictionary (never change the mapping
+               names, as later analyzer steps requires consistent keys)
+            2. fetches comments and integrate them in the dictionary, if necessary
             
-            
-            if videoData.has_key('content') and videoData['content']:
-                
-                if isinstance(videoData['content'], str):
-                    videoData['content'] = videoData['content'].decode(videoData['encoding'])
-                
-                if search_term.lower() in videoData['content'].lower():
-                    print 'check_occurs(): content (%s) includes search_term (%s) ' % (videoData['content'], search_term)
-                    return True
-
-            for word in videoData['keywords']:
-                
-                if isinstance(word, str):
-                    word = word.decode(videoData['encoding'])
-                
-                if search_term.lower() in word.lower():
-                    print 'check_occurs(): keywords (%s) include search_term (%s)' % (videoData['keywords'], search_term)
-                    return True
-
-        print 'check_occurs(): did not find one of terms (%s) in title, content or keywords' % str(search_terms)
-        return False
-
-
-    def recurse_into_related_videos(self, related_url):
-        """def get_related_contents(self, related_url, yt_service, source_id, self.max_doc, max_age, content_type):
-        @param url: url to related contents, as RSS Feed
-        CAUTION -- this is not fully implemented -- just a pre-alpha version! 
-        """
-   
-        feeds = feedparser.parse(related_url)
-
-        for entry in feeds.entries:
-                keyword_list = []
-                for k,v in entry.iteritems():
-                    #print k
-                    if k == 'id':
-                        print k, v
-                        vid = v
-                    elif k == 'title':
-                        print k, v
-                        title = v
-                    elif k == 'author':
-                        print k, v
-                        author = v
-                    elif k == 'published':
-                        print k, v
-                        published = v
-                    elif k == 'yt_location':
-                        print k, v
-                        yt_location = v
-                    elif k == 'media_keywords':
-                        print k, v
-                        media_keywords = v
-                    elif k == 'media_description':
-                        print k, v
-                        content = v
-                            
-                    try:
-                        for i in v:
-                            if type(i) == feedparser.FeedParserDict:
-                                related_link =  i['href']
-                                #print related_link
-                                if 'feature=youtube_gdata' in str(related_link):
-                                    print 'URL:', str(related_link)
-                                    link = str(related_link).split('http://www.youtube.com/watch?v=')
-                                    link[1] = str(link[1]).split('&feature')
-                                    comment_feed = yt_service.GetYouTubeVideoCommentFeed(video_id = link[1][0])
-                                    print 'Comments:'
-    
-                                    for cf in comment_feed.entry:
-                                        comments.append(cf.content.text.encode('utf8'))        
-                                    print self.comments
-                    except:
-                        pass
-                    
-                if(self.check_vid(vid,self.result) == True):
-                    print 'None'
-                    self.result.append({'source_id': source_id, 'vid': vid, 'max_doc': self.max_doc,'title': title, 'content_type': CONTENT_TYPE, 
-                        'url': related_link ,'last_modified': published,'content': comments, 'type':'youtube',
-                        'encoding': 'utf8', 'screen_name': author, 'media_keywords': media_keywords, 'yt_location': yt_location, 'content': content})
-                      
-        return self.result             
-
-
-
-class Test(unittest.TestCase):
-
-    def setUp(self):
-        self.youtube = YoutubeSchemaHandler()
-
-    def testGetHeinzVideo(self):
-        ''' check if we get Heinz' very amazing video '''
-
-        url = {'url':'youtube://search?term=m5f_lth7zdA', 'source_id':123, 'max_doc':10, 'max_age':'all_time', 'do_check_relevance': False}
-        result = self.youtube.searchHandler(url)
-        assert len(result) == 1
-
-    def testGet_5_Obama_Video_From_Today(self):
-        """ test getting exactly 5 videos for "obama" with max_age=='today' and do_check_relevance==True """
-
-        url = {'url':'youtube://search?term=obama', 'source_id':123, 'max_doc':5, 'max_age': 'today', 'do_check_relevance': True}
-        assert len(self.youtube.searchHandler(url)) == 5
-
-    def testGet_5_Obama_Video_From_today_with_location(self):
-        """ test getting exactly 5 videos for "obama" with max_age=='today' and do_check_relevance==True """
-
-        url = {'url':'youtube://search?term=obama & location=USA', 'source_id':123, 'max_doc':5, 'max_age': 'today', 'do_check_relevance': True}
-        assert len(self.youtube.searchHandler(url)) == 5
-
-        url = {'url':'youtube://search?term=obama & location=Washington', 'source_id':123, 'max_doc':5, 'max_age': 'today', 'do_check_relevance': True}
-        assert len(self.youtube.searchHandler(url)) == 5
+            @param entry: Youtube feed entry
+            @param max_comment_count: maximum number of comments to fetch
+            @return: dictionary   
+        '''
+        yt_dict = {'user_name': entry.author[0].name.text, 
+                   'user_url': entry.author[0].uri.text}
         
-    def testGet_wkw_with_location(self):
-        """ test getting exactly 5 videos for "obama" with max_age=='today' and do_check_relevance==True """
+        for attr, key in self.YT_ATOM_RESULT_TO_DICT_MAPPING.items(): 
+            try: 
+                yt_dict[key] = attrgetter(attr)(entry)
+            except AttributeError, e:
+                logger.warn('AttributeError: %s' % e)
+                yt_dict[key] = None
+                
+        yt_dict['id'] = entry.id.text.split('/')[-1]
+        yt_dict['url'] = "http://www.youtube.com/watch?v=%s" % yt_dict['id']         
+        
+        # the hasattr is required for compatibility with older videos
+        yt_dict['location'] = entry.geo.location() \
+            if hasattr(entry, 'geo') and entry.geo else None
+        
+        yt_dict['related_url'] = None
+        for link in entry.link:
+            if link.href.endswith('related'):
+                yt_dict['related_url'] = link.href
+        
+        if yt_dict['duration']: 
+            duration = int(yt_dict['duration'])
+            yt_dict['duration'] = '%d:%02d' % (duration / 60, duration % 60)
+        
+        yt_dict['picture'] = None
+        if hasattr(entry, 'media'):
+            for thumbnail in entry.media.thumbnail:
+                yt_dict['picture'] = thumbnail.url
+                break
 
-        url = {'url':'youtube://search?term=(polizei OR bildung) & location=Austria', 'source_id':123, 'max_doc':5, 'max_age': 'this_month', 'do_check_relevance': True}
-        res = self.youtube.searchHandler(url)
-        print res
-        assert len(res) == 5
+        if not yt_dict['keywords']: 
+            yt_dict['keywords'] = []
 
-        url = {'url':'youtube://search?term=(wirtschaftskammer wien OR bildung)', 'source_id':123, 'max_doc':5, 'max_age': 'this_month', 'do_check_relevance': True}
-        assert len(self.youtube.searchHandler(url)) >= 1
+        for category in entry.category:
+            if 'http://gdata.youtube.com/schemas' not in category.term:
+                yt_dict['keywords'].append(category.term)
 
- 
-    def testCheckRelevanceFunction(self):
-        ''' make sure the check_relevance function works '''
+        # retrieve comments, if required
+        if max_comment_count > 0:
+            yt_dict['comments'] = self.get_video_comments( yt_dict['id'],
+                                                            max_comment_count )
 
-        # test for found
-        videoData = {'title': 'bla', 'content': ' Open Office von Prof. Rony Flatscher', 'keywords': ['nerds']}
-        search_terms = ['rony flatscher']
-        assert self.youtube.check_occurs(videoData, search_terms)
-
-        # test for not found
-        videoData = {'title': 'bla', 'content': 'nix', 'keywords': ['nerds']}
-        search_terms = ['rony flatscher']
-        assert self.youtube.check_occurs(videoData, search_terms) == False
+        return yt_dict
 
 
-    #def testGetRelatedContents(self):
-    #    ''' related url functionality not in use atm '''
-    #    print 'start getrelatedcontents test'
-    #    self.testGetData()
-    #    related_url = 'http://gdata.youtube.com/feeds/videos/T13ZAdne6TU/related'
-    #    yt_service = gdata.youtube.service.YouTubeService()
-    #    source_id = '123'
-    #    max_doc = '11'
-    #    max_age = '100'
-    #    content_type = 'text/wl-plain'
-    #    results = self.youtube.get_related_contents(related_url, yt_service, source_id, max_doc, max_age, content_type)
-    #    print 'related_results', results
-    #    assert len(results) > 0'''
+    def get_video_comments(self, video_id, max_comments=25):
+        """ @param video_id: the video_id of the video for which we want to retrieve
+                        the comments.
+            @param max_comments: maximum number of comments to retrieve
+            @return: a list of comments 
+        """
+        comments = []
+        comment_feed = self.youtube_service.GetYouTubeVideoCommentFeed(
+                            video_id=video_id)
+        
+        while comment_feed:
+            
+            for comment in comment_feed.entry:
+                url, in_reply_to = self.get_relevant_links( comment )
+                comments.append( {'id' : comment.id.text,
+                                  'url': url,
+                                  'in-reply-to' : in_reply_to,
+                                  'author': comment.author[0].name.text,
+                                  'title' : comment.title.text,
+                                  'published': comment.published.text,
+                                  'updated'  : comment.updated.text,
+                                  'content'  : comment.content.text}
+                                )
+                if len(comments) == max_comments:
+                    return comments
+                
+            # retrieve the next comment page, if available
+            if not comment_feed.GetNextLink():
+                break
+           
+            comment_feed = self.youtube_service.Query(
+                                    comment_feed.GetNextLink().href)
+        
+        return comments
 
 
+    @staticmethod
+    def get_relevant_links( comment ):
+        """ @param comment: a single YouTube comment.
+            @return: a tuple indicating:
+                       a) the comment's url, and 
+                       b) the url of the comment to which this comment refers (in case
+                          it is a reply)
+        """
+        comment_url, in_reply_to = None, None
+        for link in comment.link:
+            if link.rel == 'self':
+                comment_url = link.href
+            elif link.rel.endswith("#in-reply-to"):
+                in_reply_to = link.href
+
+        return comment_url, in_reply_to        
+
+                                     
+
+class YouTubeTest(unittest.TestCase):
+        
+    def setUp(self):
+        self.search_terms = ["Linus Torvalds","Ubuntu"]
+        self.youtube = YouTube()
+    
+    def test_query_time(self):
+        test_cases = ((1000, 'today'), 
+                      (5000, 'this_week'), 
+                      (12000, 'this_month'), 
+                      (datetime.now() - timedelta(hours=12), 'today'),
+                      (datetime.now() - timedelta(days=4), 'this_week'),
+                      (datetime.now() - timedelta(days=15), 'this_month'),)
+        
+        for max_age, exp_result in test_cases: 
+            result = YouTube.get_query_time(max_age)
+            assert exp_result == result, 'max_age %s, result %s, exp %s' % (max_age, 
+                                                                            result, 
+                                                                            exp_result)
+        
+    
+    def test_search(self):   
+        required_keys = ('location', 'content', 'id', 'url', 'title',
+                         'last_modified', 'published', 'user_name', 
+                         'yt_source', 'rights', 'summary', 'keywords', 
+                         'related_url', 'statistics_viewcount', 
+                         'statistics_favoritecount', 'rating_average', 
+                         'rating_max', 'rating_min', 'rating_numraters', 
+                         'picture', 'duration', 'user_url'
+                        )
+             
+        for r in self.youtube.search(self.search_terms, None):
+
+            assert len(required_keys) == len(r.keys())
+            
+            for rk in required_keys: 
+                if not rk in r.keys():
+                    print 'k ', sorted(r.keys())
+                    print 'rk', sorted(required_keys)
+                    assert False, 'key %s missing' % rk
+
+    def test_comments_result(self):
+        search_terms = ((('Linux',), 5), (('Apple',), 3), (('Microsoft',), 2))
+        
+        for search_term, max_results in search_terms:
+            print 'querying youtube for %s' % search_term
+            result = self.youtube.search(search_term, None, max_results, orderby='relevance', max_comment_count=5)
+            print '\t got %s documents, max_results was %s' % (len(result),
+                                                               max_results) 
+            assert len(result) == max_results
+            assert max( [ len(r['comments']) for r in result ] ) == 5
+            print '-------------------------'
+            
+    def test_paging(self):
+        result = self.youtube.search( ("Linux"), None, max_results=200)
+        assert len(result) == 200
+        
+    def test_comments(self):
+        comments = self.youtube.get_video_comments(video_id="yI4g8Ti6eTM", 
+                                             max_comments = 27)
+        assert len(comments) == 27
+        
+        
 if __name__ == "__main__":
     unittest.main()
+        
