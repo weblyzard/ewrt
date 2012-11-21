@@ -47,6 +47,39 @@ class YouTube(WebDataSource):
     
     def __init__(self):
         self.youtube_service = YouTubeService()
+
+
+    def get_comments(self, video_id, max_comments=25):
+        """ @param video_id: the video id of the video from which
+                             we plan to retrieve the comments
+            @param max_comments: maximum number of comments to retrieve
+            @return: a list of comments 
+        """
+        comments = []
+        comment_feed = self.youtube_service.GetYouTubeVideoCommentFeed(
+                                                        video_id = video_id)
+        
+        while comment_feed:
+            
+            for comment in comment_feed.entry:
+                comments.append( {'id': comment.id.text,
+                                  'author': comment.author[0].name.text,
+                                  'title' : comment.title.text,
+                                  'published': comment.published.text,
+                                  'updated'  : comment.updated.text,
+                                  'content'  : comment.content.text}
+                                )
+                if len(comments) == max_comments:
+                    return comments
+                
+            # retrieve the next comment page
+            if comment_feed.GetNextLink():
+                comment_feed = self.youtube_service.Query(
+                                    comment_feed.GetNextLink().href)
+        
+        return comments
+        
+
         
     def search(self, search_terms, location=None, 
                max_results=MAX_RESULTS_PER_QUERY, max_age=None):
@@ -106,7 +139,9 @@ class YouTube(WebDataSource):
         feed = self.youtube_service.YouTubeQuery(query)
         result = []
         
-        for entry in feed.entry: 
+        from cPickle import dump
+        for nr, entry in enumerate(feed.entry): 
+            dump(entry, open("/tmp/entry.awi-%d" % nr, "w"))
             try: 
                 yt_dict = self.convert_feed_entry(entry)
                 result.append(yt_dict)
@@ -154,9 +189,7 @@ class YouTube(WebDataSource):
         yt_dict['id'] = entry.id.text.split('/')[-1]
         yt_dict['url'] = "http://www.youtube.com/watch?v=%s" % yt_dict['id']         
         
-        yt_dict['location'] = None
-        if entry.geo: 
-            yt_dict['location'] = entry.geo.location()
+        yt_dict['location'] = entry.geo.location() if entry.geo else None
         
         yt_dict['related_url'] = None
         for link in entry.link:
@@ -204,7 +237,6 @@ class YouTubeTest(unittest.TestCase):
         
     
     def test_search(self):   
-        
         required_keys = ('location', 'content', 'id', 'url', 'title',
                          'last_modified', 'published', 'user_name', 
                          'yt_source', 'rights', 'summary', 'keywords', 
@@ -225,7 +257,6 @@ class YouTubeTest(unittest.TestCase):
                     assert False, 'key %s missing' % rk
 
     def test_max_result(self):
-        
         search_terms = (('Linux', 43), ('Apple', 51), ('Microsoft', 99))
         
         for search_term, max_results in search_terms:
@@ -235,6 +266,12 @@ class YouTubeTest(unittest.TestCase):
                                                                max_results) 
             assert len(result) == max_results
             print '-------------------------'
+        
+    def test_comments(self):
+        comments = self.youtube.get_comments(video_id='2-8b5SDMR1k',
+                                             max_comments = 27)
+        assert len(comments) == 27
+        
         
 if __name__ == "__main__":
     unittest.main()
