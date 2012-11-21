@@ -3,7 +3,7 @@
 '''
 Created on 25.09.2012
 
-@author: Norman Süsstrunk, Heinz-Peter Lang
+@author: Norman Süsstrunk, Heinz-Peter Lang, Albert Weichselbraun
 '''
 import unittest
 import logging
@@ -18,7 +18,7 @@ MAX_RESULTS_PER_QUERY = 50
 
 logger = logging.getLogger('eWRT.ws.youtube')
 
-# TODO: store the comments
+# ToDO: comment rating, once it get's supported by the gdata API.
 # TODO: query.location --> radius available?
 
 class YouTube(WebDataSource):
@@ -49,20 +49,41 @@ class YouTube(WebDataSource):
         self.youtube_service = YouTubeService()
 
 
-    def get_comments(self, video_id, max_comments=25):
-        """ @param video_id: the video id of the video from which
-                             we plan to retrieve the comments
+    @staticmethod
+    def get_relevant_links( comment ):
+        """ @param comment: a single YouTube comment.
+            @return: a tuple indicating:
+                       a) the comment's url, and 
+                       b) the url of the comment to which this comment refers (in case
+                          it is a reply)
+        """
+        comment_url, in_reply_to = None, None
+        for link in comment.link:
+            if link.rel == 'self':
+                comment_url = link.href
+            elif link.rel.endswith("#in-reply-to"):
+                in_reply_to = link.href
+
+        return comment_url, in_reply_to
+
+
+    def get_video_comments(self, video_id, max_comments=25):
+        """ @param video_id: the video_id of the video for which we want to retrieve
+                        the comments.
             @param max_comments: maximum number of comments to retrieve
             @return: a list of comments 
         """
         comments = []
         comment_feed = self.youtube_service.GetYouTubeVideoCommentFeed(
-                                                        video_id = video_id)
+                            video_id=video_id)
         
         while comment_feed:
             
             for comment in comment_feed.entry:
-                comments.append( {'id': comment.id.text,
+                url, in_reply_to = self.get_relevant_links( comment )
+                comments.append( {'id' : comment.id.text,
+                                  'url': url,
+                                  'in-reply-to' : in_reply_to,
                                   'author': comment.author[0].name.text,
                                   'title' : comment.title.text,
                                   'published': comment.published.text,
@@ -76,25 +97,32 @@ class YouTube(WebDataSource):
             if comment_feed.GetNextLink():
                 comment_feed = self.youtube_service.Query(
                                     comment_feed.GetNextLink().href)
+            else:
+                break
         
+        print video_id, comments
         return comments
         
 
         
     def search(self, search_terms, location=None, 
-               max_results=MAX_RESULTS_PER_QUERY, max_age=None):
+               max_results=MAX_RESULTS_PER_QUERY, max_age=None,
+               orderby= 'published',
+               max_comment_count=0):
         """ searches for youtube videos
         @param search_terms: list of search terms
         @param location: tuple latitude, longitue, e.g. 37.42307,-122.08427
         @param max_results:
         @param max_age: datetime of the oldest entry  
+        @param orderby: order search results by (relevance, published, viewCount, rating)
+        @param max_comment_count: maximum number of comments to fetch (default: 0)
         """
         
         # all youtube search parameter are here: 
         # https://developers.google.com/youtube/2.0/reference?hl=de#Custom_parameters
         query = YouTubeVideoQuery()
         query.vq = ', '.join(search_terms)
-        query.orderby = 'published'
+        query.orderby = orderby
         query.racy = 'include'
         query.time = self.get_query_time(max_age)
         if location:
@@ -104,8 +132,9 @@ class YouTube(WebDataSource):
         else: 
             query.max_results = max_results
                         
-        return self.search_youtube(query, max_results)
+        return self.search_youtube(query, max_results, max_comment_count)
     
+
     @classmethod
     def get_query_time(cls, max_age):
         ''' converts a datetime or int (age in minutes) to the youtube specific
@@ -130,20 +159,19 @@ class YouTube(WebDataSource):
         return query_time
     
     
-    def search_youtube(self, query, max_results=MAX_RESULTS_PER_QUERY):
+    def search_youtube(self, query, max_results=MAX_RESULTS_PER_QUERY, max_comment_count=0):
         ''' executes the youtube query and facilitates paging of the resultset
         @param query: YouTubeVideoQuery
         @param max_results: 
+        @param max_comment_count: maximum number of comments to fetch
         @return: list of dictionaries 
         '''
         feed = self.youtube_service.YouTubeQuery(query)
         result = []
         
-        from cPickle import dump
-        for nr, entry in enumerate(feed.entry): 
-            dump(entry, open("/tmp/entry.awi-%d" % nr, "w"))
+        for entry in feed.entry: 
             try: 
-                yt_dict = self.convert_feed_entry(entry)
+                yt_dict = self.convert_feed_entry(entry, max_comment_count)
                 result.append(yt_dict)
             except Exception, e: 
                 logger.exception('Exception converting entry: %s' % e)
@@ -170,11 +198,14 @@ class YouTube(WebDataSource):
             
         return result
 
-    def convert_feed_entry(self, entry):
-        ''' converts the feed entry to a dictionary (never change the mapping
-        names, as later analyzer steps requires consistent keys)
-        @param entry: Youtube feed entry
-        @return: dictionary   
+    def convert_feed_entry(self, entry, max_comment_count):
+        ''' 1. converts the feed entry to a dictionary (never change the mapping
+               names, as later analyzer steps requires consistent keys)
+            2. fetches comments and integrate them in the dictionary, if necessary
+            
+            @param entry: Youtube feed entry
+            @param max_comment_count: maximum number of comments to fetch
+            @return: dictionary   
         '''
         yt_dict = {'user_name': entry.author[0].name.text, 
                    'user_url': entry.author[0].uri.text}
@@ -211,6 +242,9 @@ class YouTube(WebDataSource):
         for category in entry.category:
             if 'http://gdata.youtube.com/schemas' not in category.term:
                 yt_dict['keywords'].append(category.term)
+
+        if max_comment_count > 0:
+            yt_dict['comments'] = self.get_video_comments( yt_dict['id'], max_comment_count )
 
         return yt_dict
                                      
@@ -257,21 +291,26 @@ class YouTubeTest(unittest.TestCase):
                     assert False, 'key %s missing' % rk
 
     def test_max_result(self):
-        search_terms = (('Linux', 43), ('Apple', 51), ('Microsoft', 99))
+        search_terms = ((('Linux',), 5), (('Apple',), 3), (('Microsoft',), 2))
         
         for search_term, max_results in search_terms:
             print 'querying youtube for %s' % search_term
-            result = self.youtube.search(search_term, None, max_results)
+            result = self.youtube.search(search_term, None, max_results, orderby='relevance', max_comment_count=5)
             print '\t got %s documents, max_results was %s' % (len(result),
                                                                max_results) 
             assert len(result) == max_results
+            assert max( [ len(r['comments']) for r in result ] ) == 5
             print '-------------------------'
         
     def test_comments(self):
-        comments = self.youtube.get_comments(video_id='2-8b5SDMR1k',
+        comments = self.youtube.get_video_comments(video_id="yI4g8Ti6eTM", 
                                              max_comments = 27)
+        print len(comments)
         assert len(comments) == 27
         
+        from cPickle import dump
+        dump(comments, open("/tmp/info.awi", "w"))
+
         
 if __name__ == "__main__":
     unittest.main()
