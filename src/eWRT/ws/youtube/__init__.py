@@ -9,11 +9,18 @@ import unittest
 import logging
 from operator import attrgetter
 from datetime import datetime, timedelta
+from cPickle import dump
 
 from gdata.youtube.service import YouTubeService, YouTubeVideoQuery
 from eWRT.ws.WebDataSource import WebDataSource
+from time import sleep
 
+# number of seconds to wait between comment request
+# this is required to prevent the youtube api from
+# blocking us.
+YOUTUBE_SLEEP_TIME    = 1       
 MAX_RESULTS_PER_QUERY = 50 
+
 logger = logging.getLogger('eWRT.ws.youtube')
 
 # ToDO: comment rating, once it get's supported by the gdata API.
@@ -29,9 +36,7 @@ class YouTube(WebDataSource):
         'media.title.text': 'title',
         'published.text':'published',
         'media.description.text': 'content',
-        'media.keywords.text':'keywords',
         'media.duration.seconds':'duration', 
-        'rating.average': 'average rating', 
         'statistics.view_count': 'statistics_viewcount', 
         'statistics.favorite_count': 'statistics_favoritecount', 
         'rating.average': 'rating_average',
@@ -45,6 +50,7 @@ class YouTube(WebDataSource):
     }
     
     def __init__(self):
+        WebDataSource.__init__(self)
         self.youtube_service = YouTubeService()
 
         
@@ -63,6 +69,11 @@ class YouTube(WebDataSource):
         @param max_comment_count: maximum number of comments to fetch (default: 0)
         """
         
+        if not (isinstance(search_terms, list) or 
+            isinstance(search_terms, tuple) or isinstance(search_terms, set)):
+            raise ValueError("Warning search requires a list of search terms, \
+                             rather than a single term")
+
         # all youtube search parameter are here: 
         # https://developers.google.com/youtube/2.0/reference?hl=de#Custom_parameters
         query = YouTubeVideoQuery()
@@ -114,7 +125,6 @@ class YouTube(WebDataSource):
         feed = self.youtube_service.YouTubeQuery(query)
         
         while feed:
-                        
             for entry in feed.entry: 
                 try: 
                     yt_dict = self.convert_feed_entry(entry, max_comment_count)
@@ -128,7 +138,7 @@ class YouTube(WebDataSource):
             if not feed.GetNextLink():
                 break
             
-            feed = self.youtube_service.Query(feed.GetNextLink().href)
+            feed = self.youtube_service.GetYouTubeVideoFeed(feed.GetNextLink().href)
             
         return result
 
@@ -174,12 +184,8 @@ class YouTube(WebDataSource):
                 yt_dict['picture'] = thumbnail.url
                 break
 
-        if not yt_dict['keywords']: 
-            yt_dict['keywords'] = []
-
-        for category in entry.category:
-            if 'http://gdata.youtube.com/schemas' not in category.term:
-                yt_dict['keywords'].append(category.term)
+        yt_dict['keywords'] = [ category for category in entry.category \
+                    if 'http://gdata.youtube.com/schemas' not in category.term ]
 
         # retrieve comments, if required
         if max_comment_count > 0:
@@ -201,6 +207,7 @@ class YouTube(WebDataSource):
         
         while comment_feed:
             
+            sleep( YOUTUBE_SLEEP_TIME )
             for comment in comment_feed.entry:
                 url, in_reply_to = self.get_relevant_links( comment )
                 comments.append( {'id' : comment.id.text,
@@ -263,8 +270,6 @@ class YouTubeTest(unittest.TestCase):
             assert exp_result == result, 'max_age %s, result %s, exp %s' % (max_age, 
                                                                             result, 
                                                                             exp_result)
-        
-    
     def test_search(self):   
         required_keys = ('location', 'content', 'id', 'url', 'title',
                          'last_modified', 'published', 'user_name', 
@@ -275,7 +280,7 @@ class YouTubeTest(unittest.TestCase):
                          'picture', 'duration', 'user_url'
                         )
              
-        for r in self.youtube.search(self.search_terms, None):
+        for r in self.youtube.search(self.search_terms, None, orderby='relevance'):
 
             assert len(required_keys) == len(r.keys())
             
@@ -285,26 +290,48 @@ class YouTubeTest(unittest.TestCase):
                     print 'rk', sorted(required_keys)
                     assert False, 'key %s missing' % rk
 
+
     def test_comments_result(self):
-        search_terms = ((('Linux',), 5), (('Apple',), 3), (('Microsoft',), 2))
+        return
+        search_terms = ((('Linux',), 5), (('Climate Change',), 3), (('Microsoft',), 2))
         
         for search_term, max_results in search_terms:
             print 'querying youtube for %s' % search_term
             result = self.youtube.search(search_term, None, max_results, orderby='relevance', max_comment_count=5)
             print '\t got %s documents, max_results was %s' % (len(result),
                                                                max_results) 
-            assert len(result) == max_results
-            assert max( [ len(r['comments']) for r in result ] ) == 5
+            self.assertEqual( len(result), max_results)
+            
+            num_comments = max([ len(r['comments']) for r in result ])
+            print "Maximum number of comments for search term '%s': %d" % (search_term[0], num_comments)
+            self.assertEqual( 5, num_comments )
             print '-------------------------'
             
+
     def test_paging(self):
-        result = self.youtube.search( ("Linux"), None, max_results=200)
-        assert len(result) == 200
+        result = self.youtube.search( ("Linux", ), None, max_results=70, orderby='relevance')
+
+        # verify that all videos have been retrieved
+        assert len(result) == 70
+
+        # verify that the video rating is correctly retrieved and interpreted
+        for no, r in enumerate(result):
+            if not r['rating_average']:
+                print no, r['id']
+            assert r['rating_average'] 
+
+
+    def test_search_term_list(self):
+        self.assertRaises( ValueError, self.youtube.search, "Linux" )
         
+
     def test_comments(self):
         comments = self.youtube.get_video_comments(video_id="yI4g8Ti6eTM", 
                                              max_comments = 27)
         assert len(comments) == 27
+
+
+
         
         
 if __name__ == "__main__":
