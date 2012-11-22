@@ -184,8 +184,8 @@ class YouTube(WebDataSource):
                 yt_dict['picture'] = thumbnail.url
                 break
 
-        yt_dict['keywords'] = [ category for category in entry.category \
-                    if 'http://gdata.youtube.com/schemas' not in category.term ]
+        yt_dict['keywords'] = [ category.label for category in entry.category \
+                    if category.scheme != "http://schemas.google.com/g/2005#kind" ]
 
         # retrieve comments, if required
         if max_comment_count > 0:
@@ -292,7 +292,6 @@ class YouTubeTest(unittest.TestCase):
 
 
     def test_comments_result(self):
-        return
         search_terms = ((('Linux',), 5), (('Climate Change',), 3), (('Microsoft',), 2))
         
         for search_term, max_results in search_terms:
@@ -314,11 +313,12 @@ class YouTubeTest(unittest.TestCase):
         # verify that all videos have been retrieved
         assert len(result) == 70
 
-        # verify that the video rating is correctly retrieved and interpreted
+        # verify that the video rating and keywords have been correctly retrieved
+        # and interpreted
         for no, r in enumerate(result):
-            if not r['rating_average']:
-                print no, r['id']
             assert r['rating_average'] 
+            if r['keywords']:
+                assert isinstance(r['keywords'][0], str)
 
 
     def test_search_term_list(self):
