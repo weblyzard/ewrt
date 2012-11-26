@@ -3,7 +3,7 @@
 '''
 Created on 25.09.2012
 
-@author: Norman Süsstrunk, Heinz-Peter Lang
+@author: Norman Süsstrunk, Heinz-Peter Lang, Albert Weichselbraun
 '''
 import unittest
 import logging
@@ -18,11 +18,10 @@ MAX_RESULTS_PER_QUERY = 50
 DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.000Z'
 
 logger = logging.getLogger('eWRT.ws.youtube')
-
-# TODO: store the comments
-# TODO: query.location --> radius available?
-
 convert_date = lambda str_date: datetime.strptime(str_date, DATE_FORMAT)
+
+# TODO: comment rating, once it get's supported by the gdata API.
+# TODO: query.location --> radius available?
 
 class YouTube(WebDataSource):
     '''
@@ -35,7 +34,7 @@ class YouTube(WebDataSource):
         'media.description.text': 'content',
         'media.keywords.text':'keywords',
         'media.duration.seconds':'duration', 
-        'rating.average': 'average_rating', 
+        'rating.average': 'average rating', 
         'statistics.view_count': 'statistics_viewcount', 
         'statistics.favorite_count': 'statistics_favoritecount', 
         'rating.average': 'rating_average',
@@ -50,32 +49,38 @@ class YouTube(WebDataSource):
     
     def __init__(self):
         self.youtube_service = YouTubeService()
+
         
     def search(self, search_terms, location=None, 
-               max_results=MAX_RESULTS_PER_QUERY, max_age=None):
-        """ searches for youtube videos
+               max_results=MAX_RESULTS_PER_QUERY, max_age=None,
+               orderby= 'published',
+               max_comment_count=0):
+        """ 
+        Searches for youtube videos.
+        
         @param search_terms: list of search terms
         @param location: tuple latitude, longitue, e.g. 37.42307,-122.08427
         @param max_results:
         @param max_age: datetime of the oldest entry  
+        @param orderby: order search results by (relevance, published, viewCount, rating)
+        @param max_comment_count: maximum number of comments to fetch (default: 0)
         """
         
         # all youtube search parameter are here: 
         # https://developers.google.com/youtube/2.0/reference?hl=de#Custom_parameters
         query = YouTubeVideoQuery()
         query.vq = ', '.join(search_terms)
-        query.orderby = 'published'
+        query.orderby = orderby
         query.racy = 'include'
         query.time = self.get_query_time(max_age)
+        query.max_results = MAX_RESULTS_PER_QUERY
+
         if location:
             query.location = location
-        if max_results > MAX_RESULTS_PER_QUERY:
-            query.max_results = MAX_RESULTS_PER_QUERY
-        else: 
-            query.max_results = max_results
                         
-        return self.search_youtube(query, max_results)
+        return self.search_youtube(query, max_results, max_comment_count)
     
+
     @classmethod
     def get_query_time(cls, max_age):
         ''' converts a datetime or int (age in minutes) to the youtube specific
@@ -98,51 +103,46 @@ class YouTube(WebDataSource):
             query_time = 'this_month'
             
         return query_time
-    
-    
-    def search_youtube(self, query, max_results=MAX_RESULTS_PER_QUERY):
+  
+    def search_youtube(self, query, max_results=MAX_RESULTS_PER_QUERY, 
+                       max_comment_count=0):
         ''' executes the youtube query and facilitates paging of the resultset
         @param query: YouTubeVideoQuery
         @param max_results: 
+        @param max_comment_count: maximum number of comments to fetch
         @return: list of dictionaries 
         '''
-        feed = self.youtube_service.YouTubeQuery(query)
         result = []
+        feed = self.youtube_service.YouTubeQuery(query)
         
-        for entry in feed.entry: 
-            try: 
-                yt_dict = self.convert_feed_entry(entry)
-                result.append(yt_dict)
-            except Exception, e: 
-                logger.exception('Exception converting entry: %s' % e)
-        
-        # max_results = total_results
-        if max_results > int(feed.total_results.text):
-            max_results = int(feed.total_results.text)
-        
-        # set a new start_index, items_per_page to get the other entries
-        if max_results > MAX_RESULTS_PER_QUERY:
-            new_start_idx = int(feed.start_index.text) + int(feed.items_per_page.text)
-            new_end_idx = new_start_idx + int(feed.items_per_page.text)
+        while feed:
+                        
+            for entry in feed.entry: 
+                try: 
+                    yt_dict = self.convert_feed_entry(entry, max_comment_count)
+                    result.append(yt_dict)
+                except Exception, e: 
+                    logger.exception('Exception converting entry: %s' % e)
+                    
+                if len(result) == max_results:
+                    return result
+                
+            if not feed.GetNextLink():
+                break
             
-            if new_end_idx > max_results:
-                new_end_idx = max_results + 1
-            
-            query.start_index = new_start_idx
-            query.max_results = new_end_idx - new_start_idx
-
-            if int(query.max_results) > 0:
-                logger.debug('new query: start_index %s, max_results %s' % (query.start_index, 
-                                                                            query.max_results))
-                result.extend(self.search_youtube(query, max_results))
+            feed = self.youtube_service.Query(feed.GetNextLink().href)
             
         return result
 
-    def convert_feed_entry(self, entry):
-        ''' converts the feed entry to a dictionary (never change the mapping
-        names, as later analyzer steps requires consistent keys)
-        @param entry: Youtube feed entry
-        @return: dictionary   
+
+    def convert_feed_entry(self, entry, max_comment_count):
+        ''' 1. converts the feed entry to a dictionary (never change the mapping
+               names, as later analyzer steps requires consistent keys)
+            2. fetches comments and integrate them in the dictionary, if necessary
+            
+            @param entry: Youtube feed entry
+            @param max_comment_count: maximum number of comments to fetch
+            @return: dictionary   
         '''
         yt_dict = {'user_name': entry.author[0].name.text, 
                    'user_url': entry.author[0].uri.text}
@@ -157,9 +157,9 @@ class YouTube(WebDataSource):
         yt_dict['id'] = entry.id.text.split('/')[-1]
         yt_dict['url'] = "http://www.youtube.com/watch?v=%s" % yt_dict['id']         
         
-        yt_dict['location'] = None
-        if entry.geo: 
-            yt_dict['location'] = entry.geo.location()
+        # the hasattr is required for compatibility with older videos
+        yt_dict['location'] = entry.geo.location() \
+            if hasattr(entry, 'geo') and entry.geo else None
         
         yt_dict['related_url'] = None
         for link in entry.link:
@@ -171,9 +171,11 @@ class YouTube(WebDataSource):
             yt_dict['duration'] = '%d:%02d' % (duration / 60, duration % 60)
         
         yt_dict['picture'] = None
-        for thumbnail in entry.media.thumbnail:
-            yt_dict['picture'] = thumbnail.url
-            break
+
+        if hasattr(entry, 'media'):
+            for thumbnail in entry.media.thumbnail:
+                yt_dict['picture'] = thumbnail.url
+                break
 
         if not yt_dict['keywords']: 
             yt_dict['keywords'] = []
@@ -185,9 +187,69 @@ class YouTube(WebDataSource):
         for date_field in ('published', 'last_modified'):
             yt_dict[date_field] = convert_date(yt_dict[date_field])
 
-        return yt_dict
-                                     
+        # retrieve comments, if required
+        if max_comment_count > 0:
+            yt_dict['comments'] = self.get_video_comments(yt_dict['id'],
+                                                          max_comment_count)
 
+        return yt_dict
+
+
+    def get_video_comments(self, video_id, max_comments=25):
+        """ @param video_id: the video_id of the video for which we want to retrieve
+                        the comments.
+            @param max_comments: maximum number of comments to retrieve
+            @return: a list of comments 
+        """
+        comments = []
+        comment_feed = self.youtube_service.GetYouTubeVideoCommentFeed(
+                            video_id=video_id)
+        
+        while comment_feed:
+            
+            for comment in comment_feed.entry:
+                url, in_reply_to = self.get_relevant_links(comment)
+                comments.append( {'id': comment.id.text,
+                                  'url': url,
+                                  'in-reply-to': in_reply_to,
+                                  'author': comment.author[0].name.text,
+                                  'title': comment.title.text,
+                                  'published': comment.published.text,
+                                  'updated': comment.updated.text,
+                                  'content': comment.content.text}
+                                )
+                if len(comments) == max_comments:
+                    return comments
+                
+            # retrieve the next comment page, if available
+            if not comment_feed.GetNextLink():
+                break
+           
+            comment_feed = self.youtube_service.Query(
+                                    comment_feed.GetNextLink().href)
+        
+        return comments
+
+
+    @staticmethod
+    def get_relevant_links( comment ):
+        """ 
+        @param comment: a single YouTube comment.
+        @return: a tuple indicating:
+                 a) the comment's url, and 
+                 b) the url of the comment to which this comment refers (in case
+                    it is a reply)
+        """
+        comment_url, in_reply_to = None, None
+        for link in comment.link:
+            if link.rel == 'self':
+                comment_url = link.href
+            elif link.rel.endswith("#in-reply-to"):
+                in_reply_to = link.href
+
+        return comment_url, in_reply_to        
+
+                                    
 class YouTubeTest(unittest.TestCase):
         
     def setUp(self):
@@ -210,7 +272,6 @@ class YouTubeTest(unittest.TestCase):
         
     
     def test_search(self):   
-        
         required_keys = ('location', 'content', 'id', 'url', 'title',
                          'last_modified', 'published', 'user_name', 
                          'yt_source', 'rights', 'summary', 'keywords', 
@@ -245,7 +306,30 @@ class YouTubeTest(unittest.TestCase):
     def test_convert_date(self):
         date_str = '2012-11-24T02:48:24.000Z'
         assert convert_date(date_str) == datetime(2012, 11, 24, 2, 48, 24)
-    
+
+    def test_comments_result(self):
+        search_terms = ((('Linux',), 5), (('Apple',), 3), (('Microsoft',), 2))
+        
+        for search_term, max_results in search_terms:
+            print 'querying youtube for %s' % search_term
+            result = self.youtube.search(search_term, None, max_results, 
+                                         orderby='relevance', 
+                                         max_comment_count=5)
+            print '\t got %s documents, max_results was %s' % (len(result),
+                                                               max_results) 
+            assert len(result) == max_results
+            assert max([len(r['comments']) for r in result]) == 5
+            print '-------------------------'
+            
+    def test_paging(self):
+        result = self.youtube.search(("Linux"), None, max_results=200)
+        assert len(result) == 200
+        
+    def test_comments(self):
+        comments = self.youtube.get_video_comments(video_id="yI4g8Ti6eTM", 
+                                                   max_comments = 27)
+        assert len(comments) == 27
+        
+        
 if __name__ == "__main__":
     unittest.main()
-        
