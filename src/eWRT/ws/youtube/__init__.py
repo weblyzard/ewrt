@@ -19,7 +19,6 @@ logger = logging.getLogger('eWRT.ws.youtube')
 # ToDO: comment rating, once it get's supported by the gdata API.
 # TODO: query.location --> radius available?
 
-
 class YouTube(WebDataSource):
     '''
     searches youtube video library
@@ -183,8 +182,8 @@ class YouTube(WebDataSource):
 
         # retrieve comments, if required
         if max_comment_count > 0:
-            yt_dict['comments'] = self.get_video_comments( yt_dict['id'],
-                                                            max_comment_count )
+            yt_dict['comments'] = self.get_video_comments(yt_dict['id'],
+                                                          max_comment_count)
 
         return yt_dict
 
@@ -202,15 +201,15 @@ class YouTube(WebDataSource):
         while comment_feed:
             
             for comment in comment_feed.entry:
-                url, in_reply_to = self.get_relevant_links( comment )
-                comments.append( {'id' : comment.id.text,
+                url, in_reply_to = self.get_relevant_links(comment)
+                comments.append( {'id': comment.id.text,
                                   'url': url,
-                                  'in-reply-to' : in_reply_to,
+                                  'in-reply-to': in_reply_to,
                                   'author': comment.author[0].name.text,
-                                  'title' : comment.title.text,
+                                  'title': comment.title.text,
                                   'published': comment.published.text,
-                                  'updated'  : comment.updated.text,
-                                  'content'  : comment.content.text}
+                                  'updated': comment.updated.text,
+                                  'content': comment.content.text}
                                 )
                 if len(comments) == max_comments:
                     return comments
@@ -227,11 +226,12 @@ class YouTube(WebDataSource):
 
     @staticmethod
     def get_relevant_links( comment ):
-        """ @param comment: a single YouTube comment.
-            @return: a tuple indicating:
-                       a) the comment's url, and 
-                       b) the url of the comment to which this comment refers (in case
-                          it is a reply)
+        """ 
+        @param comment: a single YouTube comment.
+        @return: a tuple indicating:
+                 a) the comment's url, and 
+                 b) the url of the comment to which this comment refers (in case
+                    it is a reply)
         """
         comment_url, in_reply_to = None, None
         for link in comment.link:
@@ -290,20 +290,22 @@ class YouTubeTest(unittest.TestCase):
         
         for search_term, max_results in search_terms:
             print 'querying youtube for %s' % search_term
-            result = self.youtube.search(search_term, None, max_results, orderby='relevance', max_comment_count=5)
+            result = self.youtube.search(search_term, None, max_results, 
+                                         orderby='relevance', 
+                                         max_comment_count=5)
             print '\t got %s documents, max_results was %s' % (len(result),
                                                                max_results) 
             assert len(result) == max_results
-            assert max( [ len(r['comments']) for r in result ] ) == 5
+            assert max([len(r['comments']) for r in result]) == 5
             print '-------------------------'
             
     def test_paging(self):
-        result = self.youtube.search( ("Linux"), None, max_results=200)
+        result = self.youtube.search(("Linux"), None, max_results=200)
         assert len(result) == 200
         
     def test_comments(self):
         comments = self.youtube.get_video_comments(video_id="yI4g8Ti6eTM", 
-                                             max_comments = 27)
+                                                   max_comments = 27)
         assert len(comments) == 27
         
         
