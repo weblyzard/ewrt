@@ -11,13 +11,13 @@ from operator import attrgetter
 from datetime import datetime, timedelta
 
 from gdata.youtube.service import YouTubeService, YouTubeVideoQuery
-from eWRT.ws.WebDataSource import WebDataSource
 
-logger = logging.getLogger('eWRT.ws.youtube')
+from eWRT.ws.WebDataSource import WebDataSource
 
 MAX_RESULTS_PER_QUERY = 50 
 DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.000Z'
 
+logger = logging.getLogger('eWRT.ws.youtube')
 convert_date = lambda str_date: datetime.strptime(str_date, DATE_FORMAT)
 
 # ToDO: comment rating, once it get's supported by the gdata API.
@@ -110,8 +110,7 @@ class YouTube(WebDataSource):
             query_time = 'this_month'
             
         return query_time
-    
-    
+  
     def search_youtube(self, query, max_results=MAX_RESULTS_PER_QUERY, 
                        max_comment_count=0):
         ''' executes the youtube query and facilitates paging of the resultset
@@ -174,6 +173,7 @@ class YouTube(WebDataSource):
             yt_dict['duration'] = '%d:%02d' % (duration / 60, duration % 60)
         
         yt_dict['picture'] = None
+
         if hasattr(entry, 'media'):
             for thumbnail in entry.media.thumbnail:
                 yt_dict['picture'] = thumbnail.url
@@ -265,8 +265,7 @@ class YouTube(WebDataSource):
 
         return comment_url, in_reply_to        
 
-                                     
-
+                                    
 class YouTubeTest(unittest.TestCase):
         
     def setUp(self):
@@ -309,6 +308,22 @@ class YouTubeTest(unittest.TestCase):
                     print 'rk', sorted(required_keys)
                     assert False, 'key %s missing' % rk
 
+    def test_max_result(self):
+        
+        search_terms = (('Linux', 43), ('Apple', 51), ('Microsoft', 99))
+        
+        for search_term, max_results in search_terms:
+            print 'querying youtube for %s' % search_term
+            result = self.youtube.search(search_term, None, max_results)
+            print '\t got %s documents, max_results was %s' % (len(result),
+                                                               max_results) 
+            assert len(result) == max_results
+            print '-------------------------'
+    
+    def test_convert_date(self):
+        date_str = '2012-11-24T02:48:24.000Z'
+        assert convert_date(date_str) == datetime(2012, 11, 24, 2, 48, 24)
+
     def test_comments_result(self):
         search_terms = ((('Linux',), 5), (('Apple',), 3), (('Microsoft',), 2))
         
@@ -335,4 +350,3 @@ class YouTubeTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-        
