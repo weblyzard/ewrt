@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding: UTF-8
+# -*- coding: utf-8 -*-
 '''
 Created on 25.09.2012
 
@@ -13,8 +13,12 @@ from datetime import datetime, timedelta
 from gdata.youtube.service import YouTubeService, YouTubeVideoQuery
 from eWRT.ws.WebDataSource import WebDataSource
 
-MAX_RESULTS_PER_QUERY = 50 
 logger = logging.getLogger('eWRT.ws.youtube')
+
+MAX_RESULTS_PER_QUERY = 50 
+DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.000Z'
+
+convert_date = lambda str_date: datetime.strptime(str_date, DATE_FORMAT)
 
 # ToDO: comment rating, once it get's supported by the gdata API.
 # TODO: query.location --> radius available?
@@ -28,9 +32,8 @@ class YouTube(WebDataSource):
         'media.title.text': 'title',
         'published.text':'published',
         'media.description.text': 'content',
-        'media.keywords.text':'keywords',
+#        'media.keywords.text':'keywords',
         'media.duration.seconds':'duration', 
-        'rating.average': 'average rating', 
         'statistics.view_count': 'statistics_viewcount', 
         'statistics.favorite_count': 'statistics_favoritecount', 
         'rating.average': 'rating_average',
@@ -41,6 +44,14 @@ class YouTube(WebDataSource):
         'rights': 'rights', 
         'updated.text': 'last_modified', 
         'source': 'yt_source'
+    }
+    
+    YT_COMMENTS_MAPPING = {
+        'id.text': 'id', 
+        'title.text': 'title',
+        'published.text': 'published',
+        'updated.text': 'last_modified',
+        'content.text': 'content'
     }
     
     def __init__(self):
@@ -141,17 +152,12 @@ class YouTube(WebDataSource):
             @param max_comment_count: maximum number of comments to fetch
             @return: dictionary   
         '''
-        yt_dict = {'user_name': entry.author[0].name.text, 
-                   'user_url': entry.author[0].uri.text}
-        
-        for attr, key in self.YT_ATOM_RESULT_TO_DICT_MAPPING.items(): 
-            try: 
-                yt_dict[key] = attrgetter(attr)(entry)
-            except AttributeError, e:
-                logger.warn('AttributeError: %s' % e)
-                yt_dict[key] = None
-                
-        yt_dict['id'] = entry.id.text.split('/')[-1]
+
+        yt_dict = self._get_yt_dict(entry, self.YT_ATOM_RESULT_TO_DICT_MAPPING)
+        yt_dict.update({'user_name': entry.author[0].name.text, 
+                        'user_url': entry.author[0].uri.text,
+                        'id': entry.id.text.split('/')[-1]})
+                       
         yt_dict['url'] = "http://www.youtube.com/watch?v=%s" % yt_dict['id']         
         
         # the hasattr is required for compatibility with older videos
@@ -173,7 +179,7 @@ class YouTube(WebDataSource):
                 yt_dict['picture'] = thumbnail.url
                 break
 
-        if not yt_dict['keywords']: 
+        if not 'keywords' in yt_dict: 
             yt_dict['keywords'] = []
 
         for category in entry.category:
@@ -187,6 +193,26 @@ class YouTube(WebDataSource):
 
         return yt_dict
 
+    @classmethod
+    def _get_yt_dict(cls, entry, mapping):
+        ''' stores the mapped items in a dictionary 
+        @param entry: Gdata Entry
+        @param mapping: dictionary with the mapping
+        @return: yt_dict
+        '''
+        yt_dict = {}
+        for attr, key in mapping.iteritems(): 
+            try: 
+                yt_dict[key] = attrgetter(attr)(entry)
+                
+                if key in ('published', 'last_modified'):
+                    yt_dict[key] = convert_date(yt_dict[key])
+                
+            except AttributeError, e:
+                logger.warn('AttributeError: %s' % e)
+                yt_dict[key] = None        
+        
+        return yt_dict
 
     def get_video_comments(self, video_id, max_comments=25):
         """ @param video_id: the video_id of the video for which we want to retrieve
@@ -202,15 +228,12 @@ class YouTube(WebDataSource):
             
             for comment in comment_feed.entry:
                 url, in_reply_to = self.get_relevant_links(comment)
-                comments.append( {'id': comment.id.text,
-                                  'url': url,
-                                  'in-reply-to': in_reply_to,
-                                  'author': comment.author[0].name.text,
-                                  'title': comment.title.text,
-                                  'published': comment.published.text,
-                                  'updated': comment.updated.text,
-                                  'content': comment.content.text}
-                                )
+                yt_dict = self._get_yt_dict(comment, self.YT_COMMENTS_MAPPING)
+                yt_dict.update({'url': url,
+                                'in-reply-to': in_reply_to,
+                                'author': comment.author[0].name.text,})
+                comments.append(yt_dict)
+
                 if len(comments) == max_comments:
                     return comments
                 
@@ -225,7 +248,7 @@ class YouTube(WebDataSource):
 
 
     @staticmethod
-    def get_relevant_links( comment ):
+    def get_relevant_links(comment):
         """ 
         @param comment: a single YouTube comment.
         @return: a tuple indicating:
@@ -249,6 +272,7 @@ class YouTubeTest(unittest.TestCase):
     def setUp(self):
         self.search_terms = ["Linus Torvalds","Ubuntu"]
         self.youtube = YouTube()
+        logger.addHandler(logging.StreamHandler())
     
     def test_query_time(self):
         test_cases = ((1000, 'today'), 
@@ -278,7 +302,7 @@ class YouTubeTest(unittest.TestCase):
         for r in self.youtube.search(self.search_terms, None):
 
             assert len(required_keys) == len(r.keys())
-            
+            assert isinstance(r['last_modified'], datetime)
             for rk in required_keys: 
                 if not rk in r.keys():
                     print 'k ', sorted(r.keys())
@@ -308,7 +332,7 @@ class YouTubeTest(unittest.TestCase):
                                                    max_comments = 27)
         assert len(comments) == 27
         
-        
+
 if __name__ == "__main__":
     unittest.main()
         
