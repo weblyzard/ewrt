@@ -86,7 +86,7 @@ class FacebookWS(object):
         args['q'] = self.term
         
         if self.since:
-            args['since'] = self.since
+            args['since'] = int(self.since)
             
         if self.limit:
             args['limit'] = self.limit
@@ -112,6 +112,8 @@ class FacebookWS(object):
                                       "relative_url" : "/search?"+urllib.urlencode(args)});
         elif self.objectType == 'all':
             for obj_type in self.FB_OBJECT_TYPES:
+                if obj_type == 'path':
+                    continue
                 args['type'] = obj_type
                 jsonListStructure.append({'method': "GET", 
                                           "relative_url" : "/search?"+urllib.urlencode(args)});
