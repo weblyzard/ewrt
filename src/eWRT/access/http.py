@@ -160,7 +160,7 @@ class Retrieve(object):
         self.last_access_time= time.time()
 
     def __enter__(self):
-        """ support fo the context protocol """
+        """ support of the context protocol """
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):

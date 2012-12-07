@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-:mod:`eWRT.access.db` -- database access
+@package eWRT.access.db` -- database access
 ========================================
 """
 

@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 """
  @package eWRT.ws.stat.string
- String statistics
+ String statistics such as
+  * word similarity
+  * levenshtein distance
+  * soundex
+  * ...
 """
 
 # (C)opyrights 2010 by Albert Weichselbraun <albert@weichselbraun.net>

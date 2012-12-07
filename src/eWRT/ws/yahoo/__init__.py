@@ -62,6 +62,7 @@ class Yahoo(TagInfoService):
         } )
         params = urlencode( queryParams )
         url = YAHOO_SEARCH_URL % "%2B".join(map( quote, terms) ) +"?"+ params
+        print url
         try:
             result = eval( self.r.open(url).read().replace("\\/", "/" ))
             return result['ysearchresponse']
@@ -197,7 +198,7 @@ if __name__ == '__main__':
     #print y.query( ("energy", "coal") )
     #print y.query( ("d'alembert", "law") )
     r = y.query( ("linux", "python", ), count=5, queryParams={'view': 'keyterms', 'abstract': 'long'} )
-    print r
+    print "***", r
     for entry in r['resultset_web']:
         print entry.keys()
         print entry['keyterms']['terms']

@@ -19,7 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from eWRT.stat.coherence import Coherence, DiceCoherence, PMICoherence
-from rdflib.Graph import Graph
+from rdflib import Graph
 from rdflib import Namespace
 
 NS_RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")

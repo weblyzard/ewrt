@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 """
  @package eWRT.ws.stat.eval.metrics
- Evaluation metrics
+ Standard IR evaluation metrics such as
+  * precision
+  * recall
+  * F1 measure
 """
 
 # (C)opyrights 2010 by Albert Weichselbraun <albert@weichselbraun.net>
