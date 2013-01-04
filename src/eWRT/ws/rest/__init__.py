@@ -35,10 +35,12 @@ class RESTClient(object):
                                 authentification_method = authentification_method)
 
 
-    def json_request(self, url, parameters=None):
+    def _json_request(self, url, parameters=None, return_plain=False):
         """ performs the given json request
         @param url: the url to query
         @param parameters: optional paramters
+        @param return_plain: whether to return the result without prior deserialization
+                             using json.load (False*)
         """
         if parameters:
             handle = self.retrieve( url , dumps( parameters ),
@@ -50,6 +52,16 @@ class RESTClient(object):
         if response:
             return loads(response)
 
+    def execute(self, command, identifier=None, parameters=None):
+        """ executes a json command on the given web service
+        @param command: the command to execute
+        @param identifier: an optional identifier (e.g. batch_id, ...)
+        @param parameters: optional paramters
+        """
+        url = '%s/%s/%s' % (self.service_url, command, identifier) \
+            if identifier else "%s/%s" % (self.service_url, command)
+        return self._json_request(url, parameters)
+
 
 class TestRESTClient(TestCase):
     
@@ -58,9 +70,9 @@ class TestRESTClient(TestCase):
     TEST_PASS = 'user1'
     
     def test_retrieve(self):
-        r = RESTClient(TEST_URL, self.TEST_USER, self.TEST_PASS)
+        r = RESTClient(self.TEST_URL, self.TEST_USER, self.TEST_PASS)
         try:
-            r.json_request(self.TEST_URL)
+            r._json_request(self.TEST_URL)
         except HTTPError, e:
             # authentification has been succeeded, but no object could
             # be found
