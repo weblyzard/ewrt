@@ -86,7 +86,7 @@ class Retrieve(object):
                             if "%s" in user_agent else user_agent
 
 
-    def open(self, url, data=None, headers=None, user=None, pwd=None, retry=0, 
+    def open(self, url, data=None, headers={}, user=None, pwd=None, retry=0, 
              authentification_method="basic" ):
         """ Opens an URL and returns the matching file object 
             @param[in] url 
@@ -104,7 +104,7 @@ class Retrieve(object):
         urlObj = None
         tries  = 0
         while not urlObj:
-            request = urllib2.Request( url, data )
+            request = urllib2.Request( url, data, headers )
             request.add_header( 'User-Agent', self.user_agent )
             request.add_header('Accept-encoding', 'gzip')
             self._throttle()

@@ -15,21 +15,25 @@ from eWRT.access.http import Retrieve
 
 class RESTClient(object):
 
-    def __init__(self, user=None, password=None,
+    def __init__(self, service_url, user=None, password=None,
                  authentification_method='basic',
                  module_name='eWRT.REST'):
-        """ @param modul_name: the module name to add to the USER AGENT
+        """ @param service_url: the base url of the web service
+            @param modul_name: the module name to add to the USER AGENT
                                description (optional)
             @param user: username
             @param password: password
             @param authentification_method: authentification method to use
                                             ('basic'*, 'digest'). 
         """
+        self.service_url = service_url
+
         url_obj = Retrieve(module_name, sleep_time=0)
         self.retrieve = partial(url_obj.open,
                                 user= user,
                                 pwd = password,
                                 authentification_method = authentification_method)
+
 
     def json_request(self, url, parameters=None):
         """ performs the given json request
@@ -38,7 +42,7 @@ class RESTClient(object):
         """
         if parameters:
             handle = self.retrieve( url , dumps( parameters ),
-                                 {'Content-Type': 'application/json'})
+                                    {'Content-Type': 'application/json'})
         else:
             handle = self.retrieve( url )
             
@@ -54,7 +58,7 @@ class TestRESTClient(TestCase):
     TEST_PASS = 'user1'
     
     def test_retrieve(self):
-        r = RESTClient(self.TEST_USER, self.TEST_PASS)
+        r = RESTClient(TEST_URL, self.TEST_USER, self.TEST_PASS)
         try:
             r.json_request(self.TEST_URL)
         except HTTPError, e:

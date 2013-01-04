@@ -70,6 +70,7 @@ setup(
                       'eWRT.ws.google',
                       'eWRT.ws.googletrends',
                       'eWRT.ws.opencalais',
+                      'eWRT.ws.rest',
                       'eWRT.ws.rss',
                       'eWRT.ws.technorati',
                       'eWRT.ws.twitter',
