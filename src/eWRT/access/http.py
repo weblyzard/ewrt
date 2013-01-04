@@ -68,7 +68,9 @@ class Retrieve(object):
                 
     """
 
-    __slots__ = ('module', 'sleep_time', 'last_access_time', 'user_agent', '_supported_http_authentification_methods')   
+    __slots__ = ('module', 'sleep_time', 'last_access_time', 'user_agent', 
+                 '_supported_http_authentification_methods')   
+    
 
     def __init__(self, module, sleep_time=DEFAULT_WEB_REQUEST_SLEEP_TIME, user_agent=USER_AGENT):
         self.module           = module
@@ -84,13 +86,17 @@ class Retrieve(object):
                             if "%s" in user_agent else user_agent
 
 
-    def open(self, url, data=None, user=None, pwd=None, retry=0, authentification_method="basic" ):
+    def open(self, url, data=None, headers=None, user=None, pwd=None, retry=0, 
+             authentification_method="basic" ):
         """ Opens an URL and returns the matching file object 
             @param[in] url 
-            @param[in] data  optional data to submit
-            @param[in] user  optional user name
-            @param[in] pwd   optional password
-            @param[in] retry number of retries in case of an temporary error
+            @param[in] data    optional data to submit
+            @param[in] headers a dictionary of optional headers
+            @param[in] user    optional user name
+            @param[in] pwd     optional password
+            @param[in] retry   number of retries in case of an temporary error
+            @param[in] authentification_method the used authentification_method 
+                        ('basic'*, 'digest')
 
             @returns a file object for reading the url
         """
@@ -107,7 +113,7 @@ class Retrieve(object):
             if PROXY_SERVER:
                 opener.append( urllib2.ProxyHandler({"http" :PROXY_SERVER} ) )
             if user and pwd:
-                opener.append( auth_handler )
+                opener.append( auth_handler(url, user, pwd) )
 
             urllib2.install_opener( urllib2.build_opener( *opener ) )
             try:
@@ -130,8 +136,9 @@ class Retrieve(object):
     @staticmethod
     def _getHTTPBasicAuthOpener(url, user, pwd):
         """ returns an opener, capable of handling http-auth """
-        auth_handler = urllib2.HTTPBasicAuthHandler()
-        auth_handler.add_password('realm', getHostName(url), user, pwd)
+        passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
+        passman.add_password(None, url, user, pwd)
+        auth_handler = urllib2.HTTPBasicAuthHandler(passman)
         return auth_handler
     
     
