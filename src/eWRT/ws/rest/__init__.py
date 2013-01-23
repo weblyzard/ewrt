@@ -50,7 +50,7 @@ class RESTClient(object):
             
         response = handle.read()
         if response:
-            return loads(response)
+            return response if return_plain else loads(response)
 
     def execute(self, command, identifier=None, parameters=None, return_plain=False):
         """ executes a json command on the given web service
