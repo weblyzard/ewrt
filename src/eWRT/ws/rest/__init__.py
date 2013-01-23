@@ -52,15 +52,17 @@ class RESTClient(object):
         if response:
             return loads(response)
 
-    def execute(self, command, identifier=None, parameters=None):
+    def execute(self, command, identifier=None, parameters=None, return_plain=False):
         """ executes a json command on the given web service
         @param command: the command to execute
         @param identifier: an optional identifier (e.g. batch_id, ...)
         @param parameters: optional paramters
+        @param return_plain: return the result without prior deserialization
+                             using json.load (False*)
         """
         url = '%s/%s/%s' % (self.service_url, command, identifier) \
             if identifier else "%s/%s" % (self.service_url, command)
-        return self._json_request(url, parameters)
+        return self._json_request(url, parameters, return_plain)
 
 
 class TestRESTClient(TestCase):
