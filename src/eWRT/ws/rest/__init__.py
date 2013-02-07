@@ -10,8 +10,12 @@ from json import dumps, loads
 from functools import partial
 from unittest import TestCase, main
 from urllib2 import HTTPError
+from socket import setdefaulttimeout
 
 from eWRT.access.http import Retrieve
+
+# set higher timeout values 
+WS_DEFAULT_TIMEOUT = 300
 
 class RESTClient(object):
 
@@ -26,6 +30,7 @@ class RESTClient(object):
             @param authentification_method: authentification method to use
                                             ('basic'*, 'digest'). 
         """
+        setdefaulttimeout( WS_DEFAULT_TIMEOUT )
         self.service_url = service_url
 
         url_obj = Retrieve(module_name, sleep_time=0)
