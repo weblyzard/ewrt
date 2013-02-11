@@ -1,7 +1,7 @@
 '''
 Created on 21.06.2012
 
-@author: Norman Suesstrunk
+@author: Norman Suesstrunk, Heinz-Peter Lang
 
 class for executing batch requests to the facebook api
 '''
