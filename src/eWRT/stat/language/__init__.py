@@ -5,7 +5,6 @@
 @package eWRT.stat.language
 
 language detection
-
 """
 
 from os.path import dirname, basename, join as os_join

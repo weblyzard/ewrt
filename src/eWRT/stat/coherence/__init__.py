@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """
  @package eWRT.ws.stat.coherence
+ Determines how strongly two terms are connected to each other
 """
 
 # (C)opyrights 2010 by Albert Weichselbraun <albert@weichselbraun.net>

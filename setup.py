@@ -14,7 +14,7 @@ setup(
       ###########################################
       ## Metadata
       name="eWRT",
-      version="0.7.5",
+      version="0.7.6",
       description='eWRT',
       author='Albert Weichselbraun, Heinz Lang, Gerhard Wohlgenannt, Johannes Duong, Norman Süsstrunk',
       author_email='albert@weblyzard.com, lang@weblyzard.com, wohlg@ai.wu.ac.at, johannes.duong@wu.ac.at, norman.suesstrunk@htwchur.ch',
@@ -36,6 +36,7 @@ setup(
                       'eWRT.access',
                       'eWRT.config',
                       'eWRT.input',
+                      'eWRT.input.conv',
                       'eWRT.input.clean',
                       'eWRT.input.corpus',
                       'eWRT.input.corpus.reuters',
@@ -55,6 +56,7 @@ setup(
                       'eWRT.ontology.eval',
                       'eWRT.ontology.eval.terminology',
                       'eWRT.ontology.visualize',
+                      'eWRT.output.plot',
                       'eWRT.util',
                       'eWRT.ws',
                       'eWRT.ws.amazon',
@@ -68,6 +70,7 @@ setup(
                       'eWRT.ws.google',
                       'eWRT.ws.googletrends',
                       'eWRT.ws.opencalais',
+                      'eWRT.ws.rest',
                       'eWRT.ws.rss',
                       'eWRT.ws.technorati',
                       'eWRT.ws.twitter',
