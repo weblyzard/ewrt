@@ -28,8 +28,11 @@ class FacebookWS(object):
 
     def __init__(self, term, objectType='all', since=None, limit=None):
         """ init """
-#        self.retrieve = Retrieve('facebookWS')
         self.term = term
+        
+        if objectType == 'all':
+            objectType = 'post'
+        
         self.objectType = objectType
 
         if since and not isinstance(since, int):
@@ -81,7 +84,7 @@ class FacebookWS(object):
         return result
     
     def getJsonListStructure(self):
-        jsonListStructure = []
+        request = None
         args = {}
         args['q'] = self.term
         
@@ -100,24 +103,23 @@ class FacebookWS(object):
             if len(args):
                 args_string = '?%s' % urllib.urlencode(args)
                 
-            jsonListStructure.append({'method': "GET", 
-                                      "relative_url" : '%s%s' % (self.term,
-                                                                 args_string)});
-            print {'method': "GET", 
-                                      "relative_url" : '%s%s' % (self.term,
-                                                                 args_string)}                                               
+            request = {'method': "GET", 
+                       "relative_url" : '%s%s' % (self.term, args_string)}
+                                          
         elif self.objectType in self.FB_OBJECT_TYPES:
             args['type'] = self.objectType
-            jsonListStructure.append({'method': "GET", 
-                                      "relative_url" : "/search?"+urllib.urlencode(args)});
+            request = {'method': "GET", 
+                       "relative_url" : "/search?%s" % urllib.urlencode(args)}
+            
         elif self.objectType == 'all':
             for obj_type in self.FB_OBJECT_TYPES:
                 if obj_type == 'path':
                     continue
                 args['type'] = obj_type
-                jsonListStructure.append({'method': "GET", 
-                                          "relative_url" : "/search?"+urllib.urlencode(args)});
-        return jsonListStructure
+                request = {'method': "GET", 
+                           "relative_url" : "/search?"+urllib.urlencode(args)}
+        
+        return request
                 
     
     @classmethod
@@ -127,12 +129,12 @@ class FacebookWS(object):
         @param url: valid graph-api-url
         @return: fetched data 
         '''
-        print '_requestURL'
-        if result == None:
+
+        if not result:
             result = []
-        if maxDoc == None:
+        if not maxDoc:
             maxDoc = 1000
-        if tried == None:
+        if not tried:
             tried = False
 
         try:

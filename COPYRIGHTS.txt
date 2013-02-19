@@ -1,6 +1,8 @@
-easy Web Retrieval Toolkit (eWRT)
+extensible Web Retrieval Toolkit (eWRT)
 -------------------------------------------------------------------------
-(C)opyrights 2006-2009 by Albert Weichselbraun <albert@weichselbraun.net>
+(C)opyrights 2006-2013 by Albert Weichselbraun <albert@weichselbraun.net>
+                          Heinz-Peter Lang <lang@weblyzard.com>
+                          Gerhard Wohlgenannt <wohlg@ai.wu.ac.at>
 -------------------------------------------------------------------------
 
 This program is free software: you can redistribute it and/or modify

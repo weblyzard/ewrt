@@ -1,7 +1,7 @@
 '''
 Created on 21.06.2012
 
-@author: Norman Suesstrunk
+@author: Norman Suesstrunk, Heinz-Peter Lang
 
 class for executing batch requests to the facebook api
 '''
@@ -9,12 +9,11 @@ import unittest
 import json
 import urllib
 import httplib
-from itertools import chain
 
 from eWRT.config import FACEBOOK_ACCESS_KEY
 from eWRT.ws.facebook import FacebookWS
 
-# TODO: check maximum BATCH_SIZE of 50 query per request
+MAX_BATCH_SIZE = 50
 
 class FbBatchRequest(object):
     '''
@@ -23,100 +22,95 @@ class FbBatchRequest(object):
     the actual requests are constructed with objects from the FacebookWS class.  
     '''
 
+    batchHTTPParam = 'batch' # http post parameter for the facebook batch http interface
+    accessTokenHTTPParam = 'access_token'
+    faceBookGraphHost = 'graph.facebook.com'
+
     def __init__(self, access_token=FACEBOOK_ACCESS_KEY):
-        '''
-        Constructor
-        '''
-        self.fbWSList = [] # stores a list of FacebookWS-objects
-        self.batchHTTPParam = 'batch' # http post parameter for the facebook batch http interface
-        self.accessTokenHTTPParam = 'access_token'
-        self.faceBookGraphHost = 'graph.facebook.com'
+        ''' Constructor '''
         self.access_token = access_token
     
     def run_search(self, terms, objectType='all', since=None, limit=None):
         ''' runs a batch search '''
         if not isinstance(terms, list):
             terms = [terms]
+
+        return self.make_search([FacebookWS(term, objectType, 
+                                            since, limit) for term in terms])
+
+    def make_search(self, fbWSList):
+        ''' ''' 
+        assert len(fbWSList), 'list of facebook services empty'
+
+        result = []
+        search_result = self._send_post(self.access_token, fbWSList)
+        
+        for row in search_result: 
+            if not row: 
+                print 'row == %s ... continue' % row
+                continue
             
-        for term in terms: 
-            self.fbWSList.append(FacebookWS(term, objectType, since, limit))
-    
-        return self.do_batch_search()
-    
-    def get_path(self, paths, since=None, limit=None):
-        if not isinstance(paths, list):
-            paths = [paths]
-        
-        for path in paths: 
-            self.fbWSList.append(FacebookWS(path, 'path', since, limit))
-        
-        return self.do_batch_search()
-    
-    def add_facebook_ws(self, faceBookWS):
-        '''
-        add a FacebookWS-Object to the batch
-        '''
-        self.fbWSList.append(faceBookWS)
-    
-    def _get_json_batch_request_string(self):
+            data = json.loads(row['body'])
+            
+            if 'data' in data:    
+                for post in json.loads(row['body'])['data']:
+                    result.append(post)
+                    url = 'http://www.facebook.com/%s' % post['id'].replace('_', '/posts/')
+                    if 'comments' in post and 'data' in post['comments']:
+                        for comment in post['comments']['data']:
+                            comment['type'] = 'comment'
+                            comment['parent_url'] = url
+                            comment['url'] = url
+                            result.append(comment)
+            elif data: 
+                result.append(data)
+                
+        return result
+
+    @classmethod
+    def _get_json_batch_request_string(cls, fbWSList):
         '''
         delivers the json-string in the apropriate format for the facebook batch api
         '''
-        result = list(chain(* [ fbWebservice.getJsonListStructure() 
-                                    for fbWebservice in self.fbWSList ]))
-        return json.dumps(result)
-
+        return [fb.getJsonListStructure() for fb in fbWSList]
     
-    def _make_request_params(self):
-        '''
-        constructs a dictionary with all the necessary http params and their values
-        '''
-        urlargs = {}
-        urlargs[self.accessTokenHTTPParam] = self.access_token
-        urlargs[self.batchHTTPParam] = self._get_json_batch_request_string()
-        print urlargs
-        return urlargs
-    
-    def _send_post(self):
+    @classmethod
+    def _send_post(cls, access_token, fbWSList):
         '''
         sends the batch request as post to the facebook batch request api
         returns all the search results for the batch request
         '''
-        params = urllib.urlencode(self._make_request_params())
-        
-        headers = {"Content-type": "application/x-www-form-urlencoded","Accept": "text/plain"}
-        conn = httplib.HTTPSConnection(self.faceBookGraphHost)
-        conn.request("POST", "/", params, headers)
-        response = conn.getresponse()
-        print response.status, response.reason
-        data = response.read()
-        conn.close()
-        return json.loads(data)
-    
-    def do_batch_search(self):
-        '''
-        executes the batch request to the facebook api
-        '''
         result = []
-        json_search_result = self._send_post()
+        conn = httplib.HTTPSConnection(cls.faceBookGraphHost)
+        all_batch_requests = cls._get_json_batch_request_string(fbWSList)
         
-        if 'error' in json_search_result:
-            raise Exception(json_search_result['error']['message'])
-        
-        for row in json_search_result: 
-            print row['body']
-            for post in json.loads(row['body'])['data']:
-                result.append(post)
-                url = 'http://www.facebook.com/%s' % post['id'].replace('_', '/posts/')
-                if 'comments' in post and 'data' in post['comments']:
-                    for comment in post['comments']['data']:
-                        comment['type'] = 'comment'
-                        comment['parent_url'] = url
-                        comment['url'] = url
-                        result.append(comment)
+        for batch_requests in cls.get_batch(all_batch_requests):
+            batch_requests = json.dumps(batch_requests)
             
+            params = urllib.urlencode({cls.accessTokenHTTPParam: access_token,
+                                       cls.batchHTTPParam: batch_requests})
+            
+            headers = {'Content-type': 'application/x-www-form-urlencoded',
+                       'Accept': 'text/plain'}
+            
+            conn.request('POST', '/', params, headers)
+            response = conn.getresponse()
+
+            data = json.loads(response.read())
+
+            if isinstance(data, dict) and 'error' in data:
+                result.append(data)
+            else: 
+                result.extend(data)
+            
+        conn.close()
         return result
-        
+    
+    @staticmethod
+    def get_batch(requests, batch_size=MAX_BATCH_SIZE):
+        for i in range(0, len(requests), batch_size):
+            yield requests[i:i+batch_size]
+            
 class TestFacebookWS(unittest.TestCase):
     
     def setUp(self):
@@ -158,7 +152,9 @@ class TestFacebookWS(unittest.TestCase):
     
     def test_feed_mirroring(self):
         fbBatchRequest = FbBatchRequest()
-        result = fbBatchRequest.get_path('58220918250/feed', limit=1)
+        result = fbBatchRequest.run_search('58220918250/feed', 
+                                           objectType='path',
+                                           limit=1)
         
         for x in result:
             print x

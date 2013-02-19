@@ -1,3 +1,7 @@
+0.7.7
+* improved facebook module
+* changed defaulttimeout to prevent read-errors when accessing web services
+
 0.7.6
 * added support for RESTless clients used to access webLyzard web services (eWRT.ws.rest)
   <albert.weichselbraun@htwchur.ch>
