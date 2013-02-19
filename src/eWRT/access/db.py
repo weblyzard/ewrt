@@ -159,6 +159,16 @@ class PostgresqlDb(IDB):
         cur = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
         [ cur.execute(q) for q in qu ]
         return cur.fetchall()
+    
+    def execute(self, q):
+        cur = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        return cur.execute(q)
+    
+    def getCursor(self):
+        return self.db.cursor()
+    
+    def commit(self):
+        self.db.commit()
 
 
     def close(self):
