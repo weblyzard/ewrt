@@ -173,10 +173,22 @@ class Retrieve(object):
     def __exit__(self, exc_type, exc_value, traceback):
         """ context protocol support """
         if exc_type != None:
-           log.critical("%s" % exc_type)
-
- 
-
+            log.critical("%s" % exc_type)
+    
+    @staticmethod
+    def get_user_password(url):
+        ''' returns the url, username, password if present ''' 
+        split_url = urlsplit(url) 
+        user = split_url.username
+        passwd = split_url.password
+        
+        if user and passwd:
+            url = url.replace('%s:%s@' % (user, passwd), '')
+        else:
+            assert not user and not passwd, 'if set, user AND pwd required' 
+            
+        return url, user, passwd
+            
 class TestRetrieve(object):
     """ tests the http class """
     TEST_URLS = ('http://www.google.at/search?hl=de&q=andreas&btnG=Google-Suche&meta=', 
@@ -240,6 +252,18 @@ class TestRetrieve(object):
 
         for res in  p.map(t_retrieve, TEST_URLS):
             assert len(res) > 20
+
+    def testGettingUserPassword(self):
+        urls = (('http://irgendwas.com', None, None),
+                ('http://heinz:secret@irgendwas.com', 'heinz', 'secret'))
+        
+        for test_url, exp_user, exp_passwd in urls: 
+            print 'testing url %s' % test_url
+            url, user, passwd = Retrieve.get_user_password(test_url)
+            assert user == exp_user
+            assert passwd == exp_passwd
+            if user: 
+                assert url != test_url
 
     #@attr("new")
     #@attr("remote")
