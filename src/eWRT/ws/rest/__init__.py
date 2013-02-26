@@ -96,20 +96,8 @@ class MultiRESTClient(object):
 
         clients = []
        
-        for service_url in service_urls:
-            split_url = urlparse.urlsplit(service_url) 
-            user = split_url.username
-            password = split_url.password
-            if user and password:
-                new_url = (split_url.scheme,
-                           split_url.netloc.replace('%s:%s@' % (user, password), 
-                                                    ''),
-                           split_url.path,
-                           split_url.query,
-                           split_url.fragment )
-                service_url = urlparse.urlunsplit(new_url)
-            else:
-                assert not user and not password, 'if set, user AND pwd required'
+        for url in service_urls:
+            service_url, user, password = Retrieve.get_user_password(url)
             clients.append(RESTClient(service_url=service_url, 
                                       user=user, password=password)) 
         

@@ -26,7 +26,7 @@ from eWRT.config import USER_AGENT, DEFAULT_WEB_REQUEST_SLEEP_TIME, PROXY_SERVER
 #PROXY_SERVER = None
 
 
-from urlparse import urlsplit
+from urlparse import urlsplit, urlunsplit
 import time
 from StringIO import StringIO
 from gzip import GzipFile
@@ -177,17 +177,24 @@ class Retrieve(object):
     
     @staticmethod
     def get_user_password(url):
-        ''' returns the url, username, password if present ''' 
+        ''' returns the url, username, password if present in the url
+        @param url: well formed url, starting with a schema
+        @return: tuple (new_url, user, password) ''' 
         split_url = urlsplit(url) 
         user = split_url.username
-        passwd = split_url.password
-        
-        if user and passwd:
-            url = url.replace('%s:%s@' % (user, passwd), '')
+        password = split_url.password
+        if user and password:
+            new_url = (split_url.scheme,
+                       split_url.netloc.replace('%s:%s@' % (user, password), 
+                                                ''),
+                       split_url.path,
+                       split_url.query,
+                       split_url.fragment )
+            url = urlunsplit(new_url)
         else:
-            assert not user and not passwd, 'if set, user AND pwd required' 
+                assert not user and not password, 'if set, user AND pwd required'
             
-        return url, user, passwd
+        return url, user, password
             
 class TestRetrieve(object):
     """ tests the http class """
