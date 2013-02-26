@@ -62,6 +62,9 @@ class RESTClient(object):
         response = handle.read()
         if response:
             return response if return_plain else loads(response)
+        else:
+            # this will also return empty list, dicts ... 
+            return response
 
     def request_path(self, path, parameters=None, return_plain=False):
         if self.service_url.endswith('/') or path.startswith('/'):
@@ -95,6 +98,9 @@ class MultiRESTClient(object):
     def _connect_clients(cls, service_urls):
 
         clients = []
+       
+        if isinstance(service_urls, basestring):
+            service_urls = [service_urls]
        
         for service_url in service_urls:
             split_url = urlparse.urlsplit(service_url) 
@@ -132,9 +138,10 @@ class MultiRESTClient(object):
                 errors.append(msg)
          
         if len(errors) == len(self.clients):
+            print '\n'.join(errors)
             raise Exception('Could not make request to path %s' % path)
-        if response:
-            return response if return_plain else loads(response) 
+        
+        return response
         
 class TestRESTClient(unittest.TestCase):
     
