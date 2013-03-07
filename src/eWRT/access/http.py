@@ -26,7 +26,7 @@ from eWRT.config import USER_AGENT, DEFAULT_WEB_REQUEST_SLEEP_TIME, PROXY_SERVER
 #PROXY_SERVER = None
 
 
-from urlparse import urlsplit
+from urlparse import urlsplit, urlunsplit
 import time
 from StringIO import StringIO
 from gzip import GzipFile
@@ -173,10 +173,29 @@ class Retrieve(object):
     def __exit__(self, exc_type, exc_value, traceback):
         """ context protocol support """
         if exc_type != None:
-           log.critical("%s" % exc_type)
-
- 
-
+            log.critical("%s" % exc_type)
+    
+    @staticmethod
+    def get_user_password(url):
+        ''' returns the url, username, password if present in the url
+        @param url: well formed url, starting with a schema
+        @return: tuple (new_url, user, password) ''' 
+        split_url = urlsplit(url) 
+        user = split_url.username
+        password = split_url.password
+        if user and password:
+            new_url = (split_url.scheme,
+                       split_url.netloc.replace('%s:%s@' % (user, password), 
+                                                ''),
+                       split_url.path,
+                       split_url.query,
+                       split_url.fragment )
+            url = urlunsplit(new_url)
+        else:
+                assert not user and not password, 'if set, user AND pwd required'
+            
+        return url, user, password
+            
 class TestRetrieve(object):
     """ tests the http class """
     TEST_URLS = ('http://www.google.at/search?hl=de&q=andreas&btnG=Google-Suche&meta=', 
@@ -240,6 +259,18 @@ class TestRetrieve(object):
 
         for res in  p.map(t_retrieve, TEST_URLS):
             assert len(res) > 20
+
+    def testGettingUserPassword(self):
+        urls = (('http://irgendwas.com', None, None),
+                ('http://heinz:secret@irgendwas.com', 'heinz', 'secret'))
+        
+        for test_url, exp_user, exp_passwd in urls: 
+            print 'testing url %s' % test_url
+            url, user, passwd = Retrieve.get_user_password(test_url)
+            assert user == exp_user
+            assert passwd == exp_passwd
+            if user: 
+                assert url != test_url
 
     #@attr("new")
     #@attr("remote")
