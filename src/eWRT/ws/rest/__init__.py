@@ -4,6 +4,7 @@
 """ @package eWRT.ws.rest
 eWRT REST Client barebone with support for authentificated https requests
 """
+import traceback
 import unittest
 import logging
 import urllib2
@@ -68,7 +69,7 @@ class RESTClient(object):
 
     def request_path(self, path, parameters=None, return_plain=False):
         if self.service_url.endswith('/') or path.startswith('/'):
-            url = ''.join([self, self.service_url, path])
+            url = ''.join([self.service_url, path])
         else: 
             url = '/'.join([self.service_url, path])
             
@@ -98,7 +99,6 @@ class MultiRESTClient(object):
     def _connect_clients(cls, service_urls):
 
         clients = []
-       
         if isinstance(service_urls, basestring):
             service_urls = [service_urls]
             
@@ -107,7 +107,6 @@ class MultiRESTClient(object):
        
             clients.append(RESTClient(service_url=service_url, 
                                       user=user, password=password)) 
-        
         return clients
  
     def request(self, path, parameters=None, return_plain=False, 
@@ -127,13 +126,15 @@ class MultiRESTClient(object):
                 if not execute_all_services:
                     break
             except Exception, e:
-                msg = 'could not execute request %s, error %s' % (path, e)
+                msg = 'could not execute %s, error %s\n%s' % (path, e, 
+                                                              traceback.format_exc())
                 logger.warn(msg)
                 errors.append(msg)
          
         if len(errors) == len(self.clients):
             print '\n'.join(errors)
-            raise Exception('Could not make request to path %s' % path)
+            raise Exception('Could not make request to path %s: %s' % (path,
+                                                                       '\n'.join(errors)))
         
         return response
         
