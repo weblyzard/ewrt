@@ -40,15 +40,16 @@ class RESTClient(object):
                                 authentification_method = authentification_method)
 
 
-    def _json_request(self, url, parameters=None, return_plain=False):
+    def _json_request(self, url, parameters=None, return_plain=False, json_encode_arguments=True):
         """ performs the given json request
         @param url: the url to query
         @param parameters: optional paramters
         @param return_plain: whether to return the result without prior deserialization
                              using json.load (False*)
+        @param json_encode_arguments: whether to json encode the parameters (True*)
         """
         if parameters:
-            handle = self.retrieve( url , dumps( parameters ),
+            handle = self.retrieve( url , dumps( parameters ) if json_encode_arguments else parameters,
                                     {'Content-Type': 'application/json'})
         else:
             handle = self.retrieve( url )
@@ -57,17 +58,19 @@ class RESTClient(object):
         if response:
             return response if return_plain else loads(response)
 
-    def execute(self, command, identifier=None, parameters=None, return_plain=False):
+    def execute(self, command, identifier=None, parameters=None, 
+                return_plain=False, json_encode_arguments=True):
         """ executes a json command on the given web service
         @param command: the command to execute
         @param identifier: an optional identifier (e.g. batch_id, ...)
         @param parameters: optional paramters
         @param return_plain: return the result without prior deserialization
                              using json.load (False*)
+        @param json_encode_arguments: whether to json encode the parameters
         """
         url = '%s/%s/%s' % (self.service_url, command, identifier) \
             if identifier else "%s/%s" % (self.service_url, command)
-        return self._json_request(url, parameters, return_plain)
+        return self._json_request(url, parameters, return_plain, json_encode_arguments)
 
 
 class TestRESTClient(TestCase):
