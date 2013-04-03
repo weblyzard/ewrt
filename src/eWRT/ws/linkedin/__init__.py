@@ -133,19 +133,3 @@ class LinkedIn(WebDataSource):
             assert isinstance(possible_string, basestring)
             assert len(possible_string) > 0
                     
-
-if __name__ == '__main__':
-    
-# Fill the keys and secrets you retrieved after registering your app
-    consumer_key      =   'y8h4045v9i9r'
-    consumer_secret  =   '1UJKo0jg3GgVXCpD'
-    user_token           =   '84b07097-0f65-4c40-b75b-15e092e2de75'
-    user_secret          =   '70b6af54-0267-400b-bef4-f6188a1a8c1b'
-
-    linkedin_obj = LinkedIn(consumer_key, consumer_secret,
-                                        user_token, user_secret)
-        
-    #content = linkedin_obj.search_job_by_search_terms(['Python','C++'])
-    content = linkedin_obj.search(['Python', 'Machine Learning'], jobs=True)
-    print content
-
