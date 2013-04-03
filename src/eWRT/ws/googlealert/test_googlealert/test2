@@ -1,0 +1,37 @@
+Delivered-To: gardiac2002@gmail.com
+Received: by 10.112.84.5 with SMTP id u5csp33631lby;
+        Tue, 26 Mar 2013 03:29:11 -0700 (PDT)
+Return-Path: <3dnhRURQKCz0fnnfkdZkdqsr-mnqdokxfnnfkd.bnlfZqchZb1zz1flZhk.bnl@alerts.bounces.google.com>
+Received-SPF: pass (google.com: domain of 3dnhRURQKCz0fnnfkdZkdqsr-mnqdokxfnnfkd.bnlfZqchZb1zz1flZhk.bnl@alerts.bounces.google.com designates 10.236.75.8 as permitted sender) client-ip=10.236.75.8
+Authentication-Results: mr.google.com;
+       spf=pass (google.com: domain of 3dnhRURQKCz0fnnfkdZkdqsr-mnqdokxfnnfkd.bnlfZqchZb1zz1flZhk.bnl@alerts.bounces.google.com designates 10.236.75.8 as permitted sender) smtp.mail=3dnhRURQKCz0fnnfkdZkdqsr-mnqdokxfnnfkd.bnlfZqchZb1zz1flZhk.bnl@alerts.bounces.google.com;
+       dkim=pass header.i=@google.com
+X-Received: from mr.google.com ([10.236.75.8])
+        by 10.236.75.8 with SMTP id y8mr10266905yhd.23.1364293750901 (num_hops = 1);
+        Tue, 26 Mar 2013 03:29:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20120113;
+        h=mime-version:x-received:list-unsubscribe:list-id:message-id:date
+         :subject:from:to:content-type;
+        bh=gj0AxUc7Bm7M/j8pCJEW45jMSndyF+Q374xbgAwnaPU=;
+        b=pL9pxn53niRROekOaA3R1HFu9QzrQhELc6EIdoF7jmRgFYywnCCL59zCuJu9SofuDc
+         /w0gkLBaeRVKfQ+vlICzgqjDmChIVqRjWTkU67vPQShqMzk8TDzumhVIPG3GCuqOhVWB
+         sjAG5hL1FHZ3vixuBKeg+j/+BYxj4VElgB1CLEu9hLUvZh1eKpHbEisRD7DNxoteYaGn
+         bWZ4rfI4px+BEgv5UHuwZKd+kjPcFyGZkcuebrUIaj8RWLv2HJ3PG7SP1ejn1KW27fat
+         t8XFODo1l3RfxYLxdcVMmRP07KPmJ3QeiiawWF44ZJcdE3h150kiC9fm+fS1YQ8LozzP
+         zCVA==
+MIME-Version: 1.0
+X-Received: by 10.236.75.8 with SMTP id y8mr7790279yhd.23.1364293750353; Tue,
+ 26 Mar 2013 03:29:10 -0700 (PDT)
+List-Unsubscribe: <mailto:ur@unsubscribe.alerts.google.com?subject=AB2Xq4hIAM-99sTSN8lSw1N5hjv1NLNYdMADeQ0>
+List-Id: <AB2Xq4hIAM-99sTSN8lSw1N5hjv1NLNYdMADeQ0.alerts.google.com>
+Message-ID: <20cf300fafd35bf05f04d8d16494@google.com>
+Date: Tue, 26 Mar 2013 10:29:10 +0000
+Subject: Google Alert - Python
+From: Google Alerts <googlealerts-noreply@google.com>
+To: gardiac2002@gmail.com
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed; delsp=yes
+
+This is an email body.
+I refer to an article found at: http://www.wu.ac.at
+More information is at: http://www.tuwien.ac.at/en/
