@@ -49,3 +49,6 @@ dist
 .pydevproject
 .settings
 .metadata
+
+# vi
+.*.swp
