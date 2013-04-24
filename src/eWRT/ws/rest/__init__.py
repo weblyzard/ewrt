@@ -18,7 +18,7 @@ from socket import setdefaulttimeout
 from eWRT.access.http import Retrieve
 
 # set higher timeout values 
-WS_DEFAULT_TIMEOUT = 300
+WS_DEFAULT_TIMEOUT = 900
 
 logger = logging.getLogger('eWRT.ws.rest')
 
