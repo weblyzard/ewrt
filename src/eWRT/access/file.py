@@ -17,7 +17,7 @@ class CompressedFile(object):
     '''
     COMPRESSION_EXT = ('bz2', 'gz')
     
-    def __init__(self, fname, mode="r"):
+    def __init__(self, fname, mode='r'):
         self.name = fname
         if fname.endswith(".gz"):
             self.fhandle = GzipFile(fname, mode)
@@ -26,13 +26,18 @@ class CompressedFile(object):
         else:
             self.fhandle = open(fname, mode)
 
-
     def __enter__(self):
         return self.fhandle
 
     
     def __exit__(self, e_type, e_value, e_traceback):
         self.fhandle.close()
+
+
+    @classmethod
+    def open(cls, fname, mode='r'):
+        return CompressedFile(fname, mode).fhandle
+
 
     @classmethod
     def get_extension_list(cls, fname):
