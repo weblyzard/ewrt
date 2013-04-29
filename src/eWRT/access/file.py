@@ -11,12 +11,14 @@ from bz2 import BZ2File
 from gzip import GzipFile
 from os import remove
 
-class File(object):
-    """ An intelligent file object that transparently opens compressed
+class CompressedFile(object):
+    ''' An intelligent file object that transparently opens compressed
         files.
-    """
+    '''
+    COMPRESSION_EXT = ('bz2', 'gz')
     
     def __init__(self, fname, mode="r"):
+        self.name = fname
         if fname.endswith(".gz"):
             self.fhandle = GzipFile(fname, mode)
         elif fname.endswith(".bz2"):
@@ -31,7 +33,20 @@ class File(object):
     
     def __exit__(self, e_type, e_value, e_traceback):
         self.fhandle.close()
-        
+
+    @classmethod
+    def get_extension_list(cls, fname):
+        '''
+        @return: a list of file extensions of this file
+                 ignoring extensions indicating file compression.
+
+        e.g. 'test.awp.csv.bz2' -> ['csv', 'awp']
+        '''
+        ext_list = fname.split(".")
+        ext_list.reverse()
+                                
+        return ext_list if ext_list[0] not in cls.COMPRESSION_EXT else ext_list[1:]
+
 
 class TestFile(object):
     
@@ -43,13 +58,14 @@ class TestFile(object):
     
     @classmethod
     def _test_read_write(cls, extension=""):
-        fname = ".testfile"+extension
+        fname = ".testfile.txt"+extension
         
-        with open(fname, "w") as f:
+        with CompressedFile(fname, "w") as f:
             f.write(cls.TESTSTRING)
         
-        with open(fname) as f:
+        with CompressedFile(fname) as f:
             assert f.read() == cls.TESTSTRING
+            assert CompressedFile.get_extension_list(fname)[0] == 'txt'
         
         remove(fname)
     
