@@ -42,7 +42,7 @@ class WebOfTrust(object):
         if not urlObj:
             raise Exception('got no result')
         
-        return json.loads(urlObj.read()) 
+        return self._format_result(json.loads(urlObj.read())) 
         
     @classmethod
     def _encode_hosts(cls, hosts):
@@ -91,7 +91,7 @@ class WebOfTrust(object):
             result[host] = r
             
         return result
-            
+
 class TestWOT(unittest.TestCase):
     
     def test_format_result(self):
