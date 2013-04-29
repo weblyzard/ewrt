@@ -10,6 +10,7 @@ Created on Dec 6, 2012
 from bz2 import BZ2File
 from gzip import GzipFile
 from os import remove
+from os.path import basename
 
 class CompressedFile(object):
     ''' An intelligent file object that transparently opens compressed
@@ -45,9 +46,9 @@ class CompressedFile(object):
         @return: a list of file extensions of this file
                  ignoring extensions indicating file compression.
 
-        e.g. 'test.awp.csv.bz2' -> ['csv', 'awp']
+        e.g. 'x/y/test.awp.csv.bz2' -> ['csv', 'awp']
         '''
-        ext_list = fname.split(".")
+        ext_list = basename(fname).split(".")
         ext_list.reverse()
                                 
         return ext_list if ext_list[0] not in cls.COMPRESSION_EXT else ext_list[1:]
