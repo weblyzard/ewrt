@@ -43,8 +43,9 @@ class CompressedFile(object):
     @classmethod
     def get_extension_list(cls, fname):
         '''
-        @return: a list of file extensions of this file
-                 ignoring extensions indicating file compression.
+        :param fname: the file name to analyze
+        :rtype: a list of file extensions of this file
+                ignoring extensions indicating file compression.
 
         e.g. 'x/y/test.awp.csv.bz2' -> ['csv', 'awp']
         '''
