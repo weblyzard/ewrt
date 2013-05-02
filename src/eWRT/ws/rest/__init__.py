@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 #!/usr/bin/env python
 
-''' module:: eWRT.ws.rest
-    moduleauthor:: Albert Weichselbraun <weichselbraun@weblyzard.com>
-    moduleauthor:: Heinz-Peter Lang <lang@weblyzard.com>
+''' .. module:: eWRT.ws.rest
+    .. moduleauthor:: Albert Weichselbraun <weichselbraun@weblyzard.com>
+    .. moduleauthor:: Heinz-Peter Lang <lang@weblyzard.com>
 
     eWRT REST Client barebone with support for authentificated https requests
 '''
@@ -110,6 +110,7 @@ class RESTClient(object):
                              using json.load (False*)
         :param json_encode_arguments: whether to json encode the parameters
         :param query_parameters: optional query parameters
+        :rtype: the query result
         '''
         url = self.get_request_url(self.service_url, command, identifier, 
                         query_parameters)
