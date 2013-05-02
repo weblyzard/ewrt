@@ -44,6 +44,7 @@ Subpackages
     eWRT.ws.technorati
     eWRT.ws.twitter
     eWRT.ws.wikipedia
+    eWRT.ws.wot
     eWRT.ws.yahoo
     eWRT.ws.youtube
 

@@ -1,9 +1,12 @@
 # -*- coding: UTF-8 -*-
 #!/usr/bin/env python
 
-""" @package eWRT.ws.rest
-eWRT REST Client barebone with support for authentificated https requests
-"""
+''' module:: eWRT.ws.rest
+    moduleauthor:: Albert Weichselbraun <weichselbraun@weblyzard.com>
+    moduleauthor:: Heinz-Peter Lang <lang@weblyzard.com>
+
+    eWRT REST Client barebone with support for authentificated https requests
+'''
 import traceback
 import unittest
 import logging
@@ -23,20 +26,24 @@ WS_DEFAULT_TIMEOUT = 900
 logger = logging.getLogger('eWRT.ws.rest')
 
 class RESTClient(object):
+    '''
+    class:: RESTClient
+    '''
 
     def __init__(self, service_url, user=None, password=None,
                  authentification_method='basic',
                  module_name='eWRT.REST', default_timeout=WS_DEFAULT_TIMEOUT):
-        """ @param service_url: the base url of the web service
-            @param modul_name: the module name to add to the USER AGENT
+        ''' :param service_url: the base url of the web service
+            :param modul_name: the module name to add to the USER AGENT
                                description (optional)
-            @param user: username
-            @param password: password
-            @param authentification_method: authentification method to use
+            :param user: username
+            :param password: password
+            :param authentification_method: authentification method to use
                                             ('basic'*, 'digest'). 
-        """
+        '''
         setdefaulttimeout(default_timeout)
-        self.service_url = service_url
+        # remove superfluous slashes, if required
+        self.service_url = service_url[:-1] if service_url.endswith("/") else service_url
         self.user = user
         self.password = password
 
@@ -48,13 +55,13 @@ class RESTClient(object):
 
 
     def _json_request(self, url, parameters=None, return_plain=False, json_encode_arguments=True):
-        """ performs the given json request
-        @param url: the url to query
-        @param parameters: optional paramters
-        @param return_plain: whether to return the result without prior deserialization
-                             using json.load (False*)
-        @param json_encode_arguments: whether to json encode the parameters (True*)
-        """
+        ''' performs the given json request
+        :param url: the url to query
+        :param parameters: optional paramters
+        :param return_plain: whether to return the result without prior deserialization
+                            using json.load (False*)
+        :param json_encode_arguments: whether to json encode the parameters (True*)
+        '''
         if parameters:
             handle = self.retrieve( url , dumps( parameters ) if json_encode_arguments else parameters,
                                     {'Content-Type': 'application/json'})
@@ -68,33 +75,53 @@ class RESTClient(object):
             # this will also return empty list, dicts ... 
             return response
 
-    def request_path(self, path, parameters=None, return_plain=False):
-        if self.service_url.endswith('/') or path.startswith('/'):
-            url = ''.join([self.service_url, path])
-        else: 
-            url = '/'.join([self.service_url, path])
-            
-        return self._json_request(url, parameters, return_plain) 
+    @staticmethod
+    def get_request_url(service_url, command, identifier=None, query_parameters=None):
+        '''
+        Returns the request url given the command and query parameters
+        :param base_url: the base url of the web service
+        :param command: the command to execute at the web service
+        :param identifier: an optional identifier (e.g. batch_id, ...)
+        :param query_parameters: query parameters to include in the url
+                                 (e.g. execute?debug=True
+        :rtype: the complete request url
+        '''
+        # remove superfluous slashes
+        if command.startswith("/"):
+            command = command[1:]
+
+        url = '%s/%s/%s' % (service_url, command, identifier) \
+            if identifier else "%s/%s" % (service_url, command)
+
+        # add query string, if necessary
+        if query_parameters:
+            url = url + "?" + urllib.urlencode(query_parameters)
+
+        return url
 
     def execute(self, command, identifier=None, parameters=None, 
-                return_plain=False, json_encode_arguments=True):
-        """ executes a json command on the given web service
-        @param command: the command to execute
-        @param identifier: an optional identifier (e.g. batch_id, ...)
-        @param parameters: optional paramters
-        @param return_plain: return the result without prior deserialization
+                return_plain=False, json_encode_arguments=True,
+                query_parameters=None):
+        ''' executes a json command on the given web service
+        :param command: the command to execute
+        :param identifier: an optional identifier (e.g. batch_id, ...)
+        :param parameters: optional post paramters
+        :param return_plain: return the result without prior deserialization
                              using json.load (False*)
-        @param json_encode_arguments: whether to json encode the parameters
-        """
-        url = '%s/%s/%s' % (self.service_url, command, identifier) \
-            if identifier else "%s/%s" % (self.service_url, command)
-        return self._json_request(url, parameters, return_plain, json_encode_arguments)
+        :param json_encode_arguments: whether to json encode the parameters
+        :param query_parameters: optional query parameters
+        '''
+        url = self.get_request_url(self.service_url, command, identifier, 
+                        query_parameters)
+        return self._json_request(url, parameters, return_plain, 
+                        json_encode_arguments)
+
 
 class MultiRESTClient(object):
-    """ allows multiple URLs for access REST services """
+    ''' allows multiple URLs for access REST services '''
 
     def __init__(self, service_urls):
-        """ """  
+        ''' '''  
         self._service_urls = service_urls
         self.clients = self._connect_clients(self._service_urls) 
     
@@ -124,8 +151,9 @@ class MultiRESTClient(object):
         errors = []
         for client in self.clients:
             try:
-                response = client.request_path(path=path, parameters=parameters, 
-                                               return_plain=return_plain)
+                response = client.execute(self, command=path, 
+                                parameters=parameters, return_plain=return_plain)
+
                 if not execute_all_services:
                     break
             except Exception, e:
@@ -181,6 +209,13 @@ class TestRESTClient(unittest.TestCase):
             assert False, 'must raise an assertion error'
         except Exception, e:
             assert 'if set, user AND pwd required' in e
+
+    def test_get_url(self):
+        assert RESTClient.get_request_url(self.TEST_URL, 'execute', '12') \
+                    .endswith("/execute/12")
+        assert RESTClient.get_request_url(self.TEST_URL, 'execute', '12', {'debug': True}) \
+                    .endswith("/execute/12?debug=True")
             
+
 if __name__ == '__main__':
     unittest.main()

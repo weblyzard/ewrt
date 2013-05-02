@@ -4,7 +4,7 @@ eWRT Package
 :mod:`eWRT` Package
 -------------------
 
-.. automodule:: eWRT.__init__
+.. automodule:: eWRT
     :members:
     :undoc-members:
     :show-inheritance:
