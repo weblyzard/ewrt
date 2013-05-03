@@ -23,7 +23,8 @@ Contents:
 
    installation
    eWRT
-
+   features
+   
 Indices and tables
 ==================
 
