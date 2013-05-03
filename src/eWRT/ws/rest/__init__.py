@@ -152,8 +152,9 @@ class MultiRESTClient(object):
         errors = []
         for client in self.clients:
             try:
-                response = client.execute(self, command=path, 
-                                parameters=parameters, return_plain=return_plain)
+                response = client.execute(command=path, 
+                                          parameters=parameters, 
+                                          return_plain=return_plain)
 
                 if not execute_all_services:
                     break
