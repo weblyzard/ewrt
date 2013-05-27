@@ -14,7 +14,7 @@ setup(
       ###########################################
       ## Metadata
       name="eWRT",
-      version="0.7.7",
+      version="0.7.8",
       description='eWRT',
       author='Albert Weichselbraun, Heinz Lang, Gerhard Wohlgenannt, Johannes Duong, Norman Süsstrunk',
       author_email='albert@weblyzard.com, lang@weblyzard.com, wohlg@ai.wu.ac.at, johannes.duong@wu.ac.at, norman.suesstrunk@htwchur.ch',
@@ -75,6 +75,7 @@ setup(
                       'eWRT.ws.technorati',
                       'eWRT.ws.twitter',
                       'eWRT.ws.wikipedia',
+                      'eWRT.ws.wot',
                       'eWRT.ws.yahoo',
                       'eWRT.ws.youtube',
                      ],
