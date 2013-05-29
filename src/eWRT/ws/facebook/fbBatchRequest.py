@@ -49,7 +49,7 @@ class FbBatchRequest(object):
             if not row: 
                 print 'row == %s ... continue' % row
                 continue
-            
+            print row
             data = json.loads(row['body'])
             
             if 'data' in data:    
@@ -89,7 +89,8 @@ class FbBatchRequest(object):
             
             params = urllib.urlencode({cls.accessTokenHTTPParam: access_token,
                                        cls.batchHTTPParam: batch_requests})
-            
+            print cls.faceBookGraphHost
+            print params
             headers = {'Content-type': 'application/x-www-form-urlencoded',
                        'Accept': 'text/plain'}
             
@@ -113,52 +114,57 @@ class FbBatchRequest(object):
             
 class TestFacebookWS(unittest.TestCase):
     
-    def setUp(self):
-        from datetime import datetime
-        self.fbBatchRequest = FbBatchRequest()
-        fbWS1 = FacebookWS('Linus Torvalds', 'post', since=datetime(2012, 07, 01))
-        self.fbBatchRequest.add_facebook_ws(fbWS1)
-        fbWS2 = FacebookWS('Linus Torvalds')
-        self.fbBatchRequest.add_facebook_ws(fbWS2)
-        fbWS3 = FacebookWS('Heinz Lang', 'user')
-        self.fbBatchRequest.add_facebook_ws(fbWS3)
+#    def setUp(self):
+#        from datetime import datetime
+#        self.fbBatchRequest = FbBatchRequest()
+#        self.queries = [FacebookWS('Linus Torvalds', 'post', 
+#                                   since=datetime(2012, 07, 01)),
+#                        FacebookWS('Linus Torvalds'),
+#                        FacebookWS('Heinz Lang', 'user')]
+#        fbWS1 = FacebookWS('Linus Torvalds', 'post', since=datetime(2012, 07, 01))
+#        self.fbBatchRequest.add_facebook_ws(fbWS1)
+#        fbWS2 = FacebookWS('Linus Torvalds')
+#        self.fbBatchRequest.add_facebook_ws(fbWS2)
+#        fbWS3 = FacebookWS('Heinz Lang', 'user')
+#        self.fbBatchRequest.add_facebook_ws(fbWS3)
         
-    def test_get_json_batch_request_string(self):
-        json_string = self.fbBatchRequest._get_json_batch_request_string()
-        assert len(json.loads(json_string)) == 7
-        
+#    def test_get_json_batch_request_string(self):
+#        json_string = self.fbBatchRequest._get_json_batch_request_string(self.queries)
+#        print len(json_string)
+#        assert len(json_string) == 7
+#        
         # The order of the requests always changes
         # assert json == '[{"method": "GET", "relative_url": "/search?q=Linus+Torvalds&since=1341093600.0&type=post"}, {"method": "GET", "relative_url": "/search?q=Linus+Torvalds&type=post"}, {"method": "GET", "relative_url": "/search?q=Linus+Torvalds&type=user"}, {"method": "GET", "relative_url": "/search?q=Linus+Torvalds&type=page"}, {"method": "GET", "relative_url": "/search?q=Linus+Torvalds&type=event"}, {"method": "GET", "relative_url": "/search?q=Linus+Torvalds&type=group"}, {"method": "GET", "relative_url": "/search?q=Heinz+Lang&type=user"}]' 
         
-    def test_batch_search(self):
-        searchResult = self.fbBatchRequest.do_batch_search()
-        self.assertFalse('error' in searchResult)
-        assert len(searchResult) > 0        
-    
-    def test_bad_request(self):
-        access_token = "AAAElj9ZBZCquoBAGkKlcPvJsUCpyAZBxz6nsOYr8LAmpIj9Q9EZCKl9xVAYmlXGh2UQvhVellSWsZALPn6V73ZAZBiaxlwqkWlUjGVLzAHd7gZDZD"
-        fbBatchRequest = FbBatchRequest(access_token)
-        
-        try: 
-            fbBatchRequest.run_search('Linus Torvalds')
-        except Exception, e: 
-            print 'thats ok: %s' % e
-            assert True
-    
+#    def test_batch_search(self):
+#        searchResult = self.fbBatchRequest.do_batch_search()
+#        self.assertFalse('error' in searchResult)
+#        assert len(searchResult) > 0        
+#    
+#    def test_bad_request(self):
+#        access_token = "AAAElj9ZBZCquoBAGkKlcPvJsUCpyAZBxz6nsOYr8LAmpIj9Q9EZCKl9xVAYmlXGh2UQvhVellSWsZALPn6V73ZAZBiaxlwqkWlUjGVLzAHd7gZDZD"
+#        fbBatchRequest = FbBatchRequest(access_token)
+#        
+#        try: 
+#            fbBatchRequest.run_search('Linus Torvalds')
+#        except Exception, e: 
+#            print 'thats ok: %s' % e
+#            assert True
+#    
     def test_batch_search2(self):
         fbBatchRequest = FbBatchRequest()
         result = fbBatchRequest.run_search(['Wien'], 'post', 100)
         assert len(result) > 0
-    
-    def test_feed_mirroring(self):
-        fbBatchRequest = FbBatchRequest()
-        result = fbBatchRequest.run_search('58220918250/feed', 
-                                           objectType='path',
-                                           limit=1)
-        
-        for x in result:
-            print x
-        assert len(result) >= 1
+#    
+#    def test_feed_mirroring(self):
+#        fbBatchRequest = FbBatchRequest()
+#        result = fbBatchRequest.run_search('58220918250/feed', 
+#                                           objectType='path',
+#                                           limit=1)
+#        
+#        for x in result:
+#            print x
+#        assert len(result) >= 1
     
 if __name__ == "__main__":
 
