@@ -13,7 +13,7 @@ from eWRT.ws.WebDataSource import WebDataSource
 
 API_URL = 'https://www.googleapis.com/plus/v1/{path}?{query}'
 DEFAULT_ORDER_BY = 'recent' # other possibility: best
-DEFAUL_MAX_RESULTS = 20 # requires only 1 api access
+DEFAULT_MAX_RESULTS = 20 # requires only 1 api access
 
 logger = logging.getLogger('eWRT.ws.google')
 
@@ -29,7 +29,7 @@ class GooglePlus(object):
         self.api_url = api_url
         self.retrieve = Retrieve('google-plus')
         
-    def search(self, search_terms, max_results=DEFAUL_MAX_RESULTS):
+    def search(self, search_terms, max_results=DEFAULT_MAX_RESULTS):
         ''' searches Google+ for the given search_terms 
         :param search_terms: search terms
         :type search_terms: list
@@ -73,13 +73,9 @@ class GooglePlus(object):
         :rtype: dict
         '''
         url = self.get_request_url(params, path)
-        print url
-        try: 
-            data = self.retrieve.open(url)
-            return json.load(data)
-        except Exception, e:
-            print e, url
-            logger.exception('could not request %s: %s' % (url, e))
+        data = self.retrieve.open(url)
+        return json.load(data)
+
     
     def get_request_url(self, params=None, path='activities'):
         ''' returns a correctly parsed request URL 
@@ -99,6 +95,9 @@ class GooglePlus(object):
         
         if not 'key' in params:
             params['key'] = self.api_key
+        
+        if 'maxResults' in params and params['maxResults'] > DEFAULT_MAX_RESULTS:
+            params['maxResults'] = DEFAULT_MAX_RESULTS
         
         return self.api_url.format(path=path, query=urlencode(params))
 

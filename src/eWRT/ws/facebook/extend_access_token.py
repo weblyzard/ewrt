@@ -16,7 +16,7 @@ API_URL = 'https://graph.facebook.com/oauth/access_token?client_id={client_id}&c
 
 def get_new_access_token(client_id=FACEBOOK_APPLICATION_ID,
                          client_secret=FACEBOOK_SECRET_KEY,
-                         access_token='CAAAAHnTjbXwBAB4m4XpCC1JDCFRZBFci660dVluHhOtfTQY34gL2l93FPZCvVkZAQSWZCACq07cuWxwFo8QZAAOQ3mddDjN5aQtThhADb3eGSRDd338DEFopDi6wnfyzKagyp3eNbIt1qQRIrmPgVT7UL790Y8wkZD'):
+                         access_token=FACEBOOK_ACCESS_KEY):
     ''' '''
     url = API_URL.format(client_id=client_id,
                          client_secret=client_secret,

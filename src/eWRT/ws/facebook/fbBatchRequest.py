@@ -49,7 +49,7 @@ class FbBatchRequest(object):
             if not row: 
                 print 'row == %s ... continue' % row
                 continue
-            print row
+
             data = json.loads(row['body'])
             
             if 'data' in data:    
@@ -89,8 +89,6 @@ class FbBatchRequest(object):
             
             params = urllib.urlencode({cls.accessTokenHTTPParam: access_token,
                                        cls.batchHTTPParam: batch_requests})
-            print cls.faceBookGraphHost
-            print params
             headers = {'Content-type': 'application/x-www-form-urlencoded',
                        'Accept': 'text/plain'}
             
