@@ -55,12 +55,12 @@ class FbBatchRequest(object):
             if 'data' in data:    
                 for post in json.loads(row['body'])['data']:
                     result.append(post)
-                    url = 'http://www.facebook.com/%s' % post['id'].replace('_', '/posts/')
+                    url = 'http://www.facebook.com/%s' % post['id']
                     if 'comments' in post and 'data' in post['comments']:
-                        for comment in post['comments']['data']:
+                        for i, comment in enumerate(post['comments']['data']):
                             comment['type'] = 'comment'
                             comment['parent_url'] = url
-                            comment['url'] = url
+                            comment['url'] = '%s?comment=%s' % (url, i)
                             result.append(comment)
             elif data: 
                 result.append(data)
