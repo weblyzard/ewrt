@@ -88,6 +88,9 @@ class FacebookWS(object):
         args = {}
         args['q'] = self.term
         
+        if isinstance(args['q'], unicode):
+            args['q'] = args['q'].encode('utf-8')
+        
         if self.since:
             args['since'] = int(self.since)
             
