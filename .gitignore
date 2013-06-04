@@ -15,7 +15,7 @@
 
 # OS generated files #
 ######################
-.DS_Store?
+*.DS_Store*
 ehthumbs.db
 Icon?
 Thumbs.db
@@ -52,3 +52,6 @@ dist
 
 # vi
 .*.swp
+
+# documentation
+doc/_build
