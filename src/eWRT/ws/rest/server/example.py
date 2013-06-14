@@ -4,12 +4,6 @@ Created on 12.06.2013
 @author: streifdaniel
 '''
 
-#@see http://www.stereoplex.com/blog/understanding-imports-and-pythonpath
-import sys
-sys.path[0] = '/home/stredani/EclipseWorkspace/eWRT/src'
-del sys.path[3]
-#print '\n'.join(sys.path)
-
 from eWRT.ws.rest.server.service import WeblyzardService
 
 class HelloWorld(WeblyzardService):
