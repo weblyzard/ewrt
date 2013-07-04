@@ -54,17 +54,19 @@ class RESTClient(object):
                                 authentification_method = authentification_method)
 
 
-    def _json_request(self, url, parameters=None, return_plain=False, json_encode_arguments=True):
+    def _json_request(self, url, parameters=None, return_plain=False, 
+                      json_encode_arguments=True, content_type='application/json'):
         ''' performs the given json request
         :param url: the url to query
         :param parameters: optional paramters
         :param return_plain: whether to return the result without prior deserialization
                             using json.load (False*)
         :param json_encode_arguments: whether to json encode the parameters (True*)
+        :param content_type: one of 'application/json', 'application/xml'
         '''
         if parameters:
             handle = self.retrieve( url , dumps( parameters ) if json_encode_arguments else parameters,
-                                    {'Content-Type': 'application/json'})
+                                    {'Content-Type': content_type})
         else:
             handle = self.retrieve( url )
             
@@ -95,13 +97,13 @@ class RESTClient(object):
 
         # add query string, if necessary
         if query_parameters:
-            url = url + "?" + urllib.urlencode(query_parameters)
+            url = url + "?" + urllib.urlencode(query_parameters, doseq=True)
 
         return url
 
     def execute(self, command, identifier=None, parameters=None, 
                 return_plain=False, json_encode_arguments=True,
-                query_parameters=None):
+                query_parameters=None, content_type='application/json'):
         ''' executes a json command on the given web service
         :param command: the command to execute
         :param identifier: an optional identifier (e.g. batch_id, ...)
@@ -115,7 +117,7 @@ class RESTClient(object):
         url = self.get_request_url(self.service_url, command, identifier, 
                         query_parameters)
         return self._json_request(url, parameters, return_plain, 
-                        json_encode_arguments)
+                        json_encode_arguments, content_type)
 
 
 class MultiRESTClient(object):
