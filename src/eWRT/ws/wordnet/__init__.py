@@ -5,6 +5,11 @@
 
 Convenience functions to access the NLTK WordNet interface
 @author: Albert Weichselbraun
+
+Definitions:
+ (a) Term - a (potentially ambiguous) n-gram representing a unit of meaning.
+ (b) Synset - a concept with a well defined meaning
+ (c) Lemma - a grounded list of terms representing a certain synset
 '''
 
 from itertools import chain
@@ -24,6 +29,12 @@ def get_antonyms(term):
     '''
     return [ a for a in chain(*[ lemma.antonyms() for lemma in _get_lemmas(term) ] ) if a  ]
 
+def get_terms( lemma_list ):
+    '''
+    ::return: a set of strings representing the given list of lemmas
+    '''
+    return set( [ lemma.name for lemma in lemma_list ] )
+
 
 def _get_lemmas(term):
     ''' ::return: all lemmas for the given term '''
@@ -34,11 +45,3 @@ def _get_lemmas(term):
 
     return ( lemma for synset in synsets for lemma in synset.lemmas )
 
-
-# ------------------------------------------------------------------------------------
-# Unit tests
-# ------------------------------------------------------------------------------------
-
-def test_get_antonyms():
-    print get_antonyms('good') 
-    
