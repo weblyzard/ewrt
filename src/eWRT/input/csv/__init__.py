@@ -10,6 +10,10 @@ CSV files based on eval expressions.
 
 from csv import DictReader
 
+# these methods will be available for third party
+# modules
+from numpy import var, mean
+
 
 def get_csv_data(csv_file, column_expression_list, filter_expression):
     '''
