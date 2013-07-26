@@ -11,12 +11,12 @@ CSV files based on eval expressions.
 from csv import DictReader
 
 
-def get_csv_data(fname, column_expression, filter_expression):
+def get_csv_data(fname, column_expression_list, filter_expression):
     '''
     ::param fname: the file to open
     ::param column_expression: an eval expression to extract
                                the column data.
-                               e.g. "row['correct']"
+                               e.g. ("row['correct']", "row['sv']", )
                                     "max(row['sv'], row['sentiment'])"
     ::filter_expression: a filter expressions that get's
                    evaluate using eval.
@@ -24,6 +24,6 @@ def get_csv_data(fname, column_expression, filter_expression):
                          row['sv'] > 0."
     '''
     with open(fname) as csvfile:
-        print column_expression
-        return [eval(column_expression) for row in DictReader(csvfile)
-                if eval(filter_expression)]
+        return [[eval(column_expression) for column_expression
+                in column_expression_list]
+                for row in DictReader(csvfile) if eval(filter_expression)]
