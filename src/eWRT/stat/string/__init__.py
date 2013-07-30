@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-"""
+'''
  @package eWRT.ws.stat.string
  String statistics such as
   * word similarity
   * levenshtein distance
   * soundex
   * ...
-"""
+'''
 
 # (C)opyrights 2010 by Albert Weichselbraun <albert@weichselbraun.net>
 #                   and others (as outlined in the functions).
@@ -31,16 +31,16 @@
 import math
 from itertools import izip_longest
 from operator import mul, itemgetter
-from collections import defaultdict
+from collections import Counter
 
 from eWRT.util.cache import MemoryCached
 from eWRT.lib.thirdparty.advas.phonetics import caverphone, metaphone, nysiis
 
 # define some basic mathematical functions
-dot=lambda x,y: sum(map(mul, x, y))
+dot = lambda x, y: sum(map(mul, x, y))
 
 def wordSimilarity(s1, s2, similarityMeasure):
-    """ computes the given similarity metric on a strings
+    ''' computes the given similarity metric on a strings
         words.
         e.g. wordSimilarity("nuclear energy", "energy nuclear", lev) = 0
         
@@ -48,21 +48,21 @@ def wordSimilarity(s1, s2, similarityMeasure):
         e.g. wordSimilarity("as you thought", "you thought") ==
                wordSimilarity("as you thought", "you thought", "") 
         
-    """
+    '''
     wordList = list( izip_longest(s1.split(), s2.split(), fillvalue="") )
     words1, words2 = map(itemgetter(0), wordList), map(itemgetter(1), wordList)
     assert len(words1) == len(words2)
     
-    score = float(sum([ min( [ similarityMeasure(w1,w2) for w1 in words1] ) 
-                 for w2 in words2 ])) / len(words1)
+    score = float(sum([min([similarityMeasure(w1, w2) for w1 in words1]) 
+                 for w2 in words2])) / len(words1)
     return score
     
 @MemoryCached
 def lev(s1, s2):
-    """ Levenshtein string edit distance
+    ''' Levenshtein string edit distance
         source: 
         http://en.wikibooks.org/wiki/Algorithm_implementation/Strings/Levenshtein_distance#Python
-    """
+    '''
     if len(s1) < len(s2):
         return lev(s2, s1)
     if not s1:
@@ -82,7 +82,7 @@ def lev(s1, s2):
 
 @MemoryCached
 def damerauLev(seq1, seq2):
-    """
+    '''
     Calculate the Damerau-Levenshtein distance between sequences.
     source : http://mwh.geek.nz/2009/04/26/python-damerau-levenshtein-distance/
     license: MIT license
@@ -107,7 +107,7 @@ def damerauLev(seq1, seq2):
     It works with arbitrary sequences too:
     >>> dameraulevenshtein('abcd', ['b', 'a', 'c', 'd', 'e'])
     2
-    """
+    '''
     # codesnippet:D0DE4716-B6E6-4161-9219-2903BF8F547F
     # Conceptually, this is based on a len(seq1) + 1 * len(seq2) + 1 matrix.
     # However, only the current and two previous rows are needed at once,
@@ -132,12 +132,12 @@ def damerauLev(seq1, seq2):
 
 @MemoryCached
 def soundex(name, length=4):
-    """ soundex module conforming to Knuth's algorithm
+    ''' soundex module conforming to Knuth's algorithm
         implementation 2000-12-24 by Gregory Jorgensen
 
         source : http://code.activestate.com/recipes/52213-soundex-algorithm/
         license: public domain
-    """
+    '''
 
     # digits holds the soundex values for the alphabet
     digits = '01230120022455012623010202'
@@ -164,7 +164,7 @@ def soundex(name, length=4):
 
 
 class VectorSpaceModel:
-    """ a class used for vector space representations """
+    ''' a class used for vector space representations '''
 
     def __init__(self, tokens, binary=False):
         if not binary:
@@ -173,33 +173,27 @@ class VectorSpaceModel:
             self.v = self._binaryAddTokens(tokens)
         
     def _addTokens(self, tokens):
-        """ adds the tokens to a vsm representation """
-        v = defaultdict(int)
-        for t in tokens:
-            v[t] +=1
-        return v
+        ''' adds the tokens to a vsm representation '''
+        return Counter(tokens)
     
     def _binaryAddTokens(self, tokens):
-        """ adds tokens to a binary vsm representation """
-        v = defaultdict(int)
-        for t in tokens:
-            v[t] =1
-        return v
+        ''' adds tokens to a binary vsm representation '''
+        return Counter(set(tokens))
 
     def __str__(self):
         return str(self.v)
 
     @staticmethod
     def createVSMRepresntation(v1, v2):
-        """ creates the VSM representation for the two vectors
-            to compare """
+        ''' creates the VSM representation for the two vectors
+            to compare '''
         common_token_list = set( v1.keys() + v2.keys() )
         vsm1 = [ v1[k] for k in common_token_list ]
         vsm2 = [ v2[k] for k in common_token_list ]
         return vsm1, vsm2
 
     def __mul__(self, o):
-        """ returns the dot-product of two vectors """
+        ''' returns the dot-product of two vectors '''
         v1, v2 = self.createVSMRepresntation(self.v, o.v)        
         return float(dot(v1, v2)) / ( math.sqrt(dot(v1,v1)) * math.sqrt(dot(v2,v2)) ) 
 
@@ -210,11 +204,11 @@ class VectorSpaceModel:
 from unittest import TestCase
 
 def testMetaPhone():
-    """ compares output produced by the advas metaphone
+    ''' compares output produced by the advas metaphone
         module with the postgres fuzzymatch functions
         @warning: the used metaphone implementation _does not_ correspond
                   to the one used in postgresql.
-     """
+     '''
     from warnings import warn
     warn("the used metaphone implementation _does not_ correspond to the one use in postgres")
     print metaphone('Microprocessor')
@@ -223,20 +217,20 @@ def testMetaPhone():
     assert metaphone('Microprocessor') == 'mkrprksr'
     
 def testNysiis():
-    """ tests the New York State Identification and Intelligence
-        Algorithm (NYSIIS) code for the given term """
+    ''' tests the New York State Identification and Intelligence
+        Algorithm (NYSIIS) code for the given term '''
     print nysiis("Microprocessor")
     assert nysiis("Albert").lower() == 'albard'
     
 def testCaverphone():
-    """ tests the caverphone algorithm """
+    ''' tests the caverphone algorithm '''
     print caverphone("Albert")
     assert caverphone("Albert") == "APT1111111"
      
 
 def testSoundex():
-    """ compares the output of the soundex algorithm with
-        the output provided by postgres """
+    ''' compares the output of the soundex algorithm with
+        the output provided by postgres '''
     assert soundex("Knuth") == "K530"
     assert soundex("Weichselbraun") == "W224"
     assert soundex("Smith") == "S530"
@@ -246,7 +240,7 @@ def testSoundex():
     
 
 def testWordSimilarity():
-    """ tests the per word similarity """
+    ''' tests the per word similarity '''
     assert wordSimilarity("Ana Toth", "Toth Ana", lev) == 0
     assert wordSimilarity("Anna Toth", "Toth Ana", lev) == 0.5
 
@@ -263,9 +257,9 @@ def testLevenshteinDistance():
     assert lev("safety measures", "safety measures") == 0
     
 def testDamerauLev():
-    """ tests the Damerau-Levenshtein distance
+    ''' tests the Damerau-Levenshtein distance
         http://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance 
-    """
+    '''
     assert damerauLev("jump", "jupm") == 1
     assert damerauLev("julius", "julius") == 0
     assert damerauLev("the city of perth", "") == len("the city of perth")
