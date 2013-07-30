@@ -17,9 +17,11 @@ from eWRT.ws.conceptnet.node import Node
 from eWRT.ws.conceptnet.edge import Edge
 
 CONCEPTNET_BASE_URL = 'http://conceptnet5.media.mit.edu/data/5.1'
+CLEANUP_TRANSLATION_MAP = {'!': None, '.': None, '?': None, 
+                           '"': None, "'": None}
 
-Concept = namedtuple("Concept", "language concept_name pos sense")
-
+Concept  = namedtuple("Concept", "language concept_name pos sense")
+tokenize = lambda sentence: sentence.translate(CLEANUP_TRANSLATION_MAP).split(" ")
 
 @DiskCached(".conceptnet-query-cache")
 def retrieve_conceptnet_query_result(query):
@@ -57,6 +59,16 @@ class Result(object):
                       [True for key, value in filter_dict.items() 
                        if edge[key] == value]]
 
+    def apply_language_filter(self, valid_languages):
+        '''
+        Removes all edges where either the start or end node
+        does not matches the list of valid languages
+        ::param valid_languages: list of valid languages
+        '''
+        self.edges = [edge for edge in self.edges if
+                      Node.lang(edge['start']) in valid_languages and
+                      Node.lang(edge['end']) in valid_languages]
+
     def get_concept(self, filter_url=None, include_subconcepts=False):
         ''' ::param filter_url: an optional filter_url for the concepts to extract 
             ::param include_subconcepts: whether to include subconcepts, if filtering
@@ -76,8 +88,9 @@ class Result(object):
         ''' ::return: the set of senses present in the result '''
         return set(self.get_concept())
 
-    def get_vsm(self):
+    def get_vsm(self, stopword_list):
         ''' 
+        ::param stopword_list: an optional stopword_list to apply
         ::return: a counter object with all words and their respective
                   counts for usage in a vector space model.
         '''
@@ -89,10 +102,13 @@ class Result(object):
             
             # handle list values
             if isinstance(attr_value, list):
-                map(vsm.update, attr_value)
-            else:
+                attr_value = chain(*map(tokenize, attr_value))
                 vsm.update(attr_value)
+            else:
+                vsm.update( tokenize(attr_value) )
 
+        # apply stopword list
+        map(vsm.pop, [ s for s in stopword_list if s in vsm])
         return vsm
 
 

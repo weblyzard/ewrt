@@ -7,8 +7,10 @@ from eWRT.ws.conceptnet.util import ground_term
 
 def test_lookup_result():
     l = LookupResult("dog")
-    print l.edges
 
 def test_concept_grounding():
-    concept = ground_term('battery', ['life', 'extensive', 'too', 'short'])
+    concept = ground_term('battery', ['life', 'extensive', 'too', 'short', 'electricity'])
+    print "--_"
     print concept
+    print "--__"
+    aha
