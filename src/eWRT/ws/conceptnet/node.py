@@ -11,5 +11,8 @@ from json import loads
 
 class Node(object):
 
-    def __init__(self, json_string):
-        node_dict = loads(json_string)
+    def __init__(self, url, edges):
+        self.url = url
+        self.edges = [e for e in edges if e['start'] == url or e['end'] == url]
+
+
