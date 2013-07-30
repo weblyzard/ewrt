@@ -26,10 +26,10 @@ def retrieve_conceptnet_query_result(query):
     ''' ::param url: the url to retrieve
         ::return: the json response to the given conceptnet query
     '''
-    print "oooo", query[:120]
     with Retrieve(__name__) as r:
         c = r.open(query)
         return c.read()
+
 
 class Result(object):
     ''' The result of a ConceptNet query '''
@@ -54,7 +54,7 @@ class Result(object):
              (e.g. {'rel': '/r/isA', 'rel': '/r/HasContext', ...})
         '''
         self.edges = [edge for edge in self.edges if 
-                      [True for key, value in key_value_dict.items() 
+                      [True for key, value in filter_dict.items() 
                        if edge[key] == value]]
 
     def get_concept(self, filter_url=None, include_subconcepts=False):

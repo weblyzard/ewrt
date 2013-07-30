@@ -34,7 +34,7 @@ class LookupResult(Result):
         Result.__init__(self, retrieve_conceptnet_query_result(conceptnet_url))
 
     @staticmethod
-    def get_concept(concept_url):
+    def get_concept_from_url(concept_url):
         '''
         ::param concept_url: the url of the ConceptNet concept
         '''
