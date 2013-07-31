@@ -36,7 +36,7 @@ def retrieve_conceptnet_query_result(query):
 class Result(object):
     ''' The result of a ConceptNet query '''
 
-    RELEVANT_VSM_ATTRIBUTES = ('endLemmas', 'startlemmas', 'text', )
+    RELEVANT_VSM_ATTRIBUTES = ('endLemmas', 'startLemmas', 'text', )
 
     def __init__(self, json_string, min_score=1.0):
         '''

@@ -30,10 +30,15 @@ def ground_term(term, input_context, pos_tag = None, stopword_list=STOPWORD_DICT
     best_matching_sense, best_matching_sense_sim_score = None, 0.
 
     for sense in lookup_result.get_senses():
-        context_result = LookupResult(conceptnet_url=CONCEPTNET_BASE_URL+"/"+sense.url, strict=True)
+        context_result = LookupResult(conceptnet_url=CONCEPTNET_BASE_URL+"/"+sense.url.encode("utf8"), strict=True)
         context_result.apply_language_filter(VALID_LANGUAGES) 
         sense_context = context_result.get_vsm(stopword_list)
-        print sense, "&", ", ".join(sense_context.keys())
+        # ignore empty contexts (e.g. due to the stopword_list)
+        if not sense_context:
+            continue
+        #if '/c/en/look_at' in sense.url:
+        #    print context_result.edges
+        #    print sense, "&", ", ".join(sense_context.keys())
 
         current_sim_score = context_vector * VectorSpaceModel(sense_context)
         if current_sim_score >= best_matching_sense_sim_score:
