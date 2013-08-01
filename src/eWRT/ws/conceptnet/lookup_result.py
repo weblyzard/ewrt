@@ -60,3 +60,8 @@ class LookupResult(Result):
         l = s.split(delimiter, size)
         return l + (size - len(l)) * [None]
 
+
+if __name__ == '__main__':
+    r = LookupResult('accusation/n', strict=True)
+    r.apply_language_filter(('en', ))
+    print r.get_vsm(stopword_list=())

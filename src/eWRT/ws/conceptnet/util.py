@@ -7,6 +7,7 @@ Provides utils and shortcuts for using ConceptNet
 ::author: Albert Weichselbraun <albert.weichselbraun@htwchur.ch>
 """
 from logging import getLogger, FileHandler, Formatter, INFO
+from time import strftime
 
 from eWRT.stat.language import STOPWORD_DICT
 from eWRT.stat.string import VectorSpaceModel
@@ -17,7 +18,7 @@ from eWRT.ws.conceptnet.lookup_result import LookupResult
 LOGGER = getLogger("eWRT.ws.conceptnet.util")
 LOGGER.setLevel(INFO)
 
-hdlr = FileHandler("eWRT.ws.conceptnet.util.log")
+hdlr = FileHandler("eWRT.ws.conceptnet.util.%s.log" % (strftime("%Y-%m-%d_%H.%M")))
 hdlr.setFormatter(Formatter('%(asctime)s %(levelname)s %(message)s'))
 LOGGER.addHandler(hdlr)
 
