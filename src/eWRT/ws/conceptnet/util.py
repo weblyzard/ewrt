@@ -12,6 +12,8 @@ from eWRT.ws.conceptnet import CONCEPTNET_BASE_URL
 from eWRT.ws.conceptnet.lookup_result import LookupResult
 
 VALID_LANGUAGES = ('en', )
+# only allow hypernym, hyponym and synonym relations for senses
+VALID_SENSE_FILTER = [(u'rel', u'/r/IsA'), (u'rel', u'/r/Synonym'), (u'rel', u'/r/InstanceOf')]
 
 def ground_term(term, input_context, pos_tag = None, stopword_list=STOPWORD_DICT['en']):
     '''
@@ -26,6 +28,7 @@ def ground_term(term, input_context, pos_tag = None, stopword_list=STOPWORD_DICT
     context_vector = VectorSpaceModel(input_context)
     lookup_result = LookupResult(term=term, pos_tag=pos_tag)
     lookup_result.apply_language_filter(VALID_LANGUAGES)
+    lookup_result.apply_edge_filter(VALID_SENSE_FILTER)
     
     best_matching_sense, best_matching_sense_sim_score = None, 0.
 

@@ -12,12 +12,15 @@ from collections import defaultdict
 
 from eWRT.ws.conceptnet import Concept, Result, CONCEPTNET_BASE_URL, retrieve_conceptnet_query_result
 
+# maximum number of edges to retrieve
+DEFAULT_MAX_EDGE_COUNT = 5000
+
 
 class LookupResult(Result):
     '''
     An object for handling ConceptNet search results
     '''
-    def __init__(self, term=None, rel_type='c', lang='en', pos_tag = None, conceptnet_url=None, strict=False):
+    def __init__(self, term=None, rel_type='c', lang='en', pos_tag = None, conceptnet_url=None, strict=False, count=DEFAULT_MAX_EDGE_COUNT):
         '''
         ::param term: the lookup term
         ::param rel_type: the relation type (c).
@@ -26,10 +29,12 @@ class LookupResult(Result):
         ::param conceptnet_url: 
         ::param strict: if set remove all edges that do not contain the
                         exact conceptnet_url
+        ::param count: maximum number of edges to retrieve
         ::return: a list of edges matching the lookup query
         '''
         if not conceptnet_url:
             conceptnet_url  = "%s/%s/%s/%s" % (CONCEPTNET_BASE_URL, rel_type, lang, term)
+        conceptnet_url += "?limit=%d" % count
 
         Result.__init__(self, retrieve_conceptnet_query_result(conceptnet_url))
 

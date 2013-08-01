@@ -10,6 +10,8 @@ Access to conceptnet data structures using its REST interface
 from collections import namedtuple, Counter
 from itertools import chain
 from json import loads
+from os.path import exists
+from cPickle import load, dump
 
 from eWRT.access.http import Retrieve
 from eWRT.util.cache import DiskCached
@@ -47,16 +49,20 @@ class Result(object):
         self.edges = [Edge(edge_dict) for edge_dict in loads(json_string)['edges']
                       if edge_dict['score'] >= min_score]
 
-    def apply_edge_filter(self, filter_dict):
+        edge_types = load(open("known-edge-types.awi")) if exists("known-edge-types.awi") else set()
+        edge_types.update([ e['rel'] for e in self.edges ])
+        dump(edge_types, open("known-edge-types.awi","w"))
+
+    def apply_edge_filter(self, filter_list):
         '''
         Applies the given filter to the result object
-        ::param filter_dict: a dictionary containing keys and 
+        ::param filter_list: a list containing keys and 
              potential values for these keys. The entry is filtered
              if it does not match any of the given key value pairs.
-             (e.g. {'rel': '/r/isA', 'rel': '/r/HasContext', ...})
+             (e.g. [('rel', '/r/isA'), ('rel', '/r/HasContext'), ...])
         '''
         self.edges = [edge for edge in self.edges if 
-                      [True for key, value in filter_dict.items() 
+                      [True for key, value in filter_list
                        if edge[key] == value]]
 
     def apply_language_filter(self, valid_languages):
