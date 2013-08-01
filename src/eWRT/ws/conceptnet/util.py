@@ -6,14 +6,26 @@ Provides utils and shortcuts for using ConceptNet
 
 ::author: Albert Weichselbraun <albert.weichselbraun@htwchur.ch>
 """
+from logging import getLogger, FileHandler, Formatter, INFO
+
 from eWRT.stat.language import STOPWORD_DICT
 from eWRT.stat.string import VectorSpaceModel
 from eWRT.ws.conceptnet import CONCEPTNET_BASE_URL
 from eWRT.ws.conceptnet.lookup_result import LookupResult
 
+
+LOGGER = getLogger("eWRT.ws.conceptnet.util")
+LOGGER.setLevel(INFO)
+
+hdlr = FileHandler("eWRT.ws.conceptnet.util.log")
+hdlr.setFormatter(Formatter('%(asctime)s %(levelname)s %(message)s'))
+LOGGER.addHandler(hdlr)
+
 VALID_LANGUAGES = ('en', )
 # only allow hypernym, hyponym and synonym relations for senses
 VALID_SENSE_FILTER = [(u'rel', u'/r/IsA'), (u'rel', u'/r/Synonym'), (u'rel', u'/r/InstanceOf')]
+
+#MAX_CONTEXT_COUNT_SENSES = 100
 
 def ground_term(term, input_context, pos_tag = None, stopword_list=STOPWORD_DICT['en']):
     '''
@@ -32,9 +44,15 @@ def ground_term(term, input_context, pos_tag = None, stopword_list=STOPWORD_DICT
     
     best_matching_sense, best_matching_sense_sim_score = None, 0.
 
-    for sense in lookup_result.get_senses():
+    senses = lookup_result.get_senses()
+    LOGGER.info("Disambiguating senses for term '%s'" % (term.encode("utf8")))
+
+    for no, sense in enumerate(senses):
         context_result = LookupResult(conceptnet_url=CONCEPTNET_BASE_URL+"/"+sense.url.encode("utf8"), strict=True)
         context_result.apply_language_filter(VALID_LANGUAGES) 
+        LOGGER.info("Sense #%d for %s: '%s' found '%d' context assertions" % (
+                  no, term.encode("utf8"), sense.url.encode("utf8"), 
+                  len(context_result.edges)))
         sense_context = context_result.get_vsm(stopword_list)
         # ignore empty contexts (e.g. due to the stopword_list)
         if not sense_context:

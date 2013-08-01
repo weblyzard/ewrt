@@ -9,6 +9,7 @@ Access to conceptnet data structures using its REST interface
 
 from json import loads
 from collections import defaultdict
+from urllib import quote
 
 from eWRT.ws.conceptnet import Concept, Result, CONCEPTNET_BASE_URL, retrieve_conceptnet_query_result
 
@@ -34,7 +35,8 @@ class LookupResult(Result):
         '''
         if not conceptnet_url:
             conceptnet_url  = "%s/%s/%s/%s" % (CONCEPTNET_BASE_URL, rel_type, lang, term)
-        conceptnet_url += "?limit=%d" % count
+        host, url = conceptnet_url.split("/", 3)[2:]
+        conceptnet_url = "http://%s/%s?limit=%d" % (host, quote(url), count)
 
         Result.__init__(self, retrieve_conceptnet_query_result(conceptnet_url))
 
