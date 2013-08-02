@@ -18,7 +18,7 @@ from eWRT.ws.conceptnet.lookup_result import LookupResult
 LOGGER = getLogger("eWRT.ws.conceptnet.util")
 LOGGER.setLevel(INFO)
 
-hdlr = FileHandler("eWRT.ws.conceptnet.util.%s.log" % (strftime("%Y-%m-%d_%H.%M")))
+hdlr = FileHandler("eWRT.ws.conceptnet.util.%s.log" % (strftime("%Y-%m-%d_%H%M")))
 hdlr.setFormatter(Formatter('%(asctime)s %(levelname)s %(message)s'))
 LOGGER.addHandler(hdlr)
 
@@ -55,14 +55,16 @@ def ground_term(term, input_context, pos_tag = None, stopword_list=STOPWORD_DICT
                   no, term.encode("utf8"), sense.url.encode("utf8"), 
                   len(context_result.edges)))
         sense_context = context_result.get_vsm(stopword_list)
-        # ignore empty contexts (e.g. due to the stopword_list)
-        if not sense_context:
-            continue
-        #if '/c/en/look_at' in sense.url:
+                #if '/c/en/look_at' in sense.url:
         #    print context_result.edges
         #    print sense, "&", ", ".join(sense_context.keys())
 
-        current_sim_score = context_vector * VectorSpaceModel(sense_context)
+        try:
+            current_sim_score = context_vector * VectorSpaceModel(sense_context)
+        except ZeroDivisionError:
+            # ignore empty contexts (e.g. due to words removed by the stopword_list)
+            continue
+
         if current_sim_score >= best_matching_sense_sim_score:
             best_matching_sense_sim_score = current_sim_score
             best_matching_sense = sense

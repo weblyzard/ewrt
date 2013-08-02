@@ -49,9 +49,9 @@ class Result(object):
         self.edges = [Edge(edge_dict) for edge_dict in loads(json_string)['edges']
                       if edge_dict['score'] >= min_score]
 
-        edge_types = load(open("known-edge-types.awi")) if exists("known-edge-types.awi") else set()
-        edge_types.update([ e['rel'] for e in self.edges ])
-        dump(edge_types, open("known-edge-types.awi","w"))
+        #edge_types = load(open("known-edge-types.awi")) if exists("known-edge-types.awi") else set()
+        #edge_types.update([ e['rel'] for e in self.edges ])
+        #dump(edge_types, open("known-edge-types.awi","w"))
 
     def apply_edge_filter(self, filter_list):
         '''
