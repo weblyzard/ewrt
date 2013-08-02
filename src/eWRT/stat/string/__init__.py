@@ -32,12 +32,11 @@ import math
 from itertools import izip_longest
 from operator import mul, itemgetter
 from collections import Counter
+from numpy import vdot
+from numpy.linalg import norm
 
 from eWRT.util.cache import MemoryCached
 from eWRT.lib.thirdparty.advas.phonetics import caverphone, metaphone, nysiis
-
-# define some basic mathematical functions
-dot = lambda x, y: sum(map(mul, x, y))
 
 def wordSimilarity(s1, s2, similarityMeasure):
     ''' computes the given similarity metric on a strings
@@ -184,18 +183,18 @@ class VectorSpaceModel:
         return str(self.v)
 
     @staticmethod
-    def createVSMRepresntation(v1, v2):
+    def createVSMRepresentation(v1, v2):
         ''' creates the VSM representation for the two vectors
             to compare '''
-        common_token_list = set( v1.keys() + v2.keys() )
-        vsm1 = [ v1[k] for k in common_token_list ]
-        vsm2 = [ v2[k] for k in common_token_list ]
+        complete_token_list = set(v1.keys() + v2.keys())
+        vsm1 = [v1[k] for k in complete_token_list]
+        vsm2 = [v2[k] for k in complete_token_list] 
         return vsm1, vsm2
 
     def __mul__(self, o):
         ''' returns the dot-product of two vectors '''
-        v1, v2 = self.createVSMRepresntation(self.v, o.v)        
-        return float(dot(v1, v2)) / ( math.sqrt(dot(v1,v1)) * math.sqrt(dot(v2,v2)) ) 
+        v1, v2 = self.createVSMRepresentation(self.v, o.v)        
+        return vdot(v1, v2) / (norm(v1) * norm(v2))
 
 # --------------------------------------------------------------------
 # UNITTESTS
