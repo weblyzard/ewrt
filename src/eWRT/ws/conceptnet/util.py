@@ -68,7 +68,7 @@ def ground_term(term, input_context, pos_tag = None, stopword_list=STOPWORD_DICT
             # ignore empty contexts (e.g. due to words removed by the stopword_list)
             continue
 
-        if current_sim_score >= best_matching_sense_sim_score and len(sense.split("/"))>=MIN_SENSE_SPECIFICITY:
+        if current_sim_score >= best_matching_sense_sim_score and len(sense.url.split("/"))>=MIN_SENSE_SPECIFICITY:
             best_matching_sense_sim_score = current_sim_score
             best_matching_sense = sense
 
