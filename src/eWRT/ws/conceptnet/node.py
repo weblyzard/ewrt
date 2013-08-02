@@ -25,7 +25,7 @@ class Node(object):
         return self.url == other.url
 
     def __repr__(self):
-        return "ConceptNetNode <%s>" % (self.url)
+        return "ConceptNetNode <%s>" % (self.url.encode("utf8"))
 
     @staticmethod
     def lang(node_url):
