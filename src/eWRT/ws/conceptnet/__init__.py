@@ -31,7 +31,7 @@ def retrieve_conceptnet_query_result(query):
         ::return: the json response to the given conceptnet query
     '''
     with Retrieve(__name__) as r:
-        c = r.open(query)
+        c = r.open(query, retry=3)
         return c.read()
 
 
