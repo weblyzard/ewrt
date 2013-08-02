@@ -25,6 +25,9 @@ LOGGER.addHandler(hdlr)
 VALID_LANGUAGES = ('en', )
 # only allow hypernym, hyponym and synonym relations for senses
 VALID_SENSE_FILTER = [(u'rel', u'/r/IsA'), (u'rel', u'/r/Synonym'), (u'rel', u'/r/InstanceOf')]
+# requires at least 4 levels to describe the sense 
+# (e.g. /c/en/senes/x while /c/en/dog would fail this criteria)
+MIN_SENSE_SPECIFICITY = 5 
 
 #MAX_CONTEXT_COUNT_SENSES = 100
 
@@ -65,7 +68,7 @@ def ground_term(term, input_context, pos_tag = None, stopword_list=STOPWORD_DICT
             # ignore empty contexts (e.g. due to words removed by the stopword_list)
             continue
 
-        if current_sim_score >= best_matching_sense_sim_score:
+        if current_sim_score >= best_matching_sense_sim_score and len(sense.split("/"))>=MIN_SENSE_SPECIFICITY:
             best_matching_sense_sim_score = current_sim_score
             best_matching_sense = sense
 
