@@ -9,6 +9,7 @@ Provides utils and shortcuts for using ConceptNet
 from logging import getLogger, FileHandler, Formatter, INFO
 from time import strftime
 
+from eWRT.util.cache import MemoryCached
 from eWRT.stat.language import STOPWORD_DICT
 from eWRT.stat.string import VectorSpaceModel
 from eWRT.ws.conceptnet import CONCEPTNET_BASE_URL
@@ -52,13 +53,9 @@ def ground_term(term, input_context, pos_tag = None, stopword_list=STOPWORD_DICT
     LOGGER.info("Disambiguating senses for term '%s'" % (term.encode("utf8")))
 
     for no, sense in enumerate(senses):
-        context_result = LookupResult(conceptnet_url=CONCEPTNET_BASE_URL+"/"+sense.url.encode("utf8"), strict=True)
-        context_result.apply_language_filter(VALID_LANGUAGES) 
-        LOGGER.info("Sense #%d for %s: '%s' found '%d' context assertions" % (
-                  no, term.encode("utf8"), sense.url.encode("utf8"), 
-                  len(context_result.edges)))
-        sense_context = context_result.get_vsm(stopword_list)
-                #if '/c/en/look_at' in sense.url:
+        LOGGER.info("Sense #%d for %s: %s" % (no, term, sense.url.encode("utf8"))) 
+        sense_context = get_textual_data(sense, VALID_LANGUAGES, stopword_list)
+        #if '/c/en/look_at' in sense.url:
         #    print context_result.edges
         #    print sense, "&", ", ".join(sense_context.keys())
 
@@ -75,4 +72,12 @@ def ground_term(term, input_context, pos_tag = None, stopword_list=STOPWORD_DICT
     return best_matching_sense
 
 
-
+@MemoryCached(10000)
+def get_textual_data(sense, valid_languages, stopword_list):
+    '''
+    ::returns: a vector space representation of the given concept
+    '''
+    context_result = LookupResult(conceptnet_url=CONCEPTNET_BASE_URL+"/"+sense.url.encode("utf8"), strict=True)
+    context_result.apply_language_filter(valid_languages) 
+    LOGGER.info("Found %d assertions." % (len(context_result.edges)) )
+    return context_result.get_vsm(stopword_list)
