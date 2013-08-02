@@ -28,7 +28,7 @@ VALID_LANGUAGES = ('en', )
 VALID_SENSE_FILTER = [(u'rel', u'/r/IsA'), (u'rel', u'/r/Synonym'), (u'rel', u'/r/InstanceOf')]
 # requires at least 4 levels to describe the sense 
 # (e.g. /c/en/senes/x while /c/en/dog would fail this criteria)
-MIN_SENSE_SPECIFICITY = 5 
+MIN_SENSE_SPECIFICITY = 4 
 
 #MAX_CONTEXT_COUNT_SENSES = 100
 
