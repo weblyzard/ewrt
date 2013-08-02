@@ -73,7 +73,7 @@ class Cache(object):
     @staticmethod
     def getObjectId( obj ):
         """ returns an identifier representing the object """
-        return sha1(str( obj )).hexdigest()
+        return sha1(repr( obj )).hexdigest()
 
 
 
