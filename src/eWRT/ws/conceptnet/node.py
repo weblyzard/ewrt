@@ -27,6 +27,13 @@ class Node(object):
     def __repr__(self):
         return "ConceptNetNode <%s>" % (self.url.encode("utf8"))
 
+    def specificity(self):
+        ''' returns the a number that shows how specific this node is 
+            e.g. (3 for "/c/en/coal" or
+                  5 for "/c/en/coal/n/energy storage)
+        '''
+        return len(self.url.split("/"))-1
+
     @staticmethod
     def lang(node_url):
         ''' ::returns: the language of the given node_url '''
