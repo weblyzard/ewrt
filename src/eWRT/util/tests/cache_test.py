@@ -73,13 +73,13 @@ class TestDiskCached(TestCached):
     def __init__(self):
        self.diskCache = DiskCache(get_cache_dir(4))
 
-#    def teardown(self):
-#        ''' remove the cache directories '''
-#        from shutil import rmtree
-#
-#        for cacheDirNo in range(10):
-#            if exists(get_cache_dir(cacheDirNo)):
-#                rmtree(get_cache_dir(cacheDirNo))
+    def teardown(self):
+        ''' remove the cache directories '''
+        from shutil import rmtree
+
+        for cacheDirNo in range(10):
+            if exists(get_cache_dir(cacheDirNo)):
+                rmtree(get_cache_dir(cacheDirNo))
         
     def testObjectKeyGeneration(self):
         ''' ensures that the diskcache object's location does not change '''
