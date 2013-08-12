@@ -81,5 +81,9 @@ def get_textual_data(sense, valid_languages, stopword_list):
     '''
     context_result = LookupResult(conceptnet_url=CONCEPTNET_BASE_URL+"/"+sense.url.encode("utf8"), strict=True)
     context_result.apply_language_filter(valid_languages) 
-    LOGGER.info("Found %d assertions." % (len(context_result.edges)) )
+    LOGGER.info("Found %d assertions for sense '%s'." % (len(context_result.edges), sense) )
     return context_result.get_vsm(stopword_list)
+
+
+if __name__ == '__main__':
+    ground_term('lord', ['hallo'])

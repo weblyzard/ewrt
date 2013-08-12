@@ -62,6 +62,9 @@ class LookupResult(Result):
 
 
 if __name__ == '__main__':
-    r = LookupResult('accusation/n', strict=True)
-    r.apply_language_filter(('en', ))
+    r = LookupResult('lord', strict=True)
+    from eWRT.ws.conceptnet.util import VALID_SENSE_FILTER, VALID_LANGUAGES
+    r.apply_language_filter(VALID_LANGUAGES)
+    #r.apply_edge_filter(VALID_SENSE_FILTER)
+    #print "\n".join(map(repr, r.get_senses())) 
     print r.get_vsm(stopword_list=())
