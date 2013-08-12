@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-""" @package eWRT.util.cache
+''' @package eWRT.util.cache
     caches arbitrary objects 
-"""
+'''
 
 # (C)opyrights 2008-2010 by Albert Weichselbraun <albert@weichselbraun.net>
 # 
@@ -23,77 +23,85 @@ __author__    = "Albert Weichselbraun"
 __revision__  = "$Id$"
 __copyright__ = "GPL"
 
-from os import makedirs, remove
-from os.path import join, exists
+from os import makedirs, remove, getpid, link
+from os.path import join, exists, dirname, basename, join
 from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
 from cPickle import dump, load
 from time import time
 from operator import itemgetter
 from hashlib import sha1 
-from fcntl import lockf, LOCK_EX
 from gzip import GzipFile
-from nose.plugins.attrib import attr
+from socket import gethostname
 
+get_unique_temp_file = lambda fname: join(dirname(fname),
+                                          "_%s-%s-%d" % (basename(fname), 
+                                              gethostname(), getpid()))
 
 class Cache(object):
-    """ An abstract class for caching functions """
+    ''' An abstract class for caching functions '''
     
     def __init__(self, fn=None):
         self.fn = fn
     
     def __call__(self, *args, **kargs):
-        """ retrieves the result using self.fn as function and
+        ''' retrieves the result using self.fn as function and
             the cache.
-            @param[in] args     arguments
-            @param[in] kargs    optional keyword arguments
-        """
+            ::param args:     arguments
+            ::param kargs:    optional keyword arguments
+        '''
         assert self.fn
         return self.fetch(self.fn, *args, **kargs)
 
+    def __delitem__(self, key):
+        ''' Removes items from the cache 
+        ::param key: the item to remove
+        '''
+        raise NotImplementedError
+
     def fetchObjectId(self, key, fetch_function, *args, **kargs):
-        """ Fetches a object from the cache or computes it by calling the 
+        ''' Fetches a object from the cache or computes it by calling the 
             fetch_function.
             The key helps to determine whether the object is already in
             the cache or not. 
-        """
+        '''
         raise NotImplementedError
 
     def fetch(self, fetch_function, *args, **kargs):
-        """ Fetches a object from the cache or computes it by calling the 
+        ''' Fetches a object from the cache or computes it by calling the 
             fetch_function.
             The objectId is computed based on the function arguments
-        """
+        '''
         raise NotImplementedError
 
     @staticmethod
-    def getKey( *args, **kargs):
-        """ returns the key for a set of function parameters """
+    def getKey(*args, **kargs):
+        ''' returns the key for a set of function parameters '''
         return (args, tuple(kargs.items()) )
 
     @staticmethod
     def getObjectId( obj ):
-        """ returns an identifier representing the object """
+        ''' returns an identifier representing the object '''
         return sha1(repr( obj )).hexdigest()
 
 
 
 class DiskCache(Cache):
-    """ @class DiskCache
+    ''' @class DiskCache
         Caches abitrary functions based on the function's arguments (fetch) or 
         on a user defined key (fetchObjectId)
 
         @remarks 
         This version of DiskCached is threadsafe
-    """
+    '''
 
     def __init__(self, cache_dir, cache_nesting_level=0, cache_file_suffix="", fn=None):
-        """ initializes the Cache object 
-            @param[in] cache_dir the cache base directory
-            @param[in] cache_nesting_level optional number of nesting level (0)
-            @param[in] cache_file_suffix optional suffix for cache files
-            @param[in] fn function to cache (optional; required for directly calling the class
+        ''' initializes the Cache object 
+            ::param cache_dir: the cache base directory
+            ::param cache_nesting_level: optional number of nesting level (0)
+            ::param cache_file_suffix: optional suffix for cache files
+            ::param fn: function to cache (optional; required for directly calling the class
                           using __call__
-        """
+        '''
         Cache.__init__(self, fn)
         self.cache_dir           = cache_dir
         self.cache_file_suffix   = cache_file_suffix
@@ -104,80 +112,86 @@ class DiskCache(Cache):
         
 
     def fetch(self, fetch_function, *args, **kargs):
-        """ fetches the object with the given id, querying
+        ''' fetches the object with the given id, querying
              a) the cache and
              b) the fetch_function
             if the fetch_function is called, the functions result is saved 
             in the cache 
 
-            @param[in] function to call if the result is not in the cache
-            @param[in] args   arguments 
-            @param[in] kargs  optional keyword arguments
+            ::param fetch_function: function to call if the result is not in the cache
+            ::param args:   arguments 
+            ::param kargs:  optional keyword arguments
 
-            @returns the object (retrieved from the cache or computed)
-        """
+            ::returns: the object (retrieved from the cache or computed)
+        '''
         objectId = self.getKey(*args, **kargs) 
         return self.fetchObjectId(objectId, fetch_function, *args, **kargs)
 
 
     def __contains__(self, key):
-        """ returns whether the key is already stored in the cache """
+        ''' returns whether the key is already stored in the cache '''
         cache_file = self._get_fname( self.getObjectId(key)  ) 
         return exists(cache_file)
 
     
     def __delitem__(self, key):
-        """ removes the given item from the cache """
+        ''' removes the given item from the cache '''
         cache_file = self._get_fname( self.getObjectId(key)  )
         remove( cache_file )
         
     
     def fetchObjectId(self, key, fetch_function, *args, **kargs):
-        """ fetches the object with the given id, querying
-             a) the cache and
-             b) the fetch_function
+        ''' fetches the object with the given id, querying
+             * the cache and
+             * the fetch_function
             if the fetch_function is called, the functions result is saved 
             in the cache 
 
-            @param[in] key      key to fetch
-            @param[in] function to call if the result is not in the cache
-            @param[in] args     arguments 
-            @param[in] kargs    optional keyword arguments
+            ::param key:      key to fetch
+            ::param fetch_function: function to call if the result is not in the cache
+            ::param args:     arguments 
+            ::param kargs:    optional keyword arguments
 
-            @returns the object (retrieved from the cache or computed)
-        """
-        cache_file = self._get_fname( self.getObjectId(key)  ) 
+            ::returns: the object (retrieved from the cache or computed)
+        '''
+        cache_file = self._get_fname(self.getObjectId(key)) 
+        if exists(cache_file):
+            #
+            # case 1: cache hit - return the cached result
+            #
+            self._cache_hit += 1
+            with GzipFile(cache_file) as f:
+                return load(f)
 
-        # check whether the cache file exists and try to create
-        # it otherwise
-        while not exists(cache_file) or exists(cache_file+".lock"):
-            l = open( cache_file+".lock", "w")
-            lockf(l.fileno(), LOCK_EX )
+        #
+        # case 2: cache miss 
+        # - compute and cache the result
+        #
+        temp_file = get_unique_temp_file(cache_file)
 
-            # this is necessary to prevent deadlocks
-            if exists(cache_file):
-                self._remove( cache_file + ".lock" )
-                l.close()
-                continue
+        self._cache_miss += 1
+        obj = fetch_function(*args, **kargs)
 
-            # compute and save the cache object
-            self._cache_miss += 1
-            obj = fetch_function(*args, **kargs)
-            if obj != None: 
-                with GzipFile( cache_file, "w") as f:
-                    dump(obj, f)
-
-            self._remove( cache_file + ".lock" )
-            l.close()
+        # Do not cache None
+        if obj == None: 
             return obj
 
-        # return the cached result
-        self._cache_hit += 1
-        with GzipFile(cache_file) as f:
-            return load(f)
+        with GzipFile(temp_file, "w") as f:
+            dump(obj, f)
+
+        try:
+            link(temp_file, cache_file)
+        # ignore file exists errors
+        except OSError as e:
+            if e.errno != 17:
+                raise e
+
+        remove(temp_file)
+        return obj
+
 
     def _remove(self, fname):
-        """ removes the given files (if it exists) """
+        ''' removes the given files (if it exists) '''
         try:
             remove(fname)
         except OSError:
@@ -185,17 +199,17 @@ class DiskCache(Cache):
 
 
     def getCacheStatistics(self):
-        """ returns statistics regarding the cache's hit/miss ratio """
+        ''' returns statistics regarding the cache's hit/miss ratio '''
         return {'cache_hits': self._cache_hit, 'cache_misses': self._cache_miss}
 
 
     def _get_fname( self, obj_id ):
-        """ Computes the filename of the file with the given
+        ''' Computes the filename of the file with the given
             object identifier and creates the required directory
             structure (if necessary).
 
             @returns the full path of the given object's cache file
-        """
+        '''
         assert( len(obj_id) >= self.cache_nesting_level )
 
         obj_dir = join( *( [self.cache_dir] + list( obj_id[:self.cache_nesting_level] )) )
@@ -209,23 +223,23 @@ class DiskCache(Cache):
  
 
 class DiskCached(object):
-    """ Decorator based on Cache for caching arbitrary function calls
+    ''' Decorator based on Cache for caching arbitrary function calls
         usage:
           @DiskCached("./cache/myfunction")
           def myfunction(*args):
 
         @remarks
         This version of DiskCached is threadsafe
-    """
+    '''
     __slots__ = ('cache', )
     
     def __init__(self, cache_dir, cache_nesting_level=0, cache_file_suffix=""):
-        """ initializes the Cache object 
-            @param[in] fn                  the function to cache
-            @param[in] cache_dir           the cache base directory
-            @param[in] cache_nesting_level optional number of nesting level (0)
-            @param[in] cache_file_suffix   optional suffix for cache files
-        """
+        ''' initializes the Cache object 
+            ::param fn:                  the function to cache
+            ::param cache_dir:           the cache base directory
+            ::param cache_nesting_level: optional number of nesting level (0)
+            ::param cache_file_suffix:   optional suffix for cache files
+        '''
         self.cache = DiskCache(cache_dir, cache_nesting_level, cache_file_suffix)
 
     def __call__(self, fn):
@@ -234,16 +248,16 @@ class DiskCached(object):
 
 
 class MemoryCache(Cache):
-    """
+    '''
         @class MemoryCached
 
         Caches abitrary functions based on the function's arguments (fetch) or 
         on a user defined key (fetchObjectId)
-    """
+    '''
     __slots__ = ('max_cache_size', '_cacheData', '_usage' )
 
     def __init__(self, max_cache_size =0, fn=None):
-        """ initializes the Cache object """
+        ''' initializes the Cache object '''
         Cache.__init__(self, fn)
         self._cacheData  = {}  
         self._usage      = {}
@@ -267,16 +281,16 @@ class MemoryCache(Cache):
             return obj
 
     def __contains__(self, key):
-        """ returns whether the key is already stored in the cache """
+        ''' returns whether the key is already stored in the cache '''
         return self.getObjectId(key) in self._cacheData 
     
     def __delitem__(self, key):
-        """ removes the given item from the cache """
+        ''' removes the given item from the cache '''
         del self._cacheData[ self.getObjectId(key) ]
 
     def garbage_collect_cache(self):
-        """ removes the object which have not been in use for the 
-            longest time """
+        ''' removes the object which have not been in use for the 
+            longest time '''
         if self.max_cache_size == 0 or len(self._cacheData)<=self.max_cache_size: 
             return
 
@@ -286,15 +300,15 @@ class MemoryCache(Cache):
 
 
 class MemoryCached(MemoryCache):
-    """ Decorator based on MemoryCache for caching arbitrary function calls
+    ''' Decorator based on MemoryCache for caching arbitrary function calls
         usage:
           @MemoryCached or @MemoryCached(max_cache_size)
           def myfunction(*args):            ...
-    """
+    '''
     def __init__(self, arg):
-        """ initializes the MemoryCache object 
-            @param[in] either the max_cache_size or the function to call
-        """
+        ''' initializes the MemoryCache object 
+            ::param arg: either the max_cache_size or the function to call
+        '''
         if hasattr(arg, '__call__'):
             MemoryCache.__init__(self)
             self._fn = arg
@@ -313,24 +327,25 @@ class MemoryCached(MemoryCache):
 
 
 class IterableCache(DiskCache):
-    """ caches arbitrary iterable content identified by an identifier """
+    ''' caches arbitrary iterable content identified by an identifier '''
 
-    def __iter__(self): return self
+    def __iter__(self): 
+        return self
 
     def fetchObjectId(self, key, function, *args, **kargs):
-        """ fetches the object with the given id, querying
+        ''' fetches the object with the given id, querying
              a) the cache and
              b) the function
             if the function is called, the functions result is saved 
             in the cache 
 
-            @param[in] key      key to fetch
-            @param[in] function to call if the result is not in the cache
-            @param[in] args     arguments 
-            @param[in] kargs    optional keyword arguments
+            ::param key:      key to fetch
+            ::param function: function to call if the result is not in the cache
+            ::param args:     arguments 
+            ::param kargs:    optional keyword arguments
 
-            @returns the object (retrieved from the cache or computed)
-        """
+            ::returns: the object (retrieved from the cache or computed)
+        '''
         cache_file = self._get_fname( self.getObjectId(key)  )
 
         if exists(cache_file):
@@ -348,10 +363,10 @@ class IterableCache(DiskCache):
         return self._read_next_element() if self._cached else self._cache_next_element()
 
     def _cache_next_element(self):
-        """ a) retrieves the next element from the fetch function 
+        ''' a) retrieves the next element from the fetch function 
             b) writes the data to the cache
             c) passes the data through to the calling element
-        """
+        '''
         self._cache_miss += 1
         try:
             obj = self._fetch_function_iterator.next()
@@ -363,8 +378,8 @@ class IterableCache(DiskCache):
 
 
     def _read_next_element(self):
-        """ returns the next element from the cache """
-        self._cache_hit +=1
+        ''' returns the next element from the cache '''
+        self._cache_hit += 1
         try:
             return self._pickle_iterator.next()
         except IOError:
@@ -372,194 +387,4 @@ class IterableCache(DiskCache):
             raise StopIteration
 
 
-# 
-# Unittests
-# run nosetest from python-nose to execute these tests
-#
-
-class TestCached(object):
-    """ tests the MemoryCached Decorator """
-    @staticmethod
-    def add(a=2,b=3): 
-        return a+b
-
-    @staticmethod
-    def sub(a=2,b=3): 
-        return a-b
-
-    def testNonKeywordArguments(self):
-        """ tests the class with non Keyword Arguments """
-        for x in xrange(1,20):
-            assert self.add(x,5) == (x+5)
-            assert self.add(x,5) == (x+5)
-
-        # test objects with a cachesize specified
-        for x in xrange(1,20):
-            assert self.sub(x,5) == x-5
-            assert self.sub(x,5) == x-5
-            
-    def testContainsDel(self):
-        """ tests the contains and del functions """
-        d = MemoryCache()
-        d.fetchObjectId("10", self.add, *(), **{'a':3, 'b':4})
-        assert "10" in d
-        del d["10"]
-        assert "10" not in d
-
-    def testKeywordArguments(self):
-        """ tests keyword arguments """
-        assert self.add(3, b=7) == 3+7
-        assert self.add(3, b=7) == 3+7
-        assert self.add(a=9, b=8) == 9+8
-        
-
-class TestMemoryCached(TestCached):
-    @staticmethod
-    @MemoryCached
-    def add(a=1, b=2):
-        return a+b
-
-    @staticmethod
-    @MemoryCached(12)
-    def sub(a=2, b=1):
-        return a-b 
-
-class TestDiskCached(TestCached):
-    @staticmethod
-    @DiskCached("./.unittest-temp1")
-    def add(a=1, b=2):
-        return a+b
-
-    @staticmethod
-    @DiskCached("./.unittest-temp2")
-    def sub(a, b):
-        return a-b 
-    
-    def __init__(self):
-	try:
-           import psyco
-           psyco.full()
-	except ImportError:
-	   pass
-        self.diskCache = DiskCache("./.unittest-temp4")
-
-    def teardown(self):
-        """ remove the cache directories """
-        from shutil import rmtree
-
-        for cacheDirNo in range(10):
-            if exists("./.unittest-temp%d" % cacheDirNo):
-                rmtree("./.unittest-temp%d" % cacheDirNo)
-        
-    def testObjectKeyGeneration(self):
-        """ ensures that the diskcache object's location does not change """
-        
-        CACHE_DIR = "./.unittest-temp3"
-        d = DiskCache(CACHE_DIR)
-        getCacheLocation = lambda x: join(CACHE_DIR, Cache.getObjectId(x))
-        
-        d.fetchObjectId(1, str, 1)
-        assert exists( getCacheLocation(1) )
-        
-        d.fetch(str, 2)
-        assert exists( getCacheLocation( ((2,), ()) ))
-
-    def testContains(self):
-        """ verifies that 'key' in cache works """
-        # diskcache
-        assert self.diskCache.fetchObjectId(1, str, 1 ) == "1"
-        
-        assert 1 in self.diskCache
-        assert 2 not in self.diskCache
-        
-        # diskcached
-        assert self.add(12,14) == 26
-        assert self.add.getKey(12,14) in self.add
-        assert 9 not in self.add
-        
-    def testDelItem(self):
-        """ verifies that delitem works """
-        # diskcache
-        assert self.diskCache.fetch(str, 2) == "2"
-        key = self.diskCache.getKey(2)
-        assert key in self.diskCache
-        del self.diskCache[key]
-        assert key not in self.diskCache
-
-        # diskcached
-        assert self.add(12,13) == 25
-        key = self.add.getKey(12,13)
-        assert key == ((12,13), ())
-        assert key in self.add
-        del self.add[key]
-        assert key not in self.add     
-        
-    def testDirectCall(self):
-        """ tests directly calling the cache object using __call__ """
-        CACHE_DIR = "./.unittest-temp4"
-        cached_str = DiskCache(CACHE_DIR, fn=str)
-        
-        assert cached_str(7) == "7"
-        assert cached_str.getKey(7) in cached_str
-
-            
-    def testIterableCache(self):
-        """ tests the iterable cache """
-        CACHE_DIR = "./.unittest-temp5"        
-        i = IterableCache(CACHE_DIR)
-
-        getTestIterator = lambda x: xrange(x)
-
-        for iteratorSize in (4,5,6):
-            cachedIterator = i.fetch( getTestIterator, iteratorSize )
-            
-            for x,y in zip(cachedIterator, getTestIterator(iteratorSize)):
-                print x,y
-                assert x == y
-
-    @attr("slow")
-    def testThreadSafety(self):
-        """  tests whether everything is thread safe """
-        from multiprocessing import Pool
-        from shutil import rmtree
-
-        for a in xrange(1000):
-            print a
-            c = DiskCache("./.unittest-temp6", cache_nesting_level=2)
-            p = Pool(12)
-
-            p.map(f, 60*[c] )
-            p.map(g, 60*[c] )
-
-            p.close()
-            p.join()
-
-            rmtree("./.unittest-temp6")
-
-
-def f(c):
-    """ Function for checking Diskcach with larger files.
-
-        @remarks 
-        required for the testThreadSafety unittest. 
-        considers None results.
-    """
-    from random import randint
-    r = randint(1, 17)
-    blow = lambda x: x not in (7,8) and 100000*str(x) or None
-    assert c.fetch( blow, r ) == blow(r)
-    return 0
-
-def g(c):
-    """ Function for checking DiskCache with small files.
-
-        @remarks 
-        required for the testThreadSafety unittest.
-        considers None results.
-    """
- 
-    from random import randint
-    r = randint(111, 117)
-    assert c.fetch( str, r ) == str(r)
-    return 0
 
