@@ -9,11 +9,15 @@ import unittest
 import json
 import urllib
 import httplib
+import logging
+from ssl import SSLError
 
 from eWRT.config import FACEBOOK_ACCESS_KEY
 from eWRT.ws.facebook import FacebookWS
 
-MAX_BATCH_SIZE = 50
+MAX_BATCH_SIZE = 3
+
+logger = logging.getLogger('eWRT.ws.facebook')
 
 class FbBatchRequest(object):
     '''
@@ -39,7 +43,12 @@ class FbBatchRequest(object):
                                             since, limit) for term in terms])
 
     def make_search(self, fbWSList):
-        ''' ''' 
+        ''' executes the search 
+        :param fbWSList: list of :class:eWRT.ws.facebook.FacebookWS object
+        :type fbWSList: list
+        :returns: result
+        :rtype: list
+        ''' 
         assert len(fbWSList), 'list of facebook services empty'
 
         result = []
@@ -47,20 +56,20 @@ class FbBatchRequest(object):
         
         for row in search_result: 
             if not row: 
-                print 'row == %s ... continue' % row
+                logger.debug('row == %s ... continue' % row)
                 continue
-            
+
             data = json.loads(row['body'])
             
             if 'data' in data:    
                 for post in json.loads(row['body'])['data']:
+                    post['url'] = 'http://www.facebook.com/%s' % post['id']
                     result.append(post)
-                    url = 'http://www.facebook.com/%s' % post['id'].replace('_', '/posts/')
                     if 'comments' in post and 'data' in post['comments']:
-                        for comment in post['comments']['data']:
+                        for i, comment in enumerate(post['comments']['data']):
                             comment['type'] = 'comment'
-                            comment['parent_url'] = url
-                            comment['url'] = url
+                            comment['parent_url'] = post['url']
+                            comment['url'] = '%s?comment=%s' % (post['url'], i)
                             result.append(comment)
             elif data: 
                 result.append(data)
@@ -86,22 +95,26 @@ class FbBatchRequest(object):
         
         for batch_requests in cls.get_batch(all_batch_requests):
             batch_requests = json.dumps(batch_requests)
-            
+            logger.debug('Making batch_requests with %s' % batch_requests)
             params = urllib.urlencode({cls.accessTokenHTTPParam: access_token,
                                        cls.batchHTTPParam: batch_requests})
-            
             headers = {'Content-type': 'application/x-www-form-urlencoded',
                        'Accept': 'text/plain'}
             
-            conn.request('POST', '/', params, headers)
-            response = conn.getresponse()
+            try: 
+                
+                conn.request('POST', '/', params, headers)
+                response = conn.getresponse()
+    
+                data = json.loads(response.read())
+    
+                if isinstance(data, dict) and 'error' in data:
+                    result.append(data)
+                else: 
+                    result.extend(data)
 
-            data = json.loads(response.read())
-
-            if isinstance(data, dict) and 'error' in data:
-                result.append(data)
-            else: 
-                result.extend(data)
+            except SSLError, e: 
+                logger.error('Could not request: %s, %s' % (batch_requests, e))
             
         conn.close()
         return result
@@ -113,53 +126,49 @@ class FbBatchRequest(object):
             
 class TestFacebookWS(unittest.TestCase):
     
-    def setUp(self):
-        from datetime import datetime
-        self.fbBatchRequest = FbBatchRequest()
-        fbWS1 = FacebookWS('Linus Torvalds', 'post', since=datetime(2012, 07, 01))
-        self.fbBatchRequest.add_facebook_ws(fbWS1)
-        fbWS2 = FacebookWS('Linus Torvalds')
-        self.fbBatchRequest.add_facebook_ws(fbWS2)
-        fbWS3 = FacebookWS('Heinz Lang', 'user')
-        self.fbBatchRequest.add_facebook_ws(fbWS3)
+#    def test_bad_request(self):
+#        access_token = "AAAElj9ZBZCquoBAGkKlcPvJsUCpyAZBxz6nsOYr8LAmpIj9Q9EZCKl9xVAYmlXGh2UQvhVellSWsZALPn6V73ZAZBiaxlwqkWlUjGVLzAHd7gZDZD"
+#        fbBatchRequest = FbBatchRequest(access_token)
+#        
+#        try: 
+#            fbBatchRequest.run_search('Linus Torvalds')
+#        except Exception, e: 
+#            print 'thats ok: %s' % e
+#            assert True
+#    
+#    def test_batch_search2(self):
+#        fbBatchRequest = FbBatchRequest()
+#        result = fbBatchRequest.run_search(['Wien'], 'post', 100)
+#        assert len(result) > 0
+#    
+#    def test_feed_mirroring(self):
+#        fbBatchRequest = FbBatchRequest()
+#        result = fbBatchRequest.run_search('58220918250/feed', 
+#                                           objectType='path',
+#                                           limit=1)
+#        
+#        for x in result:
+#            print x
+#            
+#        assert len(result) >= 1
+
+    def test_search(self):
+        terms = ['Department of Health and Human Services', 'carcinomas', 
+                 'National Oceanic and Atmospheric Administration', 'Mercedes-Benz',
+                 'Audi', 'BMW', 'tumour', 'cancer', 'cop18', 'jane lubchenco', 'tumour', 'irgendwas']
         
-    def test_get_json_batch_request_string(self):
-        json_string = self.fbBatchRequest._get_json_batch_request_string()
-        assert len(json.loads(json_string)) == 7
+        fbWSList = []
         
-        # The order of the requests always changes
-        # assert json == '[{"method": "GET", "relative_url": "/search?q=Linus+Torvalds&since=1341093600.0&type=post"}, {"method": "GET", "relative_url": "/search?q=Linus+Torvalds&type=post"}, {"method": "GET", "relative_url": "/search?q=Linus+Torvalds&type=user"}, {"method": "GET", "relative_url": "/search?q=Linus+Torvalds&type=page"}, {"method": "GET", "relative_url": "/search?q=Linus+Torvalds&type=event"}, {"method": "GET", "relative_url": "/search?q=Linus+Torvalds&type=group"}, {"method": "GET", "relative_url": "/search?q=Heinz+Lang&type=user"}]' 
+        for term in terms: 
+            fbWSList.append(FacebookWS(term, 'post', 1353954200, 100))
         
-    def test_batch_search(self):
-        searchResult = self.fbBatchRequest.do_batch_search()
-        self.assertFalse('error' in searchResult)
-        assert len(searchResult) > 0        
-    
-    def test_bad_request(self):
-        access_token = "AAAElj9ZBZCquoBAGkKlcPvJsUCpyAZBxz6nsOYr8LAmpIj9Q9EZCKl9xVAYmlXGh2UQvhVellSWsZALPn6V73ZAZBiaxlwqkWlUjGVLzAHd7gZDZD"
-        fbBatchRequest = FbBatchRequest(access_token)
+#        args = {'q': u'Mercedes-Benz', 'type': 'post', 'since': 1353954200, 'limit': 100}
+#        fbWSList = [FacebookWS('Mercedes-Benz', 'post', 1353954200, 100)]
+        access_token = 'CAAAAHnTjbXwBAJo2wspSNbewIPmLdpoRoO9DHIImAdHloVQh11fyOnX4B8ZCqEj2QRb0qU8oo1IYCvXif8UJVPZAeQScx3qHWz1hZBLZA7H5B97xcT5bRNxH3zbVKIfZCae67K24ZBGtBhZAhjNMJG3'
+        result = FbBatchRequest._send_post(access_token, fbWSList)
+        print result
+        print len(result)
         
-        try: 
-            fbBatchRequest.run_search('Linus Torvalds')
-        except Exception, e: 
-            print 'thats ok: %s' % e
-            assert True
-    
-    def test_batch_search2(self):
-        fbBatchRequest = FbBatchRequest()
-        result = fbBatchRequest.run_search(['Wien'], 'post', 100)
-        assert len(result) > 0
-    
-    def test_feed_mirroring(self):
-        fbBatchRequest = FbBatchRequest()
-        result = fbBatchRequest.run_search('58220918250/feed', 
-                                           objectType='path',
-                                           limit=1)
-        
-        for x in result:
-            print x
-        assert len(result) >= 1
-    
 if __name__ == "__main__":
 
     unittest.main()

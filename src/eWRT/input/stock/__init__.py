@@ -17,8 +17,10 @@ from collections import namedtuple
 from datetime import datetime
 from twisted.python.text import strFile
 
+from eWRT.util.module_path import get_resource
+
 extract_index_name = lambda fname: basename(fname).split(".")[0]
-DATA_DIR = os_join( dirname(__file__), 'data' )
+DATA_DIR = get_resource(__file__, ('data', ) )
 
 Quote = namedtuple('quote', 'date last open high low change_percentage')
 

@@ -3,7 +3,7 @@
 """ @package eWRT.config
     evaluates ~/.eWRT/siteconfig.py and publishes the values"""
 
-# (C)opyrights 2004-2012 by Albert Weichselbraun <albert@weichselbraun.net>
+# (C)opyrights 2004-2013 by Albert Weichselbraun <albert@weichselbraun.net>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,13 +18,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-__Revision__="$Header$"
-
 import sys
 from warnings import warn
-from os.path import expanduser, exists, dirname
+from os.path import expanduser, exists, dirname, join as os_join
 
 SYS_EWRT_CONF = "/etc/eWRT/sysconfig.py"
 USR_EWRT_CONF = expanduser("~/.eWRT/siteconfig.py")
@@ -35,9 +31,113 @@ CMD_CONV = {'html': '/usr/bin/lynx -stdin -width=20000 -force_html -nocolor -dum
             'doc' : '/usr/bin/antiword -',
             }
 
+# ===================================================================
+# DEFAULT CONFIGURATION VALUES
+# - please either create a configuration file in 
+#     /etc/eWRT/sysconfig or
+#     ~/.eWRT/siteconfig.py
+#
+#   to overwrite these settings
+# ===================================================================
+
+
+PROXY_SERVER = ''
+USER_AGENT = 'eWRT Version/0.5; MODUL <%s> +http://p.semanticlab.net/eWRT'
+
+# default sleep time in seconds
+DEFAULT_WEB_REQUEST_SLEEP_TIME = 1
+
+# ===================================================================
+# DATABASE CONFIGURATION
+# ===================================================================
+DATABASE_CONNECTION = {
+            'db-name'  : {'host': 'localhost', 'dbname': 'postgres', 'username': '', 'passwd': ''},
+    }
+ 
+# ===================================================================
+# USERNAMES AND API-KEYS
+# ===================================================================
+
+# delicious
+DELICIOUS_USER = ''
+DELICIOUS_PASS = ''
+
+# opencalais
+OPENCALAIS_KEY = ''
+OPENCALAIS_CACHE_DIR = ''
+OPENCALAIS_URL = "http://api.opencalais.com/enlighten/calais.asmx/Enlighten"
+
+# geoTagger
+GEOLYZARD_URL = ''
+GEOLYZARD_GAZETTEERS = ''
+
+
+# amazon
+AMAZON_ACCESS_KEY_DICT = { 'user': 'pass',
+                         }
+AMAZON_ACCESS_KEY = AMAZON_ACCESS_KEY_DICT['user']
+
+# file to copy all xml input from the amazon webservice (the content is only
+# copyied if a file is specified)
+AMAZON_DEBUG_FILE = ""
+
+
+# ===================================================================
+# PATHS AND URLs
+# ===================================================================
+
+AMAZON_LOCATIONS = { 'us': 'http://webservices.amazon.com/onca/xml?Service=AWSECommerceService',
+                     'uk': 'http://webservices.amazon.co.uk/onca/xml?Service=AWSECommerceService',
+		     'de': 'http://webservices.amazon.de/onca/xml?Service=AWSECommerceService',
+		     'jp': 'http://webservices.amazon.co.jp/onca/xml?Service=AWSECommerceService',
+		     'fr': 'http://webservices.amazon.fr/onca/xml?Service=AWSECommerceService',
+		     'ca': 'http://webservices.amazon.ca/onca/xml?Service=AWSECommerceService' }
+
+# ===================================================================
+# CORPUS LOCATIONS
+# ===================================================================
+CORPUS_DIR = '/data/corpus'
+AUTOCLASS_SAMPLE = "reuters-10000-multitoken"
+
+BBC_CORPUS       = os_join( CORPUS_DIR, "news.bbc.co.uk" )
+BBC_CORPUS_HTML  = os_join( BBC_CORPUS, "html" )
+BBC_CORPUS_LOW   = os_join( BBC_CORPUS, "low" )
+BBC_CORPUS_RSS   = os_join( BBC_CORPUS, "rss" )
+BBC_CORPUS_PRINT = os_join( BBC_CORPUS, "print" )
+
+BBC_CORPUS_TIMEFORMAT = "%a, %d %b %Y %H:%M:%S %Z"
+
+# COMPRESSED VERSION OF THE CORPUS
+BBC_CORPUS_COMPRESSED = "data/news.bbc.co.uk.tar.gz"
+
+# geonames
+GEO_ENTITY_SEPARATOR = ">"
+
+# facebook
+FACEBOOK_API_KEY = "api-key"
+FACEBOOK_SECRET_KEY = "secret-key"
+FACEBOOK_SESSION_KEY = "session-key"
+
+SNMP_HOST_CFG = {'server'          : 'localhost',
+                 'port'            : '162',
+                 'community_string': 'public',
+                 'oid'             : 'SNMPv2-SMI::enterprises.30538.5000',
+                }
+
+SNMP_MODULE_NAME = {}
+SNMP_LOG_LEVEL   = { 'ok': '0', 'warning': '1', 'critical': '2' }
+
+# twitter keys .. gila 
+TWITTER_CONSUMER_KEY    = ''
+TWITTER_CONSUMER_SECRET = ''
+TWITTER_ACCESS_TOKEN    = ''
+TWITTER_TOKEN_SECRET    = ''
+
 # --------------------------------------------------------------------------
 #
-#  Import config variables from local siteconfig
+#  Overwrite global config based on 
+#   a) the system configuraiton and
+#   b) the user configuration.
 #
 # --------------------------------------------------------------------------
 if exists( SYS_EWRT_CONF ):

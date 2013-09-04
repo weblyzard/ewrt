@@ -7,8 +7,10 @@
 language detection
 """
 
-from os.path import dirname, basename, join as os_join
 from glob import glob
+from os.path import basename
+
+from eWRT.util.module_path import get_resource
 
 def read_wordlist(fname):
     """ reads a language wordlist from a file """
@@ -18,7 +20,7 @@ def read_wordlist(fname):
 # returns the language name based on the language file's name
 get_lang_name = lambda fname: basename(fname).split(".")[0]
 
-LANG_DATA_DIR =  os_join(dirname( __file__ ), 'data') 
+LANG_DATA_DIR =  get_resource( __file__, ('data', ))
 
 ##
 # \var STOPWORD_DICT: a dictionary of the 100 most common words in the given language
