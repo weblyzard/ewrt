@@ -68,7 +68,7 @@ class FacebookWS(object):
         return result
 
     @classmethod
-    def makeRequest(cls, path, args={}, maxDoc=None):
+    def makeRequest(cls, path, args={}, maxDoc=None, method='get'):
         '''
         makes a request to the graph API
         @param path: path to query, e.g. feed of user/group/page 122222: 122222/feed
@@ -78,6 +78,9 @@ class FacebookWS(object):
         if not args.has_key('access_token'):
             # args['access_token'] = "b07f413baf9650d2363f1c8813ece6da" #very unflexible, its hardcoded...
             args['access_token'] = FACEBOOK_ACCESS_KEY
+
+        if method == 'post': 
+            args['method'] = 'POST'
 
         url = "https://graph.facebook.com/%s?%s" % (path, urllib.urlencode(args))
         result = cls._requestURL(url, maxDoc)
