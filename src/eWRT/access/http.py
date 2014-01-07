@@ -195,7 +195,16 @@ class Retrieve(object):
                 assert not user and not password, 'if set, user AND pwd required'
             
         return url, user, password
-            
+    
+    @staticmethod
+    def add_user_password(url, user, password):
+        split_url = urlsplit(url) 
+        return urlunsplit((split_url.scheme, 
+                           '%s:%s@%s' % (user, password, split_url.netloc), 
+                           split_url.path, 
+                           split_url.query,
+                           split_url.fragment))
+        
 class TestRetrieve(object):
     """ tests the http class """
     TEST_URLS = ('http://www.google.at/search?hl=de&q=andreas&btnG=Google-Suche&meta=', 
