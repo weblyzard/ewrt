@@ -65,11 +65,12 @@ class RESTClient(object):
         :param content_type: one of 'application/json', 'application/xml'
         '''
         if parameters:
-            handle = self.retrieve( url , dumps( parameters ) if json_encode_arguments else parameters,
-                                    {'Content-Type': content_type})
+            handle = self.retrieve(url, 
+                                   dumps(parameters) if json_encode_arguments else parameters,
+                                   {'Content-Type': content_type})
         else:
             handle = self.retrieve( url )
-            
+        
         response = handle.read()
         if response:
             return response if return_plain else loads(response)
@@ -115,21 +116,52 @@ class RESTClient(object):
         :rtype: the query result
         '''
         url = self.get_request_url(self.service_url, command, identifier, 
-                        query_parameters)
+                                   query_parameters)
         return self._json_request(url, parameters, return_plain, 
                         json_encode_arguments, content_type)
 
 
 class MultiRESTClient(object):
     ''' allows multiple URLs for access REST services '''
+    MAX_BATCH_SIZE = 500
+    URL_PATH = None
 
-    def __init__(self, service_urls):
-        ''' '''  
-        self._service_urls = service_urls
+    def __init__(self, service_urls, user=None, password=None):
+        self._service_urls = self.fix_urls(service_urls, user, password) 
         self.clients = self._connect_clients(self._service_urls) 
     
     @classmethod
-    def _connect_clients(cls, service_urls):
+    def fix_urls(cls, urls, user=None, password=None):
+        ''' fixes the urls and put them into the correct format, to maintain 
+        the compability to the remaining platform
+        :param urls: service urls
+        :type urls: basestring or list or tuple
+        :param user: username
+        :param password: password
+        :returns: correctly formated urls
+        :rtype: list
+        ''' 
+        correct_urls = []
+
+        if isinstance(urls, basestring):
+            urls = [urls]
+            
+        for url in urls: 
+            if not url.endswith('/'):
+                url = '%s/' % url
+            if cls.URL_PATH and not url.endswith(cls.URL_PATH):
+                if cls.URL_PATH.startswith('/'):
+                    cls.URL_PATH = cls.URL_PATH[1:]
+                url = '%s%s' % (url, cls.URL_PATH)
+            if user and password: 
+                url = Retrieve.add_user_password(url, user, password)
+                
+            correct_urls.append(url)
+            
+        return correct_urls
+    
+    @classmethod
+    def _connect_clients(cls, service_urls, user=None, password=None):
 
         clients = []
         if isinstance(service_urls, basestring):
@@ -143,7 +175,8 @@ class MultiRESTClient(object):
         return clients
  
     def request(self, path, parameters=None, return_plain=False, 
-                execute_all_services=False):
+                execute_all_services=False, json_encode_arguments=True,
+                query_parameters=None, content_type='application/json'):
         ''' performs the given json request
         @param url: the url to query
         @param parameters: optional paramters
@@ -156,10 +189,14 @@ class MultiRESTClient(object):
             try:
                 response = client.execute(command=path, 
                                           parameters=parameters, 
-                                          return_plain=return_plain)
+                                          return_plain=return_plain,
+                                          json_encode_arguments=json_encode_arguments, 
+                                          query_parameters=query_parameters, 
+                                          content_type=content_type)
 
                 if not execute_all_services:
                     break
+                
             except Exception, e:
                 msg = 'could not execute %s, error %s\n%s' % (path, e, 
                                                               traceback.format_exc())
@@ -172,7 +209,13 @@ class MultiRESTClient(object):
                                                                        '\n'.join(errors)))
         
         return response
-        
+    
+    @classmethod
+    def get_document_batch(cls, documents, batch_size=None):
+        batch_size = batch_size if batch_size else cls.MAX_BATCH_SIZE
+        for i in range(0, len(documents), batch_size):
+            yield documents[i:i+batch_size]
+
 class TestRESTClient(unittest.TestCase):
     
     TEST_URL  = 'http://test.webdav.org/auth-basic/'
