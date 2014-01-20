@@ -87,7 +87,7 @@ class Retrieve(object):
 
 
     def open(self, url, data=None, headers={}, user=None, pwd=None, retry=0, 
-             authentification_method="basic" ):
+             authentification_method="basic", accept_gzip=True, head_only=False):
         """ Opens an URL and returns the matching file object 
             @param[in] url 
             @param[in] data    optional data to submit
@@ -97,7 +97,8 @@ class Retrieve(object):
             @param[in] retry   number of retries in case of an temporary error
             @param[in] authentification_method the used authentification_method 
                         ('basic'*, 'digest')
-
+            @param[in] accept_gzip    flag to change the accepted encoding, gzip or not 
+            @param[in] head_only      if True: only execute a HEAD request
             @returns a file object for reading the url
         """
         auth_handler = self._supported_http_authentification_methods[ authentification_method ]
@@ -105,10 +106,17 @@ class Retrieve(object):
         tries  = 0
         while not urlObj:
             request = urllib2.Request( url, data, headers )
+            
+            if head_only: 
+                request.get_method = lambda: 'HEAD'
+            
             request.add_header( 'User-Agent', self.user_agent )
-            request.add_header('Accept-encoding', 'gzip')
+            
+            if accept_gzip:
+                request.add_header('Accept-encoding', 'gzip')
+                
             self._throttle()
-
+            
             opener = []
             if PROXY_SERVER:
                 opener.append( urllib2.ProxyHandler({"http" :PROXY_SERVER} ) )
