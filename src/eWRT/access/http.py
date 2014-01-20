@@ -44,7 +44,7 @@ RETRY_WAIT_TIME_RANGE      = (2, 10)         # in seconds
 HTTP_TEMPORARY_ERROR_CODES = (500, 503, 504) # error codes which might trigger a retry
 
 # set default socket timeout (otherwise urllib might hang!)
-from socket import setdefaulttimeout
+from socket import setdefaulttimeout, timeout
 setdefaulttimeout(60)
 
 getHostName = lambda x: "://".join( urlsplit(x)[:2] )
@@ -250,10 +250,10 @@ class TestRetrieve(object):
 
 
     @attr("remote")
-    @raises(urllib2.URLError)
+    @raises(timeout)
     def testRetrievalTimeout(self):
         """ tests whether the socket timeout is honored by our class """
-        SLOW_URL = "http://www.iub.edu.bd/"
+        SLOW_URL = "http://www.csse.uwa.edu.au/"
         setdefaulttimeout( 1 )
 
         r = Retrieve( self.__class__.__name__).open( SLOW_URL )
