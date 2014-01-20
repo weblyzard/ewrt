@@ -149,10 +149,13 @@ class MultiRESTClient(object):
         for url in urls: 
             if not url.endswith('/'):
                 url = '%s/' % url
-            if cls.URL_PATH and not url.endswith(cls.URL_PATH):
-                if cls.URL_PATH.startswith('/'):
-                    cls.URL_PATH = cls.URL_PATH[1:]
-                url = '%s%s' % (url, cls.URL_PATH)
+                
+            if not 'rest' in url:
+                if cls.URL_PATH and not url.endswith(cls.URL_PATH):
+                    if cls.URL_PATH.startswith('/'):
+                        cls.URL_PATH = cls.URL_PATH[1:]
+                    url = '%s%s' % (url, cls.URL_PATH)
+                    
             if user and password: 
                 url = Retrieve.add_user_password(url, user, password)
                 
@@ -262,7 +265,9 @@ class TestRESTClient(unittest.TestCase):
                     .endswith("/execute/12")
         assert RESTClient.get_request_url(self.TEST_URL, 'execute', '12', {'debug': True}) \
                     .endswith("/execute/12?debug=True")
-            
+    
+    def test_fix_url(self):
+        ''' tests fix url '''
 
 if __name__ == '__main__':
     unittest.main()
