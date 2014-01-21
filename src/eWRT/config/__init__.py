@@ -117,7 +117,8 @@ GEO_ENTITY_SEPARATOR = ">"
 FACEBOOK_API_KEY = "api-key"
 FACEBOOK_SECRET_KEY = "secret-key"
 FACEBOOK_SESSION_KEY = "session-key"
-FACEBOOK_ACCESS_KEY = "session-key"
+FACEBOOK_ACCESS_KEY = "access-key"
+FACEBOOK_APPLICATION_ID = "application-id"
 
 SNMP_HOST_CFG = {'server'          : 'localhost',
                  'port'            : '162',
