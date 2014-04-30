@@ -48,7 +48,7 @@ class TestLogger(unittest.TestCase):
     def test_stdout_logger(self):
         ''' tests the logger '''
         
-        logger = get_stdout_logger("stdoutLoggingProfile")
+        logger = get_stdout_logger(__file__)
         logger.debug('debug')
         logger.info('info')
         logger.warning('warning')
