@@ -24,29 +24,38 @@ from cPickle import dumps, loads
 from gzip import open
 from binascii import b2a_base64, a2b_base64
 
+class AbstractIterator(object):
+    
+    def __init__(self, fname, file_mode=None):
+        self.fname = self.get_filename(fname)
+        self.f = open(self.fname, file_mode) if file_mode else open(self.fname)
 
-class WritePickleIterator(object):
+    def close(self):
+        self.f.close()
+
+    @classmethod
+    def get_filename(cls, fname):
+        return fname if fname.endswith('.gz') else fname + '.gz'
+
+class WritePickleIterator(AbstractIterator):
     """ writes pickeled elements (available as iterator) to a file """
 
     def __init__(self, fname):
-        self.f = open(fname+".gz", "w") 
+        AbstractIterator.__init__(self, fname, file_mode='w')
 
     def dump(self, obj):
         """ dumps the following object to the pickle file """
         p = b2a_base64( dumps(obj) )
         self.f.write(p)
 
-    def close(self):
-        self.f.close()
-        
-
-class ReadPickleIterator(object):
+class ReadPickleIterator(AbstractIterator):
     """ provides an iterator over pickeled elements """
 
     def __init__(self, fname):
-        self.f = open(fname+".gz")
+        AbstractIterator.__init__(self, fname)
 
-    def __iter__(self): return self
+    def __iter__(self): 
+        return self
 
     def next(self):
         """ returns the next pickled element in the file """
@@ -54,11 +63,7 @@ class ReadPickleIterator(object):
         if not line:
             raise StopIteration
 
-        return loads( a2b_base64(line) )
-
-    def close(self):
-        self.f.close()
-
+        return loads(a2b_base64(line))
 
 if __name__ == '__main__':
     
