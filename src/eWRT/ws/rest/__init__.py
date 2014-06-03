@@ -130,6 +130,13 @@ class MultiRESTClient(object):
         self._service_urls = self.fix_urls(service_urls, user, password) 
         self.clients = self._connect_clients(self._service_urls) 
     
+    def is_online(self):
+        try: 
+            self.request('meminfo')
+            return True
+        except: 
+            return False
+    
     @classmethod
     def fix_urls(cls, urls, user=None, password=None):
         ''' fixes the urls and put them into the correct format, to maintain 
