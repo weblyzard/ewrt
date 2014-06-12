@@ -45,7 +45,7 @@ HTTP_TEMPORARY_ERROR_CODES = (500, 503, 504) # error codes which might trigger a
 
 # set default socket timeout (otherwise urllib might hang!)
 from socket import setdefaulttimeout, timeout
-setdefaulttimeout(60)
+DEFAULT_TIMEOUT = 60
 
 getHostName = lambda x: "://".join( urlsplit(x)[:2] )
 
@@ -72,7 +72,9 @@ class Retrieve(object):
                  '_supported_http_authentification_methods')   
     
 
-    def __init__(self, module, sleep_time=DEFAULT_WEB_REQUEST_SLEEP_TIME, user_agent=USER_AGENT):
+    def __init__(self, module, sleep_time=DEFAULT_WEB_REQUEST_SLEEP_TIME, 
+                 user_agent=USER_AGENT, default_timeout=DEFAULT_TIMEOUT):
+        setdefaulttimeout(default_timeout)
         self.module           = module
         self.sleep_time       = sleep_time
         self.last_access_time = 0
