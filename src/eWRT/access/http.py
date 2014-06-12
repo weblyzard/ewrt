@@ -17,7 +17,6 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 import urllib2
 from eWRT.config import USER_AGENT, DEFAULT_WEB_REQUEST_SLEEP_TIME, PROXY_SERVER
 
@@ -221,9 +220,8 @@ class TestRetrieve(object):
                  'http://www.heise.de' )
 
     def __init__(self):
-        from socket import getdefaulttimeout
         from logging import StreamHandler
-        self.default_timeout = getdefaulttimeout()
+        self.default_timeout = DEFAULT_TIMEOUT
 
         # set logging handler
         log.addHandler( StreamHandler() )
@@ -256,9 +254,9 @@ class TestRetrieve(object):
     def testRetrievalTimeout(self):
         """ tests whether the socket timeout is honored by our class """
         SLOW_URL = "http://www.csse.uwa.edu.au/"
-        setdefaulttimeout( 1 )
 
-        r = Retrieve( self.__class__.__name__).open( SLOW_URL )
+        r = Retrieve(self.__class__.__name__, 
+                     default_timeout=1).open( SLOW_URL )
         content = r.read()
         r.close()
 
@@ -315,4 +313,3 @@ def t_retrieve(url):
         r.close()
 
     return content
-
