@@ -41,13 +41,13 @@ class RESTClient(object):
             :param authentification_method: authentification method to use
                                             ('basic'*, 'digest'). 
         '''
-        setdefaulttimeout(default_timeout)
         # remove superfluous slashes, if required
         self.service_url = service_url[:-1] if service_url.endswith("/") else service_url
         self.user = user
         self.password = password
 
-        url_obj = Retrieve(module_name, sleep_time=0)
+        url_obj = Retrieve(module_name, sleep_time=0, 
+                           default_timeout=default_timeout)
         self.retrieve = partial(url_obj.open,
                                 user= user,
                                 pwd = password,
@@ -126,9 +126,11 @@ class MultiRESTClient(object):
     MAX_BATCH_SIZE = 500
     URL_PATH = None
 
-    def __init__(self, service_urls, user=None, password=None):
+    def __init__(self, service_urls, user=None, password=None,
+                 default_timeout=WS_DEFAULT_TIMEOUT):
         self._service_urls = self.fix_urls(service_urls, user, password) 
-        self.clients = self._connect_clients(self._service_urls) 
+        self.clients = self._connect_clients(self._service_urls,
+                                             default_timeout=default_timeout) 
     
     def is_online(self):
         try: 
@@ -171,7 +173,8 @@ class MultiRESTClient(object):
         return correct_urls
     
     @classmethod
-    def _connect_clients(cls, service_urls, user=None, password=None):
+    def _connect_clients(cls, service_urls, user=None, password=None,
+                         default_timeout=WS_DEFAULT_TIMEOUT):
 
         clients = []
         if isinstance(service_urls, basestring):
@@ -181,7 +184,9 @@ class MultiRESTClient(object):
             service_url, user, password = Retrieve.get_user_password(url)
        
             clients.append(RESTClient(service_url=service_url, 
-                                      user=user, password=password)) 
+                                      user=user, 
+                                      password=password,
+                                      default_timeout=default_timeout)) 
         return clients
  
     def request(self, path, parameters=None, return_plain=False, 
