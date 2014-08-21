@@ -1,16 +1,24 @@
-easy Web Retrieval Toolkit (eWRT)
-=================================
+# easy Web Retrieval Toolkit (eWRT)
 
-1. Quickstart:
---------------
+## Quickstart:
+
 adjust
-  config.py.sample 
+  `config.py.sample `
 to your setting and save it as config.py
 
-2. Requirements:
----------------
+## Packages:
 
-   python-libraries:
+* `eWRT.access` - file, Web and database access
+* `eWRT.input` - input and clearnup modules
+* `eWRT.ontology` - tools for comparing, evaluating and visualizing ontologies
+* `eWRT.stat` - the eWRT statistics packages
+* `eWRT.util` - utility classes for transparent caching, logging, monitoring, etc.
+* `eWRT.visualize` - eWRT visualization library
+* `eWRT.ws` - Web service access (REST, Amazon, Flickr, Facebook, ...)
+
+## Requirements:
+
+* python-libraries:
    - facebook api - http://code.google.com/p/pyfacebook/
    - google-trends api - http://github.com/suryasev/unofficial-google-trends-api/tree/master
    - oauth - http://oauth.googlecode.com/
@@ -20,7 +28,7 @@ to your setting and save it as config.py
    - python-nltk
    - python-feedparser (eWRT.ws.rss)
 
-   text conversion (eWRT.input.conv):
+* text conversion (eWRT.input.conv):
    - lynx 
    - pdftotext (poppler-utils)
    - antiword
