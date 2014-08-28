@@ -18,7 +18,7 @@ class CompressedFile(object):
     '''
     COMPRESSION_EXT = ('bz2', 'gz')
     
-    def __init__(self, fname, mode='r'):
+    def __init__(self, fname, mode='rb'): # ported to python3 (SV)
         self.name = fname
         if fname.endswith(".gz"):
             self.fhandle = GzipFile(fname, mode)
@@ -36,7 +36,7 @@ class CompressedFile(object):
 
 
     @classmethod
-    def open(cls, fname, mode='r'):
+    def open(cls, fname, mode='rb'): # ported to python3 (SV)
         return CompressedFile(fname, mode).fhandle
 
 
@@ -67,11 +67,16 @@ class TestFile(object):
     def _test_read_write(cls, extension=""):
         fname = ".testfile.txt"+extension
         
-        with CompressedFile(fname, "w") as f:
-            f.write(cls.TESTSTRING)
+        with CompressedFile(fname, "wb") as f:
+            try: # porting to python3 (SV)
+                f.write(bytes(cls.TESTSTRING, 'UTF-8')) # python3
+            except:
+                f.write(cls.TESTSTRING) #python2                
         
         with CompressedFile(fname) as f:
-            assert f.read() == cls.TESTSTRING
+            #assert f.read() == cls.TESTSTRING # python2
+            new_string = f.read().decode('UTF-8') # python3 (SV)
+            assert new_string == cls.TESTSTRING
             assert CompressedFile.get_extension_list(fname)[0] == 'txt'
         
         remove(fname)

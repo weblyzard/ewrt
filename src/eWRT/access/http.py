@@ -17,17 +17,26 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import urllib2
+
+try: 
+    import urllib.request as urllib2 # urllib2 is merged into urllib in python3 (SV)
+except:
+    import urllib2 #python2
+
 from eWRT.config import USER_AGENT, DEFAULT_WEB_REQUEST_SLEEP_TIME, PROXY_SERVER
 
 #USER_AGENT = 'eWRT Version/0.1; Module %s +http://p.semanticlab.net/eWRT'
 #DEFAULT_WEB_REQUEST_SLEEP_TIME = 1 
 #PROXY_SERVER = None
 
+try:
+    from urllib.parse import urlsplit, urlunsplit # porting to python 3.4 (SV)
+except:
+    from urlparse import urlsplit, urlunsplit #python2
 
-from urlparse import urlsplit, urlunsplit
 import time
-from StringIO import StringIO
+import io 
+
 from gzip import GzipFile
 from time import sleep
 from random import randint
@@ -43,7 +52,7 @@ RETRY_WAIT_TIME_RANGE      = (2, 10)         # in seconds
 HTTP_TEMPORARY_ERROR_CODES = (500, 503, 504) # error codes which might trigger a retry
 
 # set default socket timeout (otherwise urllib might hang!)
-from socket import setdefaulttimeout, timeout
+from socket import setdefaulttimeout
 DEFAULT_TIMEOUT = 60
 
 getHostName = lambda x: "://".join( urlsplit(x)[:2] )
@@ -166,7 +175,7 @@ class Retrieve(object):
             @param[in] urlObj 
             @returns an urlObj containing the uncompressed data
         """
-        compressedStream = StringIO( urlObj.read() )
+        compressedStream = io.BytesIO( urlObj.read() )
         return GzipFile(fileobj=compressedStream) 
 
     def _throttle( self ):
@@ -235,7 +244,7 @@ class TestRetrieve(object):
 
         r_handler = Retrieve( self.__class__.__name__ )
         for url in self.TEST_URLS:
-            print url
+            print(url)
             r=r_handler.open( url )
             r.read()
             r.close()
@@ -250,13 +259,13 @@ class TestRetrieve(object):
 
 
     @attr("remote")
-    @raises(timeout)
+    @raises(urllib2.URLError)
     def testRetrievalTimeout(self):
         """ tests whether the socket timeout is honored by our class """
         SLOW_URL = "http://www.csse.uwa.edu.au/"
 
         r = Retrieve(self.__class__.__name__, 
-                     default_timeout=1).open( SLOW_URL )
+                     default_timeout=0.1).open( SLOW_URL )
         content = r.read()
         r.close()
 
@@ -274,7 +283,7 @@ class TestRetrieve(object):
                      'http://www.sueddeutsche.de',
                     ]
 
-        for res in  p.map(t_retrieve, TEST_URLS):
+        for res in p.map(t_retrieve, TEST_URLS):
             assert len(res) > 20
 
     def testGettingUserPassword(self):
@@ -282,7 +291,7 @@ class TestRetrieve(object):
                 ('http://heinz:secret@irgendwas.com', 'heinz', 'secret'))
         
         for test_url, exp_user, exp_passwd in urls: 
-            print 'testing url %s' % test_url
+            print ('testing url ' + test_url)
             url, user, passwd = Retrieve.get_user_password(test_url)
             assert user == exp_user
             assert passwd == exp_passwd
@@ -311,5 +320,4 @@ def t_retrieve(url):
         content = r.read()
     finally:               # this is required as GzipFile does not support the context protocol in python 2.6
         r.close()
-
     return content
