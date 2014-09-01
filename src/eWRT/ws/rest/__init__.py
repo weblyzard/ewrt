@@ -296,8 +296,7 @@ class TestRESTClient(unittest.TestCase):
             client = MultiRESTClient(urls)
             assert False, 'must raise an assertion error'
         except Exception as e:
-            pass
-            # assert 'if set, user AND pwd required' in e # not tested (SV)
+            assert 'if set, user AND pwd required' in e.args # not tested (SV)
 
     def test_get_url(self):
         assert RESTClient.get_request_url(self.TEST_URL, 'execute', '12') \
