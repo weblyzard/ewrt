@@ -82,7 +82,7 @@ class RESTClient(object):
         
         response = handle.read()
         if response:
-            return response if return_plain else loads(response)
+            return response if return_plain else loads(response.decode('utf8'))
         else:
             # this will also return empty list, dicts ... 
             return response
