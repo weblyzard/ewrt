@@ -10,15 +10,19 @@ from pprint import pprint
 ROOT_URL = 'https://www.googleapis.com/customsearch'
 DEFAULT_FORMAT = 'json'
 DEFAULT_COMMAND = 'v1'
-DEFAULT_MAX_RESULTS = 10 # requires only 1 api access
+DEFAULT_MAX_RESULTS = 10  # requires only 1 api access
 DEFAULT_RESULT_LANGUAGE = 'lang_de'
 DEFAULT_INTERFACE_LANGUAGE = 'lang_en'
 DEFAULT_START_INDEX = 1
 
+
 class CustomSearch(object):
+	# Usage:
+	# pprint(results.next())  # print first
+	# [ pprint(res) for res in results ]  # print all
 
 	def __init__(self, api_key, engine_id, api_url=ROOT_URL):
-		
+
 		assert(api_key)
 		self.api_key = api_key
 
@@ -43,23 +47,32 @@ class CustomSearch(object):
 		response = self.client.execute(DEFAULT_COMMAND, query_parameters=params)
 		return response
 
-	def search(self, search_term, num_results=DEFAULT_MAX_RESULTS, format=DEFAULT_FORMAT, index=DEFAULT_START_INDEX):
-		
-		if (num_results > 10):
-			count = DEFAULT_MAX_RESULTS
-			for i in xrange(DEFAULT_START_INDEX, num_results+1, 10): # number of reguests
-				if (i + 10 > num_results):
-					count = num_results % 10
-				fetched = self.request(search_term, count, index=i)
-		else:
-			fetched = self.request(search_term, num_results)
+	def search(self, search_terms, num_results=DEFAULT_MAX_RESULTS, format=DEFAULT_FORMAT, index=DEFAULT_START_INDEX):
 
-		for item in fetched['items']:
-		    try: 
-		        yield self.convert_item(item)
-		    except Exception as e: # ported to Python3 
-		        print('Error %s occured' % e)
-		        continue
+		for search_term in search_terms:
+
+			if (num_results > 10):
+				count = DEFAULT_MAX_RESULTS
+				for i in range(DEFAULT_START_INDEX, num_results+1, 10):  # number of reguests
+					if (i + 10 > num_results):  # detect the last iteration
+						count = num_results % 10
+					fetched = self.request(search_term, count, index=i)
+
+					for item in fetched['items']:
+					    try:
+					        yield self.convert_item(item)
+					    except Exception as e:  # ported to Python3
+					        print('Error %s occured' % e)
+					        continue
+			else:
+				fetched = self.request(search_term, num_results)
+
+				for item in fetched['items']:
+				    try:
+				        yield self.convert_item(item)
+				    except Exception as e:  # ported to Python3
+				        print('Error %s occured' % e)
+				        continue
 
 	@classmethod
 	def convert_item(cls, item):
@@ -73,30 +86,41 @@ class CustomSearch(object):
 	    return result
 
 
-class Test(object):
+class TestCustomSearch(object):
 
 	# provide your google api key for browser applications (from Developers Console)
 	my_api_key = 'AIzaSyAlXco-6Bpikl0Ji2H9NEloe4OsL-pUs2g'
 	# provide your Custom search engine ID
 	my_engine_id = '013438061017685574719:90y0qqxdojg' #013438061017685574719%3Aseaadr__rao
-	
-	limit = 10
-	
-	# def test_search(self):
-	# queryBingFor = "'google fibre'"
-	search_term = "'australia'"
-	cs_handler = CustomSearch(my_api_key, my_engine_id, ROOT_URL)
-	results = cs_handler.search(search_term, limit)
-		# limit%10 # rest
-	# results = cs_handler.search(search_term, limit)
-	
-	# pprint(results.next()) # print first
-	# [ pprint(res) for res in results ] #print all
-	print(len(list(results))) # number of the results
-	#assert(len(list(results)) == limit)
 
-	# TODO test default api call (limit = DEFAULT_MAX_RESULTS)
+	search_terms = ["'modul'", "'university'"]
 
-	# TODO test several api access (limit > DEFAULT_MAX_RESULTS)
+	# test default api call (limit = DEFAULT_MAX_RESULTS)
+	def test_default(self, limit = DEFAULT_MAX_RESULTS):
+		assert limit == DEFAULT_MAX_RESULTS
 
-	# TODO show url
+		cs_handler = CustomSearch(self.my_api_key, self.my_engine_id)
+		results = cs_handler.search(self.search_terms)
+
+		# assert the correct number of the results
+		assert len(list(results)) == limit * len(self.search_terms)
+
+	def test_smaller_limit(self, limit = 4):
+		assert limit < DEFAULT_MAX_RESULTS
+
+		cs_handler = CustomSearch(self.my_api_key, self.my_engine_id)
+		results = cs_handler.search(self.search_terms, limit)
+
+		# assert the correct number of the results
+		assert len(list(results)) == limit * len(self.search_terms)
+
+	# test several api calls (limit > DEFAULT_MAX_RESULTS)
+	def test_larger_limit(self, limit = 21):
+		assert limit > DEFAULT_MAX_RESULTS
+		assert limit%DEFAULT_MAX_RESULTS != 0
+
+		cs_handler = CustomSearch(self.my_api_key, self.my_engine_id)
+		results = cs_handler.search(self.search_terms, limit)
+
+		# assert the correct number of the results
+		assert len(list(results)) == limit * len(self.search_terms)
