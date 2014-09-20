@@ -53,11 +53,11 @@ class CustomSearch(object):
 
 		for search_term in search_terms:
 
-			if (num_results > 10):
+			if (num_results > DEFAULT_MAX_RESULTS):
 				count = DEFAULT_MAX_RESULTS
-				for i in range(DEFAULT_START_INDEX, num_results+1, 10):  # number of reguests
-					if (i + 10 > num_results):  # detect the last iteration
-						count = num_results % 10
+				for i in range(DEFAULT_START_INDEX, num_results+1, DEFAULT_MAX_RESULTS):  # number of reguests
+					if (i + DEFAULT_MAX_RESULTS > num_results):  # detect the last iteration
+						count = num_results % DEFAULT_MAX_RESULTS
 					fetched = self.request(search_term, count, index=i)
 
 					for item in fetched['items']:

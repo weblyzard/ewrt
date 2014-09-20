@@ -5,7 +5,7 @@ Created on Sep 02, 2014
 '''
 
 # Bing API Version 2.0
-# sample URL for web search https://api.datamarket.azure.com/Bing/Search/Web?$format=json&Query=%27Xbox%27
+# sample URL for web search https://api.datamarket.azure.com/Bing/Search/Web?$format=json&Query=%27Xbox%27&$top=2
 
 from eWRT.ws.rest import RESTClient
 from pprint import pprint
@@ -14,6 +14,7 @@ ROOT_URL = 'https://api.datamarket.azure.com/Bing/Search'
 DEFAULT_FORMAT = 'json'
 DEFAULT_COMMAND = 'Web' # Image, News
 DEFAULT_MAX_RESULTS = 50 # requires only 1 api access
+DEFAULT_START_INDEX = 1
 
 class BingSearch(object):
 	# Usage:
@@ -27,23 +28,44 @@ class BingSearch(object):
 		self.api_key = api_key
 		self.api_url = api_url
 		self.username = username
+		self.client = RESTClient(self.api_url, password=self.api_key, user=self.username, authentification_method='basic')
 
-	def search(self, search_terms, num_results=DEFAULT_MAX_RESULTS, command = DEFAULT_COMMAND, format=DEFAULT_FORMAT):
+	def request(self, search_term, num_results=DEFAULT_MAX_RESULTS, command = DEFAULT_COMMAND, format=DEFAULT_FORMAT, index=DEFAULT_START_INDEX):
+		''' searches Bing for the given search_term
+        '''
+		params = {'Query': search_term,
+	  			  '$format': DEFAULT_FORMAT,
+	  			  '$top': num_results}
+
+		response = self.client.execute(command, query_parameters=params)
+		return response
+
+	def search(self, search_terms, num_results=DEFAULT_MAX_RESULTS, command = DEFAULT_COMMAND, format=DEFAULT_FORMAT, index=DEFAULT_START_INDEX):
 		# Web search is by default
 		for search_term in search_terms:
-			params = {'Query': search_term,
-		  			  '$format': DEFAULT_FORMAT,
-		  			  '$top': num_results}
 
-			r = RESTClient(self.api_url, password=self.api_key, user=self.username, authentification_method='basic')
-			fetched = r.execute(command, query_parameters=params)
+			if (num_results > DEFAULT_MAX_RESULTS):
+				count = DEFAULT_MAX_RESULTS
+				for i in range(DEFAULT_START_INDEX, num_results+1, DEFAULT_MAX_RESULTS):  # number of reguests
+					if (i + DEFAULT_MAX_RESULTS > num_results):  # detect the last iteration
+						count = num_results % DEFAULT_MAX_RESULTS
+					fetched = self.request(search_term, count, index=i)
 
-			for item in fetched['d']['results']:
-			    try:
-			        yield self.convert_item(item)
-			    except Exception as e:
-			        print('Error %s occured' % e)
-			        continue
+					for item in fetched['d']['results']:
+					    try:
+					        yield self.convert_item(item)
+					    except Exception as e:  # ported to Python3
+					        print('Error %s occured' % e)
+					        continue
+			else:
+				fetched = self.request(search_term, num_results)
+
+				for item in fetched['d']['results']:
+				    try:
+				        yield self.convert_item(item)
+				    except Exception as e:  # ported to Python3
+				        print('Error %s occured' % e)
+				        continue
 
 	@classmethod
 	def convert_item(cls, item):
@@ -81,7 +103,7 @@ class TestBingSearch(object):
 		# assert the correct number of the results
 		assert len(list(results)) == limit * len(self.search_terms)
 
-	def test_larger_limit(self):  # fails
+	def test_larger_limit(self):
 		limit = 70
 		bs = BingSearch(self.my_account_key, self.username)
 		results = bs.search(self.search_terms, limit)
