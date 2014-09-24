@@ -7,122 +7,130 @@ Created on Aug 30, 2014
 '''
 
 from eWRT.ws.rest import RESTClient
-from pprint import pprint
-
-ROOT_URL = 'https://www.googleapis.com/customsearch'
-DEFAULT_FORMAT = 'json'
-DEFAULT_COMMAND = 'v1'
-DEFAULT_MAX_RESULTS = 10  # requires only 1 api access
-DEFAULT_RESULT_LANGUAGE = 'lang_de'
-DEFAULT_INTERFACE_LANGUAGE = 'lang_en'
-DEFAULT_START_INDEX = 1
+from eWRT.ws import AbstractIterableWebSource
 
 
-class CustomSearch(object):
-	# Usage:
-	# pprint(results.next())  # print first
-	# [ pprint(res) for res in results ]  # print all
+class CustomSearch(AbstractIterableWebSource):
 
-	def __init__(self, api_key, engine_id, api_url=ROOT_URL):
+    NAME = "Google Custom Search"
 
-		assert(api_key)
-		self.api_key = api_key
+    ROOT_URL = 'https://www.googleapis.com/customsearch'
 
-		assert(engine_id)
-		self.engine_id = engine_id
+    DEFAULT_MAX_RESULTS = 10  # requires only 1 api access
+    DEFAULT_COMMAND = 'v1'
+    DEFAULT_FORMAT = 'json'
+    DEFAULT_START_INDEX = 1
+    RESULT_PATH = lambda x: x['items']  # path to the results in json
 
-		self.api_url = api_url
-		self.client = RESTClient(self.api_url, authentification_method='basic')
+    DEFAULT_RESULT_LANGUAGE = 'lang_de'  # lang_en
 
-	def request(self, search_term, num_results=DEFAULT_MAX_RESULTS, format=DEFAULT_FORMAT, index=DEFAULT_START_INDEX):
-		''' searches Google for the given search_term
+    MAPPING = {'date': ('valid_from', 'convert_date'),
+
+               'text': ('content', None),
+
+               'title': 'Title',
+
+               }
+
+    def __init__(self, api_key, engine_id, api_url=ROOT_URL):
+
+        assert(api_key)
+        self.api_key = api_key
+
+        assert(engine_id)
+        self.engine_id = engine_id
+
+        self.api_url = api_url
+        self.client = RESTClient(self.api_url, authentification_method='basic')
+
+    def search_documents(self, search_terms, max_results=DEFAULT_MAX_RESULTS,
+                         from_date=None, to_date=None, command=DEFAULT_COMMAND, format=DEFAULT_FORMAT,
+                         language=DEFAULT_RESULT_LANGUAGE):
+        ''' runs the actual search / calls the webservice / API ... '''
+
+        fetched = self.invoke_iterator(
+            search_terms, max_results, from_date, to_date, command, format)
+
+        result_path = lambda x: x['items']
+        return self.process_json(fetched, result_path)
+
+    def request(
+        self, search_term, current_index, max_results=DEFAULT_MAX_RESULTS,
+        from_date=None, to_date=None, command=DEFAULT_COMMAND, format=DEFAULT_FORMAT,
+        language=DEFAULT_RESULT_LANGUAGE):
+        ''' searches Google for the given search_term
         '''
-		params = {'q': '"%s"' % search_term,
-                  'alt': format,
-                  'cx': self.engine_id,
-                  'key': self.api_key,
-                  'lr': DEFAULT_RESULT_LANGUAGE,
-                  'hl': DEFAULT_INTERFACE_LANGUAGE,
-                  'num': num_results,
-                  'start': index}
+        parameters = {'q': '"%s"' % search_term,
+                      'alt': format,
+                      'cx': self.engine_id,
+                      'key': self.api_key,
+                      'lr': language,
+                      'num': max_results,
+                      'start': current_index}
 
-		response = self.client.execute(DEFAULT_COMMAND, query_parameters=params)
-		return response
+        # for testing purposes
+        print(current_index, max_results, search_term)
 
-	def search(self, search_terms, num_results=DEFAULT_MAX_RESULTS, format=DEFAULT_FORMAT, index=DEFAULT_START_INDEX):
+        response = self.client.execute(command, query_parameters=parameters)
+        return response
 
-		for search_term in search_terms:
+    @classmethod
+    def convert_item(cls, item):
+        ''' applies a mapping to convert the result to the required format
+        '''
 
-			if (num_results > DEFAULT_MAX_RESULTS):
-				count = DEFAULT_MAX_RESULTS
-				for i in range(DEFAULT_START_INDEX, num_results+1, DEFAULT_MAX_RESULTS):  # number of reguests
-					if (i + DEFAULT_MAX_RESULTS > num_results):  # detect the last iteration
-						count = num_results % DEFAULT_MAX_RESULTS
-					fetched = self.request(search_term, count, index=i)
+        result = {'url': item['link'],
+                  'title': item['title'],
+                  }
 
-					for item in fetched['items']:
-					    try:
-					        yield self.convert_item(item)
-					    except Exception as e:  # ported to Python3
-					        print('Error %s occured' % e)
-					        continue
-			else:
-				fetched = self.request(search_term, num_results)
-
-				for item in fetched['items']:
-				    try:
-				        yield self.convert_item(item)
-				    except Exception as e:  # ported to Python3
-				        print('Error %s occured' % e)
-				        continue
-
-	@classmethod
-	def convert_item(cls, item):
-	    ''' applies a mapping to convert the result to the required format
-	    '''
-
-	    result = {'url':item['link'],
-	    		  'title': item['title'],
-	    		  }
-
-	    return result
+        return result
 
 
 class TestCustomSearch(object):
 
-	# provide your google api key for browser applications (from Developers Console)
-	my_api_key = 'AIzaSyAlXco-6Bpikl0Ji2H9NEloe4OsL-pUs2g'
-	# provide your Custom search engine ID
-	my_engine_id = '013438061017685574719:90y0qqxdojg' #013438061017685574719%3Aseaadr__rao
+    # provide your google api key for browser applications (from Developers
+    # Console)
+    my_api_key = 'AIzaSyAlXco-6Bpikl0Ji2H9NEloe4OsL-pUs2g'
+    # provide your Custom search engine ID
+    my_engine_id = '013438061017685574719:90y0qqxdojg'
 
-	search_terms = ["'modul'", "'university'"]
+    search_terms = ["'modul'", "'university'"]
 
-	# test default api call (limit = DEFAULT_MAX_RESULTS)
-	def test_default(self, limit = DEFAULT_MAX_RESULTS):
-		assert limit == DEFAULT_MAX_RESULTS
+    # test default api call
+    def test_default(self):
+        cs = CustomSearch(self.my_api_key, self.my_engine_id)
+        max_results = cs.DEFAULT_MAX_RESULTS
+        results = cs.search_documents(self.search_terms)
 
-		cs_handler = CustomSearch(self.my_api_key, self.my_engine_id)
-		results = cs_handler.search(self.search_terms)
+        # assert the correct number of the results
+        assert len(list(results)) == max_results * len(self.search_terms)
 
-		# assert the correct number of the results
-		assert len(list(results)) == limit * len(self.search_terms)
+    def test_smaller_max_results(self, max_results=4):
+        cs = CustomSearch(self.my_api_key, self.my_engine_id)
 
-	def test_smaller_limit(self, limit = 4):
-		assert limit < DEFAULT_MAX_RESULTS
+        assert max_results < cs.DEFAULT_MAX_RESULTS
 
-		cs_handler = CustomSearch(self.my_api_key, self.my_engine_id)
-		results = cs_handler.search(self.search_terms, limit)
+        results = cs.search_documents(self.search_terms, max_results)
 
-		# assert the correct number of the results
-		assert len(list(results)) == limit * len(self.search_terms)
+        # assert the correct number of the results
+        assert len(list(results)) == max_results * len(self.search_terms)
 
-	# test several api calls (limit > DEFAULT_MAX_RESULTS)
-	def test_larger_limit(self, limit = 21):
-		assert limit > DEFAULT_MAX_RESULTS
-		assert limit%DEFAULT_MAX_RESULTS != 0
+    # test several api calls (limit > DEFAULT_MAX_RESULTS)
+    def test_larger_max_results(self, max_results=21):
+        cs = CustomSearch(self.my_api_key, self.my_engine_id)
 
-		cs_handler = CustomSearch(self.my_api_key, self.my_engine_id)
-		results = cs_handler.search(self.search_terms, limit)
+        assert max_results > cs.DEFAULT_MAX_RESULTS
+        assert max_results % cs.DEFAULT_MAX_RESULTS != 0
 
-		# assert the correct number of the results
-		assert len(list(results)) == limit * len(self.search_terms)
+        results = cs.search_documents(self.search_terms, max_results)
+
+        ## for the testing purposes
+        # print(next(results))
+
+        # assert the correct number of the results
+        assert len(list(results)) == max_results * len(self.search_terms)
+
+# for the testing purposes
+if __name__ == '__main__':
+    test = TestCustomSearch()
+    test.test_larger_max_results()

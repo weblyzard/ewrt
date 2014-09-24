@@ -13,7 +13,7 @@ class AbstractWebSource(object):
 
     SUPPORTED_PARAMS = None
 
-    # a obligatory mapping, which maps results to a standard dictionary
+    # an obligatory mapping, which maps results to a standard dictionary
 
     # or specifies a WebSourceDocument class.
 
@@ -27,10 +27,8 @@ class AbstractWebSource(object):
 
     # MAPPING = WebSourceDocument
 
-    def search_documents(self, search_terms, max_results=None, from_date=None, to_date=None, **kwargs):
+    def search_documents(self, search_terms, max_results=None, from_date=None, to_date=None, command=None, format=None):
         ''' runs the actual search / calls the webservice / API ... '''
-
-        search_params = self._check_params(kwargs)
 
         raise NotImplemented
 
@@ -40,51 +38,57 @@ class AbstractWebSource(object):
     def post_search(self, search_params):
         ''' override this function to perform post-run tasks '''
 
-    @classmethod
-    def _check_params(cls, params):
 
-        search_params = {}
+class AbstractIterableWebSource(AbstractWebSource):
 
-        for k, v in params.items():
+    DEFAULT_MAX_RESULTS = None  # requires only 1 api access
+    DEFAULT_COMMAND = None
+    DEFAULT_FORMAT = None
+    RESULT_PATH = None
+    DEFAULT_START_INDEX = None
 
-            if k in cls.SUPPORTED_PARAMS:
+    # to be locally overriden
+    def search_documents(self, search_terms, max_results=DEFAULT_MAX_RESULTS,
+                         from_date=None, to_date=None, command=DEFAULT_COMMAND, format=DEFAULT_FORMAT, **kwarg):
+        ''' runs the actual search / calls the webservice / API ... '''
+        # Web search is by default
+        fetched = self.invoke_iterator(
+            search_terms, max_results, from_date, to_date, command, format)
 
-                search_params[k] = v
+        return self.process_json(fetched, self.RESULT_PATH)
 
-        return search_params
+    def invoke_iterator(self, search_terms, max_results, from_date=None, to_date=None, command=None, format=None):
+        ''' runs the actual search / calls the webservice / API ... '''
+        # Web search is by default
+        for search_term in search_terms:
 
-    # assert all(param in cls.SUPPORTED_PARAMS for param in params)
+            if (max_results > self.DEFAULT_MAX_RESULTS):
+                mid_results = self.DEFAULT_MAX_RESULTS
+                # number of reguests
+                for index in range(self.DEFAULT_START_INDEX, max_results + 1, self.DEFAULT_MAX_RESULTS):
+                    # detect the last iteration
+                    if (index + self.DEFAULT_MAX_RESULTS > max_results):
+                        mid_results = max_results % self.DEFAULT_MAX_RESULTS
+                    fetched = self.request(
+                        search_term, index, mid_results, from_date, to_date, command, format)
+                    yield fetched
 
+            else:
+                fetched = self.request(
+                    search_term, self.DEFAULT_START_INDEX, max_results, from_date, to_date, command, format)
+                yield fetched
 
-# class AbstractIterableWebSource(AbstractWebSource):
+    def process_json(self, results, json_path):
+        for result in results:
+            for item in json_path(result):
+                try:
+                    yield self.convert_item(item)
+                except Exception as e:  # ported to Python3
+                    print('Error %s occured' % e)
+                    continue
 
-# DEFAULT_MAX_RESULTS = None  # requires only 1 api access
-#     DEFAULT_START_INDEX = 1
-
-#     def request(self, search_term, num_results=DEFAULT_MAX_RESULTS):
-
-#         response = self.client.execute()
-#         return response
-
-#     def search_documents(self, search_terms, max_results=None, from_date=None, to_date=None, **kwargs):
-#         ''' runs the actual search / calls the webservice / API ... '''
-
-#         search_params = self._check_params(kwargs)
-
-#         for search_term in search_terms:
-
-#             if (max_results > self.DEFAULT_MAX_RESULTS):
-#                 count = self.DEFAULT_MAX_RESULTS
-# number of reguests
-#                 for i in range(self.DEFAULT_START_INDEX, max_results + 1, self.DEFAULT_MAX_RESULTS):
-# detect the last iteration
-#                     if (i + self.DEFAULT_MAX_RESULTS > max_results):
-#                         count = max_results % self.DEFAULT_MAX_RESULTS
-#                     fetched = self.request(search_term, count, index=i)
-
-#             else:
-#                 fetched = self.request(search_term, max_results)
-
-#         raise NotImplemented
-
-#     pass
+    def request(self, search_term, current_index, max_results,
+                from_date=None, to_date=None, command=None, format=None):
+        ''' requests the given search_term from the API
+        '''
+        raise NotImplemented

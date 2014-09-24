@@ -9,21 +9,20 @@ Created on Sep 02, 2014
 # https://api.datamarket.azure.com/Bing/Search/Web?$format=json&Query=%27Xbox%27&$top=2
 
 from eWRT.ws.rest import RESTClient
-from eWRT.ws import AbstractWebSource
-# from pprint import pprint
-
-ROOT_URL = 'https://api.datamarket.azure.com/Bing/Search'
-DEFAULT_COMMAND = 'Web'  # Image, News
-DEFAULT_START_INDEX = 1
+from eWRT.ws import AbstractIterableWebSource
 
 
-class BingSearch(AbstractWebSource):
+class BingSearch(AbstractIterableWebSource):
 
     NAME = "Bing Search"
 
-    DEFAULT_MAX_RESULTS = 50  # requires only 1 api access
+    ROOT_URL = 'https://api.datamarket.azure.com/Bing/Search'
 
-    DEFAULT_PARAMS = {'$format': 'json'}
+    DEFAULT_MAX_RESULTS = 50  # requires only 1 api access
+    DEFAULT_COMMAND = 'Web'  # Image, News
+    DEFAULT_FORMAT = 'json'
+    DEFAULT_START_INDEX = 0
+    RESULT_PATH = lambda x: x['d']['results']  # path to the results in json
 
     MAPPING = {'date': ('valid_from', 'convert_date'),
 
@@ -43,49 +42,29 @@ class BingSearch(AbstractWebSource):
         self.client = RESTClient(
             self.api_url, password=self.api_key, user=self.username, authentification_method='basic')
 
-    def search_documents(self, search_terms, max_results=DEFAULT_MAX_RESULTS, from_date=None, to_date=None, parameters=DEFAULT_PARAMS):
+    def search_documents(self, search_terms, max_results=DEFAULT_MAX_RESULTS,
+                         from_date=None, to_date=None, command=DEFAULT_COMMAND, format=DEFAULT_FORMAT):
         ''' runs the actual search / calls the webservice / API ... '''
-        # search_params = self._check_params(kwargs)
-
         # Web search is by default
-        for search_term in search_terms:
+        fetched = self.invoke_iterator(
+            search_terms, max_results, from_date, to_date, command, format)
 
-            if (max_results > self.DEFAULT_MAX_RESULTS):
-                mid_results = self.DEFAULT_MAX_RESULTS
-                # number of reguests
-                for i in range(DEFAULT_START_INDEX, max_results + 1, self.DEFAULT_MAX_RESULTS):
-                    # detect the last iteration
-                    if (i + self.DEFAULT_MAX_RESULTS > max_results):
-                        mid_results = max_results % self.DEFAULT_MAX_RESULTS
-                    fetched = self.request(
-                        search_term, mid_results, parameters)
+        result_path = lambda x: x['d']['results']
+        return self.process_json(fetched, result_path)
 
-                    for item in fetched['d']['results']:
-                        try:
-                            yield self.convert_item(item)
-                        except Exception as e:  # ported to Python3
-                            print('Error %s occured' % e)
-                            continue
-            else:
-                fetched = self.request(search_term, max_results, parameters)
-
-                # return fetched
-
-                for item in fetched['d']['results']:
-                    try:
-                        yield self.convert_item(item)
-                    except Exception as e:  # ported to Python3
-                        print('Error %s occured' % e)
-                        continue
-
-    def request(self, search_term, max_results=DEFAULT_MAX_RESULTS, parameters=DEFAULT_PARAMS, command=DEFAULT_COMMAND):
+    def request(self, search_term, current_index, max_results=DEFAULT_MAX_RESULTS,
+                from_date=None, to_date=None, command=DEFAULT_COMMAND, format=DEFAULT_FORMAT):
         ''' searches Bing for the given search_term
         '''
-        parameters['Query'] = search_term
-        parameters['$top'] = max_results
+        parameters = {'Query': search_term,
+                      '$format': format,
+                      '$top': max_results,
+                      '$skip': current_index}
+
+        ## for testing purposes
+        # print(current_index, max_results, search_term)
 
         response = self.client.execute(command, query_parameters=parameters)
-        # print(response)
         return response
 
     @classmethod
@@ -114,41 +93,39 @@ class TestBingSearch(object):
 
         results = bs.search_documents(self.search_terms)
 
+        ## for the testing purposes
+        # [ print(res) for res in results ]
+
         # assert the correct number of the results
         assert len(list(results)) == bs.DEFAULT_MAX_RESULTS * \
             len(self.search_terms)
 
-    # test api call with additional parameters
-    def test_params(self):
+    def test_smaller_max_results(self, max_results=4):
         bs = BingSearch(self.my_acmid_results_key, self.username)
 
-        params = {'$format': 'json'}
+        assert max_results < bs.DEFAULT_MAX_RESULTS
 
-        results = bs.search_documents(
-            self.search_terms, parameters=params)
+        results = bs.search_documents(self.search_terms, max_results)
 
-        # print(results)
         # assert the correct number of the results
-        assert len(list(results)) == bs.DEFAULT_MAX_RESULTS * \
-            len(self.search_terms)
-        # [pprint(res) for res in results]
-
-    def test_smaller_max_results(self):
-        max_results = 4
-        bs = BingSearch(self.my_acmid_results_key, self.username)
-        results = bs.search_documents(self.search_terms, max_results)
-
-    # assert the correct number of the results
         assert len(list(results)) == max_results * len(self.search_terms)
 
-    def test_larger_max_results(self):
-        max_results = 70
+    def test_larger_max_results(self, max_results=70):
         bs = BingSearch(self.my_acmid_results_key, self.username)
+
+        assert max_results > bs.DEFAULT_MAX_RESULTS
+        assert max_results % bs.DEFAULT_MAX_RESULTS != 0
+
         results = bs.search_documents(self.search_terms, max_results)
 
-    # assert the correct number of the results
+        ## for the testing purposes
+        # print(next(results))
+
+        # assert the correct number of the results
         assert len(list(results)) == max_results * len(self.search_terms)
 
+
+# for the testing purposes
 if __name__ == '__main__':
     test = TestBingSearch()
-    test.test_params()
+    test.test_larger_max_results()
