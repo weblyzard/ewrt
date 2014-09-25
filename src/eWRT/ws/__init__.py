@@ -10,24 +10,19 @@ class AbstractWebSource(object):
     ''' a raw Web Source object '''
 
     NAME = None
-
     SUPPORTED_PARAMS = None
 
     # an obligatory mapping, which maps results to a standard dictionary
-
     # or specifies a WebSourceDocument class.
-
     MAPPING = {'date': ('valid_from', 'convert_date'),
-
                'text': ('content', None),
-
                'title': 'title',
-
                }
 
     # MAPPING = WebSourceDocument
 
-    def search_documents(self, search_terms, max_results=None, from_date=None, to_date=None, command=None, format=None):
+    def search_documents(self, search_terms, max_results=None, from_date=None,
+                         to_date=None, **kwargs):
         ''' runs the actual search / calls the webservice / API ... '''
 
         raise NotImplemented
@@ -41,6 +36,12 @@ class AbstractWebSource(object):
 
 class AbstractIterableWebSource(AbstractWebSource):
 
+    '''
+    web source implementing several calls to the API
+    iterating over search terms and over API-specific
+    maximal number of results restriction
+    '''
+
     DEFAULT_MAX_RESULTS = None  # requires only 1 api access
     DEFAULT_COMMAND = None
     DEFAULT_FORMAT = None
@@ -49,38 +50,47 @@ class AbstractIterableWebSource(AbstractWebSource):
 
     # to be locally overriden
     def search_documents(self, search_terms, max_results=DEFAULT_MAX_RESULTS,
-                         from_date=None, to_date=None, command=DEFAULT_COMMAND, format=DEFAULT_FORMAT, **kwarg):
-        ''' runs the actual search / calls the webservice / API ... '''
-        # Web search is by default
+                         from_date=None, to_date=None, **kwargs):
+        ''' calls iterator and results' post-processor '''
+
         fetched = self.invoke_iterator(
-            search_terms, max_results, from_date, to_date, command, format)
+            search_terms, max_results, from_date, to_date, kwarg)
 
-        return self.process_json(fetched, self.RESULT_PATH)
+        return self.process_output(fetched, self.RESULT_PATH)
 
-    def invoke_iterator(self, search_terms, max_results, from_date=None, to_date=None, command=None, format=None):
-        ''' runs the actual search / calls the webservice / API ... '''
-        # Web search is by default
-        for search_term in search_terms:
+    def invoke_iterator(self, search_terms, max_results, from_date=None,
+                        to_date=None, command=None, output_format=None):
+        ''' iterator: iterates over search terms and API requests '''
+
+        for search_term in ["'{0}'".format(t) for t in search_terms]:
 
             if (max_results > self.DEFAULT_MAX_RESULTS):
                 mid_results = self.DEFAULT_MAX_RESULTS
                 # number of reguests
-                for index in range(self.DEFAULT_START_INDEX, max_results + 1, self.DEFAULT_MAX_RESULTS):
+                for index in range(self.DEFAULT_START_INDEX,
+                                   max_results + 1, self.DEFAULT_MAX_RESULTS):
                     # detect the last iteration
                     if (index + self.DEFAULT_MAX_RESULTS > max_results):
                         mid_results = max_results % self.DEFAULT_MAX_RESULTS
-                    fetched = self.request(
-                        search_term, index, mid_results, from_date, to_date, command, format)
+                    fetched = self.request(search_term, index, mid_results,
+                                           from_date, to_date, command,
+                                           output_format)
                     yield fetched
 
             else:
                 fetched = self.request(
-                    search_term, self.DEFAULT_START_INDEX, max_results, from_date, to_date, command, format)
+                    search_term, self.DEFAULT_START_INDEX, max_results,
+                    from_date, to_date, command, output_format)
                 yield fetched
 
-    def process_json(self, results, json_path):
+    def process_output(self, results, path):
+        '''
+        results' post-processor: iterates over the API responses
+        and calls the output convertor
+        '''
+
         for result in results:
-            for item in json_path(result):
+            for item in path(result):
                 try:
                     yield self.convert_item(item)
                 except Exception as e:  # ported to Python3
@@ -88,7 +98,8 @@ class AbstractIterableWebSource(AbstractWebSource):
                     continue
 
     def request(self, search_term, current_index, max_results,
-                from_date=None, to_date=None, command=None, format=None):
-        ''' requests the given search_term from the API
+                from_date=None, to_date=None, command=None,
+                output_format=None):
+        ''' calls the web source's API
         '''
         raise NotImplemented

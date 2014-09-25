@@ -14,25 +14,24 @@ from eWRT.ws import AbstractIterableWebSource
 
 class BingSearch(AbstractIterableWebSource):
 
+    ''' wrapper for the Bing Search API '''
+
     NAME = "Bing Search"
-
     ROOT_URL = 'https://api.datamarket.azure.com/Bing/Search'
-
     DEFAULT_MAX_RESULTS = 50  # requires only 1 api access
+    SUPPORTED_PARAMS = ['command', 'output_format']
     DEFAULT_COMMAND = 'Web'  # Image, News
     DEFAULT_FORMAT = 'json'
     DEFAULT_START_INDEX = 0
     RESULT_PATH = lambda x: x['d']['results']  # path to the results in json
 
     MAPPING = {'date': ('valid_from', 'convert_date'),
-
                'text': ('content', None),
-
                'title': 'Title',
-
                }
 
     def __init__(self, api_key, username, api_url=ROOT_URL):
+        ''' fixes the credentials and initiates the RESTClient '''
 
         assert(api_key)
 
@@ -40,28 +39,33 @@ class BingSearch(AbstractIterableWebSource):
         self.api_url = api_url
         self.username = username
         self.client = RESTClient(
-            self.api_url, password=self.api_key, user=self.username, authentification_method='basic')
+            self.api_url, password=self.api_key, user=self.username,
+            authentification_method='basic')
 
     def search_documents(self, search_terms, max_results=DEFAULT_MAX_RESULTS,
-                         from_date=None, to_date=None, command=DEFAULT_COMMAND, format=DEFAULT_FORMAT):
-        ''' runs the actual search / calls the webservice / API ... '''
+                         from_date=None, to_date=None, command=DEFAULT_COMMAND,
+                         output_format=DEFAULT_FORMAT):
+        ''' calls iterator and results' post-processor '''
         # Web search is by default
-        fetched = self.invoke_iterator(
-            search_terms, max_results, from_date, to_date, command, format)
+        fetched = self.invoke_iterator(search_terms, max_results, from_date,
+                                       to_date, command, output_format)
 
         result_path = lambda x: x['d']['results']
-        return self.process_json(fetched, result_path)
+        return self.process_output(fetched, result_path)
 
-    def request(self, search_term, current_index, max_results=DEFAULT_MAX_RESULTS,
-                from_date=None, to_date=None, command=DEFAULT_COMMAND, format=DEFAULT_FORMAT):
-        ''' searches Bing for the given search_term
+    def request(self, search_term, current_index,
+                max_results=DEFAULT_MAX_RESULTS, from_date=None,
+                to_date=None, command=DEFAULT_COMMAND,
+                output_format=DEFAULT_FORMAT):
+        ''' calls Bing Search API
         '''
+
         parameters = {'Query': search_term,
-                      '$format': format,
+                      '$format': output_format,
                       '$top': max_results,
                       '$skip': current_index}
 
-        ## for testing purposes
+        # for testing purposes
         # print(current_index, max_results, search_term)
 
         response = self.client.execute(command, query_parameters=parameters)
@@ -69,7 +73,9 @@ class BingSearch(AbstractIterableWebSource):
 
     @classmethod
     def convert_item(cls, item):
-        ''' applies a mapping to convert the result to the required format
+        '''
+        output convertor: applies a mapping to convert
+        the result to the required format
         '''
 
         result = {'url': item['Url'],
@@ -85,7 +91,7 @@ class TestBingSearch(object):
     username = 'svitlana.vakulenko@gmail.com'
     my_acmid_results_key = 'kieVYyuW1uwvUnVo3b1+vXWtim6TuxFiYkSpPtloUhI'
 
-    search_terms = ["'modul'", "'university'"]
+    search_terms = ['modul', 'university']
 
     # test default api call (max_results = DEFAULT_MAX_RESULTS)
     def test_default(self):
@@ -93,7 +99,7 @@ class TestBingSearch(object):
 
         results = bs.search_documents(self.search_terms)
 
-        ## for the testing purposes
+        # for the testing purposes
         # [ print(res) for res in results ]
 
         # assert the correct number of the results
@@ -118,7 +124,7 @@ class TestBingSearch(object):
 
         results = bs.search_documents(self.search_terms, max_results)
 
-        ## for the testing purposes
+        # for the testing purposes
         # print(next(results))
 
         # assert the correct number of the results

@@ -12,27 +12,25 @@ from eWRT.ws import AbstractIterableWebSource
 
 class CustomSearch(AbstractIterableWebSource):
 
+    ''' wrapper for the Google Custom Search API '''
+
     NAME = "Google Custom Search"
-
     ROOT_URL = 'https://www.googleapis.com/customsearch'
-
     DEFAULT_MAX_RESULTS = 10  # requires only 1 api access
+    SUPPORTED_PARAMS = ['command', 'output_format', 'language']
     DEFAULT_COMMAND = 'v1'
     DEFAULT_FORMAT = 'json'
     DEFAULT_START_INDEX = 1
-    RESULT_PATH = lambda x: x['items']  # path to the results in json
-
+    RESULT_PATH = lambda x: x['items']  # path to the results
     DEFAULT_RESULT_LANGUAGE = 'lang_de'  # lang_en
 
     MAPPING = {'date': ('valid_from', 'convert_date'),
-
                'text': ('content', None),
-
                'title': 'Title',
-
                }
 
     def __init__(self, api_key, engine_id, api_url=ROOT_URL):
+        ''' fixes the credentials and initiates the RESTClient '''
 
         assert(api_key)
         self.api_key = api_key
@@ -44,24 +42,26 @@ class CustomSearch(AbstractIterableWebSource):
         self.client = RESTClient(self.api_url, authentification_method='basic')
 
     def search_documents(self, search_terms, max_results=DEFAULT_MAX_RESULTS,
-                         from_date=None, to_date=None, command=DEFAULT_COMMAND, format=DEFAULT_FORMAT,
+                         from_date=None, to_date=None, command=DEFAULT_COMMAND,
+                         output_format=DEFAULT_FORMAT,
                          language=DEFAULT_RESULT_LANGUAGE):
-        ''' runs the actual search / calls the webservice / API ... '''
+        ''' calls iterator and results' post-processor '''
 
-        fetched = self.invoke_iterator(
-            search_terms, max_results, from_date, to_date, command, format)
+        fetched = self.invoke_iterator(search_terms, max_results, from_date,
+                                       to_date, command, output_format)
 
         result_path = lambda x: x['items']
-        return self.process_json(fetched, result_path)
+        return self.process_output(fetched, result_path)
 
-    def request(
-        self, search_term, current_index, max_results=DEFAULT_MAX_RESULTS,
-        from_date=None, to_date=None, command=DEFAULT_COMMAND, format=DEFAULT_FORMAT,
-        language=DEFAULT_RESULT_LANGUAGE):
-        ''' searches Google for the given search_term
+    def request(self, search_term, current_index,
+                max_results=DEFAULT_MAX_RESULTS, from_date=None, to_date=None,
+                command=DEFAULT_COMMAND, output_format=DEFAULT_FORMAT,
+                language=DEFAULT_RESULT_LANGUAGE):
+        ''' calls Google Custom Search API
         '''
+
         parameters = {'q': '"%s"' % search_term,
-                      'alt': format,
+                      'alt': output_format,
                       'cx': self.engine_id,
                       'key': self.api_key,
                       'lr': language,
@@ -69,14 +69,16 @@ class CustomSearch(AbstractIterableWebSource):
                       'start': current_index}
 
         # for testing purposes
-        print(current_index, max_results, search_term)
+        # print(current_index, max_results, search_term)
 
         response = self.client.execute(command, query_parameters=parameters)
         return response
 
     @classmethod
     def convert_item(cls, item):
-        ''' applies a mapping to convert the result to the required format
+        '''
+        output convertor: applies a mapping to convert
+        the result to the required format
         '''
 
         result = {'url': item['link'],
@@ -94,7 +96,7 @@ class TestCustomSearch(object):
     # provide your Custom search engine ID
     my_engine_id = '013438061017685574719:90y0qqxdojg'
 
-    search_terms = ["'modul'", "'university'"]
+    search_terms = ['modul', 'university']
 
     # test default api call
     def test_default(self):
@@ -124,7 +126,7 @@ class TestCustomSearch(object):
 
         results = cs.search_documents(self.search_terms, max_results)
 
-        ## for the testing purposes
+        # for the testing purposes
         # print(next(results))
 
         # assert the correct number of the results
