@@ -12,7 +12,7 @@ from eWRT.ws import AbstractIterableWebSource
 
 class CustomSearch(AbstractIterableWebSource):
 
-    ''' wrapper for the Google Custom Search API '''
+    """wrapper for the Google Custom Search API"""
 
     NAME = "Google Custom Search"
     ROOT_URL = 'https://www.googleapis.com/customsearch'
@@ -30,7 +30,7 @@ class CustomSearch(AbstractIterableWebSource):
                }
 
     def __init__(self, api_key, engine_id, api_url=ROOT_URL):
-        ''' fixes the credentials and initiates the RESTClient '''
+        """fixes the credentials and initiates the RESTClient"""
 
         assert(api_key)
         self.api_key = api_key
@@ -45,7 +45,7 @@ class CustomSearch(AbstractIterableWebSource):
                          from_date=None, to_date=None, command=DEFAULT_COMMAND,
                          output_format=DEFAULT_FORMAT,
                          language=DEFAULT_RESULT_LANGUAGE):
-        ''' calls iterator and results' post-processor '''
+        """calls iterator and results' post-processor"""
 
         fetched = self.invoke_iterator(search_terms, max_results, from_date,
                                        to_date, command, output_format)
@@ -57,8 +57,7 @@ class CustomSearch(AbstractIterableWebSource):
                 max_results=DEFAULT_MAX_RESULTS, from_date=None, to_date=None,
                 command=DEFAULT_COMMAND, output_format=DEFAULT_FORMAT,
                 language=DEFAULT_RESULT_LANGUAGE):
-        ''' calls Google Custom Search API
-        '''
+        """calls Google Custom Search API"""
 
         parameters = {'q': '"%s"' % search_term,
                       'alt': output_format,
@@ -76,10 +75,9 @@ class CustomSearch(AbstractIterableWebSource):
 
     @classmethod
     def convert_item(cls, item):
-        '''
-        output convertor: applies a mapping to convert
+        """output convertor: applies a mapping to convert
         the result to the required format
-        '''
+        """
 
         result = {'url': item['link'],
                   'title': item['title'],

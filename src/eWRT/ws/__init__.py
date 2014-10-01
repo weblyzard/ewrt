@@ -7,40 +7,35 @@ Web Service access.
 
 class AbstractWebSource(object):
 
-    ''' a raw Web Source object '''
+    """a raw Web Source object"""
 
     NAME = None
     SUPPORTED_PARAMS = None
 
     # an obligatory mapping, which maps results to a standard dictionary
     # or specifies a WebSourceDocument class.
-    MAPPING = {'date': ('valid_from', 'convert_date'),
-               'text': ('content', None),
-               'title': 'title',
-               }
-
+    MAPPING = None
     # MAPPING = WebSourceDocument
 
     def search_documents(self, search_terms, max_results=None, from_date=None,
                          to_date=None, **kwargs):
-        ''' runs the actual search / calls the webservice / API ... '''
+        """runs the actual search / calls the webservice / API ..."""
 
         raise NotImplemented
 
     def pre_search(self, search_params):
-        ''' override this function to perform pre-run tasks '''
+        """override this function to perform pre-run tasks"""
 
     def post_search(self, search_params):
-        ''' override this function to perform post-run tasks '''
+        """override this function to perform post-run tasks"""
 
 
 class AbstractIterableWebSource(AbstractWebSource):
 
-    '''
-    web source implementing several calls to the API
+    """web source implementing several calls to the API
     iterating over search terms and over API-specific
     maximal number of results restriction
-    '''
+    """
 
     DEFAULT_MAX_RESULTS = None  # requires only 1 api access
     DEFAULT_COMMAND = None
@@ -51,16 +46,16 @@ class AbstractIterableWebSource(AbstractWebSource):
     # to be locally overriden
     def search_documents(self, search_terms, max_results=DEFAULT_MAX_RESULTS,
                          from_date=None, to_date=None, **kwargs):
-        ''' calls iterator and results' post-processor '''
+        """calls iterator and results' post-processor"""
 
         fetched = self.invoke_iterator(
-            search_terms, max_results, from_date, to_date, kwarg)
+            search_terms, max_results, from_date, to_date, **kwargs)
 
         return self.process_output(fetched, self.RESULT_PATH)
 
     def invoke_iterator(self, search_terms, max_results, from_date=None,
                         to_date=None, command=None, output_format=None):
-        ''' iterator: iterates over search terms and API requests '''
+        """iterator: iterates over search terms and API requests"""
 
         for search_term in ["'{0}'".format(t) for t in search_terms]:
 
@@ -84,10 +79,9 @@ class AbstractIterableWebSource(AbstractWebSource):
                 yield fetched
 
     def process_output(self, results, path):
-        '''
-        results' post-processor: iterates over the API responses
+        """results' post-processor: iterates over the API responses
         and calls the output convertor
-        '''
+        """
 
         for result in results:
             for item in path(result):
@@ -100,6 +94,7 @@ class AbstractIterableWebSource(AbstractWebSource):
     def request(self, search_term, current_index, max_results,
                 from_date=None, to_date=None, command=None,
                 output_format=None):
-        ''' calls the web source's API
-        '''
+        """calls the web source's API
+        """
+        
         raise NotImplemented
