@@ -2,17 +2,17 @@
 
 # (C)opyrights 2008-2009 by Albert Weichselbraun <albert@weichselbraun.net>
 #                           Heinz-Peter Lang <heinz@langatium.net>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -23,10 +23,19 @@ import unittest
 import optparse
 import sys
 import logging
-import StringIO
+
+try:
+    from io import StringIO
+except:
+    import StringIO
+
 import time
 from datetime import datetime, timedelta, date
-from urlparse import urlparse, parse_qs
+
+try:
+    from urllib.parse import urlparse, parse_qs  # porting to python 3.4 (SV)
+except:
+    from urlparse import urlparse, parse_qs  # python2
 
 from xml.dom.minidom import parse, parseString
 from lxml import etree
@@ -63,13 +72,13 @@ class GoogleBlogSearch(object):
     @staticmethod
     def get_blog_links(searchTerm, maxResults=100, offset=0, maxAge=0,
                        country=None):
-        ''' returns a list of URLs 
+        ''' returns a list of URLs
         @param searchTerm:
         @param maxResult:
         @param offset:
         @param maxAge:
-        @param country: country code, e.g. AT, DE, ... 
-        @return:     
+        @param country: country code, e.g. AT, DE, ...
+        @return:
         '''
 
         if isinstance(searchTerm, list):
@@ -88,14 +97,14 @@ class GoogleBlogSearch(object):
 
         url = SEARCH_URL.format(searchTerm=searchTerm, start=offset,
                                 number=maxResults, maxAge=maxAgeString)
-        
-        if country: 
+
+        if country:
             if country.upper() in SUPPORTED_COUNTRIES:
                 url = '%s&cr=country%s' % (url, country.upper())
                 url = url.replace('.com/', '.%s/' % country.lower())
-            else: 
+            else:
                 logger.error('Do not recognize country "%s"' % country)
-                
+
         logger.debug('Searching URL %s' % url)
         html_content = GoogleBlogSearch.get_content(url)
         tree = etree.HTML(html_content)
@@ -112,7 +121,7 @@ class GoogleBlogSearch(object):
                 url = element.xpath('./h3[@class="r"]/a')[0].attrib['href']
                 abstract = ' '.join(element.xpath('./div[@class="s"]/text()'))
                 url = GoogleBlogSearch.parse_url(url)
-                
+
                 if url:
                     blogLink = {}
                     blogLink['url'] = url
@@ -120,9 +129,9 @@ class GoogleBlogSearch(object):
                     blogLink['abstract'] = abstract
                     blogLink['reach'] = '0'
                     blogLink['date'] = GoogleBlogSearch.get_link_date(element)
-    
+
                     urls.append(blogLink)
-    
+
                     counter += 1
 
                 if (counter + offset) >= maxResults:
@@ -138,15 +147,15 @@ class GoogleBlogSearch(object):
 
     @staticmethod
     def parse_url(url):
-        
+
         if url.startswith('/'):
             url = 'www.google.com%s' % url
-        
+
         o = urlparse(url)
         query = parse_qs(o.query)
-        
+
         correct_url = None
-        
+
         if not 'q' in query:
             logger.critical('URL %s does not contain the parameter "q"' % url)
         else:
@@ -156,14 +165,14 @@ class GoogleBlogSearch(object):
                 correct_url = query['q'][0]
             else:
                 logger.critical('Unknown type "%s" for query["q"]' % type(query['q']))
-                
+
         return correct_url
 
     @staticmethod
     def get_link_date(element):
         linkDate = element.xpath('./div[@class="f"]/text()')[0]
         linkDate = linkDate.split('by')[0]
-        
+
         m = re.match('(\d{1,2} \w* \d{2,4})', linkDate)
 
         if m:
@@ -182,11 +191,11 @@ class GoogleBlogSearch(object):
                 elif 'minute' in linkDate:
                     minutes = int(re.split(' ', linkDate)[0])
                     tdelta = timedelta(minutes=minutes)
-                    
+
                 linkDate = now - tdelta
-            
+
         return linkDate
-    
+
 class TestGoogleSearch(unittest.TestCase):
     ''' '''
 
@@ -195,7 +204,7 @@ class TestGoogleSearch(unittest.TestCase):
         self.search = GoogleBlogSearch()
         logger.addHandler(logging.StreamHandler())
         logger.setLevel(logging.DEBUG)
-        
+
     def no_test_get_url(self):
         ''' tests getting the urls '''
 
@@ -218,14 +227,14 @@ class TestGoogleSearch(unittest.TestCase):
     def test_country(self):
         urls = GoogleBlogSearch.get_blog_links('finanzkrise', maxResults=10, country='AT')
         for url in urls:
-            print url
+            print(url)
             assert url['url'].startswith('http')
 
     def test_parsing_url(self):
         url = '/url?q=http://wiweb.at/index.php%3Foption%3Dcom_content%26view%3Darticle%26id%3D650:eu-budget-kommissar%26catid%3D36:welt&sa=U&ei=BfYoT4_DGuSD4gTEsv3rAw&ved=0CD0QmAEwBw&usg=AFQjCNEToCVos-YrGnS4Jnuuv0L-x_hnXA'
 
         url = GoogleBlogSearch.parse_url(url)
-        print url
+        print(url)
         assert url == 'http://wiweb.at/index.php?option=com_content&view=article&id=650:eu-budget-kommissar&catid=36:welt'
 
 if __name__ == '__main__':
