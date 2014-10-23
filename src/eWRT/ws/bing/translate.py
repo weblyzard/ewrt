@@ -29,7 +29,7 @@ from urllib import urlencode
 from eWRT.ws import AbstractWebSource
 
 API_URL = 'https://datamarket.accesscontrol.windows.net/v2/OAuth2-13'
-REQUEST_URL = ''
+
 class BingTranslator(AbstractWebSource):
     NAME = 'bing_translate'
     SUPPORTED_PARAMS = ('text', 'target_language', 'source_language')
@@ -51,19 +51,19 @@ class BingTranslator(AbstractWebSource):
             
         for search_term in search_terms: 
             translation = self.translate(text=search_term, 
-                                         source_language=source_language, 
-                                         target_language=target_language)
+                                         target_language=target_language,
+                                         source_language=source_language)
             yield {'text': search_term, 
                    'translation': translation, 
                    'source_language': source_language, 
                    'target_language': target_language}
             
-    def translate(self, text, source_language, target_language):
+    def translate(self, text, target_language, source_language):
         ''' tranlates the `text` in `source_language` to the `target_language`
         :param text: text to translate
         :type text: str or unicode
-        :param source_language: language of the given text (iso-code)
         :param target_language: language to translate to (iso-code)
+        :param source_language: language of the given text (iso-code)
         :returns: translated text as string
         '''
         api_url = 'http://api.microsofttranslator.com/v2/Ajax.svc/Translate?'
