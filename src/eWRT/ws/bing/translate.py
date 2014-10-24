@@ -21,24 +21,29 @@ System.Net.WebRequest webRequest = System.Net.WebRequest.Create(strTranslatorAcc
 webRequest.ContentType = "application/x-www-form-urlencoded";
 webRequest.Method = "POST";
 '''
+import string
 import json
 import requests
-from pprint import pprint
 
 from urllib import urlencode
 from eWRT.ws import AbstractWebSource
 
-API_URL = 'https://datamarket.accesscontrol.windows.net/v2/OAuth2-13'
+TOKEN_URL = 'https://datamarket.accesscontrol.windows.net/v2/OAuth2-13'
+API_URL = 'http://api.microsofttranslator.com/v2/Ajax.svc/Translate?'
 
 class BingTranslator(AbstractWebSource):
     NAME = 'bing_translate'
     SUPPORTED_PARAMS = ('text', 'target_language', 'source_language')
     
-    def __init__(self, client_id, client_secret, api_url=None):
-        ''' sets the credentials for Bing Translator '''
+    def __init__(self, client_id, client_secret, api_url=None, token_url=None):
+        ''' sets the credentials for Bing Translator 
+        .. todo:: store the urls in the database as welll !!! 
+        
+        '''
         self.client_id = client_id
         self.client_secret = client_secret
         self.api_url = api_url if api_url else API_URL
+        self.token_url = token_url if token_url else TOKEN_URL
         self._access_token = None
         
     def search_documents(self, search_terms, source_language, target_language):
@@ -53,10 +58,11 @@ class BingTranslator(AbstractWebSource):
             translation = self.translate(text=search_term, 
                                          target_language=target_language,
                                          source_language=source_language)
+            
             yield {'text': search_term, 
-                   'translation': translation, 
-                   'source_language': source_language, 
-                   'target_language': target_language}
+                   'translations': [(translation.strip(), 
+                                     source_language,
+                                     target_language)]}
             
     def translate(self, text, target_language, source_language):
         ''' tranlates the `text` in `source_language` to the `target_language`
@@ -66,15 +72,13 @@ class BingTranslator(AbstractWebSource):
         :param source_language: language of the given text (iso-code)
         :returns: translated text as string
         '''
-        api_url = 'http://api.microsofttranslator.com/v2/Ajax.svc/Translate?'
         params = {'text': text, 
                   'from': source_language,
                   'to': target_language
                   }
-        pprint(params)
         headers = {'Authorization': 'Bearer %s' % self.access_token}
-        resp = requests.get(api_url+urlencode(params), headers=headers)
-        return resp.text.replace('"', '')
+        resp = requests.get(self.api_url+urlencode(params), headers=headers)
+        return resp.text.replace('"', '').replace(u'\ufeff', '')
         
     def get_new_access_token(self):
         params = {'grant_type': 'client_credentials', 
@@ -82,7 +86,7 @@ class BingTranslator(AbstractWebSource):
                   'client_secret': self.client_secret,
                   'scope': 'http://api.microsofttranslator.com'}
             
-        resp = requests.post(self.api_url, data=urlencode(params))
+        resp = requests.post(self.token_url, data=urlencode(params))
         return json.loads(resp.text)
     
     def get_access_token(self):
