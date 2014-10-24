@@ -21,7 +21,6 @@ System.Net.WebRequest webRequest = System.Net.WebRequest.Create(strTranslatorAcc
 webRequest.ContentType = "application/x-www-form-urlencoded";
 webRequest.Method = "POST";
 '''
-import string
 import json
 import requests
 
