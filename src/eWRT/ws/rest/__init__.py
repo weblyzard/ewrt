@@ -173,7 +173,7 @@ class MultiRESTClient(object):
         '''
         correct_urls = []
 
-        if isinstance(urls, str):
+        if isinstance(urls, basestring):
             urls = [urls]
 
         for url in urls:
