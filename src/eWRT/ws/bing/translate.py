@@ -9,17 +9,6 @@ Created on 23.10.2014
 
     `Getting started with Microsoft Translator <http://blogs.msdn.com/b/translation/p/gettingstarted1.aspx>`
 
-
-string clientID = "<Your ClientID>";
-string clientSecret = "<Your Client Secret>";
-String strTranslatorAccessURI = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13";
-
-String strRequestDetails = string.Format("grant_type=client_credentials&client_id={0}&client_secret={1}&scope=http://api.microsofttranslator.com", HttpUtility.UrlEncode(clientID), HttpUtility.UrlEncode(clientSecret));
-
-
-System.Net.WebRequest webRequest = System.Net.WebRequest.Create(strTranslatorAccessURI);
-webRequest.ContentType = "application/x-www-form-urlencoded";
-webRequest.Method = "POST";
 '''
 import json
 import requests
