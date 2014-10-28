@@ -173,8 +173,13 @@ class MultiRESTClient(object):
         '''
         correct_urls = []
 
-        if isinstance(urls, basestring):
-            urls = [urls]
+        try:
+            if isinstance(urls, basestring):
+                urls = [urls]
+        except NameError:
+            #  basestring no longer exists in python 3, producing an error.
+            if isinstance(urls, str):
+                urls = [urls]
 
         for url in urls:
             if not url.endswith('/'):
