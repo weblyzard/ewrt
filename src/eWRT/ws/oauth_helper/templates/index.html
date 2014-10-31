@@ -1,0 +1,19 @@
+<h1>Oauth Helper</h1>
+
+<p>Welcome to eWRT's Oauth Helper! It helps you to create an access_token for 
+your application</p>
+{% if error %}
+	<p>{{ error }}<p>
+{% endif %}
+
+{% if access_token %}
+	<p>Thank you</p>
+	<p>Your access token for {{service_name}}: <i>{{access_token}}</i></p>
+{% endif %}
+
+<p>Currently the following networks are supported</p>
+
+<ul>
+	<li><a href="/auth/instagram">Instagram</a></li>
+	<li><a href="/auth/other">Other (without predefined values)</a></li>
+</ul> 

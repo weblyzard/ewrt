@@ -1,0 +1,23 @@
+
+{% block content %}
+<h1>{{ service_name }}</h1>
+{% if access_token %}
+	<p>Thank's for authorizing, you access token <i>{{access_token}}</i></p>
+{% else %}
+	<form method="POST" action="/auth/{{ form.service_name.value }}">
+	  <table>
+	  {% for field in form %} 
+	  	{% if field.label != "csrf_token" %}
+	    <tr>
+	        <td>{{ field.label }}</td>
+	        <td>{{ field(size=60) }}</td>
+	    </tr>
+	    {% endif %}
+	{% endfor %}
+		<tr>
+	    	<td colspan="2"><input type="submit" value="Authorize"></td>
+	    </tr>
+	</table>
+	</form>
+{% endif %}
+{% endblock %}
