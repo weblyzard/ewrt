@@ -21,6 +21,7 @@ Pre-defined logging profiles
 
 
 import logging, unittest
+from os import remove
 
 
 DEFAULT_LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -29,6 +30,8 @@ DEFAULT_LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 def get_stdout_logger(name, level=logging.DEBUG):
     '''
     Returns a logger which reports to standard output
+    ::param name:
+        the logger's name
     '''
     logger = logging.getLogger(name)
     logger.setLevel(level)
@@ -43,8 +46,31 @@ def get_stdout_logger(name, level=logging.DEBUG):
     return logger
 
 
+def get_file_logger(name, filename, level=logging.DEBUG):
+    '''
+    Returns a logger which logs to the given filename
+    ::param name:
+        the logger's name
+    ::param filename:
+        the name of the logfile
+    '''
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+
+    formatter = logging.Formatter(DEFAULT_LOG_FORMAT)
+
+    ch = logging.FileHandler(filename)
+    ch.setLevel(level)
+    ch.setFormatter(formatter)
+
+    logger.addHandler(ch)
+    return logger
+
+
 class TestLogger(unittest.TestCase):
-    
+
+    LOG_FNAME = 'test.log'
+
     def test_stdout_logger(self):
         ''' tests the logger '''
         
@@ -54,7 +80,18 @@ class TestLogger(unittest.TestCase):
         logger.warning('warning')
         logger.error('error')
         logger.critical('critical')
+
+    def test_file_logger(self):
+        ''' tests the file logger '''
+        logger = get_file_logger(__file__ + "2", self.LOG_FNAME)
+        logger.error('test-message')
+
+        with open(self.LOG_FNAME) as f:
+            content = str(f.read())
+            assert 'test-message' in content
     
+        remove(self.LOG_FNAME)
+
         
 if __name__ == '__main__':
     unittest.main()

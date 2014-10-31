@@ -10,11 +10,11 @@ setup(
       ###########################################
       ## Metadata
       name="eWRT",
-      version="0.7.12",
+      version="0.9.1.1",
       description='eWRT',
       author='Albert Weichselbraun, Heinz Lang, Gerhard Wohlgenannt, Johannes Duong, Norman Süsstrunk, Daniel Streiff',
       author_email='albert@weblyzard.com, lang@weblyzard.com, wohlg@ai.wu.ac.at, johannes.duong@wu.ac.at, norman.suestrunk@htwchur.ch, daniel.streiff@htwchur.ch',
-      url='http://www.semanticlab.net/index.php/EWRT',
+      url='http://www.weblyzard.com/ewrt/',
       license="GPL3",
       package_dir={'': 'src'},
 
