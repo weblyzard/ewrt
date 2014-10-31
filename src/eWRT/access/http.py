@@ -188,6 +188,9 @@ class Retrieve(object):
         ''' returns the url, username, password if present in the url
         @param url: well formed url, starting with a schema
         @return: tuple (new_url, user, password) ''' 
+        if not url.startswith('http'):
+            url = 'http://%s' % url
+             
         split_url = urlsplit(url) 
         user = split_url.username
         password = split_url.password
