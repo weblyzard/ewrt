@@ -1,21 +1,21 @@
 #!/usr/bin/env python
 
 ''' @package eWRT.util.cache
-    caches arbitrary objects 
+    caches arbitrary objects
 '''
 
 # (C)opyrights 2008-2010 by Albert Weichselbraun <albert@weichselbraun.net>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -26,23 +26,26 @@ __copyright__ = "GPL"
 from os import makedirs, remove, getpid, link
 from os.path import join, exists, dirname, basename, join
 from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
-from cPickle import dump, load
 from time import time
 from operator import itemgetter
-from hashlib import sha1 
+from hashlib import sha1
 from gzip import GzipFile
 from socket import gethostname
+try:
+    from cPickle import dumps, loads
+except:
+    from pickle import dumps, loads
 
 get_unique_temp_file = lambda fname: join(dirname(fname),
-                                          "_%s-%s-%d" % (basename(fname), 
+                                          "_%s-%s-%d" % (basename(fname),
                                               gethostname(), getpid()))
 
 class Cache(object):
     ''' An abstract class for caching functions '''
-    
+
     def __init__(self, fn=None):
         self.fn = fn
-    
+
     def __call__(self, *args, **kargs):
         ''' retrieves the result using self.fn as function and
             the cache.
@@ -53,21 +56,21 @@ class Cache(object):
         return self.fetch(self.fn, *args, **kargs)
 
     def __delitem__(self, key):
-        ''' Removes items from the cache 
+        ''' Removes items from the cache
         ::param key: the item to remove
         '''
         raise NotImplementedError
 
     def fetchObjectId(self, key, fetch_function, *args, **kargs):
-        ''' Fetches a object from the cache or computes it by calling the 
+        ''' Fetches a object from the cache or computes it by calling the
             fetch_function.
             The key helps to determine whether the object is already in
-            the cache or not. 
+            the cache or not.
         '''
         raise NotImplementedError
 
     def fetch(self, fetch_function, *args, **kargs):
-        ''' Fetches a object from the cache or computes it by calling the 
+        ''' Fetches a object from the cache or computes it by calling the
             fetch_function.
             The objectId is computed based on the function arguments
         '''
@@ -87,15 +90,15 @@ class Cache(object):
 
 class DiskCache(Cache):
     ''' @class DiskCache
-        Caches abitrary functions based on the function's arguments (fetch) or 
+        Caches abitrary functions based on the function's arguments (fetch) or
         on a user defined key (fetchObjectId)
 
-        @remarks 
+        @remarks
         This version of DiskCached is threadsafe
     '''
 
     def __init__(self, cache_dir, cache_nesting_level=0, cache_file_suffix="", fn=None):
-        ''' initializes the Cache object 
+        ''' initializes the Cache object
             ::param cache_dir: the cache base directory
             ::param cache_nesting_level: optional number of nesting level (0)
             ::param cache_file_suffix: optional suffix for cache files
@@ -108,53 +111,53 @@ class DiskCache(Cache):
         self.cache_nesting_level = cache_nesting_level
 
         self._cache_hit  = 0
-        self._cache_miss = 0      
-        
+        self._cache_miss = 0
+
 
     def fetch(self, fetch_function, *args, **kargs):
         ''' fetches the object with the given id, querying
              a) the cache and
              b) the fetch_function
-            if the fetch_function is called, the functions result is saved 
-            in the cache 
+            if the fetch_function is called, the functions result is saved
+            in the cache
 
             ::param fetch_function: function to call if the result is not in the cache
-            ::param args:   arguments 
+            ::param args:   arguments
             ::param kargs:  optional keyword arguments
 
             ::returns: the object (retrieved from the cache or computed)
         '''
-        objectId = self.getKey(*args, **kargs) 
+        objectId = self.getKey(*args, **kargs)
         return self.fetchObjectId(objectId, fetch_function, *args, **kargs)
 
 
     def __contains__(self, key):
         ''' returns whether the key is already stored in the cache '''
-        cache_file = self._get_fname( self.getObjectId(key)  ) 
+        cache_file = self._get_fname( self.getObjectId(key)  )
         return exists(cache_file)
 
-    
+
     def __delitem__(self, key):
         ''' removes the given item from the cache '''
         cache_file = self._get_fname( self.getObjectId(key)  )
         remove( cache_file )
-        
-    
+
+
     def fetchObjectId(self, key, fetch_function, *args, **kargs):
         ''' fetches the object with the given id, querying
              * the cache and
              * the fetch_function
-            if the fetch_function is called, the functions result is saved 
-            in the cache 
+            if the fetch_function is called, the functions result is saved
+            in the cache
 
             ::param key:      key to fetch
             ::param fetch_function: function to call if the result is not in the cache
-            ::param args:     arguments 
+            ::param args:     arguments
             ::param kargs:    optional keyword arguments
 
             ::returns: the object (retrieved from the cache or computed)
         '''
-        cache_file = self._get_fname(self.getObjectId(key)) 
+        cache_file = self._get_fname(self.getObjectId(key))
         if exists(cache_file):
             #
             # case 1: cache hit - return the cached result
@@ -164,7 +167,7 @@ class DiskCache(Cache):
                 return load(f)
 
         #
-        # case 2: cache miss 
+        # case 2: cache miss
         # - compute and cache the result
         #
         temp_file = get_unique_temp_file(cache_file)
@@ -173,7 +176,7 @@ class DiskCache(Cache):
         obj = fetch_function(*args, **kargs)
 
         # Do not cache None
-        if obj == None: 
+        if obj == None:
             return obj
 
         with GzipFile(temp_file, "w") as f:
@@ -220,7 +223,7 @@ class DiskCache(Cache):
                 pass
 
         return join(obj_dir, obj_id+self.cache_file_suffix)
- 
+
 
 class DiskCached(object):
     ''' Decorator based on Cache for caching arbitrary function calls
@@ -232,9 +235,9 @@ class DiskCached(object):
         This version of DiskCached is threadsafe
     '''
     __slots__ = ('cache', )
-    
+
     def __init__(self, cache_dir, cache_nesting_level=0, cache_file_suffix=""):
-        ''' initializes the Cache object 
+        ''' initializes the Cache object
             ::param fn:                  the function to cache
             ::param cache_dir:           the cache base directory
             ::param cache_nesting_level: optional number of nesting level (0)
@@ -243,7 +246,7 @@ class DiskCached(object):
         self.cache = DiskCache(cache_dir, cache_nesting_level, cache_file_suffix)
 
     def __call__(self, fn):
-        self.cache.fn = fn 
+        self.cache.fn = fn
         return self.cache
 
 
@@ -251,7 +254,7 @@ class MemoryCache(Cache):
     '''
         @class MemoryCached
 
-        Caches abitrary functions based on the function's arguments (fetch) or 
+        Caches abitrary functions based on the function's arguments (fetch) or
         on a user defined key (fetchObjectId)
     '''
     __slots__ = ('max_cache_size', '_cacheData', '_usage' )
@@ -259,18 +262,18 @@ class MemoryCache(Cache):
     def __init__(self, max_cache_size =0, fn=None):
         ''' initializes the Cache object '''
         Cache.__init__(self, fn)
-        self._cacheData  = {}  
+        self._cacheData  = {}
         self._usage      = {}
         self.max_cache_size = max_cache_size
 
     def fetch(self, fetch_function, *args, **kargs):
-        key = self.getKey(*args, **kargs) 
+        key = self.getKey(*args, **kargs)
         return self.fetchObjectId(key, fetch_function, *args, **kargs)
-        
+
     def fetchObjectId(self, key, fetch_function, *args, **kargs):
         # update the object's last usage time stamp
         key = self.getObjectId(key)
-        self._usage[key]     = time()  
+        self._usage[key]     = time()
         try:
             return self._cacheData[key]
         except KeyError:
@@ -282,16 +285,16 @@ class MemoryCache(Cache):
 
     def __contains__(self, key):
         ''' returns whether the key is already stored in the cache '''
-        return self.getObjectId(key) in self._cacheData 
-    
+        return self.getObjectId(key) in self._cacheData
+
     def __delitem__(self, key):
         ''' removes the given item from the cache '''
         del self._cacheData[ self.getObjectId(key) ]
 
     def garbage_collect_cache(self):
-        ''' removes the object which have not been in use for the 
+        ''' removes the object which have not been in use for the
             longest time '''
-        if self.max_cache_size == 0 or len(self._cacheData)<=self.max_cache_size: 
+        if self.max_cache_size == 0 or len(self._cacheData)<=self.max_cache_size:
             return
 
         (key, _) = sorted( self._usage.items(), key=itemgetter(1), reverse=True ).pop()
@@ -306,7 +309,7 @@ class MemoryCached(MemoryCache):
           def myfunction(*args):            ...
     '''
     def __init__(self, arg):
-        ''' initializes the MemoryCache object 
+        ''' initializes the MemoryCache object
             ::param arg: either the max_cache_size or the function to call
         '''
         if hasattr(arg, '__call__'):
@@ -329,19 +332,19 @@ class MemoryCached(MemoryCache):
 class IterableCache(DiskCache):
     ''' caches arbitrary iterable content identified by an identifier '''
 
-    def __iter__(self): 
+    def __iter__(self):
         return self
 
     def fetchObjectId(self, key, function, *args, **kargs):
         ''' fetches the object with the given id, querying
              a) the cache and
              b) the function
-            if the function is called, the functions result is saved 
-            in the cache 
+            if the function is called, the functions result is saved
+            in the cache
 
             ::param key:      key to fetch
             ::param function: function to call if the result is not in the cache
-            ::param args:     arguments 
+            ::param args:     arguments
             ::param kargs:    optional keyword arguments
 
             ::returns: the object (retrieved from the cache or computed)
@@ -363,7 +366,7 @@ class IterableCache(DiskCache):
         return self._read_next_element() if self._cached else self._cache_next_element()
 
     def _cache_next_element(self):
-        ''' a) retrieves the next element from the fetch function 
+        ''' a) retrieves the next element from the fetch function
             b) writes the data to the cache
             c) passes the data through to the calling element
         '''
@@ -385,6 +388,3 @@ class IterableCache(DiskCache):
         except IOError:
             self._pickle_iterator.close()
             raise StopIteration
-
-
-
