@@ -33,7 +33,7 @@ from gzip import GzipFile
 from socket import gethostname
 try:
     from cPickle import dumps, loads
-except:
+except ImportError:
     from pickle import dumps, loads
 
 get_unique_temp_file = lambda fname: join(dirname(fname),

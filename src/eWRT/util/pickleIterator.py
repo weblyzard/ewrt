@@ -24,7 +24,7 @@ from gzip import open
 from binascii import b2a_base64, a2b_base64
 try:
     from cPickle import dumps, loads
-except:
+except ImportError:
     from pickle import dumps, loads
 
 class AbstractIterator(object):
@@ -68,45 +68,4 @@ class ReadPickleIterator(AbstractIterator):
 
         return loads(a2b_base64(line))
 
-if __name__ == '__main__':
 
-    from tempfile import mkdtemp
-    from unittest import main, TestCase
-    from random import randint
-    from os.path import join
-
-    class TestPickle(TestCase):
-
-        TESTFILE_NAME = "dump"
-
-        def setUp(self):
-            self.test_dict = [ self._get_test_dictionary(10) for x in xrange(10) ]
-            self.fdir = mkdtemp()
-
-
-        def _get_test_dictionary(self, num_elements):
-            """ returns a test dictionary with the given number
-                of elements """
-            return dict( [ (randint(1,100), randint(1,100)) for x in xrange(num_elements) ] )
-
-
-        def testPickle(self):
-            """ tests the pickling """
-            self._testPickle()
-            self._testUnPickle()
-
-        def _testUnPickle(self):
-            pr = ReadPickleIterator( join( self.fdir, self.TESTFILE_NAME) )
-            for pickled, orig in zip(pr, self.test_dict):
-                self.assertEqual( pickled, orig )
-
-
-        def _testPickle(self):
-            """ pickles the test dictionary """
-
-            pw = WritePickleIterator( join( self.fdir, self.TESTFILE_NAME ) )
-            for element in self.test_dict:
-                pw.dump(element)
-
-
-    main()
