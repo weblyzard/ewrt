@@ -150,10 +150,12 @@ class MultiRESTClient(object):
 
     def __init__(self, service_urls, user=None, password=None,
                  default_timeout=WS_DEFAULT_TIMEOUT, use_random_server=False):
+        
         self._service_urls = self.fix_urls(service_urls, user, password)
+        
         if use_random_server:
-            self._service_urls = random.choice(self._service_urls)
-
+            random.shuffle(self._service_urls)
+        
         self.clients = self._connect_clients(self._service_urls,
                                              default_timeout=default_timeout)
               
@@ -280,33 +282,34 @@ class TestRESTClient(unittest.TestCase):
             # authentification has been succeeded, but no object could
             # be found
             assert '404: Not Found' in str(e)
-
+ 
     def test_multi_request(self):
         urls = (('http://irgendwas.com', None, None),
                 ('http://heinz:secret@irgendwas.com', 'heinz', 'secret'))
         service_urls = [url[0] for url in urls]
         client = MultiRESTClient(service_urls)
-
+ 
         for i, (service_url, user, passwd) in enumerate(urls):
             c = client.clients[i]
             if user:
                 assert service_url != c.service_url
             assert c.user == user
             assert c.password == passwd
-
+ 
         try:
             client.request('irgendwas')
             assert False
         except Exception as e:
             assert 'Could not make request to path' in str(e)
-
+ 
         try:
             urls = ('https://heinz@irgendwas.com', )
             client = MultiRESTClient(urls)
             assert False, 'must raise an assertion error'
         except Exception as e:
+            print '!!! previous exception is OK, we expected that'
             assert 'if set, user AND pwd required' in e.args # not tested (SV)
-
+ 
     def test_get_url(self):
         assert RESTClient.get_request_url(self.TEST_URL, 'execute', '12') \
             .endswith("/execute/12")
@@ -315,9 +318,26 @@ class TestRESTClient(unittest.TestCase):
             'execute',
             '12',
             {'debug': True}).endswith("/execute/12?debug=True")
-
+ 
     def test_fix_url(self):
         ''' tests fix url '''
 
+    def test_randomize_urls(self):
+        ''' this test might fail, if random returns the same list, but this is 
+        very unlikely ''' 
+        client = MultiRESTClient(service_urls='http://test.url', 
+                                 use_random_server=True)
+        
+        assert isinstance(client._service_urls, list)
+        assert len(client._service_urls) == 1
+    
+        service_urls = ['http://test.url%s' % i for i in range(1000)]
+    
+        client = MultiRESTClient(service_urls=service_urls, 
+                                 use_random_server=True)
+        
+        assert len(client._service_urls) == len(service_urls)
+        assert service_urls <> client._service_urls
+        
 if __name__ == '__main__':
     unittest.main()
