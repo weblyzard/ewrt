@@ -7,17 +7,21 @@ Created on 23.10.2014
 
 .. seealso:: 
 
-    `Getting started with Microsoft Translator <http://blogs.msdn.com/b/translation/p/gettingstarted1.aspx>`
+    `Getting started with Microsoft Translator <http://blogs.msdn.com/b/translation/p/gettingstarted1.aspx>`_
+
+    `Translator Language Codes <http://msdn.microsoft.com/en-us/library/hh456380.aspx>`_
 
 '''
 import json
 import requests
+from datetime import datetime, timedelta
 
 from urllib import urlencode
 from eWRT.ws import AbstractWebSource
 
 TOKEN_URL = 'https://datamarket.accesscontrol.windows.net/v2/OAuth2-13'
 API_URL = 'http://api.microsofttranslator.com/v2/Ajax.svc/Translate?'
+REFRESH_TOKEN_INTERVAL = 10 # in minutes
 
 class BingTranslator(AbstractWebSource):
     NAME = 'bing_translate'
@@ -33,7 +37,8 @@ class BingTranslator(AbstractWebSource):
         self.api_url = api_url if api_url else API_URL
         self.token_url = token_url if token_url else TOKEN_URL
         self._access_token = None
-        
+        self._next_refresh = None
+         
     def search_documents(self, search_terms, source_language, target_language):
         ''' translates the `search_terms` from `source_language to the 
         `target_language`
@@ -78,9 +83,14 @@ class BingTranslator(AbstractWebSource):
         return json.loads(resp.text)
     
     def get_access_token(self):
-        if not self._access_token: 
-            self._access_token = self.get_new_access_token()
+        now = datetime.now()
+
+        too_old = False if not self._next_refresh else now > self._next_refresh
         
+        if too_old or not self._access_token: 
+            self._access_token = self.get_new_access_token()
+            self._next_refresh = now + timedelta(minutes=REFRESH_TOKEN_INTERVAL)
+            
         return self._access_token['access_token']
             
     access_token = property(get_access_token)
