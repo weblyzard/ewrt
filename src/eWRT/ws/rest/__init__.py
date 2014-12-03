@@ -10,6 +10,7 @@
 import traceback
 import unittest
 import logging
+import random
 
 try:
     # urllib2 is merged into urllib in python3 (SV)
@@ -148,11 +149,14 @@ class MultiRESTClient(object):
     URL_PATH = None
 
     def __init__(self, service_urls, user=None, password=None,
-                 default_timeout=WS_DEFAULT_TIMEOUT):
+                 default_timeout=WS_DEFAULT_TIMEOUT, use_random_server=False):
         self._service_urls = self.fix_urls(service_urls, user, password)
+        if use_random_server:
+            self._service_urls = random.choice(self._service_urls)
+
         self.clients = self._connect_clients(self._service_urls,
                                              default_timeout=default_timeout)
-
+              
     def is_online(self):
         try:
             self.request('meminfo')
