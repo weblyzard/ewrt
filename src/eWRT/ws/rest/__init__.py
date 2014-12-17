@@ -152,7 +152,7 @@ class MultiRESTClient(object):
                  default_timeout=WS_DEFAULT_TIMEOUT, use_random_server=False):
         self._service_urls = self.fix_urls(service_urls, user, password)
         if use_random_server:
-            self._service_urls = random.choice(self._service_urls)
+            self._service_urls = [random.choice(self._service_urls)]
 
         self.clients = self._connect_clients(self._service_urls,
                                              default_timeout=default_timeout)
