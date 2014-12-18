@@ -139,6 +139,9 @@ class RESTClient(object):
         '''
         url = self.get_request_url(self.service_url, command, identifier,
                                    query_parameters)
+        
+        logger.debug('requesting url %s' % url)
+        
         return self._json_request(url, parameters, return_plain,
                                   json_encode_arguments, content_type)
 
