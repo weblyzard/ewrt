@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
-""" @package eWRT.access.http
-    provides access to resources using http """
+''' 
+eWRT.access.http
+================
+provides access to resources using http 
+'''
 
-# (C)opyrights 2008-2012 by Albert Weichselbraun <albert@weblyzard.com>
+# (C)opyrights 2008-2015 by Albert Weichselbraun <albert@weblyzard.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,13 +41,13 @@ except:
 
 import time
 import io
+import unittest
 
 from gzip import GzipFile
 from time import sleep
 from random import randint
 
-from nose.tools import raises
-from nose.plugins.attrib import attr
+from pytest import raises
 
 # logging
 import logging
@@ -62,22 +65,23 @@ getHostName = lambda x: "://".join(urlsplit(x)[:2])
 
 
 class Retrieve(object):
-    """ @class Retrieve
+    ''' Retrieve
+        ========
         retrieves URLs using HTTP
 
-        @remarks
-        this class supports transparent
-        - authentication and
-        - compression
-        - support for the context protocol (python)
-        - automatic throttling support
+        .. remarks:
+           this class supports transparent
+           - authentication and
+           - compression
+           - support for the context protocol (python)
+           - automatic throttling support
 
-        @warning
-        There are certain urls such as
-        http://www.mfsa.com.mt/insguide/english/glossarysearch.jsp?letter=all
-        which are _not_ handled correctly by the underlying urllib2 library(!)
-        Please use urllib in such cases.
-    """
+        .. warning:
+           There are certain urls such as
+           http://www.mfsa.com.mt/insguide/english/glossarysearch.jsp?letter=all
+           which are _not_ handled correctly by the underlying urllib2 library(!)
+           Please use urllib in such cases.
+    '''
 
     __slots__ = ('module', 'sleep_time', 'last_access_time', 'user_agent',
                  '_supported_http_authentification_methods')
@@ -99,20 +103,28 @@ class Retrieve(object):
     def open(self, url, data=None, headers={}, user=None, pwd=None, retry=0,
              authentification_method="basic", accept_gzip=True,
              head_only=False):
-        """ Opens an URL and returns the matching file object
-            @param[in] url
-            @param[in] data    optional data to submit
-            @param[in] headers a dictionary of optional headers
-            @param[in] user    optional user name
-            @param[in] pwd     optional password
-            @param[in] retry   number of retries in case of an temporary error
-            @param[in] authentification_method the used authentification_method
-                        ('basic'*, 'digest')
-            @param[in] accept_gzip flag to change the accepted encoding, gzip
-                        or not
-            @param[in] head_only   if True: only execute a HEAD request
-            @returns a file object for reading the url
-        """
+        ''' Opens an URL and returns the matching file object
+
+            :param url:
+            :param data: \
+                optional data to submit
+            :param headers: \
+                a dictionary of optional headers
+            :param user: \
+                optional user name
+            :param pwd: \
+                optional password
+            :param retry: \
+                number of retries in case of an temporary error
+            :param authentification_method: \
+                the used authentification_method ('basic'*, 'digest')
+            :param accept_gzip: \
+                flag to change the accepted encoding, gzip or not
+            :param head_only: \
+                if True: only execute a HEAD request
+            :returns: \
+                a file object for reading the url
+        '''
         auth_handler = self._supported_http_authentification_methods[
             authentification_method]
         urlObj = None
@@ -155,7 +167,9 @@ class Retrieve(object):
 
     @staticmethod
     def _getHTTPBasicAuthOpener(url, user, pwd):
-        """ returns an opener, capable of handling http-auth """
+        ''' 
+        returns an opener, capable of handling http-auth 
+        '''
         passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
         passman.add_password(None, url, user, pwd)
         auth_handler = urllib2.HTTPBasicAuthHandler(passman)
@@ -163,9 +177,9 @@ class Retrieve(object):
 
     @staticmethod
     def _getHTTPDigestAuthOpener(url, user, pwd):
-        """
+        '''
         returns an opener, capable of handling http-digest authentification
-        """
+        '''
         passwdmngr = urllib2.HTTPPasswordMgrWithDefaultRealm()
         passwdmngr.add_password('realm', url, user, pwd)
         auth_handler = urllib2.HTTPDigestAuthHandler(passwdmngr)
@@ -173,26 +187,32 @@ class Retrieve(object):
 
     @staticmethod
     def _getUncompressedStream(urlObj):
-        """ transparently uncompressed the given data stream
-            @param[in] urlObj
-            @returns an urlObj containing the uncompressed data
-        """
+        ''' 
+        transparently uncompressed the given data stream
+
+        :param urlObj:
+            the url object to handle
+        :returns:
+            an urlObj containing the uncompressed data
+        '''
         compressedStream = io.BytesIO(urlObj.read())
         return GzipFile(fileobj=compressedStream)
 
     def _throttle(self):
-        """ delays web access according to the content provider's policy """
+        ''' 
+        delays web access according to the content provider's policy
+        '''
         if (time.time() - self.last_access_time) < \
                 DEFAULT_WEB_REQUEST_SLEEP_TIME:
             time.sleep(self.sleep_time)
         self.last_access_time = time.time()
 
     def __enter__(self):
-        """ support of the context protocol """
+        ''' support of the context protocol '''
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        """ context protocol support """
+        ''' context protocol support '''
         if exc_type is not None:
             log.critical("%s" % exc_type)
 
@@ -230,13 +250,13 @@ class Retrieve(object):
                            split_url.fragment))
 
 
-class TestRetrieve(object):
-    """ tests the http class """
+class TestRetrieve(unittest.TestCase):
+    ''' tests the http class '''
     TEST_URLS = (
         'http://www.google.at/search?hl=de&q=andreas&btnG=Google-Suche&meta=',
         'http://www.heise.de')
 
-    def __init__(self):
+    def setUp(self):
         from logging import StreamHandler
         self.default_timeout = DEFAULT_TIMEOUT
 
@@ -246,9 +266,8 @@ class TestRetrieve(object):
     def tearDown(self):
         setdefaulttimeout(self.default_timeout)
 
-    @attr("remote")
     def testRetrieval(self):
-        """ tries to retrieve the following url's from the list """
+        ''' tries to retrieve the following url's from the list '''
 
         r_handler = Retrieve(self.__class__.__name__)
         for url in self.TEST_URLS:
@@ -257,30 +276,27 @@ class TestRetrieve(object):
             r.read()
             r.close()
 
-    @attr("remote")
     def testRetrieveContext(self):
-        """ tests the retrieve context module """
+        ''' tests the retrieve context module '''
         with Retrieve(self.__class__.__name__) as r:
             c = r.open("http://www.heise.de")
             content = c.read()
         assert len(content) > 100
 
-    @attr("remote")
-    @raises(urllib2.URLError)
     def testRetrievalTimeout(self):
-        """ tests whether the socket timeout is honored by our class """
+        ''' tests whether the socket timeout is honored by our class '''
         SLOW_URL = "http://www.csse.uwa.edu.au/"
 
-        r = Retrieve(self.__class__.__name__,
-                     default_timeout=0.1).open(SLOW_URL)
-        content = r.read()
-        r.close()
+        with raises(urllib2.URLError):
+            r = Retrieve(self.__class__.__name__,
+                         default_timeout=0.1).open(SLOW_URL)
+            content = r.read()
+            r.close()
 
-    @attr("remote")
     def testMultiProcessing(self):
-        """ verifies that retrieves works with multi-processing """
+        ''' verifies that retrieves works with multi-processing '''
         from multiprocessing import Pool
-        p = Pool(4)
+        p = Pool(5)
 
         TEST_URLS = ['http://www.heise.de',
                      'http://linuxtoday.com',
@@ -305,26 +321,12 @@ class TestRetrieve(object):
             if user:
                 assert url != test_url
 
-    #@attr("new")
-    #@attr("remote")
-    #def testProblematicUrls(self):
-    #    """ tests urls which are known to be problematic """
-    #    TEST_URLS = [
-    #        'http://www.mfsa.com.mt/insguide/english/glossarysearch.jsp?' +
-    #        'letter=all',
-    #        ]
-
-    #    for t in TEST_URLS:
-    #        r = Retrieve(self.__class__.__name__).open(t)
-    #        assert len(r.read().strip()) > 0
-
-
 def t_retrieve(url):
-    """ retrieves the given url from the web
+    ''' retrieves the given url from the web
 
         @remarks
         helper module for the testMultiProcessing unit test.
-    """
+    '''
     r = Retrieve(__name__).open(url)
     try:
         content = r.read()
