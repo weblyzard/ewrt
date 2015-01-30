@@ -32,9 +32,9 @@ from hashlib import sha1
 from gzip import GzipFile
 from socket import gethostname
 try:
-    from cPickle import dumps, loads
+    from cPickle import dump, load
 except ImportError:
-    from pickle import dumps, loads
+    from pickle import dump, load
 
 get_unique_temp_file = lambda fname: join(dirname(fname),
                                           "_%s-%s-%d" % (basename(fname),
