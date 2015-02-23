@@ -1,0 +1,7 @@
+# for a fully indexed repo use
+# --extra-index-url https://services.weblyzard.com/repo
+--find-links https://services.weblyzard.com/repo
+
+# to overwrite setup.py deps use
+# -e https://github.com/foo/bar.git#egg=bar
+-e .
