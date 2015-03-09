@@ -53,7 +53,7 @@ DEFAULT_WEB_REQUEST_SLEEP_TIME = 1
 DATABASE_CONNECTION = {
             'db-name'  : {'host': 'localhost', 'dbname': 'postgres', 'username': '', 'passwd': ''},
     }
- 
+
 # ===================================================================
 # USERNAMES AND API-KEYS
 # ===================================================================
@@ -135,6 +135,11 @@ TWITTER_CONSUMER_SECRET = ''
 TWITTER_ACCESS_TOKEN    = ''
 TWITTER_TOKEN_SECRET    = ''
 
+# Google BigQuery Key
+# TODO how does dist file work?
+BIG_QUERY_PROJECT_ID = 'engaged-plasma-866'
+BIG_QUERY_CERTIFICATE_FILENAME = '/Users/chris/Google Drive/business/my webLyzard/big_query_cert.json'
+
 # --------------------------------------------------------------------------
 #
 #  Overwrite global config based on 
@@ -155,5 +160,5 @@ if exists( USR_EWRT_CONF ):
         from siteconfig import *
     except ImportError:
         warn("Could not finde siteconfig.py in ~/.eWRT")
-    
+
 # $Id$
