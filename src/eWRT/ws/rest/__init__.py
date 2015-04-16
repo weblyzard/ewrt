@@ -69,7 +69,8 @@ class RESTClient(object):
 
     def _json_request(self, url, parameters=None, return_plain=False,
                       json_encode_arguments=True,
-                      content_type='application/json'):
+                      content_type='application/json',
+                      request_timeout=None):
         ''' performs the given json request
         :param url: the url to query
         :param parameters: optional paramters
@@ -78,14 +79,17 @@ class RESTClient(object):
         :param json_encode_arguments: whether to json encode the parameters
                                       (True*)
         :param content_type: one of 'application/json', 'application/xml'
+        :param request_timeout: optional timeout for this request in float seconds
+        :type request_timeout: float
         '''
         if parameters:
             handle = self.retrieve(
                 url,
                 dumps(parameters) if json_encode_arguments else parameters,
-                {'Content-Type': content_type})
+                {'Content-Type': content_type},
+                request_timeout=request_timeout)
         else:
-            handle = self.retrieve(url)
+            handle = self.retrieve(url, request_timeout=request_timeout)
 
         response = handle.read()
         if response:
@@ -126,7 +130,8 @@ class RESTClient(object):
 
     def execute(self, command, identifier=None, parameters=None,
                 return_plain=False, json_encode_arguments=True,
-                query_parameters=None, content_type='application/json'):
+                query_parameters=None, content_type='application/json',
+                request_timeout=None):
         ''' executes a json command on the given web service
         :param command: the command to execute
         :param identifier: an optional identifier (e.g. batch_id, ...)
@@ -135,6 +140,8 @@ class RESTClient(object):
                              using json.load (False*)
         :param json_encode_arguments: whether to json encode the parameters
         :param query_parameters: optional query parameters
+        :param request_timeout: optional timeout for this request in float seconds
+        :type request_timeout: float
         :rtype: the query result
         '''
         url = self.get_request_url(self.service_url, command, identifier,
@@ -143,7 +150,8 @@ class RESTClient(object):
         logger.debug('requesting url %s' % url)
         
         return self._json_request(url, parameters, return_plain,
-                                  json_encode_arguments, content_type)
+                                  json_encode_arguments, content_type,
+                                  request_timeout=request_timeout)
 
 
 class MultiRESTClient(object):
@@ -161,10 +169,23 @@ class MultiRESTClient(object):
         
         self.clients = self._connect_clients(self._service_urls,
                                              default_timeout=default_timeout)
-              
-    def is_online(self):
+
+    def get_service_urls(self):
+        '''
+        :return: a copy of the service urls list
+        :rtype: list
+        '''
+        return list(self._service_urls)
+
+    def is_online(self, request_timeout=None):
+        '''
+        :param request_timeout: optional timeout in float seconds
+        :type request_timeout: float
+        :return: True if the service is online
+        :rtype: bool
+        '''
         try:
-            self.request('meminfo')
+            self.request('meminfo', request_timeout=request_timeout)
             return True
         except:
             return False
@@ -227,12 +248,14 @@ class MultiRESTClient(object):
 
     def request(self, path, parameters=None, return_plain=False,
                 execute_all_services=False, json_encode_arguments=True,
-                query_parameters=None, content_type='application/json'):
+                query_parameters=None, content_type='application/json',
+                request_timeout=None):
         ''' performs the given json request
         @param url: the url to query
         @param parameters: optional paramters
         @param return_plain: whether to return the result without prior
                              deserialization using json.load (False*)
+        @param request_timeout: optional timeout for this request in float seconds
         '''
         response = None
         errors = []
@@ -244,7 +267,8 @@ class MultiRESTClient(object):
                     return_plain=return_plain,
                     json_encode_arguments=json_encode_arguments,
                     query_parameters=query_parameters,
-                    content_type=content_type)
+                    content_type=content_type,
+                    request_timeout=request_timeout)
 
                 if not execute_all_services:
                     break
@@ -285,6 +309,13 @@ class TestRESTClient(unittest.TestCase):
             # authentification has been succeeded, but no object could
             # be found
             assert '404: Not Found' in str(e)
+
+    def test_is_online_failfast(self):
+        SLOW_URL = "http://www.csse.uwa.edu.au/"  # todo test with better endpoint
+        service_urls = (SLOW_URL, )
+        multi_rest_client = MultiRESTClient(service_urls)
+        self.assertFalse(multi_rest_client.is_online(request_timeout=0.1))
+
  
     def test_multi_request(self):
         urls = (('http://irgendwas.com', None, None),

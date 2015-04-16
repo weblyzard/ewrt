@@ -55,7 +55,7 @@ RETRY_WAIT_TIME_RANGE = (2, 10)              # in seconds
 HTTP_TEMPORARY_ERROR_CODES = (500, 503, 504)
 
 # set default socket timeout (otherwise urllib might hang!)
-from socket import setdefaulttimeout
+from socket import setdefaulttimeout, getdefaulttimeout
 DEFAULT_TIMEOUT = 60
 
 getHostName = lambda x: "://".join(urlsplit(x)[:2])
@@ -98,7 +98,7 @@ class Retrieve(object):
 
     def open(self, url, data=None, headers={}, user=None, pwd=None, retry=0,
              authentification_method="basic", accept_gzip=True,
-             head_only=False):
+             head_only=False, request_timeout=None):
         """ Opens an URL and returns the matching file object
             @param[in] url
             @param[in] data    optional data to submit
@@ -111,6 +111,7 @@ class Retrieve(object):
             @param[in] accept_gzip flag to change the accepted encoding, gzip
                         or not
             @param[in] head_only   if True: only execute a HEAD request
+            @param[in] request_timeout   optional timeout for this request in float seconds
             @returns a file object for reading the url
         """
         auth_handler = self._supported_http_authentification_methods[
@@ -138,7 +139,8 @@ class Retrieve(object):
 
             urllib2.install_opener(urllib2.build_opener(*opener))
             try:
-                urlObj = urllib2.urlopen(request)
+                timeout = getdefaulttimeout() if request_timeout is None else request_timeout
+                urlObj = urllib2.urlopen(request, timeout=timeout)
             except urllib2.HTTPError as e:
                 if e.code in HTTP_TEMPORARY_ERROR_CODES and tries < retry:
                     time.sleep(randint(*RETRY_WAIT_TIME_RANGE))
@@ -274,6 +276,16 @@ class TestRetrieve(object):
         r = Retrieve(self.__class__.__name__,
                      default_timeout=0.1).open(SLOW_URL)
         content = r.read()
+        r.close()
+
+    @attr("remote")
+    @raises(urllib2.URLError)
+    def testPerRequestRetrievalTimeout(self):
+        """ tests whether the per request socket timeout is honored by our class """
+        SLOW_URL = "http://www.csse.uwa.edu.au/"
+
+        r = Retrieve(self.__class__.__name__).open(SLOW_URL, request_timeout=0.1)
+        _ = r.read()
         r.close()
 
     @attr("remote")
