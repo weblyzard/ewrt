@@ -15,7 +15,7 @@ from eWRT.util.module_path import get_resource
 def read_wordlist(fname):
     """ reads a language wordlist from a file """
     with open(fname) as f: 
-        return set( map(str.strip, f.readlines() ))
+        return set( map(str.lower, map(str.strip, f.readlines() )))
 
 # returns the language name based on the language file's name
 get_lang_name = lambda fname: basename(fname).split(".")[0]
@@ -29,9 +29,11 @@ DELETE_CHARS = { ch: None for ch in ",.!?\"'" }
 
 
 def detect_language(text):
-    """ detects the most probable languge for the given text """
+    """ detects the most probable language for the given text """
     if not text.strip():
         return None
+
+    text = text.lower()
 
     words = map( unicode.strip, text.translate(DELETE_CHARS).split(" "))
     current_lang      = None
