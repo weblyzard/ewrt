@@ -25,7 +25,7 @@ class BBCGetCorpus(object):
     def __init__(self, filePattern="*"):
         """ @param[in] filePattern Pattern of files to consider (e.g. 7[3456789]*.stm)
         """
-        self.files = glob( os.path.join(BBC_CORPUS_HOME_LOW, filePattern) )
+        self.files = glob( os.path.join(BBC_CORPUS_LOW, filePattern) )
 
     def __iter__(self):
         return self
