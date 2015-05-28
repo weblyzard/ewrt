@@ -57,6 +57,7 @@ class YouTubeEntry(dict):
         'snippet.title': 'title',
         'snippet.publishedAt':'published',
         'snippet.description': 'content',
+        'comment': None
 #         'media.duration.seconds':'duration', 
 #         'statistics.view_count': 'statistics_viewcount', 
 #         'statistics.favorite_count': 'statistics_favoritecount', 
@@ -84,19 +85,24 @@ class YouTubeEntry(dict):
         'snippet.textDisplay':'content',
     }
     
-    def __init__(self, search_result, type):
+    def __init__(self, search_result):
         ''' constructor initializes entry with the result'''
         dict.__init__(self)
-        self.update_entry(search_result, type)
-
+        self.update(self.update_entry(search_result, entry_type='video'))
+    
+        self['url'] = ''.join([YOUTUBE_SEARCH_URL, self['video_id']])
+        
     def __repr__(self):
         return '** entry: %s' % '\n'.join(['%s: %s' % (k, v) for k, v in self.iteritems()])
 
-    def update_entry(self, search_result, entry_type):
+    def update_entry(self, search_result, mapping, entry_type):
         ''' stores the mapped items in a dictionary 
         @param search_result: the search result returned by youtube
         @param entry_type: string, either comment or video
         '''
+        
+        result = {}
+    
         mapping = self.YT_VIDEO_MAPPING
         if entry_type.lower()=='comment':
             mapping = self.YT_COMMENT_MAPPING
@@ -104,6 +110,12 @@ class YouTubeEntry(dict):
             mapping = self.YT_VIDEO_MAPPING
             
         for attr, key in mapping.iteritems(): 
+            
+            if attr == 'comment':
+                result['comment'] = self.update_entry(search_result['comment'], 
+                                                      mapping=self.YT_COMMENT_MAPPING)
+                continue
+            
             value = get_value(attr, search_result)
             
             if key in self and isinstance(self[key], list):
@@ -181,22 +193,23 @@ class YouTube_v3(WebDataSource):
             and "dislike"."""
         self.client.videos().rate(id=video_id, rating="like").execute()
 
-    def _convert_item_to_video(self, item, max_comment_count=0):
+    def _convert_item_to_video(self, item, max_comment_count=0, get_details=False):
         """ """
-        video = YouTubeEntry(item, 'video')
+        
+        video_id = item['id']['videoId']
+        
+#         # retrieve comments, if required
+#         if max_comment_count > 0:
+#             item['comments'] = self._get_video_comments(video_id=video_id)
+# 
+#         if get_details: 
+#             item['details'] = self._get_video_details(video_id=video_id) 
 
-        # retrieve comments, if required
-        if max_comment_count > 0:
-            video['comments'] = self._get_video_comments(video_id=video['video_id'])
-
-        details = self._get_video_details(video_id=video['video_id'])
-        #set the URL of the video
-        video['url'] = ''.join([YOUTUBE_SEARCH_URL, video['video_id']])
-        return video
+        return YouTubeEntry(item, 'video')
     
     def search(self, 
                search_terms, 
-               max_results=25, 
+               max_results=MAX_RESULTS_PER_QUERY, 
                since_date=None, 
                region_code=None, 
                language=None):
@@ -212,27 +225,46 @@ class YouTube_v3(WebDataSource):
             since_date = datetime.now() - timedelta(days=1)
         if isinstance(since_date, datetime):
             since_date = since_date.isoformat("T") + "Z"
-        kwargs = {
-                  'q':search_terms,
+            
+        items_per_page = min([max_results, MAX_RESULTS_PER_QUERY])
+            
+        kwargs = {'q':search_terms,
                   'part':'id,snippet',
                   'type':'video',
                   'publishedAfter':since_date,
-                  'maxResults':max_results,
-                  'order':'date'
-                  }
+                  'maxResults':items_per_page,
+                  'order':'date'}
+        
         if region_code:
             kwargs['regionCode'] = region_code
         if language:
-            kwargs['relevanceLanguage'] = language,
+            kwargs['relevanceLanguage'] = language
                                          
-        response = self.client.search().list(**kwargs).execute()
-        for search_result in response.get('items', []):
-            if search_result['id']['kind'] == 'youtube#video':
-                try:
-                    yield self._convert_item_to_video(search_result)
-                except Exception,e:
-                    logger.error('Failed to convert Youtube item: %s' %e) 
-                                        
+        continue_search = True
+        items_count = 0 
+        
+        while continue_search: 
+        
+            response = self.client.search().list(**kwargs).execute()
+            total_results = response['pageInfo']['totalResults']
+            
+            for search_result in response.get('items', []):
+                if search_result['id']['kind'] == 'youtube#video':
+                    try:
+                        items_count += 1
+                        print items_count
+                        yield self._convert_item_to_video(search_result)
+                    except Exception,e:
+                        logger.error('Failed to convert Youtube item: %s' %e) 
+            
+            if items_count >= max_results:
+                continue_search = False
+            
+            if items_count >= total_results:
+                continue_search = False 
+            
+            kwargs['pageToken'] = response['nextPageToken']
+                 
     def _get_video_comments(self, video_id, channel_id=None):
         """ Returns the comments for a youtube ID"""
         comments = self.client.commentThreads().list(part='snippet',
@@ -539,6 +571,10 @@ class YouTubeTest(unittest.TestCase):
     def test_search_v3(self):
         search_term = 'FIFA'
         api_key = 'AIzaSyBGBjbt74jNpgD3_rJRZM1_JuMGPys1sMk'
+        
+        api_key = 'AIzaSyC3-GLHSW-TVg59ax3xDjuOp-FJ6_GkKaU'
+        
+        
         service = YouTube_v3(api_key)
         result = service.get_video_search_feed(search_terms=search_term)
         for item in result:
