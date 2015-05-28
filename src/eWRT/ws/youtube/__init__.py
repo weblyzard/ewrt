@@ -214,7 +214,8 @@ class YouTube_v3(WebDataSource):
                   'part':'id,snippet',
                   'type':'video',
                   'publishedAfter':since_date,
-                  'maxResults':max_results
+                  'maxResults':max_results,
+                  'order':'date'
                   }
         if region_code:
             kwargs['regionCode'] = region_code
