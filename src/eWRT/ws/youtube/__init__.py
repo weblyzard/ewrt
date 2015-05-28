@@ -159,8 +159,7 @@ class YouTube_v3(WebDataSource):
         """
         Returns a generator of youtube search results
         """
-        search_response = self.search(search_terms, max_results)
-        for search_result in search_response.get('items', []):
+        for search_result in self.search(search_terms, max_results):
             if search_result['id']['kind'] == 'youtube#video':
                 try:
                     yield self._convert_item_to_video(search_result, 
@@ -172,7 +171,10 @@ class YouTube_v3(WebDataSource):
         """ Returns the rating for a video ID """
         return self.client.videos().getRating(id=video_id).execute()
         
-
+    def _get_video_details(self, video_id):
+        return self.client.videos().list(id=video_id, 
+                                         part='contentDetails,statistics,topicDetails').execute()
+    
     def like_video(self, video_id):
         """ Adds to the video rating. This code sets the rating to "like," but you 
             could also support an additional option that supports values of "like"
@@ -187,6 +189,7 @@ class YouTube_v3(WebDataSource):
         if max_comment_count > 0:
             video['comments'] = self._get_video_comments(video_id=video['video_id'])
 
+        details = self._get_video_details(video_id=video['video_id'])
         #set the URL of the video
         video['url'] = ''.join([YOUTUBE_SEARCH_URL, video['video_id']])
         return video
@@ -535,8 +538,9 @@ class YouTubeTest(unittest.TestCase):
     
     def test_search_v3(self):
         search_term = 'FIFA'
-        service = YouTube_v3()
-        result = service.get_video_feed(search_terms=search_term)
+        api_key = 'AIzaSyBGBjbt74jNpgD3_rJRZM1_JuMGPys1sMk'
+        service = YouTube_v3(api_key)
+        result = service.get_video_search_feed(search_terms=search_term)
         for item in result:
             print item
         print result
