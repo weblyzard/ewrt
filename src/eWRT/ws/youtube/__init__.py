@@ -72,7 +72,7 @@ class YouTubeEntry(dict):
     
     COMMENT_MAPPING = {
         'id': 'comment_id',
-        't':'parent_id',
+        'parent':'parent_id',
         'snippet.authorDisplayName':'user_name',
         'snippet.authorGoogleplusProfileUrl':'user_profile',
         'snippet.viewer_rating':'viewer_rating',
@@ -84,25 +84,22 @@ class YouTubeEntry(dict):
         'snippet.textDisplay':'content',
     }
     
-    def __init__(self, search_result, mapping=None):
+    def __init__(self, search_result, mapping=VIDEO_MAPPING):
         ''' constructor initializes entry with the result'''
         dict.__init__(self)
-        self.update(self.update_entry(search_result), mapping=mapping)
+        self.update(self.update_entry(search_result, mapping=mapping))
     
-        if self['video_id']:
+        if 'video_id' in self:
             self['url'] = ''.join([YOUTUBE_SEARCH_URL, self['video_id']])
         
     def __repr__(self):
         return '** entry: %s' % '\n'.join(['%s: %s' % (k, v) for k, v in self.iteritems()])
 
-    def update_entry(self, search_result, mapping=None):
+    def update_entry(self, search_result, mapping=VIDEO_MAPPING):
         ''' stores the mapped items in a dictionary 
         @param search_result: the search result returned by youtube
         @param entry_type: string, either comment or video
-        '''  
-        if not mapping:
-            mapping = self.VIDEO_MAPPING
-            
+        '''             
         for attr, key in mapping.iteritems(): 
             
             if attr == 'comments' and 'comments' in search_result:
@@ -110,7 +107,8 @@ class YouTubeEntry(dict):
                 continue
             
             value = get_value(attr, search_result)
-            
+            if isinstance(value, unicode):
+                value = value.encode('utf-8')
             if key in self and isinstance(self[key], list):
                 if value:
                     self[key].append(value)
@@ -193,15 +191,15 @@ class YouTube_v3(WebDataSource):
         
         # retrieve comments and details as requested
         if max_comment_count > 0:
-            item['comments'] = [YouTubeEntry(item, YouTubeEntry.COMMENT_MAPPING) 
-                                for item in self._get_video_comment_threads(video_id=video_id)]
+            item['comments'] = [YouTubeEntry(comment, YouTubeEntry.COMMENT_MAPPING) 
+                                for comment in self._get_video_comments(video_id=video_id)]
  
         if get_details: 
             details = self._get_video_details(video_id=video_id)['items']
             if details and len(details)>0:
                 item.update(details[0])
 
-        return YouTubeEntry(item, 'video')
+        return YouTubeEntry(item)
     
     def search(self, 
                search_terms, 
@@ -260,42 +258,23 @@ class YouTube_v3(WebDataSource):
             
             if items_count >= total_results:
                 continue_search = False 
-            
-            kwargs['pageToken'] = response['nextPageToken']
+                
+            if not 'nextPageToken' in response:
+                continue_search = False
+            else:
+                kwargs['pageToken'] = response['nextPageToken']
                  
-    def _get_video_comments(self, video_id, channel_id=None):
+    def _get_video_comments(self, video_id):
         """ Returns the comments for a youtube ID"""
-        comments = self.client.comments().list(part='snippet',
-                                               videoId=video_id,
-                                               textFormat='plainText'
-                                               ).execute()
-        result = []
-        for item in comments['items']:
-            comment = item['snippet']['topLevelComment']
-            result.append(YouTubeEntry(comment, 'comment'))
-        
-        return result
-    
-    def _get_video_comment_threads(self, video_id):
-        """ REturns comment threads for a youtube ID """
         comments = self.client.commentThreads().list(part='snippet',
                                                      videoId=video_id,
                                                      textFormat='plainText'
                                                      ).execute()
         result = []
         for item in comments['items']:
-            comment = item['snippet']['topLevelComment']
-            result.append({'id':comment['id'],
-                           'user_name': comment['snippet']['authorDisplayName'],
-                           'user_profile': comment['snippet']['authorGoogleplusProfileUrl'],
-#                            'viewer_rating':comment['snippet']['viewer_rating'],
-#                            'like_count':comment['snippet']['viewer_rating'],
-                           'title':comment['snippet']['authorDisplayName'],
-                           'published':comment['snippet']['publishedAt'],
-                           'last_modified':comment['snippet']['updatedAt'],
-                           'content':comment['snippet']['textDisplay']})
-        
+            result.append(item['snippet']['topLevelComment'])
         return result
+
     
     def get_freebase_topics(self, QUERY_TERM):
         """ Retrieves a list of Freebase topics associated with the query term """
