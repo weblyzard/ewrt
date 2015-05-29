@@ -52,26 +52,25 @@ class YouTubeEntry(dict):
     
     DATE_FIELDS = ('published', 'last_modified')
      
-    YT_VIDEO_MAPPING = {
-        'id.videoId':'video_id',
+    VIDEO_MAPPING = {
+        'id':'video_id',
+        'comments': None,
         'snippet.title': 'title',
         'snippet.publishedAt':'published',
         'snippet.description': 'content',
-        'comment': None
-#         'media.duration.seconds':'duration', 
-#         'statistics.view_count': 'statistics_viewcount', 
-#         'statistics.favorite_count': 'statistics_favoritecount', 
-#         'rating.average': 'rating_average',
-#         'rating.max': 'rating_max',
-#         'rating.min': 'rating_min',
-#         'rating.num_raters': 'rating_numraters', 
-#         'summary': 'summary', 
-#         'rights': 'rights', 
-#         'updated.text': 'last_modified', 
-#         'source': 'yt_source'           
+        'contentDetails.duration':'duration',
+        'contentDetails.caption':'caption',
+        'contentDetails.licensedContent':'licensed',
+        'statistics.viewCount':'statistics_viewcount',
+        'statistics.favoriteCount':'statistics_favoritecount',
+        'statistics.likeCount':'statistics_likecount',
+        'statistics.dislikeCount':'statistics_dislikecount',
+        'statistics.commentCount':'statistics_commentcount',
+        'topicDetails.relevantTopicIds':'freebase_topics_relevant',
+        'topicDetails.topicIds':'freebase_topics'     
     }
     
-    YT_COMMENT_MAPPING = {
+    COMMENT_MAPPING = {
         'id': 'comment_id',
         't':'parent_id',
         'snippet.authorDisplayName':'user_name',
@@ -85,35 +84,29 @@ class YouTubeEntry(dict):
         'snippet.textDisplay':'content',
     }
     
-    def __init__(self, search_result):
+    def __init__(self, search_result, mapping=None):
         ''' constructor initializes entry with the result'''
         dict.__init__(self)
-        self.update(self.update_entry(search_result, entry_type='video'))
+        self.update(self.update_entry(search_result), mapping=mapping)
     
-        self['url'] = ''.join([YOUTUBE_SEARCH_URL, self['video_id']])
+        if self['video_id']:
+            self['url'] = ''.join([YOUTUBE_SEARCH_URL, self['video_id']])
         
     def __repr__(self):
         return '** entry: %s' % '\n'.join(['%s: %s' % (k, v) for k, v in self.iteritems()])
 
-    def update_entry(self, search_result, mapping, entry_type):
+    def update_entry(self, search_result, mapping=None):
         ''' stores the mapped items in a dictionary 
         @param search_result: the search result returned by youtube
         @param entry_type: string, either comment or video
-        '''
-        
-        result = {}
-    
-        mapping = self.YT_VIDEO_MAPPING
-        if entry_type.lower()=='comment':
-            mapping = self.YT_COMMENT_MAPPING
-        elif entry_type.lower()=='video':
-            mapping = self.YT_VIDEO_MAPPING
+        '''  
+        if not mapping:
+            mapping = self.VIDEO_MAPPING
             
         for attr, key in mapping.iteritems(): 
             
-            if attr == 'comment':
-                result['comment'] = self.update_entry(search_result['comment'], 
-                                                      mapping=self.YT_COMMENT_MAPPING)
+            if attr == 'comments' and 'comments' in search_result:
+                self['comments'] = search_result['comments']
                 continue
             
             value = get_value(attr, search_result)
@@ -193,17 +186,20 @@ class YouTube_v3(WebDataSource):
             and "dislike"."""
         self.client.videos().rate(id=video_id, rating="like").execute()
 
-    def _convert_item_to_video(self, item, max_comment_count=0, get_details=False):
+    def _build_youtube_item(self, item, max_comment_count=0, get_details=False):
         """ """
         
         video_id = item['id']['videoId']
         
-#         # retrieve comments, if required
-#         if max_comment_count > 0:
-#             item['comments'] = self._get_video_comments(video_id=video_id)
-# 
-#         if get_details: 
-#             item['details'] = self._get_video_details(video_id=video_id) 
+        # retrieve comments and details as requested
+        if max_comment_count > 0:
+            item['comments'] = [YouTubeEntry(item, YouTubeEntry.COMMENT_MAPPING) 
+                                for item in self._get_video_comment_threads(video_id=video_id)]
+ 
+        if get_details: 
+            details = self._get_video_details(video_id=video_id)['items']
+            if details and len(details)>0:
+                item.update(details[0])
 
         return YouTubeEntry(item, 'video')
     
@@ -253,7 +249,9 @@ class YouTube_v3(WebDataSource):
                     try:
                         items_count += 1
                         print items_count
-                        yield self._convert_item_to_video(search_result)
+                        yield self._build_youtube_item(search_result,
+                                                       max_comment_count=10, 
+                                                       get_details=True)
                     except Exception,e:
                         logger.error('Failed to convert Youtube item: %s' %e) 
             
@@ -267,11 +265,10 @@ class YouTube_v3(WebDataSource):
                  
     def _get_video_comments(self, video_id, channel_id=None):
         """ Returns the comments for a youtube ID"""
-        comments = self.client.commentThreads().list(part='snippet',
-                                             videoId=video_id,
-                                             channelId=channel_id,
-                                             textFormat='plainText'
-                                             ).execute()
+        comments = self.client.comments().list(part='snippet',
+                                               videoId=video_id,
+                                               textFormat='plainText'
+                                               ).execute()
         result = []
         for item in comments['items']:
             comment = item['snippet']['topLevelComment']
@@ -279,11 +276,10 @@ class YouTube_v3(WebDataSource):
         
         return result
     
-    def _get_video_comment_threads(self, video_id, channel_id=None):
+    def _get_video_comment_threads(self, video_id):
         """ REturns comment threads for a youtube ID """
         comments = self.client.commentThreads().list(part='snippet',
                                                      videoId=video_id,
-                                                     channelId=channel_id,
                                                      textFormat='plainText'
                                                      ).execute()
         result = []
