@@ -35,7 +35,7 @@ def get_value(key, dictionary):
 # number of seconds to wait between comment request
 # this is required to prevent the youtube api from
 # blocking us.
-YOUTUBE_SLEEP_TIME    = 1       
+YOUTUBE_SLEEP_TIME = 1       
 MAX_RESULTS_PER_QUERY = 50 
 DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.000Z'
 
@@ -248,7 +248,6 @@ class YouTube_v3(WebDataSource):
                 if search_result['id']['kind'] == 'youtube#video':
                     try:
                         items_count += 1
-                        print items_count
                         yield self._build_youtube_item(search_result,
                                                        max_comment_count=10, 
                                                        get_details=True)
@@ -288,25 +287,12 @@ class YouTube_v3(WebDataSource):
             result.append({'id':comment['id'],
                            'user_name': comment['snippet']['authorDisplayName'],
                            'user_profile': comment['snippet']['authorGoogleplusProfileUrl'],
-#                            'viewer_rating':comment['snippet']['viewer_rating'],
-#                            'like_count':comment['snippet']['viewer_rating'],
                            'title':comment['snippet']['authorDisplayName'],
                            'published':comment['snippet']['publishedAt'],
                            'last_modified':comment['snippet']['updatedAt'],
                            'content':comment['snippet']['textDisplay']})
         
         return result
-    
-    def get_freebase_topics(self, QUERY_TERM):
-        """ Retrieves a list of Freebase topics associated with the query term """
-        freebase_params = dict(query=QUERY_TERM, key=self.api_key)
-        freebase_url = FREEBASE_SEARCH_URL % urllib.urlencode(freebase_params)
-        freebase_response = json.loads(urllib.urlopen(freebase_url).read())
-        if len(freebase_response['result']) == 0:
-            print('No matching terms were found in Freebase.')
-            
-        return freebase_response['result']
-
 
 class YouTube(WebDataSource):
     '''
@@ -567,9 +553,6 @@ class YouTubeTest(unittest.TestCase):
     def test_search_v3(self):
         search_term = 'FIFA'
         api_key = 'AIzaSyBGBjbt74jNpgD3_rJRZM1_JuMGPys1sMk'
-        
-        api_key = 'AIzaSyC3-GLHSW-TVg59ax3xDjuOp-FJ6_GkKaU'
-        
         
         service = YouTube_v3(api_key)
         result = service.get_video_search_feed(search_terms=search_term)
