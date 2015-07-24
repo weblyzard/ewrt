@@ -59,6 +59,9 @@ class RESTClient(object):
         self.user = user
         self.password = password
 
+        if not default_timeout: 
+            default_timeout = WS_DEFAULT_TIMEOUT
+
         url_obj = Retrieve(module_name, sleep_time=0,
                            default_timeout=default_timeout)
         self.retrieve = partial(url_obj.open,
@@ -144,7 +147,6 @@ class RESTClient(object):
         
         return self._json_request(url, parameters, return_plain,
                                   json_encode_arguments, content_type)
-
 
 class MultiRESTClient(object):
     ''' allows multiple URLs for access REST services '''
@@ -250,8 +252,8 @@ class MultiRESTClient(object):
                     break
 
             except Exception as e:  # ported to python3 (SV)
-                msg = 'could not execute %s, error %s\n%s' % (
-                    path, e,
+                msg = 'could not execute %s %s, error %s\n%s' % (
+                    client.service_url, path, e,
                     traceback.format_exc())
                 logger.warn(msg)
                 errors.append(msg)
