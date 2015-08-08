@@ -43,6 +43,10 @@ OCR_TRANSLATION_TABLE = {ord(u'8'): u'B',
                          ord(u'ä'): u'a',
                          ord(u'ö'): u'o',
                          ord(u'ü'): u'u',
+                         ord(u'é'): u'e',
+                         ord(u'û'): u'u',
+                         ord(u'à') :u'a',
+                         ord(u'â') :u'a',
                          }
 
 def ocr_normalize(ocr_text):
