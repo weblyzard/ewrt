@@ -3,11 +3,12 @@
 
 '''
 import logging
+import pyvirtualdisplay
+
+from time import sleep
+from selenium import webdriver
 
 from eWRT.access import abstract_retrieve
-
-from selenium import webdriver
-import pyvirtualdisplay
 
 __version__ = '0.0.8'
 
@@ -85,5 +86,6 @@ class JavascriptRetriever(abstract_retrieve.AbstractRetriever):
         :param str url: Surf to a given URL and return the source code of the site.
         '''
         self.browser.get(url=url)
+        sleep(2)
         return self.browser.page_source
 
