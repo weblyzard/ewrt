@@ -274,8 +274,6 @@ class YouTube_v3(WebDataSource):
             result.append(item['snippet']['topLevelComment'])
 
         return result
-
-
     
     def get_freebase_topics(self, QUERY_TERM):
         """ Retrieves a list of Freebase topics associated with the query term """
@@ -440,9 +438,9 @@ class YouTube(WebDataSource):
             if link.href.endswith('related'):
                 yt_dict['related_url'] = link.href
         
+        #mcg: yt APIv3 returns ISO8601, do not format
         if yt_dict['duration']: 
-            duration = int(yt_dict['duration'])
-            yt_dict['duration'] = '%d:%02d' % (duration / 60, duration % 60)
+            duration = yt_dict['duration']
         
         yt_dict['picture'] = None
 
@@ -545,10 +543,10 @@ class YouTubeTest(unittest.TestCase):
     
     def test_search_v3(self):
         search_term = 'FIFA'
-        api_key = 'AIzaSyBGBjbt74jNpgD3_rJRZM1_JuMGPys1sMk'
+        api_key = 'AIzaSyAfFOJnJMd3QfP0cV9HDymin19gkYDDR5c'
         
         service = YouTube_v3(api_key)
-        result = service.get_video_search_feed(search_terms=search_term)
+        result = service.search(search_terms=search_term)
         for item in result:
             print item
         print result
