@@ -72,7 +72,9 @@ class GoogleTranslator(AbstractWebSource):
     
     def translate(self, text, target_language, source_language=None):
         ''' translates the text '''
-        params = {'target': target_language, 'q': text}
+        if not isinstance(text, unicode):
+            text = unicode(text)
+        params = {'target': target_language, 'q': text.encode('utf8')}
         
         if source_language: 
             params['source'] = source_language
