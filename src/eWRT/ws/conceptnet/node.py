@@ -7,10 +7,12 @@ Access to conceptnet data structures using its REST interface
 ::author: Albert Weichselbraun <albert.weichselbraun@htwchur.ch>
 """
 
-from json import loads
 from warnings import warn
 
 class Node(object):
+    '''
+    A ConceptNet node.
+    '''
 
     def __init__(self, url, edges):
         self.url = url
@@ -28,7 +30,8 @@ class Node(object):
         return "ConceptNetNode <%s>" % (self.url.encode("utf8"))
 
     def specificity(self):
-        ''' returns the a number that shows how specific this node is 
+        ''' ::return:
+            a number that shows how specific this node is
             e.g. (3 for "/c/en/coal" or
                   5 for "/c/en/coal/n/energy storage)
         '''
