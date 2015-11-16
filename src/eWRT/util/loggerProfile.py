@@ -19,7 +19,8 @@
 Pre-defined logging profiles
 '''
 import logging, unittest
-from os import remove
+from os import remove, makedirs
+from os.path import exists, dirname
 
 DEFAULT_LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 
@@ -127,10 +128,10 @@ def init_logging(log_file=DEFAULT_LOG_FILE, log_level=None,
                                                 backupCount=max_files,
                                                 encoding='utf-8')
             else:
-                log_dir = os.path.dirname(log_file)
+                log_dir = dirname(log_file)
 
-                if not os.path.exists(log_dir):
-                    os.makedirs(log_dir)
+                if not exists(log_dir):
+                    makedirs(log_dir)
 
                 file_hdlr = FileHandler(filename=log_file,
                                         encoding='utf-8')

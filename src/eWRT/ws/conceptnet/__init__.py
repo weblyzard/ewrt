@@ -12,9 +12,9 @@ from itertools import chain
 from json import loads
 from os.path import exists
 try:
-    from cPickle import load, dump
+    from cPickle import dump
 except ImportError:
-    from pickle import load, dump
+    from pickle import dump
 
 from eWRT.access.http import Retrieve
 from eWRT.util.cache import DiskCached
