@@ -192,8 +192,8 @@ class YouTube_v3(WebDataSource):
         # retrieve comments and details as requested
         if max_comment_count > 0:
             item['comments'] = [YouTubeEntry(comment, YouTubeEntry.COMMENT_MAPPING) 
-                                for comment in self._get_video_comments(video_id=video_id)]
- 
+                            for comment in self._get_video_comments(video_id=video_id)]
+
         if get_details: 
             details = self._get_video_details(video_id=video_id)['items']
             if details and len(details)>0:
@@ -265,11 +265,18 @@ class YouTube_v3(WebDataSource):
                  
     def _get_video_comments(self, video_id):
         """ Returns the comments for a youtube ID"""
-        comments = self.client.commentThreads().list(part='snippet',
-                                                     videoId=video_id,
-                                                     textFormat='plainText'
-                                                     ).execute()
         result = []
+        try:
+            comments = self.client.commentThreads().list(part='snippet',
+                                                         videoId=video_id,
+                                                         textFormat='plainText'
+                                                     ).execute()
+        except Exception:
+            return result #just ignore, comments might be disabled
+ 
+        if not comments or not 'items' in comments:
+            return result #just ignore, comments might be disabled
+        
         for item in comments['items']:
             result.append(item['snippet']['topLevelComment'])
 
