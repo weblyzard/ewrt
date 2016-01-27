@@ -59,7 +59,7 @@ class RESTClient(object):
         self.user = user
         self.password = password
 
-        if not default_timeout: 
+        if not default_timeout:
             default_timeout = WS_DEFAULT_TIMEOUT
 
         url_obj = Retrieve(module_name, sleep_time=0,
@@ -142,9 +142,9 @@ class RESTClient(object):
         '''
         url = self.get_request_url(self.service_url, command, identifier,
                                    query_parameters)
-        
+
         logger.debug('requesting url %s' % url)
-        
+
         return self._json_request(url, parameters, return_plain,
                                   json_encode_arguments, content_type)
 
@@ -155,15 +155,15 @@ class MultiRESTClient(object):
 
     def __init__(self, service_urls, user=None, password=None,
                  default_timeout=WS_DEFAULT_TIMEOUT, use_random_server=False):
-        
+
         self._service_urls = self.fix_urls(service_urls, user, password)
-        
+
         if use_random_server:
             random.shuffle(self._service_urls)
-        
+
         self.clients = self._connect_clients(self._service_urls,
                                              default_timeout=default_timeout)
-              
+
     def is_online(self):
         try:
             self.request('meminfo')
@@ -229,10 +229,13 @@ class MultiRESTClient(object):
 
     def request(self, path, parameters=None, return_plain=False,
                 execute_all_services=False, json_encode_arguments=True,
-                query_parameters=None, content_type='application/json'):
+                query_parameters=None, content_type='application/json',
+                pass_through_http_exceptions=()):
         ''' performs the given json request
         @param url: the url to query
         @param parameters: optional paramters
+        @param pass_through_http_exceptions:
+            list of http exceptions to forward to the client
         @param return_plain: whether to return the result without prior
                              deserialization using json.load (False*)
         '''
@@ -250,6 +253,16 @@ class MultiRESTClient(object):
 
                 if not execute_all_services:
                     break
+
+            except HTTPError as e:
+                if e.code in pass_through_http_exceptions:
+                    raise e
+                else:
+                    msg = 'could not execute %s %s, error %s\n%s' % (
+                       client.service_url, path, e,
+                       traceback.format_exc())
+                    logger.warn(msg)
+                    errors.append(msg)
 
             except Exception as e:  # ported to python3 (SV)
                 msg = 'could not execute %s %s, error %s\n%s' % (
@@ -287,26 +300,26 @@ class TestRESTClient(unittest.TestCase):
             # authentification has been succeeded, but no object could
             # be found
             assert '404: Not Found' in str(e)
- 
+
     def test_multi_request(self):
         urls = (('http://irgendwas.com', None, None),
                 ('http://heinz:secret@irgendwas.com', 'heinz', 'secret'))
         service_urls = [url[0] for url in urls]
         client = MultiRESTClient(service_urls)
- 
+
         for i, (service_url, user, passwd) in enumerate(urls):
             c = client.clients[i]
             if user:
                 assert service_url != c.service_url
             assert c.user == user
             assert c.password == passwd
- 
+
         try:
             client.request('irgendwas')
             assert False
         except Exception as e:
             assert 'Could not make request to path' in str(e)
- 
+
         try:
             urls = ('https://heinz@irgendwas.com', )
             client = MultiRESTClient(urls)
@@ -314,7 +327,7 @@ class TestRESTClient(unittest.TestCase):
         except Exception as e:
             print '!!! previous exception is OK, we expected that'
             assert 'if set, user AND pwd required' in e.args # not tested (SV)
- 
+
     def test_get_url(self):
         assert RESTClient.get_request_url(self.TEST_URL, 'execute', '12') \
             .endswith("/execute/12")
@@ -323,26 +336,26 @@ class TestRESTClient(unittest.TestCase):
             'execute',
             '12',
             {'debug': True}).endswith("/execute/12?debug=True")
- 
+
     def test_fix_url(self):
         ''' tests fix url '''
 
     def test_randomize_urls(self):
-        ''' this test might fail, if random returns the same list, but this is 
-        very unlikely ''' 
-        client = MultiRESTClient(service_urls='http://test.url', 
+        ''' this test might fail, if random returns the same list, but this is
+        very unlikely '''
+        client = MultiRESTClient(service_urls='http://test.url',
                                  use_random_server=True)
-        
+
         assert isinstance(client._service_urls, list)
         assert len(client._service_urls) == 1
-    
+
         service_urls = ['http://test.url%s' % i for i in range(1000)]
-    
-        client = MultiRESTClient(service_urls=service_urls, 
+
+        client = MultiRESTClient(service_urls=service_urls,
                                  use_random_server=True)
-        
+
         assert len(client._service_urls) == len(service_urls)
         assert service_urls <> client._service_urls
-        
+
 if __name__ == '__main__':
     unittest.main()

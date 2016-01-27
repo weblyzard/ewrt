@@ -8,28 +8,31 @@
   * ...
 '''
 
-# (C)opyrights 2010 by Albert Weichselbraun <albert@weichselbraun.net>
-#                   and others (as outlined in the functions).
+# (C)opyrights 2010 - 2015 by Albert Weichselbraun <albert@weichselbraun.net>
+#                          and others (as outlined in the functions).
 #
 # The code published in this module is either under the GNU General
-# Public License (see below) or under the license specified in the 
-# function. 
+# Public License (see below) or under the license specified in the
+# function.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 import math
-from itertools import izip_longest
+try:
+    from itertools import izip_longest as zip_longest
+except ImportError:
+    from itertools import zip_longest
 from operator import mul, itemgetter
 from collections import Counter
 from numpy import vdot
@@ -42,31 +45,31 @@ def wordSimilarity(s1, s2, similarityMeasure):
     ''' computes the given similarity metric on a strings
         words.
         e.g. wordSimilarity("nuclear energy", "energy nuclear", lev) = 0
-        
+
         missing words are replaced by ""
         e.g. wordSimilarity("as you thought", "you thought") ==
-               wordSimilarity("as you thought", "you thought", "") 
-        
+               wordSimilarity("as you thought", "you thought", "")
+
     '''
-    wordList = list( izip_longest(s1.split(), s2.split(), fillvalue="") )
+    wordList = list(zip_longest(s1.split(), s2.split(), fillvalue=""))
     words1, words2 = map(itemgetter(0), wordList), map(itemgetter(1), wordList)
     assert len(words1) == len(words2)
-    
-    score = float(sum([min([similarityMeasure(w1, w2) for w1 in words1]) 
+
+    score = float(sum([min([similarityMeasure(w1, w2) for w1 in words1])
                  for w2 in words2])) / len(words1)
     return score
-    
+
 @MemoryCached
 def lev(s1, s2):
     ''' Levenshtein string edit distance
-        source: 
+        source:
         http://en.wikibooks.org/wiki/Algorithm_implementation/Strings/Levenshtein_distance#Python
     '''
     if len(s1) < len(s2):
         return lev(s2, s1)
     if not s1:
         return len(s2)
- 
+
     previous_row = xrange(len(s2) + 1)
     for i, c1 in enumerate(s1):
         current_row = [i + 1]
@@ -76,7 +79,7 @@ def lev(s1, s2):
             substitutions = previous_row[j] + (c1 != c2)
             current_row.append(min(insertions, deletions, substitutions))
         previous_row = current_row
- 
+
     return previous_row[-1]
 
 @MemoryCached
@@ -85,7 +88,7 @@ def damerauLev(seq1, seq2):
     Calculate the Damerau-Levenshtein distance between sequences.
     source : http://mwh.geek.nz/2009/04/26/python-damerau-levenshtein-distance/
     license: MIT license
-    
+
 
     This distance is the number of additions, deletions, substitutions,
     and transpositions needed to transform the first sequence into the
@@ -170,11 +173,11 @@ class VectorSpaceModel:
             self.v = self._addTokens(tokens)
         else:
             self.v = self._binaryAddTokens(tokens)
-        
+
     def _addTokens(self, tokens):
         ''' adds the tokens to a vsm representation '''
         return Counter(tokens)
-    
+
     def _binaryAddTokens(self, tokens):
         ''' adds tokens to a binary vsm representation '''
         return Counter(set(tokens))
@@ -188,12 +191,12 @@ class VectorSpaceModel:
             to compare '''
         complete_token_list = set(v1.keys() + v2.keys())
         vsm1 = [v1[k] for k in complete_token_list]
-        vsm2 = [v2[k] for k in complete_token_list] 
+        vsm2 = [v2[k] for k in complete_token_list]
         return vsm1, vsm2
 
     def __mul__(self, o):
         ''' returns the dot-product of two vectors '''
-        v1, v2 = self.createVSMRepresentation(self.v, o.v)        
+        v1, v2 = self.createVSMRepresentation(self.v, o.v)
         return vdot(v1, v2) / (norm(v1) * norm(v2))
 
 # --------------------------------------------------------------------
@@ -210,22 +213,19 @@ def testMetaPhone():
      '''
     from warnings import warn
     warn("the used metaphone implementation _does not_ correspond to the one use in postgres")
-    print metaphone('Microprocessor')
     assert metaphone('Albert') == 'albrt'
     assert metaphone('John') == 'jhn'
     assert metaphone('Microprocessor') == 'mkrprksr'
-    
+
 def testNysiis():
     ''' tests the New York State Identification and Intelligence
         Algorithm (NYSIIS) code for the given term '''
-    print nysiis("Microprocessor")
     assert nysiis("Albert").lower() == 'albard'
-    
+
 def testCaverphone():
     ''' tests the caverphone algorithm '''
-    print caverphone("Albert")
     assert caverphone("Albert") == "APT1111111"
-     
+
 
 def testSoundex():
     ''' compares the output of the soundex algorithm with
@@ -236,7 +236,7 @@ def testSoundex():
     assert soundex("Albert") == "A416"
 
     assert soundex("Weichselbraun",8) == "W2241650"
-    
+
 
 def testWordSimilarity():
     ''' tests the per word similarity '''
@@ -247,17 +247,17 @@ def testWordSimilarity():
     assert wordSimilarity("Anna Toth", "Toht Ana", damerauLev) == 1.0
 
 
-def testLevenshteinDistance():    
+def testLevenshteinDistance():
     assert lev("anton", "ana") == 3
     assert lev("anna", "ana") == 1
     assert lev("alfred", "alfred") == 0
     assert lev("tothi", "alfredKurz") == 10
     assert lev("maria", "marion") == 2
     assert lev("safety measures", "safety measures") == 0
-    
+
 def testDamerauLev():
     ''' tests the Damerau-Levenshtein distance
-        http://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance 
+        http://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance
     '''
     assert damerauLev("jump", "jupm") == 1
     assert damerauLev("julius", "julius") == 0
@@ -273,7 +273,6 @@ class TestVSM(TestCase):
         self.assertAlmostEqual(v1 * v1, 1.0)
         self.assertAlmostEqual(v2 * v2, 1.0)
 
-        print "***",v1 * v2
         self.assertAlmostEqual(v1 * v2, 2/3.)
 
     def testBinaryVersusStandardVSM(self):
@@ -284,6 +283,6 @@ class TestVSM(TestCase):
 
         self.assertAlmostEqual(v1*v2, 4/5.)
         self.assertAlmostEqual(v3*v4, 1.0)
-        
 
-        
+
+
