@@ -58,6 +58,7 @@ class YouTubeEntry(dict):
         'snippet.title': 'title',
         'snippet.publishedAt':'published',
         'snippet.description': 'content',
+        'snippet.channelId': 'channel_id',
         'contentDetails.duration':'duration',
         'contentDetails.caption':'caption',
         'contentDetails.licensedContent':'licensed',
@@ -542,14 +543,54 @@ class YouTubeTest(unittest.TestCase):
     
     
     def test_search_v3(self):
-        search_term = 'FIFA'
-        api_key = 'AIzaSyAfFOJnJMd3QfP0cV9HDymin19gkYDDR5c'
+        search_terms = 'FIFA'
+        api_key = 'XXX'
+        client = YouTube_v3(api_key=api_key)
+        since_date = None
+        max_results = 1000
         
-        service = YouTube_v3(api_key)
-        result = service.search(search_terms=search_term)
-        for item in result:
-            print item
-        print result
+        if not since_date:
+            since_date = datetime.now() - timedelta(days=1)
+        if isinstance(since_date, datetime):
+            since_date = since_date.isoformat("T") + "Z"
+            
+        items_per_page = min([max_results, MAX_RESULTS_PER_QUERY])
+            
+        for r in client.search(search_terms=search_terms, 
+#                                     location=location,
+                     max_results=max_results,
+                     since_date=since_date):
+            print '================================================='
+            print r
+            
+#         kwargs = {'q':search_terms,
+#                   'part':'id,snippet',
+#                   'type':'video',
+#                   'publishedAfter':since_date,
+#                   'maxResults':items_per_page,
+#                   'order':'date'}
+#         
+# #         if region_code:
+# #             kwargs['regionCode'] = region_code
+# #         if language:
+# #             kwargs['relevanceLanguage'] = language
+#             
+#         response = client.search().list(**kwargs).execute()
+#         total_results = response['pageInfo']['totalResults']
+#             
+#         result = []
+#         items_count = 0
+#         for search_result in response.get('items', []):
+#             if search_result['id']['kind'] == 'youtube#video':
+#                 try:
+#                     items_count += 1
+#                     result.append( self._build_youtube_item(search_result,
+#                                                    max_comment_count=10, 
+#                                                    get_details=True))
+#                 except Exception, e:
+#                     print e
+#                                   
+#         print result
         
 #     def test_query_time(self):
 #         test_cases = ((1000, 'today'), 
@@ -571,7 +612,7 @@ class YouTubeTest(unittest.TestCase):
 #                          'related_url', 'statistics_viewcount', 
 #                          'statistics_favoritecount', 'rating_average', 
 #                          'rating_max', 'rating_min', 'rating_numraters', 
-#                          'picture', 'duration', 'user_url'
+#                          'picture', 'duration', ''
 #                         )
 #              
 #         for r in self.youtube.search(self.search_terms, None, orderby='relevance'):
