@@ -107,6 +107,7 @@ class GoogleBlogSearch(object):
 
         logger.debug('Searching URL %s' % url)
         html_content = GoogleBlogSearch.get_content(url)
+        print html_content
         tree = etree.HTML(html_content)
         resultList = tree.xpath('.//div[@id="ires"]/ol')
 
@@ -118,24 +119,26 @@ class GoogleBlogSearch(object):
             if firstElement:
                 firstElement = False
             else:
-                url = element.xpath('./h3[@class="r"]/a')[0].attrib['href']
-                abstract = ' '.join(element.xpath('./div[@class="s"]/text()'))
-                url = GoogleBlogSearch.parse_url(url)
-
-                if url:
-                    blogLink = {}
-                    blogLink['url'] = url
-                    blogLink['source'] = 'GoogleBlogSearch - Keyword "%s"' % searchTerm
-                    blogLink['abstract'] = abstract
-                    blogLink['reach'] = '0'
-                    blogLink['date'] = GoogleBlogSearch.get_link_date(element)
-
-                    urls.append(blogLink)
-
-                    counter += 1
-
-                if (counter + offset) >= maxResults:
-                    break
+                itemList = element.xpath('./h3[@class="r"]/a')
+                if len(itemList)==1:
+                    url = itemList[0].attrib['href']
+                    abstract = ' '.join(element.xpath('./div[@class="s"]/text()'))
+                    url = GoogleBlogSearch.parse_url(url)
+    
+                    if url:
+                        blogLink = {}
+                        blogLink['url'] = url
+                        blogLink['source'] = 'GoogleBlogSearch - Keyword "%s"' % searchTerm
+                        blogLink['abstract'] = abstract
+                        blogLink['reach'] = '0'
+                        blogLink['date'] = GoogleBlogSearch.get_link_date(element)
+    
+                        urls.append(blogLink)
+    
+                        counter += 1
+    
+                    if (counter + offset) >= maxResults:
+                        break
 
         if maxResults > (MAX_RESULTS_PAGE) and (counter + offset) < maxResults:
 

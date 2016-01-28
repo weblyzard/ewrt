@@ -27,6 +27,12 @@ __copyright__ = "GPL"
 
 from os.path import dirname, join
 
+# python 3 compatibility
+from sys import version_info
+if version_info[0] > 2:
+    basestring = str
+
+
 def get_resource( module_path, relative_path_list ):
     '''
     Returns the path of the given resource relative to the module's directory.
