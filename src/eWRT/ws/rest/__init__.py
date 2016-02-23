@@ -230,11 +230,11 @@ class MultiRESTClient(object):
     def request(self, path, parameters=None, return_plain=False,
                 execute_all_services=False, json_encode_arguments=True,
                 query_parameters=None, content_type='application/json',
-                pass_through_exceptions=()):
+                pass_through_http_exceptions=()):
         ''' performs the given json request
         @param url: the url to query
         @param parameters: optional paramters
-        @param pass_through_exceptions:
+        @param pass_through_http_exceptions:
             set to True, if the client shall pass through all exceptions
         @param return_plain: whether to return the result without prior
                              deserialization using json.load (False*)
@@ -255,7 +255,7 @@ class MultiRESTClient(object):
                     break
 
             except Exception as e:  # ported to python3 (SV)
-                if pass_through_exceptions:
+                if pass_through_http_exceptions:
                     raise e
                 else:
                     msg = 'could not execute %s %s, error %s\n%s' % (
