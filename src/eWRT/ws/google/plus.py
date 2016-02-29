@@ -7,11 +7,12 @@ Created on Dec 13, 2011
 '''
 import json
 import logging
-from urllib import urlencode
+import urllib
 from datetime import datetime
 
 from eWRT.access.http import Retrieve
 from eWRT.ws.WebDataSource import WebDataSource
+import unittest
 
 API_URL = 'https://www.googleapis.com/plus/v1/{path}?{query}'
 DEFAULT_ORDER_BY = 'recent' # other possibility: best
@@ -101,7 +102,12 @@ class GooglePlus(object):
         if 'maxResults' in params and params['maxResults'] > DEFAULT_MAX_RESULTS:
             params['maxResults'] = DEFAULT_MAX_RESULTS
         
-        return self.api_url.format(path=path, query=urlencode(params))
+        #deal with funny encodings in params
+        str_params = {}
+        for k,v in params.iteritems():
+            str_params[k] = unicode(v).encode('utf-8')
+        params = urllib.urlencode(str_params)
+        return self.api_url.format(path=path, query=params)
 
     @classmethod
     def convert_item(cls, item):
