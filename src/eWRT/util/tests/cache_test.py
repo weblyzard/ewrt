@@ -4,11 +4,11 @@
 #
 from shutil import rmtree
 from multiprocessing import Pool
-
-from nose.plugins.attrib import attr
+import pytest
 
 from eWRT.util.cache import *
 from eWRT.util.module_path import get_resource
+
 
 get_cache_dir = lambda no: get_resource(__file__, ('.unittest-temp%d' % (no), ))
 
@@ -24,12 +24,12 @@ class TestCached(object):
 
     def testNonKeywordArguments(self):
         ''' tests the class with non Keyword Arguments '''
-        for x in xrange(1,20):
+        for x in range(1,20):
             assert self.add(x,5) == (x+5)
             assert self.add(x,5) == (x+5)
 
         # test objects with a cachesize specified
-        for x in xrange(1,20):
+        for x in range(1,20):
             assert self.sub(x,5) == x-5
             assert self.sub(x,5) == x-5
             
@@ -138,21 +138,19 @@ class TestDiskCached(TestCached):
         CACHE_DIR = get_cache_dir(5)
         i = IterableCache(CACHE_DIR)
 
-        getTestIterator = lambda x: xrange(x)
+        getTestIterator = lambda x: range(x)
 
         for iteratorSize in (4, 5, 6):
             cachedIterator = i.fetch( getTestIterator, iteratorSize )
             
             for x,y in zip(cachedIterator, getTestIterator(iteratorSize)):
-                print x,y
                 assert x == y
 
-    @attr("slow")
+    @pytest.mark.slow
     def testThreadSafety(self):
         '''  tests whether everything is thread safe '''
 
-        for a in xrange(1000):
-            print a
+        for a in range(1000):
             c = DiskCache(get_cache_dir(6))
             p = Pool(12)
 

@@ -32,7 +32,7 @@ def pipe_content(cmd, stdin=None):
         @return: (exit_status, stdout)
     """
     if not isfile(cmd.split(" ")[0]):
-        raise ValueError, "Command %s is not available." % (cmd)
+        raise ValueError("Command {} is not available.".format(cmd))
     
     if stdin:
         process_stdin = PIPE
@@ -40,20 +40,20 @@ def pipe_content(cmd, stdin=None):
         process_stdin = None
 
     process_stdout = PIPE
-    p = Popen( cmd.split(" "),
-                bufsize= 0,
-                shell  = False,
-                stdin  = process_stdin,
-                stdout = process_stdout )
+    p = Popen(cmd.split(" "),
+              bufsize= 0,
+              shell  = False,
+              stdin  = process_stdin,
+              stdout = process_stdout)
     
     # write input to stdin, if present
     if stdin:
-        p.stdin.write( stdin )
+        p.stdin.write(stdin)
         p.stdin.close()
 
     # get stdout
     content = p.stdout.read()
-    return ( p.wait(), content )
+    return (p.wait(), content)
 
 
 

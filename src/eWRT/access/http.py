@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
-''' 
-eWRT.access.http
-================
-provides access to resources using http 
-'''
+''' @package eWRT.access.http
+    provides access to resources using http '''
+
 
 # (C)opyrights 2008-2015 by Albert Weichselbraun <albert@weblyzard.com>
 #
@@ -44,10 +42,10 @@ import io
 import unittest
 
 from gzip import GzipFile
-from time import sleep
 from random import randint
 
 from pytest import raises
+
 
 # logging
 import logging
@@ -65,8 +63,7 @@ getHostName = lambda x: "://".join(urlsplit(x)[:2])
 
 
 class Retrieve(object):
-    ''' Retrieve
-        ========
+    ''' @class Retrieve
         retrieves URLs using HTTP
 
         .. remarks:
@@ -76,11 +73,12 @@ class Retrieve(object):
            - support for the context protocol (python)
            - automatic throttling support
 
-        .. warning:
-           There are certain urls such as
-           http://www.mfsa.com.mt/insguide/english/glossarysearch.jsp?letter=all
-           which are _not_ handled correctly by the underlying urllib2 library(!)
-           Please use urllib in such cases.
+        @warning
+        There are certain urls such as
+        http://www.mfsa.com.mt/insguide/english/glossarysearch.jsp?letter=all
+        which are _not_ handled correctly by the underlying urllib2 library(!)
+        Please use urllib in such cases.
+
     '''
 
     __slots__ = ('module', 'sleep_time', 'last_access_time', 'user_agent',
@@ -104,26 +102,18 @@ class Retrieve(object):
              authentification_method="basic", accept_gzip=True,
              head_only=False):
         ''' Opens an URL and returns the matching file object
-
-            :param url:
-            :param data: \
-                optional data to submit
-            :param headers: \
-                a dictionary of optional headers
-            :param user: \
-                optional user name
-            :param pwd: \
-                optional password
-            :param retry: \
-                number of retries in case of an temporary error
-            :param authentification_method: \
-                the used authentification_method ('basic'*, 'digest')
-            :param accept_gzip: \
-                flag to change the accepted encoding, gzip or not
-            :param head_only: \
-                if True: only execute a HEAD request
-            :returns: \
-                a file object for reading the url
+            @param[in] url
+            @param[in] data    optional data to submit
+            @param[in] headers a dictionary of optional headers
+            @param[in] user    optional user name
+            @param[in] pwd     optional password
+            @param[in] retry   number of retries in case of an temporary error
+            @param[in] authentification_method the used authentification_method
+                        ('basic'*, 'digest')
+            @param[in] accept_gzip flag to change the accepted encoding, gzip
+                        or not
+            @param[in] head_only   if True: only execute a HEAD request
+            @returns a file object for reading the url
         '''
         auth_handler = self._supported_http_authentification_methods[
             authentification_method]
@@ -167,9 +157,7 @@ class Retrieve(object):
 
     @staticmethod
     def _getHTTPBasicAuthOpener(url, user, pwd):
-        ''' 
-        returns an opener, capable of handling http-auth 
-        '''
+        ''' returns an opener, capable of handling http-auth '''
         passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
         passman.add_password(None, url, user, pwd)
         auth_handler = urllib2.HTTPBasicAuthHandler(passman)
@@ -187,21 +175,16 @@ class Retrieve(object):
 
     @staticmethod
     def _getUncompressedStream(urlObj):
-        ''' 
-        transparently uncompressed the given data stream
-
-        :param urlObj:
-            the url object to handle
-        :returns:
-            an urlObj containing the uncompressed data
+        ''' transparently uncompressed the given data stream
+            @param[in] urlObj
+            @returns an urlObj containing the uncompressed data
         '''
         compressedStream = io.BytesIO(urlObj.read())
         return GzipFile(fileobj=compressedStream)
 
     def _throttle(self):
-        ''' 
-        delays web access according to the content provider's policy
-        '''
+        ''' delays web access according to the content provider's policy '''
+
         if (time.time() - self.last_access_time) < \
                 DEFAULT_WEB_REQUEST_SLEEP_TIME:
             time.sleep(self.sleep_time)
@@ -248,7 +231,6 @@ class Retrieve(object):
                            split_url.path,
                            split_url.query,
                            split_url.fragment))
-
 
 class TestRetrieve(unittest.TestCase):
     ''' tests the http class '''
@@ -335,3 +317,4 @@ def t_retrieve(url):
         # in python 2.6
         r.close()
     return content
+

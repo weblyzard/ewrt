@@ -1,0 +1,3 @@
+# to overwrite setup.py deps use
+# -e https://github.com/foo/bar.git#egg=bar
+-e .

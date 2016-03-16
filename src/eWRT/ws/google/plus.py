@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 '''
 Created on Dec 13, 2011
 
@@ -9,9 +11,8 @@ import urllib
 
 from datetime import datetime
 
-from eWRT.access.http import Retrieve
 from eWRT.ws.WebDataSource import WebDataSource
-import unittest
+from eWRT.access.http import Retrieve
 
 
 API_URL = 'https://www.googleapis.com/plus/v1/{path}?{query}'
@@ -79,7 +80,6 @@ class GooglePlus(object):
         data = self.retrieve.open(url)
         return json.load(data)
 
-    
     def get_request_url(self, params=None, path='activities'):
         ''' returns a correctly parsed request URL 
         :param params: paremeters for the query
@@ -104,7 +104,7 @@ class GooglePlus(object):
         
         #deal with funny encodings in params
         str_params = {}
-        for k, v in params.iteritems():
+        for k,v in params.iteritems():
             str_params[k] = unicode(v).encode('utf-8')
         params = urllib.urlencode(str_params)
         return self.api_url.format(path=path, query=params)
