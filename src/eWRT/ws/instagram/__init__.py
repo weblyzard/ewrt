@@ -66,7 +66,8 @@ class InstagramClient(object):
         max_docs = params.get('max_docs', self.max_results)
         
         if not 'count' in params: 
-            params['count'] = 100 if max_docs >= 100 else max_docs
+            params['count'] = DEFAULT_MAX_RESULTS \
+            if max_docs >= DEFAULT_MAX_RESULTS else max_docs
         
         while not done: 
             try: 

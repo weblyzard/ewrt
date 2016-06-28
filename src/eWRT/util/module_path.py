@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 
 """ @package eWRT.util.module_path
     utils for manipulating module paths
