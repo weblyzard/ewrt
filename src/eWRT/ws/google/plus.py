@@ -8,11 +8,12 @@ Created on Dec 13, 2011
 import json
 import logging
 import urllib
+
 from datetime import datetime
 
-from eWRT.access.http import Retrieve
 from eWRT.ws.WebDataSource import WebDataSource
-import unittest
+from eWRT.access.http import Retrieve
+
 
 API_URL = 'https://www.googleapis.com/plus/v1/{path}?{query}'
 DEFAULT_ORDER_BY = 'recent' # other possibility: best
@@ -79,7 +80,6 @@ class GooglePlus(object):
         data = self.retrieve.open(url)
         return json.load(data)
 
-    
     def get_request_url(self, params=None, path='activities'):
         ''' returns a correctly parsed request URL 
         :param params: paremeters for the query
@@ -160,8 +160,7 @@ class GooglePlus(object):
             activity['geocode'] = item['geocode']
 
         return activity
-
-
+        
 if __name__ == '__main__':
     import doctest
     doctest.testmod()

@@ -23,6 +23,9 @@ class FacebookWS(object):
     """
     FB_OBJECT_TYPES = ['post', 'user', 'page', 'event', 'group', 'path']
     
+    #expires 27 March 2017, c.f. https://developers.facebook.com/tools/api_versioning/130810080636
+    GRAPH_API_VERSION = 'v2.2' 
+    
     retrieve = Retrieve('facebookWS')
     # added: class properties for storing searchTerm and searchType
 
@@ -110,7 +113,8 @@ class FacebookWS(object):
                 args_string = '?%s' % urllib.urlencode(args)
                 
             request = {'method': "GET", 
-                       "relative_url" : '%s%s' % (self.term, args_string)}
+                       "relative_url" : '%s/%s%s' % (self.GRAPH_API_VERSION,
+                                                     self.term, args_string)}
                                           
         elif self.objectType in self.FB_OBJECT_TYPES:
             args['type'] = self.objectType
