@@ -17,6 +17,7 @@ from eWRT.access.http import Retrieve
 
 API_URL = 'https://www.googleapis.com/plus/v1/{path}?{query}'
 DEFAULT_ORDER_BY = 'recent' # other possibility: best
+MAX_RESULTS_PER_PAGE = 20
 DEFAULT_MAX_RESULTS = 20 # requires only 1 api access
 
 logger = logging.getLogger('eWRT.ws.google')
@@ -32,6 +33,7 @@ class GooglePlus(object):
         self.api_key = api_key
         self.api_url = api_url
         self.retrieve = Retrieve('google-plus')
+    
         
     def search(self, search_terms, max_results=DEFAULT_MAX_RESULTS):
         ''' searches Google+ for the given search_terms 
