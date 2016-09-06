@@ -225,7 +225,7 @@ class YouTube_v3(WebDataSource):
                 item['channel'] = YouTubeEntry(channel_info[0], YouTubeEntry.CHANNEL_MAPPING)
                 
         return YouTubeEntry(item)
-    
+
     def search(self,
                search_terms,
                max_results=MAX_RESULTS_PER_QUERY,
@@ -272,23 +272,23 @@ class YouTube_v3(WebDataSource):
                     try:
                         items_count += 1
                         yield self._build_youtube_item(search_result,
-                                                       max_comment_count=self.max_comment_count, 
+                                                       max_comment_count=self.max_comment_count,
                                                        get_details=self.get_details)
                     except Exception,e:
-                        logger.error('Failed to convert Youtube item: %s' %e) 
-            
+                        logger.error('Failed to convert Youtube item: %s' %e)
+
             if items_count >= max_results:
                 continue_search = False
             
             if items_count >= total_results:
-                continue_search = False 
+                continue_search = False
                 
             if not 'nextPageToken' in response:
                 continue_search = False
             else:
                 kwargs['pageToken'] = response['nextPageToken']
-                kwargs['maxResults'] = min([max_results - MAX_RESULTS_PER_QUERY,
-                                            MAX_RESULTS_PER_QUERY])
+                kwargs['maxResults'] = min([MAX_RESULTS_PER_QUERY - (max_results - items_count),
+                                           MAX_RESULTS_PER_QUERY],)
                  
     def _get_video_comments(self, video_id):
         """ Returns the comments for a youtube ID"""
