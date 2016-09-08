@@ -263,7 +263,7 @@ class YouTube_v3(WebDataSource):
         items_count = 0 
         
         while continue_search: 
-        
+
             response = self.client.search().list(**kwargs).execute()
             total_results = response['pageInfo']['totalResults']
             
@@ -287,8 +287,8 @@ class YouTube_v3(WebDataSource):
                 continue_search = False
             else:
                 kwargs['pageToken'] = response['nextPageToken']
-                kwargs['maxResults'] = min([MAX_RESULTS_PER_QUERY - (max_results - items_count),
-                                           MAX_RESULTS_PER_QUERY],)
+                kwargs['maxResults'] = min([(max_results - items_count),
+                                            MAX_RESULTS_PER_QUERY])
                  
     def _get_video_comments(self, video_id):
         """ Returns the comments for a youtube ID"""
