@@ -145,8 +145,10 @@ class YouTube_v3(WebDataSource):
     YOUTUBE_API_SERVICE_NAME = 'youtube'
     YOUTUBE_API_VERSION = 'v3'
 
-    def __init__(self, api_key):
+    def __init__(self, api_key, max_comment_count=10, get_details=True):
         self.api_key = api_key
+        self.max_comment_count = max_comment_count
+        self.get_details = get_details
         self.client = build(self.YOUTUBE_API_SERVICE_NAME, 
                             self.YOUTUBE_API_VERSION,
                             developerKey=self.api_key)
@@ -223,12 +225,12 @@ class YouTube_v3(WebDataSource):
                 item['channel'] = YouTubeEntry(channel_info[0], YouTubeEntry.CHANNEL_MAPPING)
                 
         return YouTubeEntry(item)
-    
-    def search(self, 
-               search_terms, 
-               max_results=MAX_RESULTS_PER_QUERY, 
-               since_date=None, 
-               region_code=None, 
+
+    def search(self,
+               search_terms,
+               max_results=MAX_RESULTS_PER_QUERY,
+               since_date=None,
+               region_code=None,
                language=None):
         """ 
         Search the Youtube API for videos matching a set of search terms 
@@ -261,7 +263,7 @@ class YouTube_v3(WebDataSource):
         items_count = 0 
         
         while continue_search: 
-        
+
             response = self.client.search().list(**kwargs).execute()
             total_results = response['pageInfo']['totalResults']
             
@@ -270,22 +272,22 @@ class YouTube_v3(WebDataSource):
                     try:
                         items_count += 1
                         yield self._build_youtube_item(search_result,
-                                                       max_comment_count=10, 
-                                                       get_details=True)
+                                                       max_comment_count=self.max_comment_count,
+                                                       get_details=self.get_details)
                     except Exception,e:
-                        logger.error('Failed to convert Youtube item: %s' %e) 
-            
+                        logger.error('Failed to convert Youtube item: %s' %e)
+
             if items_count >= max_results:
                 continue_search = False
             
             if items_count >= total_results:
-                continue_search = False 
+                continue_search = False
                 
             if not 'nextPageToken' in response:
                 continue_search = False
             else:
                 kwargs['pageToken'] = response['nextPageToken']
-                kwargs['maxResults'] = min([max_results - MAX_RESULTS_PER_QUERY,
+                kwargs['maxResults'] = min([(max_results - items_count),
                                             MAX_RESULTS_PER_QUERY])
                  
     def _get_video_comments(self, video_id):
