@@ -55,3 +55,9 @@ dist
 
 # documentation
 doc/_build
+
+.coverage*
+htmlcov
+coverage.xml
+.cache/
+.conceptnet-query-cache/
