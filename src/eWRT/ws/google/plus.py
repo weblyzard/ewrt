@@ -7,8 +7,8 @@ Created on Dec 13, 2011
 '''
 import json
 import logging
-import urllib
 
+from urllib import urlencode
 from datetime import datetime
 
 from eWRT.ws.WebDataSource import WebDataSource
@@ -104,12 +104,7 @@ class GooglePlus(object):
         if 'maxResults' in params and params['maxResults'] > DEFAULT_MAX_RESULTS:
             params['maxResults'] = DEFAULT_MAX_RESULTS
         
-        #deal with funny encodings in params
-        str_params = {}
-        for k,v in params.iteritems():
-            str_params[k] = unicode(v).encode('utf-8')
-        params = urllib.urlencode(str_params)
-        return self.api_url.format(path=path, query=params)
+        return self.api_url.format(path=path, query=urlencode(params))
 
     @classmethod
     def convert_item(cls, item):
