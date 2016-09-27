@@ -40,7 +40,9 @@ class GoogleTranslator(AbstractWebSource):
             search_terms = [search_terms]
             
         for search_term in search_terms: 
-            self.logger.info('... will translate "%s"' % search_term)
+            self.logger.info('... will translate "%s" to %s',
+                             search_term,
+                             target_language)
             result = self.translate(text=search_term, 
                                     target_language=target_language,
                                     source_language=source_language)

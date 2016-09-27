@@ -14,6 +14,7 @@ from ssl import SSLError
 
 from eWRT.config import FACEBOOK_ACCESS_KEY
 from eWRT.ws.facebook import FacebookWS
+from eWRT.ws.exceptions import AuthenticationError
 
 MAX_BATCH_SIZE = 3
 TIMEOUT = 100 # timeout for the requests in seconds
@@ -59,8 +60,14 @@ class FbBatchRequest(object):
             if not row: 
                 logger.debug('row == %s ... continue' % row)
                 continue
-            
-            data = json.loads(row['body'])
+            try:
+                data = json.loads(row['body'])
+            except KeyError as e:
+                if 'error' in row and\
+                   'Error validating access token' in row['error'].get('message',''):
+                        raise AuthenticationError(str(row['error']))
+                else:
+                    raise e
             
             if 'data' in data:    
                 for post in json.loads(row['body'])['data']:
