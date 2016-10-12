@@ -2,9 +2,9 @@
 # Unittests
 # run nosetest from python-nose to execute these tests
 #
-from shutil import rmtree
 from multiprocessing import Pool
 import pytest
+from shutil import rmtree
 
 from eWRT.util.cache import *
 from eWRT.util.module_path import get_resource
@@ -188,3 +188,24 @@ def g(c):
     assert c.fetch( str, r ) == str(r)
     return 0
 
+# @RedisCached
+def dummy_function(dummy_input):
+    x = 0
+    for i in range(100000000):
+        x = i
+    print(x)
+    return(x)
+ 
+@RedisCached
+def dummy_return_dict(dummy_input):
+    return({'one': 1, 'two': 2})
+ 
+class TestRedisCache():
+ 
+    def test_int_type_preservation(self):
+        x = dummy_function(1)
+        assert(isinstance(x, int))
+     
+    def test_dict_type_preservation(self):
+        d = dummy_return_dict(2)
+        assert(isinstance(d, dict))

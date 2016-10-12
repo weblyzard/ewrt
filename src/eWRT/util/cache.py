@@ -3,6 +3,19 @@
 ''' @package eWRT.util.cache
     caches arbitrary objects
 '''
+from gzip import GzipFile
+from hashlib import sha1
+from operator import itemgetter
+from os import makedirs, remove, getpid, link
+from os.path import join, exists, dirname, basename, join
+import pickle
+from socket import gethostname
+from time import time
+
+from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
+
+import redis
+
 
 # (C)opyrights 2008-2015 by Albert Weichselbraun <albert@weichselbraun.net>
 #
@@ -18,18 +31,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 __author__ = "Albert Weichselbraun"
 __copyright__ = "GPL"
 
-from os import makedirs, remove, getpid, link
-from os.path import join, exists, dirname, basename, join
-from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
-from time import time
-from operator import itemgetter
-from hashlib import sha1
-from gzip import GzipFile
-from socket import gethostname
+
+
+
+
 try:
     from cPickle import dump, load
 except ImportError:
@@ -387,3 +395,59 @@ class IterableCache(DiskCache):
         except IOError:
             self._pickle_iterator.close()
             raise StopIteration
+        
+class RedisCache(MemoryCache):
+
+    def __init__(self, max_cache_size=0, fn=None, localhost='localhost', port=6379, db=0):
+        ''' initializes the Cache object '''
+        Cache.__init__(self, fn)
+        self._cacheData = redis.StrictRedis(host=localhost, port=port, db=db)
+        try:
+            self._cacheData.ping()
+            self._usage = {}
+            self.max_cache_size = max_cache_size
+        except:
+            print("RedisCache requires a running Redis server.")
+
+
+class RedisCached(RedisCache):
+    ''' Decorator based on MemoryCache for caching arbitrary function calls
+        usage:
+          @MemoryCached or @MemoryCached(max_cache_size)
+          def myfunction(*args):            ...
+    '''
+    def __init__(self, arg):
+        ''' initializes the RedisCache object
+            ::param arg: either the max_cache_size or the function to call
+        '''
+        if hasattr(arg, '__call__'):
+            RedisCache.__init__(self)
+            self._fn = arg
+        else:
+            RedisCache.__init__(self, max_cache_size=arg)
+            self._fn = None
+
+    def fetchObjectId(self, key, fetch_function, *args, **kargs):
+            # update the object's last usage time stamp
+            key = self.getObjectId(key)
+            self._usage[key] = time()
+            # pickling is necessary because Redis turns every input into
+            # a string
+            try:
+                return(pickle.loads(self._cacheData[key]))
+            except KeyError:
+                obj = fetch_function(*args, **kargs)
+                if obj != None:
+                    self.garbage_collect_cache()
+                    p_obj = pickle.dumps(obj)
+                    self._cacheData[key] = p_obj
+                return(obj)
+
+    def __call__(self, *args, **kargs):
+        if self._fn == None:
+            fn = args[0]
+            def wrapped_fn(*args, **kargs):
+                return self.fetch(fn, *args, **kargs)
+            return wrapped_fn
+        else:
+            return self.fetch(self._fn, *args, **kargs)
