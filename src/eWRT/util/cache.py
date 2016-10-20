@@ -402,9 +402,9 @@ class RedisCache(Cache):
         ''' initializes the Cache object '''
         Cache.__init__(self, fn)
         self._cacheData = redis.StrictRedis(host=host, port=port, db=db)
+        self._usage = redis.StrictRedis(host=host, port=port, db=1)
         try:
             self._cacheData.ping()
-            self._usage = {}
             self.max_cache_size = max_cache_size
         except:
             print("RedisCache requires a running Redis server.")
@@ -414,29 +414,30 @@ class RedisCache(Cache):
         return self.fetchObjectId(key, fetch_function, *args, **kargs)
 
     def fetchObjectId(self, key, fetch_function, *args, **kargs):
-            # update the object's last usage time stamp
-            key = self.getObjectId(key)
-            self._usage[key] = time()
-            # pickling is necessary because Redis turns every input into
-            # a string
-            try:
-                return(pickle.loads(self._cacheData[key]))
-            except KeyError:
-                obj = fetch_function(*args, **kargs)
-                if obj != None:
-                    self.garbage_collect_cache()
-                    p_obj = pickle.dumps(obj)
-                    self._cacheData[key] = p_obj
-                return(obj)
-    def garbage_collect_cache(self):
-            ''' removes the object which have not been in use for the
-                longest time '''
-            if self.max_cache_size == 0 or self._cacheData.dbsize() <= self.max_cache_size:
-                return
+        # update the object's last usage time stamp
+        key = self.getObjectId(key)
+        self._usage[key] = time()
+        # pickling is necessary because Redis turns every input into
+        # a string
+        try:
+            return(pickle.loads(self._cacheData[key]))
+        except KeyError:
+            obj = fetch_function(*args, **kargs)
+            if obj != None:
+                self.garbage_collect_cache()
+                p_obj = pickle.dumps(obj)
+                self._cacheData[key] = p_obj
+            return(obj)
 
-            (key, _) = sorted(self._usage.items(), key=itemgetter(1), reverse=True).pop()
-            del self._usage[key]
-            del self._cacheData[key]
+    def garbage_collect_cache(self):
+        ''' removes the object which have not been in use for the
+            longest time '''
+        if self.max_cache_size == 0 or self._cacheData.dbsize() < self.max_cache_size:
+            return
+        usage_dict = {k: self._usage[k] for k in self._usage.keys()}
+        (key, _) = sorted(usage_dict.items(), key=itemgetter(1), reverse=True).pop()
+        del self._usage[key]
+        del self._cacheData[key]
             
 
 class RedisCached(RedisCache):
