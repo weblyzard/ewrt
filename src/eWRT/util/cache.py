@@ -396,12 +396,12 @@ class IterableCache(DiskCache):
             self._pickle_iterator.close()
             raise StopIteration
         
-class RedisCache(MemoryCache):
+class RedisCache(Cache):
 
-    def __init__(self, max_cache_size=0, fn=None, localhost='localhost', port=6379, db=0):
+    def __init__(self, max_cache_size=0, fn=None, host='localhost', port=6379, db=0):
         ''' initializes the Cache object '''
         Cache.__init__(self, fn)
-        self._cacheData = redis.StrictRedis(host=localhost, port=port, db=db)
+        self._cacheData = redis.StrictRedis(host=host, port=port, db=db)
         try:
             self._cacheData.ping()
             self._usage = {}
@@ -409,23 +409,9 @@ class RedisCache(MemoryCache):
         except:
             print("RedisCache requires a running Redis server.")
 
-
-class RedisCached(RedisCache):
-    ''' Decorator based on MemoryCache for caching arbitrary function calls
-        usage:
-          @MemoryCached or @MemoryCached(max_cache_size)
-          def myfunction(*args):            ...
-    '''
-    def __init__(self, arg):
-        ''' initializes the RedisCache object
-            ::param arg: either the max_cache_size or the function to call
-        '''
-        if hasattr(arg, '__call__'):
-            RedisCache.__init__(self)
-            self._fn = arg
-        else:
-            RedisCache.__init__(self, max_cache_size=arg)
-            self._fn = None
+    def fetch(self, fetch_function, *args, **kargs):
+        key = self.getKey(*args, **kargs)
+        return self.fetchObjectId(key, fetch_function, *args, **kargs)
 
     def fetchObjectId(self, key, fetch_function, *args, **kargs):
             # update the object's last usage time stamp
@@ -442,6 +428,33 @@ class RedisCached(RedisCache):
                     p_obj = pickle.dumps(obj)
                     self._cacheData[key] = p_obj
                 return(obj)
+    def garbage_collect_cache(self):
+            ''' removes the object which have not been in use for the
+                longest time '''
+            if self.max_cache_size == 0 or self._cacheData.dbsize() <= self.max_cache_size:
+                return
+
+            (key, _) = sorted(self._usage.items(), key=itemgetter(1), reverse=True).pop()
+            del self._usage[key]
+            del self._cacheData[key]
+            
+
+class RedisCached(RedisCache):
+    ''' Decorator based on MemoryCache for caching arbitrary function calls
+        usage:
+          @MemoryCached or @MemoryCached(max_cache_size)
+          def myfunction(*args):            ...
+    '''
+    def __init__(self, arg):
+        ''' initializes the RedisCache object
+            ::param arg: either the max_cache_size or the function to call
+        '''
+        if hasattr(arg, '__call__'):
+            RedisCache.__init__(self)
+            self._fn = arg
+        else:
+            RedisCache.__init__(self, **arg)
+            self._fn = None
 
     def __call__(self, *args, **kargs):
         if self._fn == None:

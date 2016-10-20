@@ -188,7 +188,8 @@ def g(c):
     assert c.fetch( str, r ) == str(r)
     return 0
 
-# @RedisCached
+args = {'host':'localhost', 'port':6379, 'max_cache_size': 0, 'max_cache_size': 10}
+@RedisCached(args)
 def dummy_function(dummy_input):
     x = 0
     for i in range(100000000):
