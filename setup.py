@@ -17,6 +17,7 @@ setup(
       url='http://www.weblyzard.com/ewrt/',
       license="GPL3",
       package_dir={'': 'src'},
+      install_requires=['redis'],
 
       ###########################################
       ## Run unittests
