@@ -7,19 +7,20 @@ Created on 25.09.2012
 '''
 import unittest
 import logging
+import dateutil.parser as dateparser
+import urllib
+import json
+
 from operator import attrgetter
 from datetime import datetime, timedelta
 from cPickle import dump
-
+from time import sleep
 from gdata.youtube.service import YouTubeService, YouTubeVideoQuery
+from apiclient.discovery import build
+# from urllib import urlencode, quote_plus
 
 from eWRT.ws.WebDataSource import WebDataSource
-from time import sleep
-import dateutil.parser as dateparser
-from types import NoneType
 
-from apiclient.discovery import build
-import urllib, json
 
 def get_value(key, dictionary):
     if '.' in key and not key.isdigit():
@@ -246,14 +247,14 @@ class YouTube_v3(WebDataSource):
             since_date = since_date.isoformat("T") + "Z"
             
         items_per_page = min([max_results, MAX_RESULTS_PER_QUERY])
-            
+#         search_terms = search_terms.encode('utf8')
+#         search_terms = quote_plus(search_terms)
         kwargs = {'q':search_terms,
                   'part':'id,snippet',
                   'type':'video',
                   'publishedAfter':since_date,
                   'maxResults':items_per_page,
                   'order':'date'}
-        
         if region_code:
             kwargs['regionCode'] = region_code
         if language:
@@ -281,6 +282,9 @@ class YouTube_v3(WebDataSource):
                 continue_search = False
             
             if items_count >= total_results:
+                continue_search = False
+                
+            if items_count==0:
                 continue_search = False
                 
             if not 'nextPageToken' in response:
