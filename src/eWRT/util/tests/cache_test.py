@@ -188,7 +188,7 @@ def g(c):
     assert c.fetch( str, r ) == str(r)
     return 0
 
-args = {'host':'localhost', 'port':6379, 'max_cache_size': 0, 'max_cache_size': 10}
+args = {'host':'localhost', 'port':6379, 'max_cache_size': 10}
 @RedisCached(args)
 def dummy_function(dummy_input):
     x = 0
@@ -197,7 +197,7 @@ def dummy_function(dummy_input):
     print(x)
     return(x)
    
-@RedisCached
+@RedisCached(args)
 def dummy_return_dict(dummy_input):
     return({'one': 1, 'two': 2})
 
@@ -214,10 +214,3 @@ class TestRedisCache():
     def test_dict_type_preservation(self):
         d = dummy_return_dict(2)
         assert(isinstance(d, dict))
-        
-    def test_garbage_collection(self):
-        r = redis.StrictRedis(host='localhost', port=6379)
-        for i in range(20):
-            num_to_string(i)
-            print(r.dbsize())
-        assert(r.dbsize() == 10)
