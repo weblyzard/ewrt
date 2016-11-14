@@ -3,18 +3,19 @@
 ''' @package eWRT.util.cache
     caches arbitrary objects
 '''
+import redis
+import pickle
+
 from gzip import GzipFile
 from hashlib import sha1
 from operator import itemgetter
 from os import makedirs, remove, getpid, link
 from os.path import join, exists, dirname, basename, join
-import pickle
 from socket import gethostname
 from time import time
 
 from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
 
-import redis
 
 
 # (C)opyrights 2008-2015 by Albert Weichselbraun <albert@weichselbraun.net>
