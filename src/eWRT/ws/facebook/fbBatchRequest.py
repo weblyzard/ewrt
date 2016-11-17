@@ -51,6 +51,7 @@ class FbBatchRequest(object):
         :returns: result
         :rtype: list
         ''' 
+
         assert len(fbWSList), 'list of facebook services empty'
 
         result = []
@@ -59,6 +60,9 @@ class FbBatchRequest(object):
         for row in search_result: 
             if not row: 
                 logger.debug('row == %s ... continue' % row)
+                continue
+            elif row.get('body', None) is None:
+                logger.debug("the row's body is non-existent or None")
                 continue
             try:
                 data = json.loads(row['body'])
