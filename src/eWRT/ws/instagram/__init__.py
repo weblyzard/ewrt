@@ -68,6 +68,10 @@ class InstagramClient(object):
         if not 'count' in params: 
             params['count'] = DEFAULT_MAX_RESULTS \
             if max_docs >= DEFAULT_MAX_RESULTS else max_docs
+        if 'min_timestamp' in params:
+            age_threshold = params['min_timestamp']
+        else:
+            age_threshold = None
         
         while not done: 
             try: 
@@ -81,12 +85,18 @@ class InstagramClient(object):
      
             if data and 'data' in data: 
                 for entry in data['data']:
-                    add_entry = self.check_entry(entry)
-                    
-                    if add_entry:
-                        total_docs += 1
-                        response_docs += 1
-                        yield entry
+                    if 'created_time' in entry and \
+                       age_threshold and \
+                       float(entry['created_time']) < age_threshold:
+                        reached_limit = True
+                        break
+                    else:
+                        add_entry = self.check_entry(entry)
+                        
+                        if add_entry:
+                            total_docs += 1
+                            response_docs += 1
+                            yield entry
                          
                 found_pagination = 'pagination' in data
                 result_empty = response_docs == 0
