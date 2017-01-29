@@ -10,14 +10,17 @@ setup(
       ###########################################
       ## Metadata
       name="eWRT",
-      version="0.9.2.18-dev",
+      version="0.9.2.19-dev",
       description='eWRT',
       author='Albert Weichselbraun, Heinz Lang, Gerhard Wohlgenannt, Johannes Duong, Norman Süsstrunk, Daniel Streiff',
       author_email='albert@weblyzard.com, lang@weblyzard.com, wohlg@ai.wu.ac.at, johannes.duong@wu.ac.at, norman.suestrunk@htwchur.ch, daniel.streiff@htwchur.ch',
       url='http://www.weblyzard.com/ewrt/',
       license="GPL3",
       package_dir={'': 'src'},
-      install_requires=['redis'],
+      install_requires=['redis',
+                        'oauth2client==2.2.0', #YT
+                        'google-api-python-client==1.4.0' #YT
+                        ],
 
       ###########################################
       ## Run unittests
