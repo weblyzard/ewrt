@@ -190,7 +190,11 @@ class YouTube_v3(WebDataSource):
     def _get_video_rating(self, video_id):
         """ Returns the rating for a video ID """
         return self.client.videos().getRating(id=video_id).execute()
-        
+    
+    def _get_video_status(self, video_id):
+        return self.client.videos().list(id=video_id, 
+                                         part='id').execute()
+
     def _get_video_details(self, video_id):
         return self.client.videos().list(id=video_id, 
                                          part='contentDetails,statistics,topicDetails').execute()
