@@ -2,8 +2,8 @@
 # Unittests
 # run nosetest from python-nose to execute these tests
 #
-from multiprocessing import Pool
 import pytest
+from multiprocessing import Pool
 from shutil import rmtree
 
 from eWRT.util.cache import *
@@ -72,12 +72,10 @@ class SkipTestDiskCached(TestCached):
         return a-b 
     
     def __init__(self):
-       self.diskCache = DiskCache(get_cache_dir(4))
+        self.diskCache = DiskCache(get_cache_dir(4))
 
     def teardown(self):
         ''' remove the cache directories '''
-        from shutil import rmtree
-
         for cacheDirNo in range(10):
             if exists(get_cache_dir(cacheDirNo)):
                 rmtree(get_cache_dir(cacheDirNo))
@@ -204,7 +202,8 @@ def dummy_return_dict(dummy_input):
 @RedisCached(args)
 def num_to_string(n):
     return(str(n))
- 
+
+@pytest.mark.skip("requires local redis instance running")
 class TestRedisCache():
  
     def test_int_type_preservation(self):
