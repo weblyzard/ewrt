@@ -14,6 +14,8 @@ from eWRT.lib.ResultSet import ResultSet
 from eWRT.access.http import Retrieve
 from eWRT.config import FACEBOOK_ACCESS_KEY
 
+logging.getLogger(__name__)
+
 class FacebookWS(object):
     """ 
     @class FacebookWS
@@ -23,8 +25,8 @@ class FacebookWS(object):
     """
     FB_OBJECT_TYPES = ['post', 'user', 'page', 'event', 'group', 'path']
     
-    #expires 27 March 2017, c.f. https://developers.facebook.com/tools/api_versioning/130810080636
-    GRAPH_API_VERSION = 'v2.2' 
+    # Expires July 8, 2017 9https://developers.facebook.com/docs/apps/changelog)
+    GRAPH_API_VERSION = 'v2.3' 
     
     retrieve = Retrieve('facebookWS')
     # added: class properties for storing searchTerm and searchType

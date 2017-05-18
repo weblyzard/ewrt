@@ -20,6 +20,7 @@ from apiclient.discovery import build
 # from urllib import urlencode, quote_plus
 
 from eWRT.ws.WebDataSource import WebDataSource
+import os
 
 
 def get_value(key, dictionary):
@@ -578,15 +579,14 @@ class YouTube(WebDataSource):
 class YouTubeTest(unittest.TestCase):
         
     def setUp(self):
+        api_key = os.getenv('YOUTUBE_API_KEY')
         self.search_terms = ["Linus Torvalds","Ubuntu"]
-        self.youtube = YouTube_v3(api_key='AIzaSyAfFOJnJMd3QfP0cV9HDymin19gkYDDR5c')
+        self.youtube = YouTube_v3(api_key=api_key)
         logger.addHandler(logging.StreamHandler())
     
     
     def test_search_v3(self):
         search_terms = 'FIFA'
-        api_key = 'XXX'
-        client = YouTube_v3(api_key=api_key)
         since_date = None
         max_results = 10
          
@@ -597,10 +597,10 @@ class YouTubeTest(unittest.TestCase):
              
         items_per_page = min([max_results, MAX_RESULTS_PER_QUERY])
              
-        for r in client.search(search_terms=search_terms, 
+        for r in self.youtube.search(search_terms=search_terms, 
 #                                     location=location,
-                               max_results=max_results,
-                               since_date=since_date):
+                                     max_results=max_results,
+                                     since_date=since_date):
             print '================================================='
             print r
             
@@ -616,7 +616,7 @@ class YouTubeTest(unittest.TestCase):
 #         if language:
 #             kwargs['relevanceLanguage'] = language
              
-        response = client.search().list(**kwargs).execute()
+        response = self.youtube.search().list(**kwargs).execute()
         total_results = response['pageInfo']['totalResults']
              
         result = []
