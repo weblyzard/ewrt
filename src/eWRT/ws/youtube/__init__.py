@@ -296,8 +296,6 @@ class YouTube_v3(WebDataSource):
                 continue_search = False
             else:
                 kwargs['pageToken'] = response['nextPageToken']
-                kwargs['maxResults'] = min([(max_results - items_count),
-                                            MAX_RESULTS_PER_QUERY])
                  
     def _get_video_comments(self, video_id):
         """ Returns the comments for a youtube ID"""
