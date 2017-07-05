@@ -10,6 +10,7 @@ import logging
 import dateutil.parser as dateparser
 import urllib
 import json
+import pytz
 
 from operator import attrgetter
 from datetime import datetime, timedelta
@@ -247,9 +248,13 @@ class YouTube_v3(WebDataSource):
         @param language, ISO 639-1 two-letter language code, e.g. de, cs, en
         """
         if not since_date:
-            since_date = datetime.now() - timedelta(days=1)
+            since_date = datetime.utcnow() - timedelta(days=1)
+            since_date = since_date.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
         if isinstance(since_date, datetime):
-            since_date = since_date.isoformat("T") + "Z"
+            local = pytz.timezone ("Europe/Vienna")
+            local_dt = local.localize(since_date, is_dst=None)
+            utc_dt = local_dt.astimezone (pytz.utc)
+            since_date = utc_dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
             
         items_per_page = min([max_results, MAX_RESULTS_PER_QUERY])
 #         search_terms = search_terms.encode('utf8')
@@ -280,8 +285,8 @@ class YouTube_v3(WebDataSource):
                         yield self._build_youtube_item(search_result,
                                                        max_comment_count=self.max_comment_count,
                                                        get_details=self.get_details)
-                    except Exception,e:
-                        logger.error('Failed to convert Youtube item: %s' %e)
+                    except Exception as e:
+                        logger.error('Failed to convert Youtube item: {}'.format(e))
 
             if items_count >= max_results:
                 continue_search = False
