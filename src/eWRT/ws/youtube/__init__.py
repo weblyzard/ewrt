@@ -286,7 +286,7 @@ class YouTube_v3(WebDataSource):
                                                        max_comment_count=self.max_comment_count,
                                                        get_details=self.get_details)
                     except Exception as e:
-                        logger.error('Failed to convert Youtube item: {}'.format(e))
+                        logger.error('Failed to convert Youtube item: %s' % e)
 
             if items_count >= max_results:
                 continue_search = False
