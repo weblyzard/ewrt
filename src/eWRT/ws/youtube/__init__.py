@@ -63,6 +63,7 @@ class YouTubeEntry(dict):
         'snippet.publishedAt':'published',
         'snippet.description': 'content',
         'snippet.channelId': 'channel_id',
+        'snippet.thumbnails.default.url':'thumbnail',
         'contentDetails.duration':'duration',
         'contentDetails.caption':'caption',
         'contentDetails.licensedContent':'licensed',
@@ -72,7 +73,7 @@ class YouTubeEntry(dict):
         'statistics.dislikeCount':'statistics_dislikecount',
         'statistics.commentCount':'statistics_commentcount',
         'topicDetails.relevantTopicIds':'freebase_topics_relevant',
-        'topicDetails.topicIds':'freebase_topics'     
+        'topicDetails.topicIds':'freebase_topics',
     }
     
     COMMENT_MAPPING = {
