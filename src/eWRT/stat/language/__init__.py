@@ -26,17 +26,27 @@ LANG_DATA_DIR = get_resource(__file__, 'data')
 ##
 # \var STOPWORD_DICT: a dictionary of the 100 most common words in the given language
 STOPWORD_DICT = {get_lang_name(fname): read_wordlist(fname) for fname in glob(LANG_DATA_DIR+"/*.csv")}
-DELETE_CHARS = {ch: None for ch in ",.!?\"'"}
+DELETE_CHARS = ",.!?\"'"
+DELETE_TABLE = {ch: None for ch in DELETE_CHARS}
 
+
+import string
+table = string.maketrans('ac', 'cx')
 
 def detect_language(text):
-    ''' detects the most probable language for the given text '''
+    ''' detects the most probable language for a given text '''
     if not text.strip():
         return None
 
     text = text.lower()
     text = re.sub(r'[^\w]', ' ', text)
-    words = [word.strip() for word in text.translate(DELETE_CHARS).split(" ")]
+    
+    cleaned_text = ''
+    try:
+        cleaned_text = text.translate(DELETE_TABLE) #python3
+    except Exception as e:
+        cleaned_text = text.translate(None, DELETE_CHARS) #python2.6
+    words = [word.strip() for word in cleaned_text.split(" ")]
     current_lang = None
     current_wordcount = 0
     for lang, reference_wordlist in STOPWORD_DICT.items():
@@ -46,8 +56,6 @@ def detect_language(text):
             current_lang = lang
 
     return current_lang
-
-
 
 
 class DetectLanguageTest(unittest.TestCase):
