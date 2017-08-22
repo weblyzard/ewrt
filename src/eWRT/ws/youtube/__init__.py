@@ -63,6 +63,7 @@ class YouTubeEntry(dict):
         'snippet.publishedAt':'published',
         'snippet.description': 'content',
         'snippet.channelId': 'channel_id',
+        'snippet.thumbnails.default.url':'thumbnail',
         'contentDetails.duration':'duration',
         'contentDetails.caption':'caption',
         'contentDetails.licensedContent':'licensed',
@@ -72,7 +73,7 @@ class YouTubeEntry(dict):
         'statistics.dislikeCount':'statistics_dislikecount',
         'statistics.commentCount':'statistics_commentcount',
         'topicDetails.relevantTopicIds':'freebase_topics_relevant',
-        'topicDetails.topicIds':'freebase_topics'     
+        'topicDetails.topicIds':'freebase_topics',
     }
     
     COMMENT_MAPPING = {
@@ -286,7 +287,7 @@ class YouTube_v3(WebDataSource):
                                                        max_comment_count=self.max_comment_count,
                                                        get_details=self.get_details)
                     except Exception as e:
-                        logger.error('Failed to convert Youtube item: {}'.format(e))
+                        logger.error('Failed to convert Youtube item: %s' % e)
 
             if items_count >= max_results:
                 continue_search = False
