@@ -166,7 +166,7 @@ class MultiRESTClient(object):
 
     def is_online(self):
         try:
-            self.request('meminfo')
+            self.request('status')
             return True
         except:
             return False
