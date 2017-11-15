@@ -43,6 +43,8 @@ dist
 *.pyc
 *.pyo
 *.tmp*
+*.bak
+*.swp
 
 # eclipse
 .project
