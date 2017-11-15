@@ -47,7 +47,7 @@ PARAMS_XML = """
 </c:params>
 """
 
-class Calais:
+class Calais(object):
     submitter = USER_AGENT % "Calais"
     allow_distro = "false"
     allow_search = "false" 

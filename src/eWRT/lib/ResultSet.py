@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+from __future__ import absolute_import
+
 ## create a iterable ResultSet for storing values of the Webservices 
-class ResultSet:
+class ResultSet(object):
 
     ## Constructor
     # @parameter id (optional) integer
@@ -60,19 +63,19 @@ class ResultSet:
     ## prints the items stored in the ResultSet
     @staticmethod
     def printRS(resultSet, filler = 0):
-        print resultSet.getName(),':'
+        print(resultSet.getName(),':')
 
         for result in resultSet:
             if cmp(result.__class__.__name__, 'ResultSet') == 0:
                 # filler = filler + 1
                 ResultSet.printRS(result, filler)
             else:
-                print result.getId(), result.getName()
+                print(result.getId(), result.getName())
 
 
 if __name__ == "__main__":
     
-    from Result import Result
+    from .Result import Result
 
     a = Result(1, 'foobar1')
     b = Result(2, 'foobar2')

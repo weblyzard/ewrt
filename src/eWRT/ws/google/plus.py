@@ -55,7 +55,7 @@ class GooglePlus(object):
             for item in fetched['items']:
                 try: 
                     yield self.convert_item(item)
-                except Exception, e: 
+                except Exception as e: 
                     logger.info('Error %s occured' % e)
                     continue
         

@@ -165,7 +165,7 @@ def soundex(name, length=4):
     return (sndx + (length * '0'))[:length]
 
 
-class VectorSpaceModel:
+class VectorSpaceModel(object):
     ''' a class used for vector space representations '''
 
     def __init__(self, tokens, binary=False):

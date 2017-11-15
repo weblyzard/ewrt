@@ -204,7 +204,7 @@ def num_to_string(n):
     return(str(n))
 
 @pytest.mark.skip("requires local redis instance running")
-class TestRedisCache():
+class TestRedisCache(object):
  
     def test_int_type_preservation(self):
         x = dummy_function(1)

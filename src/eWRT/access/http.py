@@ -2,6 +2,7 @@
 
 ''' @package eWRT.access.http
     provides access to resources using http '''
+from __future__ import print_function
 
 
 # (C)opyrights 2008-2015 by Albert Weichselbraun <albert@weblyzard.com>

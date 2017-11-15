@@ -3,6 +3,8 @@
 ''' @package eWRT.util.cache
     caches arbitrary objects
 '''
+from __future__ import print_function
+
 import redis
 import pickle
 
@@ -380,7 +382,7 @@ class IterableCache(DiskCache):
         '''
         self._cache_miss += 1
         try:
-            obj = self._fetch_function_iterator.next()
+            obj = next(self._fetch_function_iterator)
             self._pickle_iterator.dump(obj)
             return obj
         except StopIteration:
@@ -392,7 +394,7 @@ class IterableCache(DiskCache):
         ''' returns the next element from the cache '''
         self._cache_hit += 1
         try:
-            return self._pickle_iterator.next()
+            return next(self._pickle_iterator)
         except IOError:
             self._pickle_iterator.close()
             raise StopIteration

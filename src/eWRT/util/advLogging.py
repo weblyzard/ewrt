@@ -16,6 +16,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+from __future__ import print_function
+
 __version__ = "$Header$"
 
 import logging, unittest
@@ -30,7 +32,7 @@ def sendSNMPTrap(message, module, level):
     try:
         raise SNMPException(module, message, level=level)
     except SNMPException:
-        print 'Sent a SNMP "%s": "%s"' % (level, message)
+        print('Sent a SNMP "%s": "%s"' % (level, message))
 
 
 class SNMPHandler(logging.Handler):

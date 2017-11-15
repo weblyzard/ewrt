@@ -46,7 +46,7 @@ BROWSE_NODE_ID = { 'book' : '283155',
                    'music': '5174'
                  }
 
-class ResultList:
+class ResultList(object):
     """ converts xml results into a list of dictionaries """
 
     def __init__(self, targetPath, hunt=()):
@@ -107,7 +107,7 @@ class ResultList:
 
 
 
-class AmazonWS:
+class AmazonWS(object):
     """ This class provides low level amazon web service access """
     
     def __init__(self, location='us', key=None):
@@ -203,7 +203,7 @@ class AmazonWS:
 
 AWS_ACCESS_KEY_ID = {'AWSAccessKeyId': AMAZON_ACCESS_KEY}
 
-class AmazonUrl:
+class AmazonUrl(object):
 
     def timestamp(self):
         """ determine the current timestamp """

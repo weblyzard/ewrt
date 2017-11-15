@@ -76,7 +76,7 @@ class InstagramClient(object):
         while not done: 
             try: 
                 data = self._get_data(url, params)
-            except Exception, e: 
+            except Exception as e: 
                 self.logger.exception('Will stop: %s' % e)
                 done = True
                 continue

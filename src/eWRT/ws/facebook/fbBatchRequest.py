@@ -145,7 +145,7 @@ class TestFacebookWS(unittest.TestCase):
         
         try: 
             fbBatchRequest.run_search('Linus Torvalds')
-        except Exception, e: 
+        except Exception as e: 
             print 'thats ok: %s' % e
             assert True
     

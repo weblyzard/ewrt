@@ -39,8 +39,10 @@ easier
 ** enter the above password and encryption method
 
 '''
+from __future__ import print_function
 
 import os, subprocess, commands, socket, logging
+
 from string import Template
 
 SEND_NSCA_PATH = os.path.join(os.sep, 'usr', 'sbin', 'send_nsca')
@@ -75,13 +77,13 @@ class NSCA(object):
             message = '%s | %s ' % (message, ' '.join([p.message for p in performance]))
 
         cmd = [SEND_NSCA_PATH, '-H', monitoringServer, '-d', '\';\'', '-c', SEND_NSCA_CONFIG]
-        print "echo '%s' | %s " % (message, ' '.join(cmd))
+        print("echo '%s' | %s " % (message, ' '.join(cmd)))
         out = commands.getstatusoutput("echo '%s' | %s " % (message, ' '.join(cmd)))
 
         if not out[1] == '1 data packet(s) sent to host successfully.':
-            print 'Could not send the data packet:', out[1]
+            print('Could not send the data packet:', out[1])
         else:
-            print out[1]
+            print(out[1])
 
 
 ## Performance allows to add performance information to a NSCA message 
@@ -107,7 +109,7 @@ class Performance(object):
         assert unit in ('', 's', '%', 'B', 'KB', 'MB', 'TB', 'c')
 
         self.message = '%s=%s%s;%s;%s;%s;%s' % (label, value, unit, warn, critical, min, max)
-        print self.message
+        print(self.message)
 
 if  __name__ == '__main__':
 

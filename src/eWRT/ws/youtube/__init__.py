@@ -172,7 +172,7 @@ class YouTube_v3(WebDataSource):
                 if key in ('published', 'last_modified'):
                     yt_dict[key] = convert_date(yt_dict[key])
                 
-            except AttributeError, e:
+            except AttributeError as e:
                 logger.warn('AttributeError: %s' % e)
                 yt_dict[key] = None        
         
@@ -187,7 +187,7 @@ class YouTube_v3(WebDataSource):
                 try:
                     yield self._convert_item_to_video(search_result, 
                                                       max_comment_count)
-                except Exception, e:
+                except Exception as e:
                     logger.error('Failed to convert Youtube search result: %s' % e)
                 
     def _get_video_rating(self, video_id):
@@ -443,7 +443,7 @@ class YouTube(WebDataSource):
                 try: 
                     yt_dict = self.convert_feed_entry(entry, max_comment_count)
                     result.append(yt_dict)
-                except Exception, e: 
+                except Exception as e: 
                     logger.exception('Exception converting entry: %s' % e)
                     
                 if len(result) == max_results:
@@ -605,8 +605,8 @@ class YouTubeTest(unittest.TestCase):
 #                                     location=location,
                                      max_results=max_results,
                                      since_date=since_date):
-            print '================================================='
-            print r
+            print('=================================================')
+            print(r)
             
         kwargs = {'q':search_terms,
                   'part':'id,snippet',
@@ -632,8 +632,8 @@ class YouTubeTest(unittest.TestCase):
                     result.append( self._build_youtube_item(search_result,
                                                    max_comment_count=10, 
                                                    get_details=True))
-                except Exception, e:
-                    print e
+                except Exception as e:
+                    print(e)
                                    
         assert len(result)
         
@@ -666,8 +666,8 @@ class YouTubeTest(unittest.TestCase):
             assert isinstance(r['last_modified'], datetime)
             for rk in required_keys: 
                 if not rk in r.keys():
-                    print 'k ', sorted(r.keys())
-                    print 'rk', sorted(required_keys)
+                    print('k ', sorted(r.keys()))
+                    print('rk', sorted(required_keys))
                     assert False, 'key %s missing' % rk
      
     def test_convert_date(self):
@@ -679,15 +679,15 @@ class YouTubeTest(unittest.TestCase):
                         (('Microsoft',), 2))
          
         for search_term, max_results in search_terms:
-            print 'querying youtube for %s' % search_term
+            print('querying youtube for %s' % search_term)
             result = [item for item in self.youtube.search(search_term, max_results)]
-            print '\t got %s documents, max_results was %s' % (len(result),
-                                                               max_results) 
+            print('\t got %s documents, max_results was %s' % (len(result),
+                                                               max_results)) 
             self.assertEqual( len(result), max_results)
              
             num_comments = max([ len(r['comments']) for r in result ])
-            print "Maximum number of comments for search term '%s': %d" % (search_term[0], num_comments)
-            print '-------------------------'
+            print("Maximum number of comments for search term '%s': %d" % (search_term[0], num_comments))
+            print('-------------------------')
  
     def test_comments(self):
         comments = self.youtube._get_video_comments(video_id="yI4g8Ti6eTM")

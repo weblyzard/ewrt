@@ -7,6 +7,7 @@
     this library is still a draft and might change considerable
 
 '''
+from __future__ import print_function
 
 
 # (C)opyrights 2008-2010 by Albert Weichselbraun <albert@weichselbraun.net>
@@ -27,15 +28,15 @@
 __author__    = "Albert Weichselbraun"
 __copyright__ = "GPL"
 
-from eWRT.util.cache import DiskCache
+import time
+import os
+import gzip
+
 from shutil import rmtree
 from os.path import join, exists
 from cPickle import load, UnpicklingError
-import time
 from subprocess import Popen
 from glob import glob
-import os
-import gzip
 
 try:
     import hashlib
@@ -44,6 +45,7 @@ except ImportError:
     import sha
     HASH = sha.sha
 
+from eWRT.util.cache import DiskCache
 
 class Async(DiskCache):
     ''' Asynchronous Call Handling '''
@@ -132,7 +134,7 @@ class Async(DiskCache):
                 try:
                     return load( gzip.open(cache_file))
                 except (EOFError, UnpicklingError) as e:
-                    print "Error opening %s" % cache_file, e
+                    print("Error opening %s" % cache_file, e)
                     pass
 
             time.sleep(10)
@@ -164,7 +166,7 @@ class TestAsync(object):
 
         time.sleep(2)
         flag = async.has_processes_limit_reached()
-        print flag, [ p.pid for p in async.cur_processes ]
+        print(flag, [ p.pid for p in async.cur_processes ])
         assert flag  == False
 
     def testDebugMode(self):
@@ -173,7 +175,7 @@ class TestAsync(object):
         for x in xrange(2):
             async.post( ["/bin/echo", "hallo"] )
 
-        print glob( join(self.TEST_CACHE_DIR, "debug*") )
+        print(glob( join(self.TEST_CACHE_DIR, "debug*") ))
         assert len( glob( join(self.TEST_CACHE_DIR, "debug*.out") )  ) == 2
         assert len( glob( join(self.TEST_CACHE_DIR, "debug*.err") )  ) == 2
 
