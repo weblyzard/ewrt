@@ -24,6 +24,9 @@ from eWRT.ws.WebDataSource import WebDataSource
 import os
 
 
+from __future__ import print_function
+
+
 def get_value(key, dictionary):
     if '.' in key and not key.isdigit():
         old_key, new_key = key.split('.', 1)
