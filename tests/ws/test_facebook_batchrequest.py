@@ -4,13 +4,17 @@ import unittest
 
 from eWRT.ws.facebook.fbBatchRequest import FbBatchRequest
 from eWRT.ws.facebook import FacebookWS
+from eWRT.config import FACEBOOK_ACCESS_KEY
 
 
 class TestFacebookBatchRequest(unittest.TestCase):
     
     def test_bad_request(self):
-        access_token = "AAAElj9ZBZCquoBAGkKlcPvJsUCpyAZBxz6nsOYr8LAmpIj9Q9EZCKl9xVAYmlXGh2UQvhVellSWsZALPn6V73ZAZBiaxlwqkWlUjGVLzAHd7gZDZD"
-        fbBatchRequest = FbBatchRequest(access_token)
+        ''' '''
+        if len(FACEBOOK_ACCESS_KEY)==0:
+            print('skipped TestFacebookBatchRequest::test_bad_request due to missing facebook credentials')
+            return
+        fbBatchRequest = FbBatchRequest(access_token=FACEBOOK_ACCESS_KEY)
         
         try: 
             fbBatchRequest.run_search('Linus Torvalds')
@@ -19,12 +23,20 @@ class TestFacebookBatchRequest(unittest.TestCase):
             assert True
     
     def test_batch_search2(self):
-        fbBatchRequest = FbBatchRequest()
+        ''' '''
+        if len(FACEBOOK_ACCESS_KEY)==0:
+            print('skipped TestFacebookBatchRequest::test_batch_search2 due to missing facebook credentials')
+            return
+        fbBatchRequest = FbBatchRequest(access_token=FACEBOOK_ACCESS_KEY)
         result = fbBatchRequest.run_search(['Wien'], 'post', 100)
         assert len(result) > 0
     
     def test_feed_mirroring(self):
-        fbBatchRequest = FbBatchRequest()
+        ''' '''
+        if len(FACEBOOK_ACCESS_KEY)==0:
+            print('skipped TestFacebookBatchRequest::test_feed_mirroring due to missing facebook credentials')
+            return
+        fbBatchRequest = FbBatchRequest(access_token=FACEBOOK_ACCESS_KEY)
         result = fbBatchRequest.run_search('107961012601035/feed', 
                                            objectType='path',
                                            limit=10)
@@ -41,13 +53,17 @@ class TestFacebookBatchRequest(unittest.TestCase):
         
         fbWSList = []
         
+        if len(FACEBOOK_ACCESS_KEY)==0:
+            print('skipped TestFacebookBatchRequest::test_search due to missing facebook credentials')
+            return
+        
         for term in terms: 
             fbWSList.append(FacebookWS(term, 'post', 1353954200, 100))
         
-        result = FbBatchRequest._send_post(fbWSList)
+        result = FbBatchRequest._send_post(access_token=FACEBOOK_ACCESS_KEY,
+                                           fbWSList=fbWSList)
         print result
         print len(result)
         
 if __name__ == "__main__":
-
     unittest.main()

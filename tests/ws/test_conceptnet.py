@@ -1,17 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-'''
-Created on Nov 29, 2017
-
-.. codeauthor: max goebel <mcgoebel@gmail.com>
-'''
 import unittest
 import json
 
 from eWRT.util.loggerProfile import get_file_logger
 from eWRT.ws.conceptnet.lookup_result import LookupResult
 from eWRT.ws.conceptnet.util import ground_term
-from eWRT.lib.Result import Result
+from eWRT.ws.conceptnet import Result
+
 
 
 LOGGER = get_file_logger(name='eWRT.ws.conceptnet.unittest', 

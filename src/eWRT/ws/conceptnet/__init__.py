@@ -21,7 +21,7 @@ from eWRT.util.cache import DiskCached
 from eWRT.ws.conceptnet.node import Node
 from eWRT.ws.conceptnet.edge import Edge
 
-CONCEPTNET_BASE_URL = 'http://conceptnet5.media.mit.edu/data/5.4'
+CONCEPTNET_BASE_URL = 'http://api.conceptnet.io'
 CLEANUP_TRANSLATION_MAP = {'!': None, '.': None, '?': None,
                            '"': None, "'": None}
 

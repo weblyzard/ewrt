@@ -3,6 +3,7 @@
 import unittest
 
 from eWRT.ws.opencalais import Calais
+from eWRT.config import OPEN_CALAIS_KEY
 
 
 class TestCalais( unittest.TestCase ):
@@ -49,11 +50,16 @@ class TestCalais( unittest.TestCase ):
  ''' 
     
     def setUp(self):
-        self.c = Calais('heinz')
-        
+        if not len(OPEN_CALAIS_KEY):
+            print("Skipping TestCalais: no api key provided")
+            return
+        self.calais = Calais(submitter='test', api_key=OPEN_CALAIS_KEY)
 
     def testAnalyze(self):
-        things = self.c.analyze(self.test_html, 'text/html')
+        if not len(OPEN_CALAIS_KEY):
+            print("Skipping TestCalais: no api key provided")
+            return
+        things = self.calais.analyze(self.test_html, 'text/html')
         print things
         assert len(things) == 6
 

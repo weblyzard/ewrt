@@ -113,18 +113,26 @@ BBC_CORPUS_COMPRESSED = "data/news.bbc.co.uk.tar.gz"
 BING_USERNAME = ""
 BING_API_KEY = ""
 
+# facebook
+FACEBOOK_API_KEY = ""
+FACEBOOK_SECRET_KEY = ""
+FACEBOOK_SESSION_KEY = ""
+FACEBOOK_ACCESS_KEY = ""
+FACEBOOK_APPLICATION_ID = "application-id"
+
 # geonames
 GEO_ENTITY_SEPARATOR = ">"
 
 GOOGLE_USER = ""
 GOOGLE_PASS = ""
 
-# facebook
-FACEBOOK_API_KEY = "api-key"
-FACEBOOK_SECRET_KEY = "secret-key"
-FACEBOOK_SESSION_KEY = "session-key"
-FACEBOOK_ACCESS_KEY = "access-key"
-FACEBOOK_APPLICATION_ID = "application-id"
+# provide your google api key for browser applications (from Developers
+# Console)
+GOOGLE_CUSTOM_SEARCH_API_KEY = ""
+# provide your Custom search engine ID
+GOOGLE_CUSTOM_SEARCH_ENGINE_ID = ""
+
+OPEN_CALAIS_KEY = ""
 
 REUTERS_DATA_DIR = ""
 

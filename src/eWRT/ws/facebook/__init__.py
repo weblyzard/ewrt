@@ -31,7 +31,7 @@ class FacebookWS(object):
     retrieve = Retrieve('facebookWS')
     # added: class properties for storing searchTerm and searchType
 
-    def __init__(self, term, objectType='all', since=None, limit=None):
+    def __init__(self, term=None, objectType='all', since=None, limit=None):
         """ init """
         self.term = term
         

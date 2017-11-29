@@ -24,10 +24,12 @@ from nose.plugins.attrib import attr
 from eWRT.ws.delicious import Delicious
 
 
-DELICIOUS_TEST_URLS = ( 'http://www.iaeste.at', 'http://www.wu-wien.ac.at', 'http://www.heise.de', 
-                        'http://www.kurier.at', 'http://news.bbc.co.uk', )
+DELICIOUS_TEST_URLS = ( 'http://www.iaeste.at', 'http://www.wu-wien.ac.at', 
+                        'http://www.heise.de', 'http://www.kurier.at', 
+                        'http://news.bbc.co.uk', )
 
-DELICIOUS_TEST_TAGS = [("linux",), ("information",), ("information", "retrieval"),("linux", "debian"),("algore",)]
+DELICIOUS_TEST_TAGS = [("linux",), ("information",), ("information", "retrieval"),
+                       ("linux", "debian"),("algore",)]
 
 RELATED_TAGS_DELICIOUS_PAGE = './data/delicious_climate_related_tags.html'
     

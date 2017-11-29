@@ -2,11 +2,12 @@
 import unittest
 
 from nose.plugins.attrib import attr
+from eWRT.ws.wikipedia.distance import WikiDistance
 
 
 class TestWikiDistance(unittest.TestCase):
     
-    def __init__(self):
+    def setUp(self):
         self.wd = WikiDistance()
         
     @attr("db")
@@ -43,3 +44,6 @@ class TestWikiDistance(unittest.TestCase):
     def test_connection_limit(self):
         for _ in xrange(300):
             assert self.wd.isSameAs("design area", "risk") == False
+            
+if __name__ == '__main__':
+    unittest.main()

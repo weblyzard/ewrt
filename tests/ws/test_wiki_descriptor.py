@@ -29,3 +29,6 @@ class TestDescriptor(unittest.TestCase):
             for synonym in synonyms:
                 print synonym, d.getDescriptor(synonym)
                 assert descriptor == d.getDescriptor(synonym)
+                
+if __name__ == '__main__':
+    unittest.main()

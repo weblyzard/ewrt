@@ -12,17 +12,20 @@ from eWRT.config import BING_USERNAME, BING_API_KEY
 class TestBingSearch(unittest.TestCase):
     # tested only Web command
 
-    username = BING_USERNAME
-    api_key = BING_API_KEY
-
-    search_terms = ['modul', 'university']
-
-    # test default api call (max_results = DEFAULT_MAX_RESULTS)
+    def setUp(self):
+        if not len(BING_USERNAME):
+            raise unittest.SkipTest('Skipping TestBingSearch: missing username')
+        self.username = BING_USERNAME
+        self.api_key = BING_API_KEY
+    
     def test_default(self):
+        ''' test default api call (max_results = DEFAULT_MAX_RESULTS) '''
         bs = BingSearch(api_key=self.api_key, 
                         username=self.username)
 
-        results = bs.search_documents(self.search_terms)
+
+        search_terms = ['modul', 'university']
+        results = bs.search_documents(search_terms)
 
         # for the testing purposes
         # [ print(res) for res in results ]
