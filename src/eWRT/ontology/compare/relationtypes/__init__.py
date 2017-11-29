@@ -19,8 +19,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from nltk import WordNetLemmatizer, pos_tag
-from eWRT.util.cache import MemoryCache, MemoryCached
 from collections import defaultdict
+
+from eWRT.util.cache import MemoryCache, MemoryCached
 
 
 class RelationTypes(object):

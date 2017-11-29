@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
+import re
+
 from eWRT.access.http import Retrieve
 from eWRT.ws.TagInfoService import TagInfoService
-import re
+
 
 class Twitter(TagInfoService):
 
@@ -41,14 +43,4 @@ class Twitter(TagInfoService):
     @staticmethod
     def getDailyTrends():
         raise NotImplementedError
-
-
-class TwitterTest( object ):
-
-    TWITTER_TEST_TAGS = [ 'linux', ('linux', 'debian') ]
-
-    def testUrlInfo(self):
-        for tag in self.TWITTER_TEST_TAGS:
-            relTags = Twitter.getRelatedTags(tag)
-            print 'related to %s are %s.'% (tag, relTags )
 

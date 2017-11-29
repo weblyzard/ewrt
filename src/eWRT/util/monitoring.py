@@ -41,9 +41,7 @@ easier
 '''
 from __future__ import print_function
 
-import os, subprocess, commands, socket, logging
-
-from string import Template
+import os, commands, socket
 
 SEND_NSCA_PATH = os.path.join(os.sep, 'usr', 'sbin', 'send_nsca')
 SEND_NSCA_CONFIG = os.path.join(os.sep, 'etc' , 'send_nsca.cfg')

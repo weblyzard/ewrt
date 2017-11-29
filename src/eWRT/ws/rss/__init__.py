@@ -6,12 +6,14 @@
 
 Retrieves RSS Feeds and the corresponding Web page.
 """
+import feedparser
+import unittest
 
 from datetime import datetime
 from time import mktime
-import feedparser
+
 from eWRT.access.http import Retrieve
-from unittest import main
+
 
 HTTP_FETCH_DELAY = 0
 
@@ -36,13 +38,3 @@ def parse(url, last_modified=None):
             result.append(item)
 
     return result
-
-
-
-def parse_test():
-    """ Test the rss module. """
-    TEST_URL = "http://kurier.at/rss/channel_startseite_rss.xml"
-    last_modified = datetime(2012,8,3,21,50,00)
-    for a in parse(TEST_URL, last_modified):
-        print a['link'], a['date']
-        print len(a['content'])

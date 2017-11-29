@@ -25,7 +25,7 @@ __author__    = "Albert Weichselbraun"
 __revision__  = "$Id$"
 __copyright__ = "GPL"
 
-from time import time
+
 from collections import Counter
 
 class AssertReturnValue(object):
@@ -67,24 +67,4 @@ class AssertReturnValue(object):
         wrapper.__doc__ = fn.__doc__
         wrapper.counter = self.counter
         return wrapper
-
-
-class TestAssertReturnValue(object):
-
-    @AssertReturnValue("int(x)>12", "countPassed", "countFailed")
-    def _assertReturnValue(self, value):
-        return value
-     
-    def testAssertCounter(self):
-        """ 
-        verifies the assertion counters
-        """
-        self._assertReturnValue(24)
-        assert self._assertReturnValue.counter['countPassed'] == 1
-        assert self._assertReturnValue.counter['countFailed'] == 0
-
-        self._assertReturnValue(-2)
-        assert self._assertReturnValue.counter['countPassed'] == 1
-        assert self._assertReturnValue.counter['countFailed'] == 1
-
 

@@ -22,12 +22,13 @@
 
 __version__ = "$Header$"
 
-from eWRT.access.http import Retrieve
+import unittest
+
 from urllib import urlencode
 from xml.dom.minidom import parseString
 from nose.plugins.attrib import attr
 
-import unittest
+from eWRT.access.http import Retrieve
 
 WIKIPEDIA_API_QUERY = 'http://%s.wikipedia.org/w/api.php'
 

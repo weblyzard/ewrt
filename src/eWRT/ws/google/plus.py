@@ -62,7 +62,7 @@ class GooglePlus(object):
     def get_activity(self, activity_id):
         ''' returns the activity with the given ID
         :param activity_id: GooglePlus activity ID
-        :type activity_id: basestring
+        :type activity_id: string
         :returns: mapped result
         :rtype: dict
         '''
@@ -74,7 +74,7 @@ class GooglePlus(object):
         :param params: paremeters for the query
         :type params: list or None
         :param path: path to query, e.g. activities
-        :type path: basestring
+        :type path: string
         :returns: GooglePlus result
         :rtype: dict
         '''
@@ -87,7 +87,7 @@ class GooglePlus(object):
         :param params: paremeters for the query
         :type params: list or None
         :param path: path to query, e.g. activities
-        :type path: basestring
+        :type path: string
         :returns: GooglePlus request URL
         :rtype: str
         

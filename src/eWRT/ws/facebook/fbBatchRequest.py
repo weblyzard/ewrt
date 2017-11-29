@@ -5,16 +5,17 @@ Created on 21.06.2012
 
 class for executing batch requests to the facebook api
 '''
-import unittest
 import json
 import urllib
 import httplib
 import logging
+
 from ssl import SSLError
 
 from eWRT.config import FACEBOOK_ACCESS_KEY
 from eWRT.ws.facebook import FacebookWS
 from eWRT.ws.exceptions import AuthenticationError
+
 
 MAX_BATCH_SIZE = 3
 TIMEOUT = 100 # timeout for the requests in seconds
@@ -136,49 +137,3 @@ class FbBatchRequest(object):
     def get_batch(requests, batch_size=MAX_BATCH_SIZE):
         for i in range(0, len(requests), batch_size):
             yield requests[i:i+batch_size]
-            
-class TestFacebookWS(unittest.TestCase):
-    
-    def test_bad_request(self):
-        access_token = "AAAElj9ZBZCquoBAGkKlcPvJsUCpyAZBxz6nsOYr8LAmpIj9Q9EZCKl9xVAYmlXGh2UQvhVellSWsZALPn6V73ZAZBiaxlwqkWlUjGVLzAHd7gZDZD"
-        fbBatchRequest = FbBatchRequest(access_token)
-        
-        try: 
-            fbBatchRequest.run_search('Linus Torvalds')
-        except Exception as e: 
-            print 'thats ok: %s' % e
-            assert True
-    
-    def test_batch_search2(self):
-        fbBatchRequest = FbBatchRequest()
-        result = fbBatchRequest.run_search(['Wien'], 'post', 100)
-        assert len(result) > 0
-    
-    def test_feed_mirroring(self):
-        fbBatchRequest = FbBatchRequest()
-        result = fbBatchRequest.run_search('107961012601035/feed', 
-                                           objectType='path',
-                                           limit=10)
-        
-        for x in result:
-            print x
-            
-        assert len(result) >= 1
-
-    def test_search(self):
-        terms = ['Department of Health and Human Services', 'carcinomas', 
-                 'National Oceanic and Atmospheric Administration', 'Mercedes-Benz',
-                 'Audi', 'BMW', 'tumour', 'cancer', 'cop18', 'jane lubchenco', 'tumour', 'irgendwas']
-        
-        fbWSList = []
-        
-        for term in terms: 
-            fbWSList.append(FacebookWS(term, 'post', 1353954200, 100))
-        
-        result = FbBatchRequest._send_post(fbWSList)
-        print result
-        print len(result)
-        
-if __name__ == "__main__":
-
-    unittest.main()

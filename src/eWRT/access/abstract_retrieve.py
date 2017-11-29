@@ -15,7 +15,6 @@ class AbstractRetriever(object):
     def tear_down(self, *args, **kwargs):
         pass
 
-
     @abc.abstractmethod
     def open(self):
         pass

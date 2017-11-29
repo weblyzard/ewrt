@@ -1,22 +1,18 @@
+import re
+import rdflib
+import unittest
+
 from xml.dom.minidom import parse, parseString
 # from metric import LearningAccuracy
 # from pygments.unistring import No
-
-import rdflib
 from rdflib import plugin
 from rdflib.store import Store
-
 from rdflib.Graph import Graph
 from rdflib import URIRef, Literal, BNode, Namespace
 from rdflib import RDF
-
 from rdflib.sparql.bison import Parse
-
-import re
-
 from itertools import chain
 
-import unittest
 
 HIERARCHY_LINK_TYPES = [URIRef('http://www.w3.org/2000/01/rdf-schema#subClassOf')]
 IGNORE_HIERARCHY_LINK_TYPES = True

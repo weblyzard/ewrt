@@ -12,6 +12,7 @@ see: `WOT API Documentation <http://www.mywot.com/wiki/API#Documentation:_Reputa
 import unittest
 import json
 
+from six import string_types
 from urllib import urlencode, quote
 from urlparse import urlparse
 
@@ -54,7 +55,7 @@ class WebOfTrust(object):
         >>> WebOfTrust._encode_hosts(['wu.ac.at', 'https://modul.ac.at/'])
         'wu.ac.at/modul.ac.at/'
         '''
-        if isinstance(hosts, basestring):
+        if isinstance(hosts, string_types):
             hosts = [hosts]
         
         selected_hosts = []

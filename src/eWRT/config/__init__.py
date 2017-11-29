@@ -110,8 +110,14 @@ BBC_CORPUS_TIMEFORMAT = "%a, %d %b %Y %H:%M:%S %Z"
 # COMPRESSED VERSION OF THE CORPUS
 BBC_CORPUS_COMPRESSED = "data/news.bbc.co.uk.tar.gz"
 
+BING_USERNAME = ""
+BING_API_KEY = ""
+
 # geonames
 GEO_ENTITY_SEPARATOR = ">"
+
+GOOGLE_USER = ""
+GOOGLE_PASS = ""
 
 # facebook
 FACEBOOK_API_KEY = "api-key"

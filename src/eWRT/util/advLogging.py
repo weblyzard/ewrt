@@ -56,25 +56,3 @@ class SNMPHandler(logging.Handler):
             level = 'unknown'
         
         sendSNMPTrap(record.msg, self.moduleName, level)
-
-class TestHandler( unittest.TestCase ):
-    
-    def testHandler(self):
-        ''' tests the handler '''
-        
-        # Testing the snmp logging
-        logger = logging.getLogger('snmp')
-        snmpHandler = SNMPHandler('webLyzard.test')
-        snmpHandler.setLevel(logging.ERROR)
-        logger.addHandler(snmpHandler)
-        
-        logging.debug('debug')
-        logging.info('info')
-        logging.warning('warning')
-        logging.error('error')
-        logging.critical('critical')
-    
-        
-if __name__ == '__main__':
-    
-    unittest.main()

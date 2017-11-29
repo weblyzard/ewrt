@@ -27,12 +27,8 @@ __author__    = "Albert Weichselbraun"
 __revision__  = "$Id$"
 __copyright__ = "GPL"
 
+from six import string_types
 from os.path import dirname, join
-
-# python 3 compatibility
-from sys import version_info
-if version_info[0] > 2:
-    basestring = str
 
 
 def get_resource( module_path, relative_path_list ):
@@ -42,10 +38,9 @@ def get_resource( module_path, relative_path_list ):
     ::param module_path: path to the given module (obtained from __file__)
     ::param relative_path_list: a string or a list of directories as used for os.path.join
     '''
-    if isinstance(relative_path_list, basestring):
+    if isinstance(relative_path_list, string_types):
         relative_path_list = (relative_path_list, )
     return join(dirname(module_path), *relative_path_list)
-
 
 
 def test_get_resource():
@@ -58,7 +53,3 @@ def test_get_resource_single_string():
         single string argument '''
     path = get_resource( __file__, 'resources/test.xml')
     assert join(dirname(__file__), 'resources', 'test.xml') == path
-
-
-
-

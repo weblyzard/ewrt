@@ -14,10 +14,13 @@ Created on 23.10.2014
 '''
 import json
 import requests
-from datetime import datetime, timedelta
 
+from six import string_types
+from datetime import datetime, timedelta
 from urllib import urlencode
+
 from eWRT.ws import AbstractWebSource
+
 
 TOKEN_URL = 'https://datamarket.accesscontrol.windows.net/v2/OAuth2-13'
 API_URL = 'http://api.microsofttranslator.com/v2/Ajax.svc/Translate?'
@@ -44,7 +47,7 @@ class BingTranslator(AbstractWebSource):
         `target_language`
         :returns: iterator with the translated text
         '''
-        if isinstance(search_terms, basestring):
+        if isinstance(search_terms, string_types):
             search_terms = [search_terms]
             
         for search_term in search_terms: 

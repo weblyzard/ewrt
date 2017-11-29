@@ -23,20 +23,20 @@
 __revision__ = "$Revision$"
 
 
+import base64
+import hashlib
+import hmac
+import urllib
 import time
 import logging
 
 from urllib import quote
 from xml.parsers.expat import ParserCreate
+from time import strftime
+
 from eWRT.access.http import Retrieve
 from eWRT.config import AMAZON_ACCESS_KEY, AMAZON_LOCATIONS, AMAZON_DEBUG_FILE
 
-from time import strftime
-
-import base64
-import hashlib
-import hmac
-import urllib
 
 # time to wait after an error in seconds
 ERROR_SLEEP_TIME = 30
@@ -45,6 +45,8 @@ BROWSE_NODE_ID = { 'book' : '283155',
                    'dvd'  : '130',
                    'music': '5174'
                  }
+
+AWS_ACCESS_KEY_ID = {'AWSAccessKeyId': AMAZON_ACCESS_KEY}
 
 class ResultList(object):
     """ converts xml results into a list of dictionaries """
@@ -199,9 +201,6 @@ class AmazonWS(object):
                          'ResponseGroup': 'ItemAttributes,SalesRank' }
             arguments.update(param)
             return self.query(arguments)
-
-
-AWS_ACCESS_KEY_ID = {'AWSAccessKeyId': AMAZON_ACCESS_KEY}
 
 class AmazonUrl(object):
 

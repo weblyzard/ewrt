@@ -16,9 +16,12 @@ Created on 23.10.2014
 import json
 import requests
 import logging
+
+from six import string_types
 from urllib import urlencode
 
 from eWRT.ws import AbstractWebSource
+
 
 API_URL = 'https://www.googleapis.com/language/translate/v2'
 
@@ -36,7 +39,7 @@ class GoogleTranslator(AbstractWebSource):
         `target_language`
         :returns: iterator with the translated text
         '''
-        if isinstance(search_terms, basestring):
+        if isinstance(search_terms, string_types):
             search_terms = [search_terms]
             
         for search_term in search_terms: 

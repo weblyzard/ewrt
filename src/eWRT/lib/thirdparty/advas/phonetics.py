@@ -51,7 +51,7 @@ def soundex (term):
     str2 = first_char
     for x in term:
         if x != str2[-1]:
-               str2 = str2 + x
+            str2 = str2 + x
         # end if
     # end for
 
@@ -100,7 +100,7 @@ def metaphone (term):
     str2 = firstChar
     for x in term:
         if x != str2[-1]:
-               str2 = str2 + x
+            str2 = str2 + x
         # end if
     # end for
 

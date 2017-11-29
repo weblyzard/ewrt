@@ -119,13 +119,3 @@ class Result(object):
         # apply stopword list
         map(vsm.pop, [ s for s in stopword_list if s in vsm])
         return vsm
-
-
-
-
-
-
-
-
-
-
