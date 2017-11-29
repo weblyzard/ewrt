@@ -19,7 +19,9 @@ setup(
       package_dir={'': 'src'},
       install_requires=['redis',
                         'oauth2client==2.2.0', #YT
-                        'google-api-python-client==1.4.0' #YT
+                        'google-api-python-client==1.4.0', #YT,
+                        'six',
+                        'python-oauth2' #linkedin
                         ],
       classifiers = [
                     'Programming Language :: Python',

@@ -126,6 +126,8 @@ FACEBOOK_SESSION_KEY = "session-key"
 FACEBOOK_ACCESS_KEY = "access-key"
 FACEBOOK_APPLICATION_ID = "application-id"
 
+REUTERS_DATA_DIR = ""
+
 SNMP_HOST_CFG = {'server'          : 'localhost',
                  'port'            : '162',
                  'community_string': 'public',

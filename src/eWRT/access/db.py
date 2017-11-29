@@ -25,7 +25,6 @@ __revision__ = "$Revision$"
 
 
 from types import StringTypes
-from nose.plugins.attrib import attr
 from warnings import warn
 try:
     import psycopg2 
@@ -173,37 +172,3 @@ class PostgresqlDb(IDB):
 
     def close(self):
         self.db.close()
-
-
-class TestDB(object):
-    """ @class TestDB
-        db test cases 
-    """
-    @attr("db")
-    def testContextProtocol(self):
-        """ tests the db module's support for the context protocoll """
-        from eWRT.config import DATABASE_CONNECTION
-        with PostgresqlDb( **DATABASE_CONNECTION['wikipedia'] ) as q:
-            assert len( q.query("SELECT * FROM concept LIMIT 5")) == 5
-
-    @attr("db")
-    def testMultiProcessing(self):
-        """ tests multiprocessing """
-        from multiprocessing import Pool
-        p = Pool(4)
-        qq = 8 * ["SELECT * FROM concept LIMIT 1"]
-
-        res = p.map(t_multiprocessing, qq)
-
-
-def t_multiprocessing(q):
-    """ @remarks
-        helper function for the multi processing test case
-    """
-    from eWRT.config import DATABASE_CONNECTION
-
-    db = PostgresqlDb( **DATABASE_CONNECTION['wikipedia'] )
-    r = db.query( q )
-    db.close()
-    return r
-    

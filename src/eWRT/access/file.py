@@ -9,7 +9,6 @@ Created on Dec 6, 2012
 
 from bz2 import BZ2File
 from gzip import GzipFile
-from os import remove
 from os.path import basename
 
 
@@ -51,30 +50,3 @@ class CompressedFile(object):
         ext_list.reverse()
         return ext_list if ext_list[0] not in cls.COMPRESSION_EXT \
             else ext_list[1:]
-
-
-class TestFile(object):
-
-    TESTSTRING = "this is a test"
-
-    def test_formats(self):
-        for extension in ('.bz2', '.gz', ''):
-            self._test_read_write(extension)
-
-    @classmethod
-    def _test_read_write(cls, extension=""):
-        fname = ".testfile.txt"+extension
-
-        with CompressedFile(fname, "wb") as f:
-            try:  # porting to python3 (SV)
-                f.write(bytes(cls.TESTSTRING, 'UTF-8'))  # python3
-            except:
-                f.write(cls.TESTSTRING)  # python2
-
-        with CompressedFile(fname) as f:
-            #assert f.read() == cls.TESTSTRING # python2
-            new_string = f.read().decode('UTF-8')  # python3 (SV)
-            assert new_string == cls.TESTSTRING
-            assert CompressedFile.get_extension_list(fname)[0] == 'txt'
-
-        remove(fname)
