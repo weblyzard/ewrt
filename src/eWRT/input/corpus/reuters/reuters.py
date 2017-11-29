@@ -13,12 +13,14 @@
 __revision__ = "$Revision: 545 $"
 __author__   = "Albert Weichselbraun"
 
+import os
 
 from xml.sax import handler, parseString
 from glob import glob
-from eWRT.config import REUTERS_DATA_DIR
 from zipfile import ZipFile
-import os
+
+from eWRT.config import REUTERS_DATA_DIR
+
 
 class ReutersParser(handler.ContentHandler):
 
@@ -106,7 +108,7 @@ class ReutersGetZipCorpus(object):
 if __name__ == '__main__':
     import sys
     for nr,t in enumerate(ReutersGetZipCorpus( "./eval", "it") ):
-        print t
+        print(t)
         sys.exit(0)
 
     for nr,t in enumerate(ReutersGetCorpus("de")):

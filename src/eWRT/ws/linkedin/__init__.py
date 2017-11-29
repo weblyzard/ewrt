@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import simplejson
+import oauth2
+
+from atom import Link
+from six import string_types
 
 from eWRT.ws.WebDataSource import WebDataSource
 
-import oauth2
-from atom import Link
 
 class LinkedIn(WebDataSource):
     
@@ -48,7 +50,7 @@ class LinkedIn(WebDataSource):
         return retval
 
     def custom_search(self, uri, format='json'):
-        self._assert_basestring(uri)
+        self._assert_string(uri)
         self._assert_format(format)
         
         response, content = self.client.request(uri, 
@@ -58,7 +60,7 @@ class LinkedIn(WebDataSource):
 
     def search_company(self, search_term, option='keywords', format='json'):
         '''Search for companies using one search term'''
-        self._assert_basestring(search_term, option)
+        self._assert_string(search_term, option)
         self._assert_format(format)
         
         request = self.linkedin_uri + 'company-search?%s=%s' % (option,
@@ -73,7 +75,7 @@ class LinkedIn(WebDataSource):
         '''Search for companies using several keywords'''
         
         assert isinstance(search_terms, list)
-        self._assert_basestring(option)
+        self._assert_string(option)
         self._assert_format(format)
         
         results = []
@@ -83,12 +85,12 @@ class LinkedIn(WebDataSource):
         return results
     
     
-    def search_job_by_search_term(self, search_term, option='keyword', format='json'):
+    def search_job_by_search_term(self, search_term, option='keyword', 
+                                  format='json'):
         '''Search for a job using a certain search term'''
         
-        self._assert_basestring(search_term, option)
+        self._assert_string(search_term, option)
         self._assert_format(format)
-        assert isinstance(search_term, basestring)
         
         request = self.linkedin_uri + 'job-search?%s=%s' % (option, search_term)
         response, content = self.client.request(request, 
@@ -97,11 +99,11 @@ class LinkedIn(WebDataSource):
         return self._convert_json_to_dict(content, search_field='jobs')
     
     def search_job_by_search_terms(self, search_terms, option='keywords', 
-                                            format='json'):
+                                   format='json'):
         '''Search for jobs using several search terms.'''
         self._assert_format(format)
         assert isinstance(search_terms, list)
-        self._assert_basestring(option)
+        self._assert_string(option)
         
         results = []
         for search_term in search_terms:
@@ -111,7 +113,7 @@ class LinkedIn(WebDataSource):
         return results
 
     def _convert_json_to_dict(self, json_string, search_field):
-        self._assert_basestring(json_string, search_field)
+        self._assert_string(json_string, search_field)
         
         raw_data = simplejson.loads(json_string)
 
@@ -124,12 +126,10 @@ class LinkedIn(WebDataSource):
         
         return results
 
-
     def _assert_format(self, format):
         assert format == 'json' or format == 'xml'
         
-    def _assert_basestring(self, *args):
+    def _assert_string(self, *args):
         for possible_string in args:
-            assert isinstance(possible_string, basestring)
+            assert isinstance(possible_string, string_types)
             assert len(possible_string) > 0
-                    

@@ -1,6 +1,8 @@
-from __init__ import Calais
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 import unittest
 
+from eWRT.ws.opencalais import Calais
 
 
 class TestCalais( unittest.TestCase ):

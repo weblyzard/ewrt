@@ -5,7 +5,7 @@ Created on 19.11.2014
 
 .. codeauthor:: Heinz-Peter Lang <lang@weblyzard.com>
 
-Client for the Instgram API, see `Instagram Developer Documentation <http://instagram.com/developer/>`_
+Client for the Instagram API, see `Instagram Developer Documentation <http://instagram.com/developer/>`_
 for details on how to obtain the `access_token` and usage of the API
 
 .. todo:: use superclass Webservice and adapt this class. 
@@ -14,6 +14,7 @@ for details on how to obtain the `access_token` and usage of the API
 import json
 import requests
 import logging
+
 from datetime import datetime, timedelta
 
 API_URL = 'https://api.instagram.com/v1/'
@@ -76,7 +77,7 @@ class InstagramClient(object):
         while not done: 
             try: 
                 data = self._get_data(url, params)
-            except Exception, e: 
+            except Exception as e: 
                 self.logger.exception('Will stop: %s' % e)
                 done = True
                 continue

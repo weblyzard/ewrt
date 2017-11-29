@@ -11,10 +11,13 @@ see: `WOT API Documentation <http://www.mywot.com/wiki/API#Documentation:_Reputa
 '''
 import unittest
 import json
+
+from six import string_types
 from urllib import urlencode, quote
 from urlparse import urlparse
 
 from eWRT.access.http import Retrieve
+
 
 SERVICE_URL = 'http://api.mywot.com/0.4/public_link_json2?hosts=%(hosts)s&key=%(api_key)s'
 WOT_LINK = 'http://www.mywot.com/en/scorecard/%s'
@@ -52,7 +55,7 @@ class WebOfTrust(object):
         >>> WebOfTrust._encode_hosts(['wu.ac.at', 'https://modul.ac.at/'])
         'wu.ac.at/modul.ac.at/'
         '''
-        if isinstance(hosts, basestring):
+        if isinstance(hosts, string_types):
             hosts = [hosts]
         
         selected_hosts = []

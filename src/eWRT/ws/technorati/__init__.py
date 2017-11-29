@@ -18,18 +18,21 @@
 
 __version__ = "$Header$"
 
-import re, logging, sys
-from eWRT.access.http import Retrieve
-from eWRT.ws.TagInfoService import TagInfoService
 import time
+import re, logging, sys
+
 from lxml import etree
 from datetime import timedelta, date
+
+from eWRT.access.http import Retrieve
+from eWRT.ws.TagInfoService import TagInfoService
+
 
 SLEEP_TIME = 5
 NON_ABSTRACT_TEXT = ['a', 'h3']
 RESULTS_PER_PAGE = 10
 
-cleanText = lambda text: trim(re.sub('\n', ' ', text))
+cleanText = lambda text: (re.sub('\n', ' ', text)).strip()
 
 logger = logging.getLogger('Technorati')
 handler = logging.StreamHandler()
@@ -234,7 +237,7 @@ class Technorati(TagInfoService):
                     blogLink['reach'] = '0'
                     blogLink['date'] = linkDate
 
-                    if blogLink.has_key('url'):
+                    if 'url' in blogLink:
                         logger.debug('Found URL %s' % blogLink['url'])
                         links.append(blogLink)
                         offset += 1

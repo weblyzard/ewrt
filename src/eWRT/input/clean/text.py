@@ -196,7 +196,8 @@ class RemovePunctationAndBrackets(WordCleanupModule):
         many other modules to work correctly
     """
     def __call__(self, l):
-        return [ s.replace(")", "").replace("(","").replace(".", "").replace("'", "").replace("!", "") for s in l ]
+        return [ s.replace(")", "").replace("(","").replace(".", "").\
+                replace("'", "").replace("!", "") for s in l ]
 
 
 class TestPhraseCleanup(object):
@@ -248,4 +249,3 @@ class TestPhraseCleanup(object):
         s = FixSpelling()
         print s.numMistakesFixed(u'dow fire and explossion index (f&ei)'.split(" ")) 
         assert s.numMistakesFixed(u'dow fire and explossion index (f&ei)'.split(" ")) == 2
-

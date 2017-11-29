@@ -17,12 +17,15 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-from eWRT.access.http import *
 import unittest
-import pytest
+import urllib2
 
-class TestRetrieve(unittest.TestCase):
+from pytest import raises
+
+from eWRT.access.http import DEFAULT_TIMEOUT, Retrieve, setdefaulttimeout, log
+
+
+class TestHttpRetrieve(unittest.TestCase):
     ''' tests the http class '''
 
     TEST_URLS = (
@@ -39,7 +42,6 @@ class TestRetrieve(unittest.TestCase):
     def tearDown(self):
         setdefaulttimeout(self.default_timeout)
 
-    @pytest.mark.remote
     def testRetrieval(self):
         ''' tries to retrieve the following url's from the list '''
 
@@ -50,7 +52,6 @@ class TestRetrieve(unittest.TestCase):
             r.read()
             r.close()
 
-    @pytest.mark.remote
     def testRetrieveContext(self):
         ''' tests the retrieve context module '''
         with Retrieve(self.__class__.__name__) as r:
@@ -58,23 +59,20 @@ class TestRetrieve(unittest.TestCase):
             content = c.read()
         assert len(content) > 100
 
-    @pytest.mark.skip(REASON = "todo failing")
-    @pytest.mark.remote
     def testRetrievalTimeout(self):
         ''' tests whether the socket timeout is honored by our class '''
         SLOW_URL = "http://www.csse.uwa.edu.au/"
 
-        with pytest.raises(urllib2.URLError):
+        with raises(urllib2.URLError):
             r = Retrieve(self.__class__.__name__,
                          default_timeout=0.1).open(SLOW_URL)
             content = r.read()
             r.close()
 
-    @pytest.mark.remote
     def testMultiProcessing(self):
         ''' verifies that retrieves works with multi-processing '''
         from multiprocessing import Pool
-        p = Pool(4)
+        p = Pool(5)
 
         TEST_URLS = ['http://www.heise.de',
                      'http://linuxtoday.com',

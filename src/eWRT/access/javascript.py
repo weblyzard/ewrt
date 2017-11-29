@@ -10,11 +10,11 @@ from selenium import webdriver
 
 from eWRT.access import abstract_retrieve
 
+
 __version__ = '0.0.8'
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 
 class SetUpOpenAndTearDown(object):
 
@@ -29,8 +29,6 @@ class SetUpOpenAndTearDown(object):
             function(*args, **kwargs)
             self.tear_down_func(*args, **kwargs)
         return _wrapper
-
-
 
 class JavascriptRetriever(abstract_retrieve.AbstractRetriever):
     '''

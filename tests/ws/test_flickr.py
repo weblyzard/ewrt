@@ -1,5 +1,9 @@
-from __init__ import Flickr
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 import unittest
+
+from eWRT.ws.flickr import Flickr
+
 
 class TestFlickr( unittest.TestCase ):
     ''' Testing Flickr webservice '''

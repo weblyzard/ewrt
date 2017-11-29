@@ -20,11 +20,11 @@
 
 __version__ = "$Header$"
 
-
-from eWRT.access.http import Retrieve
 from urllib import quote
 from urllib2 import HTTPError
-from nose.plugins.attrib import attr
+
+from eWRT.access.http import Retrieve
+
 
 WIKIPEDIA_SEARCH_QUERY = 'http://%s.wikipedia.org/wiki/%s'
 
@@ -68,23 +68,3 @@ class WikiPedia(object):
             result.append(descriptor)
 
         return result
-
-class TestDescriptor(object):
-    """ tests the http class """
-    TEST_TERMS = { 
-                   None: ('noresults_ksfdasdf', ),
-                   'Wolfgang Amadeus Mozart': ( 'wolfgang amadeus', 'mozart', ), 
-                   'Pope Benedict XVI': ('pope benedict xvi', 'joseph ratzinger', ),
-                 }
-
-    @attr("remote")
-    def testDescriptor(self):
-        """ tries to retrieve the following url's from the list """
-
-        d=WikiPedia()
-        for descriptor, synonyms in self.TEST_TERMS.iteritems():
-            for synonym in synonyms:
-                print synonym, d.getDescriptor(synonym)
-                assert descriptor == d.getDescriptor(synonym)
-
-

@@ -2,24 +2,22 @@
 
 """ ontology-stats.py
     computes the top overlapping concepts of ontologies """
-
 from glob import glob
 from os import path
 from bz2 import BZ2File
-
-from eWRT.input.conv.cxl import XCL2RDF
-# ontology cleanup
-from eWRT.input.clean.text import *
-from eWRT.stat.string.spelling import SpellSuggestion
-
 from rdflib import Namespace
 from collections import defaultdict
 from itertools import izip_longest
 from operator import itemgetter
 from csv import writer
 
+from eWRT.input.conv.cxl import XCL2RDF
+from eWRT.input.clean.text import *
+from eWRT.stat.string.spelling import SpellSuggestion
+
+
 # a directory containing all cxl ontology files
-ONTOLOGY_DIR = "/home/albert/data/ac/research/inwork/pakdd2011-ontology-evaluation/data/ontologies/risk/week2"
+# ONTOLOGY_DIR = "/home/albert/data/ac/research/inwork/pakdd2011-ontology-evaluation/data/ontologies/risk/week2"
 
 # required namespaces
 NS_RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
@@ -129,8 +127,6 @@ def computeOntologyStatistics( ff, cc, rc, ccCutOffCount, rcCutOffCount):
     c.close()
 
    
-
-
 def csvOutput( termCnt, relCnt ):
     f = open("terminology-stats.csv", "w")
     w = writer(f) 
@@ -142,5 +138,7 @@ def csvOutput( termCnt, relCnt ):
 
 
 # main
-cc, rc = computeStatistics( glob(ONTOLOGY_DIR +"/*.cxl") )
-computeOntologyStatistics( glob(ONTOLOGY_DIR +"/*.cxl"), cc, rc, ccCutOffCount=4, rcCutOffCount=3 )
+if __name__ == '__main__':
+    cc, rc = computeStatistics( glob(ONTOLOGY_DIR +"/*.cxl") )
+    computeOntologyStatistics( glob(ONTOLOGY_DIR +"/*.cxl"), cc, rc, 
+                               ccCutOffCount=4, rcCutOffCount=3 )

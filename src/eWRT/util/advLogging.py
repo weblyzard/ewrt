@@ -16,6 +16,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+from __future__ import print_function
+
 __version__ = "$Header$"
 
 import logging, unittest
@@ -30,7 +32,7 @@ def sendSNMPTrap(message, module, level):
     try:
         raise SNMPException(module, message, level=level)
     except SNMPException:
-        print 'Sent a SNMP "%s": "%s"' % (level, message)
+        print('Sent a SNMP "%s": "%s"' % (level, message))
 
 
 class SNMPHandler(logging.Handler):
@@ -54,25 +56,3 @@ class SNMPHandler(logging.Handler):
             level = 'unknown'
         
         sendSNMPTrap(record.msg, self.moduleName, level)
-
-class TestHandler( unittest.TestCase ):
-    
-    def testHandler(self):
-        ''' tests the handler '''
-        
-        # Testing the snmp logging
-        logger = logging.getLogger('snmp')
-        snmpHandler = SNMPHandler('webLyzard.test')
-        snmpHandler.setLevel(logging.ERROR)
-        logger.addHandler(snmpHandler)
-        
-        logging.debug('debug')
-        logging.info('info')
-        logging.warning('warning')
-        logging.error('error')
-        logging.critical('critical')
-    
-        
-if __name__ == '__main__':
-    
-    unittest.main()

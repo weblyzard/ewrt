@@ -7,6 +7,7 @@
     this library is still a draft and might change considerable
 
 '''
+from __future__ import print_function
 
 
 # (C)opyrights 2008-2010 by Albert Weichselbraun <albert@weichselbraun.net>
@@ -27,15 +28,15 @@
 __author__    = "Albert Weichselbraun"
 __copyright__ = "GPL"
 
-from eWRT.util.cache import DiskCache
+import time
+import os
+import gzip
+
 from shutil import rmtree
 from os.path import join, exists
 from cPickle import load, UnpicklingError
-import time
 from subprocess import Popen
 from glob import glob
-import os
-import gzip
 
 try:
     import hashlib
@@ -43,6 +44,8 @@ try:
 except ImportError:
     import sha
     HASH = sha.sha
+
+from eWRT.util.cache import DiskCache
 
 
 class Async(DiskCache):
@@ -97,7 +100,7 @@ class Async(DiskCache):
         # verify whether all registered processes are still running
         for pObj in self.cur_processes:
             if pObj.poll()!=None:
-               self.cur_processes.remove( pObj )
+                self.cur_processes.remove( pObj )
 
         pids = [ str(pObj.pid) for pObj in self.cur_processes ]
         return len(self.cur_processes) >= self.max_processes
@@ -132,50 +135,9 @@ class Async(DiskCache):
                 try:
                     return load( gzip.open(cache_file))
                 except (EOFError, UnpicklingError) as e:
-                    print "Error opening %s" % cache_file, e
+                    print("Error opening %s" % cache_file, e)
                     pass
 
             time.sleep(10)
-
-
-class TestAsync(object):
-    ''' unittests covering the class async '''
-
-    TEST_CACHE_DIR = "./.test-async"
-
-    def setUp(self):
-        self._delCacheDir()
-
-    def tearDown(self):
-        self._delCacheDir()
-
-    @staticmethod
-    def _delCacheDir():
-        if exists( TestAsync.TEST_CACHE_DIR ):
-            rmtree( TestAsync.TEST_CACHE_DIR )
-
-    def testMaxProcessLimit(self):
-        ''' tests the max process limit '''
-        async = Async(self.TEST_CACHE_DIR, max_processes=1)
-        for x in xrange(2):
-            async.post( [ "/bin/sleep", str(x+1) ] )
-
-        assert async.has_processes_limit_reached() == True
-
-        time.sleep(2)
-        flag = async.has_processes_limit_reached()
-        print flag, [ p.pid for p in async.cur_processes ]
-        assert flag  == False
-
-    def testDebugMode(self):
-        ''' tests the debug mode '''
-        async = Async(self.TEST_CACHE_DIR, max_processes=1, debug_dir=self.TEST_CACHE_DIR)
-        for x in xrange(2):
-            async.post( ["/bin/echo", "hallo"] )
-
-        print glob( join(self.TEST_CACHE_DIR, "debug*") )
-        assert len( glob( join(self.TEST_CACHE_DIR, "debug*.out") )  ) == 2
-        assert len( glob( join(self.TEST_CACHE_DIR, "debug*.err") )  ) == 2
-
 
 # $Id$

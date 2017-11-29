@@ -21,15 +21,14 @@
 __version__ = "$Header$"
 
 import re
-from eWRT.access.http import Retrieve
-from eWRT.ws.TagInfoService import TagInfoService
-from urllib import quote
 import urllib2
+
+from urllib import quote
 from time import sleep
 from hashlib import md5
 
-from nose.plugins.attrib import attr
-#from eWRT.config import DELICIOUS_USER, DELICIOUS_PASS
+from eWRT.access.http import Retrieve
+from eWRT.ws.TagInfoService import TagInfoService
 
 class Delicious(TagInfoService):
     """ retrieves data using the del.icio.us API """
@@ -159,40 +158,6 @@ class Delicious(TagInfoService):
         f.close()
         sleep(1)
         return content
-
-class TestDelicious(object):
-
-    RELATED_TAGS_DELICIOUS_PAGE = './test/delicious_climate_related_tags.html'
-    
-    def testTagSplitting(self):
-        """ verifies the correct handling of tags containing spaces
-            i.e. (t1, t2, t3) == (t1, "t2 t3") """
-        d = Delicious._parse_tag_url
-        print d( ("debian linux") )
-        assert d( ("debian", "linux" )) == d( ("debian linux", ) )
-        assert d( ("t1", "t2", "t3") ) == d( ("t1", "t2 t3") )
-
-    def testNGramRelatedTags(self):
-        """ tests support for related tags for n-grams """
-        assert len( Delicious().getRelatedTags( ("climate", "change") ) ) > 0
-
-        content = open( TestDelicious.RELATED_TAGS_DELICIOUS_PAGE ).read()
-        related_tags = Delicious._getNGramRelatedTags( content )
-
-        assert 'global' in related_tags
-        assert 'evidence' in related_tags
-        assert 'vegetarian' in related_tags
-        assert 'sustainability' in related_tags
-
-        assert 'linux' not in related_tags
-
-    @attr("remote")
-    def testCriticalTagNames(self):
-        """ tests tag names which contain slashes, quotes, etc """
-        assert Delicious.getTagInfo( ("consequence/frequency matrix", ) ) != None
-        assert Delicious.getTagInfo( ("it's", )) != None
-
-
 
 
 

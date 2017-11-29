@@ -21,9 +21,11 @@
 #
 # -----------------------------------------------------------------------------------
 
-from sys import stdin
 import re
 import xml.parsers.expat
+
+from sys import stdin
+
 
 quote_str = lambda x: "'%s'" % x.replace("'", "''").replace("_", " ").replace("\\", "").encode("utf8").lower().replace("\"", "")
 
@@ -43,8 +45,9 @@ class WikiParse(object):
 
         self.container = None
         self._clear()
-	self.count = 0
-	self.prn   = False
+        
+        self.count = 0
+        self.prn   = False
 
 
     def _clear(self):
@@ -60,27 +63,25 @@ class WikiParse(object):
     def end_element(self, name):
         if name == 'page':
             if self._wiki_concept.startswith("'Wikipedia:"):
-            	self.clear()
-		return
+                self.clear()
+        return
 
-	    #if self.prn:
-	    if self._wiki_concept in self._wiki_redirects:
-		self._wiki_redirects.remove( self._wiki_concept )
-	    if self._wiki_concept in self._wiki_links:
-		self._wiki_links.remove( self._wiki_concept )
-	    self._wiki_links = self._wiki_links.difference(self._wiki_redirects)  # remove redirects from links
-
-	    print "SELECT %s(%s, ARRAY[%s]::text[], ARRAY[%s]::text[]);" % (self.INSERT_FUNCTION,
-		       self._wiki_concept,
-		       ",".join( self._wiki_redirects ),
-		       ",".join( self._wiki_links ), )
-            #else:
-            #        if self._wiki_concept == "'template:australian rules football'":
-            #        	self.prn = True
-
-            self._clear()
-
-                                                  
+        #if self.prn:
+# 	    if self._wiki_concept in self._wiki_redirects:
+# 		self._wiki_redirects.remove( self._wiki_concept )
+# 	    if self._wiki_concept in self._wiki_links:
+# 		self._wiki_links.remove( self._wiki_concept )
+# 	    self._wiki_links = self._wiki_links.difference(self._wiki_redirects)  # remove redirects from links
+# 
+# 	    print "SELECT %s(%s, ARRAY[%s]::text[], ARRAY[%s]::text[]);" % (self.INSERT_FUNCTION,
+# 		       self._wiki_concept,
+# 		       ",".join( self._wiki_redirects ),
+# 		       ",".join( self._wiki_links ), )
+#             #else:
+#             #        if self._wiki_concept == "'template:australian rules football'":
+#             #        	self.prn = True
+# 
+#             self._clear()
 
     def char_data(self, data):
         if self.container == 'title':
@@ -94,7 +95,7 @@ class WikiParse(object):
         self.p.ParseFile(fhandle)
 
 
-
-w = WikiParse()
-w.parse(stdin)
+if __name__ == '__main__':
+    w = WikiParse()
+    w.parse(stdin)
 

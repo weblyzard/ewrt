@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 
-import unittest, re
-from __init__ import Technorati
+import unittest
+import time
+
 from lxml import etree
 from datetime import date, timedelta
-import time
+
+from eWRT.ws.technorati import Technorati
+
 
 TECHNORATI_TEST_TAGS = ['linux', ('debian', 'linux') ]
 

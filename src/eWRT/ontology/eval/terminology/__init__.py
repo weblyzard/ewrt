@@ -18,9 +18,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from eWRT.stat.coherence import Coherence, DiceCoherence, PMICoherence
 from rdflib import Graph
 from rdflib import Namespace
+
+from eWRT.stat.coherence import Coherence, DiceCoherence, PMICoherence
+
 
 NS_RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
 NS_WL   = Namespace("http://www.weblyzard.com/2005/03/31/wl#")

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 ## Result is an item of ResultSet
-class Result:
+class Result(object):
 
     ## constructor 
     # @parameter id, name

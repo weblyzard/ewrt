@@ -106,8 +106,8 @@ def computeHybridOntology( ff, topConcepts ):
         f.write( g.serialize() )
 
     unusedConcepts = allTopConcepts.difference( usedTopConcepts )
-    print "# of unused concepts: %d" % len( unusedConcepts ) 
-    print ", ".join( list(unusedConcepts) )
+    print("# of unused concepts: %d" % len(unusedConcepts)) 
+    print(", ".join( list(unusedConcepts) ))
 
 
 def _addUseCaseSpecificUnusedConcepts( g ):
@@ -124,6 +124,7 @@ def _addUseCaseSpecificUnusedConcepts( g ):
     g.add( (getUrl("events"), getUrl("related"), getUrl("piper alpha")) )
 
 # main
-topConcepts = map(None, map(str.strip, open( IMPORTANT_CONCEPTS_LIST )) )
-computeHybridOntology( glob(ONTOLOGY_DIR +"/*.cxl"), topConcepts )
+if __name__ == '__main__':
+    topConcepts = map(None, map(str.strip, open( IMPORTANT_CONCEPTS_LIST )) )
+    computeHybridOntology( glob(ONTOLOGY_DIR +"/*.cxl"), topConcepts )
 

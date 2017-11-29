@@ -17,16 +17,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-from __init__ import Delicious
 import unittest
+
+from nose.plugins.attrib import attr
+
+from eWRT.ws.delicious import Delicious
+
 
 DELICIOUS_TEST_URLS = ( 'http://www.iaeste.at', 'http://www.wu-wien.ac.at', 'http://www.heise.de', 
                         'http://www.kurier.at', 'http://news.bbc.co.uk', )
 
 DELICIOUS_TEST_TAGS = [("linux",), ("information",), ("information", "retrieval"),("linux", "debian"),("algore",)]
 
-class TestDelicious( unittest.TestCase ):
+RELATED_TAGS_DELICIOUS_PAGE = './data/delicious_climate_related_tags.html'
+    
+class TestDelicious(unittest.TestCase):
 
     def test_url_info(self):
         for url in DELICIOUS_TEST_URLS:
@@ -42,7 +47,34 @@ class TestDelicious( unittest.TestCase ):
         print '### Testing related_tags ###'
         for tags in DELICIOUS_TEST_TAGS:
             print '%s has related tags: %s' % (tags, Delicious.getRelatedTags( tags ))
+    
+    def test_tag_splitting(self):
+        """ verifies the correct handling of tags containing spaces
+            i.e. (t1, t2, t3) == (t1, "t2 t3") """
+        d = Delicious._parse_tag_url
+        print d( ("debian linux") )
+        assert d( ("debian", "linux" )) == d( ("debian linux", ) )
+        assert d( ("t1", "t2", "t3") ) == d( ("t1", "t2 t3") )
+
+    def test_ngram_related_tags(self):
+        """ tests support for related tags for n-grams """
+        assert len( Delicious().getRelatedTags( ("climate", "change") ) ) > 0
+
+        content = open( TestDelicious.RELATED_TAGS_DELICIOUS_PAGE ).read()
+        related_tags = Delicious._getNGramRelatedTags( content )
+
+        assert 'global' in related_tags
+        assert 'evidence' in related_tags
+        assert 'vegetarian' in related_tags
+        assert 'sustainability' in related_tags
+
+        assert 'linux' not in related_tags
+
+    @attr("remote")
+    def test_critical_tag_names(self):
+        """ tests tag names which contain slashes, quotes, etc """
+        assert Delicious.getTagInfo( ("consequence/frequency matrix", ) ) != None
+        assert Delicious.getTagInfo( ("it's", )) != None
 
 if __name__ == '__main__':
     unittest.main()
-

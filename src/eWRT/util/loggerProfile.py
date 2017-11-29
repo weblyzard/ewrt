@@ -18,7 +18,11 @@
 '''
 Pre-defined logging profiles
 '''
+from __future__ import print_function
+
 import logging, unittest
+
+from six import string_types
 from os import remove, makedirs
 from os.path import exists, dirname
 
@@ -96,7 +100,7 @@ def init_logging(log_file=DEFAULT_LOG_FILE, log_level=None,
     if len(logger.handlers):
         logger.handlers = []
 
-    if log_level and isinstance(log_level, basestring):
+    if log_level and isinstance(log_level, string_types):
         log_level = log_level.upper()
         if log_level in LOG_LEVELS:
             log_level = LOG_LEVELS[log_level]
@@ -145,33 +149,3 @@ def init_logging(log_file=DEFAULT_LOG_FILE, log_level=None,
         logger.error('Couldnt create LogHandler %s: %s' % (log_file, e))
 
     return logger
-
-
-class TestLogger(unittest.TestCase):
-
-    LOG_FNAME = 'test.log'
-
-    def test_stdout_logger(self):
-        ''' tests the logger '''
-
-        logger = get_stdout_logger(__file__)
-        logger.debug('debug')
-        logger.info('info')
-        logger.warning('warning')
-        logger.error('error')
-        logger.critical('critical')
-
-    def test_file_logger(self):
-        ''' tests the file logger '''
-        logger = get_file_logger(__file__ + "2", self.LOG_FNAME)
-        logger.error('test-message')
-
-        with open(self.LOG_FNAME) as f:
-            content = str(f.read())
-            assert 'test-message' in content
-
-        remove(self.LOG_FNAME)
-
-
-if __name__ == '__main__':
-    unittest.main()

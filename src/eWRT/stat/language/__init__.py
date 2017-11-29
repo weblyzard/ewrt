@@ -7,9 +7,10 @@
 language detection
 '''
 import re
+import unittest
+
 from glob import glob
 from os.path import basename
-import unittest
 
 from eWRT.util.module_path import get_resource
 

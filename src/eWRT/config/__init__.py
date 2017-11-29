@@ -110,8 +110,14 @@ BBC_CORPUS_TIMEFORMAT = "%a, %d %b %Y %H:%M:%S %Z"
 # COMPRESSED VERSION OF THE CORPUS
 BBC_CORPUS_COMPRESSED = "data/news.bbc.co.uk.tar.gz"
 
+BING_USERNAME = ""
+BING_API_KEY = ""
+
 # geonames
 GEO_ENTITY_SEPARATOR = ">"
+
+GOOGLE_USER = ""
+GOOGLE_PASS = ""
 
 # facebook
 FACEBOOK_API_KEY = "api-key"
@@ -119,6 +125,8 @@ FACEBOOK_SECRET_KEY = "secret-key"
 FACEBOOK_SESSION_KEY = "session-key"
 FACEBOOK_ACCESS_KEY = "access-key"
 FACEBOOK_APPLICATION_ID = "application-id"
+
+REUTERS_DATA_DIR = ""
 
 SNMP_HOST_CFG = {'server'          : 'localhost',
                  'port'            : '162',
@@ -135,6 +143,8 @@ TWITTER_CONSUMER_SECRET = ''
 TWITTER_ACCESS_TOKEN    = ''
 TWITTER_TOKEN_SECRET    = ''
 
+YAHOO_APP_ID = ''
+YAHOO_SEARCH_URL = ''
 # --------------------------------------------------------------------------
 #
 #  Overwrite global config based on 

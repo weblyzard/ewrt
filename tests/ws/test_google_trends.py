@@ -1,4 +1,6 @@
-from __init__ import GoogleTrends, LOADED
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+from eWRT.ws.googletrends import GoogleTrends, LOADED
 
 class TestGoogleTrends( object ):
     ''' Testing GoogleTrends webservice '''

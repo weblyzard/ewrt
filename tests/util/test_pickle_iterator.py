@@ -1,11 +1,13 @@
 #!/usr/bin/env python
-
-from eWRT.util.pickleIterator import *
+import unittest
 
 from tempfile import mkdtemp
-from unittest import main, TestCase
 from random import randint
 from os.path import join
+from unittest.case import TestCase
+
+from eWRT.util.pickleIterator import ReadPickleIterator, WritePickleIterator
+
 
 class TestPickle(TestCase):
 
@@ -40,6 +42,5 @@ class TestPickle(TestCase):
         for element in self.test_dict:
             pw.dump(element)
 
-
 if __name__ == '__main__':
-    main()
+    unittest.main()

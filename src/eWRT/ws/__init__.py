@@ -3,6 +3,7 @@
 Web Service access.
 
 """
+from __future__ import print_function
 
 
 class AbstractWebSource(object):

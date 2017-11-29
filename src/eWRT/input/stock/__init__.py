@@ -19,6 +19,7 @@ from twisted.python.text import strFile
 
 from eWRT.util.module_path import get_resource
 
+
 extract_index_name = lambda fname: basename(fname).split(".")[0]
 DATA_DIR = get_resource(__file__, ('data', ) )
 
