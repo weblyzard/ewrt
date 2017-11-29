@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 import unittest
 
+from nose.plugins.attrib import attr
+
+
 class TestWikiDistance(unittest.TestCase):
     
     def __init__(self):
