@@ -153,6 +153,9 @@ TWITTER_TOKEN_SECRET    = ''
 
 YAHOO_APP_ID = ''
 YAHOO_SEARCH_URL = ''
+
+YOUTUBE_API_KEY = ''
+
 # --------------------------------------------------------------------------
 #
 #  Overwrite global config based on 

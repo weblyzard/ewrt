@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import os
 import unittest
 
 from eWRT.ws.opencalais import Calais
@@ -50,15 +51,13 @@ class TestCalais( unittest.TestCase ):
  ''' 
     
     def setUp(self):
-        if not len(OPEN_CALAIS_KEY):
-            print("Skipping TestCalais: no api key provided")
-            return
-        self.calais = Calais(submitter='test', api_key=OPEN_CALAIS_KEY)
+        self.api_key = os.getenv('OPEN_CALAIS_KEY') or OPEN_CALAIS_KEY
+        if not self.api_key or len(self.api_key)==0:
+            raise unittest.SkipTest('Skipping TestCalais: missing API key')
+        self.calais = Calais(submitter='test', api_key=self.api_key)
 
-    def testAnalyze(self):
-        if not len(OPEN_CALAIS_KEY):
-            print("Skipping TestCalais: no api key provided")
-            return
+    def test_analyze(self):
+        ''' '''
         things = self.calais.analyze(self.test_html, 'text/html')
         print things
         assert len(things) == 6
