@@ -6,10 +6,10 @@ Created on Feb 3, 2012
 
 from json import loads
 from inspect import getargspec
-
 from twisted.web import resource
 
-from compiler.ast import Function
+from eWRT.ws.rest.server.exception import (MissingArgumentErrorMsg,
+                                           UnknownArgumentErrorMsg)
 
 class WeblyzardService(resource.Resource):
     '''

@@ -297,7 +297,7 @@ class TestRetrieve(unittest.TestCase):
                 ('http://heinz:secret@irgendwas.com', 'heinz', 'secret'))
 
         for test_url, exp_user, exp_passwd in urls:
-            print ('testing url ' + test_url)
+            print('testing url ' + test_url)
             url, user, passwd = Retrieve.get_user_password(test_url)
             assert user == exp_user
             assert passwd == exp_passwd

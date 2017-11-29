@@ -21,9 +21,11 @@
 #
 # -----------------------------------------------------------------------------------
 
-from sys import stdin
 import re
 import xml.parsers.expat
+
+from sys import stdin
+
 
 quote_str = lambda x: "'%s'" % x.replace("'", "''").replace("_", " ").replace("\\", "").encode("utf8").lower().replace("\"", "")
 

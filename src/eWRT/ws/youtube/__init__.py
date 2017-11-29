@@ -5,6 +5,9 @@ Created on 25.09.2012
 
 @author: Norman Süsstrunk, Heinz-Peter Lang, Albert Weichselbraun
 '''
+from __future__ import print_function
+
+import os
 import unittest
 import logging
 import dateutil.parser as dateparser
@@ -18,13 +21,8 @@ from cPickle import dump
 from time import sleep
 from gdata.youtube.service import YouTubeService, YouTubeVideoQuery
 from apiclient.discovery import build
-# from urllib import urlencode, quote_plus
 
 from eWRT.ws.WebDataSource import WebDataSource
-import os
-
-
-from __future__ import print_function
 
 
 def get_value(key, dictionary):

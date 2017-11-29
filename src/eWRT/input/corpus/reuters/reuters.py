@@ -106,7 +106,7 @@ class ReutersGetZipCorpus(object):
 if __name__ == '__main__':
     import sys
     for nr,t in enumerate(ReutersGetZipCorpus( "./eval", "it") ):
-        print t
+        print(t)
         sys.exit(0)
 
     for nr,t in enumerate(ReutersGetCorpus("de")):

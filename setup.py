@@ -21,7 +21,12 @@ setup(
                         'oauth2client==2.2.0', #YT
                         'google-api-python-client==1.4.0' #YT
                         ],
-
+      classifiers = [
+                    'Programming Language :: Python',
+                    'Programming Language :: Python :: 2',
+                    'Programming Language :: Python :: 2.7',
+                    ],
+      
       ###########################################
       ## Run unittests
       test_suite='nose.collector',

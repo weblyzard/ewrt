@@ -80,7 +80,7 @@ class FacebookWS(object):
         @return: fetched data
         '''
 
-        if not args.has_key('access_token'):
+        if not 'access_token' in args:
             # args['access_token'] = "b07f413baf9650d2363f1c8813ece6da" #very unflexible, its hardcoded...
             args['access_token'] = FACEBOOK_ACCESS_KEY
 
@@ -158,7 +158,7 @@ class FacebookWS(object):
             
             if isinstance(fetched, dict):
 
-                if fetched.has_key('data'):
+                if 'data' in fetched:
                     if not len(fetched['data']):
                         return result
                     
@@ -166,7 +166,7 @@ class FacebookWS(object):
 
                     # process paging
                     if len(result) < maxDoc:
-                        if fetched.has_key('paging') and fetched['paging'].has_key('previous'):
+                        if 'paging' in fetched and 'previous' in fetched['paging']:
                             result = (cls._requestURL(fetched['paging']['previous'],
                                                       maxDoc, result))
                             print 'After processing paging', len(result)
@@ -212,14 +212,14 @@ class TestFacebookWS(unittest.TestCase):
         ''' tests fetching the profile '''
         result = self.fb.makeRequest('me')
         assert len(result) == 1
-        assert result[0].has_key('first_name')
+        assert 'first_name' in result[0]
 
     def testRequestUrl(self):
         ''' tests request url '''
         url = 'https://graph.facebook.com/me?access_token=%s' % FACEBOOK_ACCESS_KEY
         result = self.fb._requestURL(url)
         assert len(result) == 1
-        assert result[0].has_key('first_name')
+        assert 'first_name' in result[0]
 
     def testBadRequest(self):
         ''' tests that a bad request won't disturb the program'''

@@ -135,6 +135,8 @@ TWITTER_CONSUMER_SECRET = ''
 TWITTER_ACCESS_TOKEN    = ''
 TWITTER_TOKEN_SECRET    = ''
 
+YAHOO_APP_ID = ''
+YAHOO_SEARCH_URL = ''
 # --------------------------------------------------------------------------
 #
 #  Overwrite global config based on 

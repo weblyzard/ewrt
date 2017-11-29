@@ -2,15 +2,17 @@
 
 """ ontology-vis
     visualizes ontologies """
+import sys
 
-from eWRT.input.conv.cxl import XCL2RDF
-from eWRT.ontology.visualize import GraphvizVisualize, OutputQueries
 from glob import glob
 from os import path
 from os import mkdir
 from getopt import getopt, GetoptError
 from rdflib.Graph import Graph
-import sys
+
+from eWRT.input.conv.cxl import XCL2RDF
+from eWRT.ontology.visualize import GraphvizVisualize, OutputQueries
+
 
 # a directory containing all cxl ontology files
 IMG_OUTPUT_DIR = "./images"
@@ -52,19 +54,20 @@ def usage():
     print "ontology-vis.py -d [ontology-directory] -f [ontology-file] -h"
 
 # main
-try:
-    opts, args = getopt( sys.argv[1:], "hd:f:", ["help", "input-dir=", "input-file="] )
-except GetoptError, err:
-    print str(err)
-    usage()
-    sys.exit(2)
-
-for o, a in opts:
-    if o in ("-d", "--input-dir"):
-        visualizeOntologies( glob(a +"/*.cxl") )
-    elif o in ("-f", "--input-file"):
-        visualizeOntologyFile( a )
-    elif o in ("-h", "--help"):
+if __name__ == '__main__':
+    try:
+        opts, args = getopt( sys.argv[1:], "hd:f:", ["help", "input-dir=", "input-file="] )
+    except GetoptError, err:
+        print str(err)
         usage()
-        sys.exit()
+        sys.exit(2)
+    
+    for o, a in opts:
+        if o in ("-d", "--input-dir"):
+            visualizeOntologies( glob(a +"/*.cxl") )
+        elif o in ("-f", "--input-file"):
+            visualizeOntologyFile( a )
+        elif o in ("-h", "--help"):
+            usage()
+            sys.exit()
 

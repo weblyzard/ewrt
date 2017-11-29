@@ -31,6 +31,7 @@ from socket import setdefaulttimeout
 
 from eWRT.access.http import Retrieve
 
+
 # set higher timeout values
 WS_DEFAULT_TIMEOUT = 900
 
@@ -170,6 +171,12 @@ class MultiRESTClient(object):
             return True
         except:
             return False
+        
+    def status(self):
+        '''
+        :returns: the status of the Recognize web service.
+        '''
+        return self.request(path='status')
 
     @classmethod
     def fix_urls(cls, urls, user=None, password=None):

@@ -18,9 +18,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from eWRT.access.http import *
 import unittest
 import pytest
+import urllib2
+
+from eWRT.access.http import DEFAULT_TIMEOUT, Retrieve, setdefaulttimeout, log
+
 
 class TestRetrieve(unittest.TestCase):
     ''' tests the http class '''

@@ -25,16 +25,18 @@
 
 __version__ = "$Header$"
 
-from eWRT.access.http import Retrieve
 from urllib import urlopen, urlencode, quote
-from eWRT.ws.TagInfoService import TagInfoService
-from eWRT.config import YAHOO_APP_ID, YAHOO_SEARCH_URL
-from eWRT.input.conv.html import HtmlToText
 from urllib2 import URLError
 from nose.plugins.attrib import attr
 from socket import setdefaulttimeout
-setdefaulttimeout(60)
 
+from eWRT.ws.TagInfoService import TagInfoService
+from eWRT.config import YAHOO_APP_ID, YAHOO_SEARCH_URL
+from eWRT.input.conv.html import HtmlToText
+from eWRT.access.http import Retrieve
+
+
+setdefaulttimeout(60)
 
 class Yahoo(TagInfoService):
     """ interfaces with yahoo's search service 
