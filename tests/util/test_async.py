@@ -1,13 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import glob
 import time
+import unittest
 
+from glob import glob
 from os.path import join, exists
 from shutil import rmtree
 
 from eWRT.util.async import Async
-import unittest
 
 
 class TestAsync(unittest.TestCase):
@@ -45,7 +45,7 @@ class TestAsync(unittest.TestCase):
         for x in xrange(2):
             async.post( ["/bin/echo", "hallo"] )
 
-        print(glob( join(self.TEST_CACHE_DIR, "debug*") ))
+        print(glob( join(self.TEST_CACHE_DIR, "debug*")))
         assert len( glob( join(self.TEST_CACHE_DIR, "debug*.out") )  ) == 2
         assert len( glob( join(self.TEST_CACHE_DIR, "debug*.err") )  ) == 2
         

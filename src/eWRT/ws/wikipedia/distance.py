@@ -3,7 +3,7 @@
    @package eWRT.ws.wikipedia.distance
    wikipedia "click" distance between concepts
 """
-
+ 
 # -----------------------------------------------------------------------------------
 # (C)opyrights 2010 by Albert Weichselbraun <albert@weichselbraun.net>
 #
@@ -21,23 +21,23 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # -----------------------------------------------------------------------------------
-
+ 
 __author__   = "albert"
 __revision__ = "$Revision: 1 $"
-
+ 
 from eWRT.access.db import PostgresqlDb
 from eWRT.config import DATABASE_CONNECTION
-
+ 
 class WikiDistance(object):
-    
+     
     escape_terms = staticmethod( lambda tt:", ".join( ["'%s'" % t.replace("'", "''") for t in tt]) ) 
-    
+     
     def __init__(self):
         """ open the database connection """
         dbParam = DATABASE_CONNECTION['wikipedia'].copy()
         dbParam['connect'] = False
         self.db = PostgresqlDb( **dbParam)
-
+ 
     def isSibling(self, t1, t2):
         """ determines whether the given concepts are siblings
             @param[in] t1   first term
@@ -49,7 +49,7 @@ class WikiDistance(object):
             q="SELECT * FROM vw_siblings WHERE dname IN (%s) AND sname IN (%s)" % (tt, tt)
             cnt = len(c.query(q))
         return cnt > 0 
-
+ 
     def isSameAs(self, t1, t2):
         """ determines whether the given terms refer to the same concept
             @param[in] t1   first term
@@ -61,12 +61,12 @@ class WikiDistance(object):
             q="SELECT * FROM vw_sameas WHERE dname IN (%s) AND sname IN (%s)" % (tt, tt)
             cnt = len(c.query(q))
         return cnt > 0 
-
-
+ 
+ 
 def p_isSibling( concepts ):
     """ 
         @param[in] concepts a tuple containing the two concepts to check
-
+ 
         @remarks
         helper function for the testMultiProcessing test
     """

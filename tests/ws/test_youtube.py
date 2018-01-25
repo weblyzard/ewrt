@@ -12,6 +12,7 @@ import os
 from datetime import datetime, timedelta
 
 from eWRT.ws.youtube import convert_date, YouTube_v3
+from eWRT.config import YOUTUBE_API_KEY
 
                     
 logger = logging.getLogger('eWRT.ws.youtube')
@@ -19,12 +20,13 @@ logger = logging.getLogger('eWRT.ws.youtube')
 class YouTubeTest(unittest.TestCase):
         
     def setUp(self):
-        api_key = os.getenv('YOUTUBE_API_KEY')
+        api_key = os.getenv('YOUTUBE_API_KEY') or YOUTUBE_API_KEY
+        if not api_key or len(api_key)==0:
+            raise unittest.SkipTest('Skipping YouTubeTest: missing API key')
         self.search_terms = ["Linus Torvalds","Ubuntu"]
         self.youtube = YouTube_v3(api_key=api_key)
         logger.addHandler(logging.StreamHandler())
-    
-    
+
     def test_search_v3(self):
         search_terms = 'FIFA'
         since_date = None
@@ -128,7 +130,6 @@ class YouTubeTest(unittest.TestCase):
     def test_comments(self):
         comments = self.youtube._get_video_comments(video_id="yI4g8Ti6eTM")
         assert len(comments)
-
 
 if __name__ == "__main__":
     unittest.main()

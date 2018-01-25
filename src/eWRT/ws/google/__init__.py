@@ -42,8 +42,8 @@ from lxml import etree
 
 from eWRT.access.http import Retrieve
 
-SEARCH_URL = 'http://www.google.com/search?hl=en&ie=UTF-8&lr=&tbm=blg{maxAge}&q={searchTerm}&num={number}&safe=active&start={start}'
-
+SEARCH_URL = 'http://www.google.com/search?hl=en&ie=UTF-8&q={searchTerm}&num={number}&safe=active&start={start}'
+#
 XPATHS = {'blog_url': './h3[@class="r"]/a',
           'blog_date': './div[@class="s"]/span[@class="f"]',
           'search_result': './/div[@id="ires"]/ol',
@@ -107,7 +107,7 @@ class GoogleBlogSearch(object):
 
         logger.debug('Searching URL %s' % url)
         html_content = GoogleBlogSearch.get_content(url)
-        print html_content
+#         print html_content
         tree = etree.HTML(html_content)
         resultList = tree.xpath('.//div[@id="ires"]/ol')
 
@@ -131,8 +131,10 @@ class GoogleBlogSearch(object):
                         blogLink['source'] = 'GoogleBlogSearch - Keyword "%s"' % searchTerm
                         blogLink['abstract'] = abstract
                         blogLink['reach'] = '0'
-                        blogLink['date'] = GoogleBlogSearch.get_link_date(element)
-    
+                        try:
+                            blogLink['date'] = GoogleBlogSearch.get_link_date(element)
+                        except IndexError as e:
+                            pass
                         urls.append(blogLink)
     
                         counter += 1
