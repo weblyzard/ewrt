@@ -172,12 +172,6 @@ class MultiRESTClient(object):
         except:
             return False
         
-    def status(self):
-        '''
-        :returns: the status of the Recognize web service.
-        '''
-        return self.request(path='status')
-
     @classmethod
     def fix_urls(cls, urls, user=None, password=None):
         ''' fixes the urls and put them into the correct format, to maintain
