@@ -1,31 +1,37 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import os
 import unittest
 
 from eWRT.ws.facebook.fbBatchRequest import FbBatchRequest
 from eWRT.ws.facebook import FacebookWS
+from eWRT.config import FACEBOOK_ACCESS_KEY
 
 
 class TestFacebookBatchRequest(unittest.TestCase):
     
+    def setUp(self):
+        self.api_key = os.getenv('FACEBOOK_ACCESS_KEY') or FACEBOOK_ACCESS_KEY
+        if not self.api_key or len(self.api_key)==0:
+            raise unittest.SkipTest('Skipping TestFacebookBatchRequest: missing API key')
+        self.fb_batch_client = FbBatchRequest(access_token=self.api_key)
+
     def test_bad_request(self):
-        access_token = "AAAElj9ZBZCquoBAGkKlcPvJsUCpyAZBxz6nsOYr8LAmpIj9Q9EZCKl9xVAYmlXGh2UQvhVellSWsZALPn6V73ZAZBiaxlwqkWlUjGVLzAHd7gZDZD"
-        fbBatchRequest = FbBatchRequest(access_token)
-        
+        ''' '''
         try: 
-            fbBatchRequest.run_search('Linus Torvalds')
+            self.fb_batch_client.run_search('Linus Torvalds')
         except Exception as e: 
             print 'thats ok: %s' % e
             assert True
     
     def test_batch_search2(self):
-        fbBatchRequest = FbBatchRequest()
-        result = fbBatchRequest.run_search(['Wien'], 'post', 100)
+        ''' '''
+        result = self.fb_batch_client.run_search(['Wien'], 'post', 100)
         assert len(result) > 0
     
     def test_feed_mirroring(self):
-        fbBatchRequest = FbBatchRequest()
-        result = fbBatchRequest.run_search('107961012601035/feed', 
+        ''' '''
+        result = self.fb_batch_client.run_search('107961012601035/feed', 
                                            objectType='path',
                                            limit=10)
         
@@ -41,13 +47,17 @@ class TestFacebookBatchRequest(unittest.TestCase):
         
         fbWSList = []
         
+        if len(FACEBOOK_ACCESS_KEY)==0:
+            print('skipped TestFacebookBatchRequest::test_search due to missing facebook credentials')
+            return
+        
         for term in terms: 
             fbWSList.append(FacebookWS(term, 'post', 1353954200, 100))
         
-        result = FbBatchRequest._send_post(fbWSList)
+        result = self.fb_batch_client._send_post(access_token=self.api_key,
+                                                 fbWSList=fbWSList)
         print result
         print len(result)
         
 if __name__ == "__main__":
-
     unittest.main()

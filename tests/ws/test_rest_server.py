@@ -9,16 +9,16 @@ from eWRT.ws.rest import MultiRESTClient, RESTClient
     
 class TestRESTClient(unittest.TestCase):
 
-    TEST_URL = 'http://test.webdav.org/auth-basic/'
-    TEST_USER = 'user1'
-    TEST_PASS = 'user1'
+    TEST_URL = 'http://httpbin.org/basic-auth/user/passwd'
+    TEST_USER = 'user'
+    TEST_PASS = 'passwd'
 
     def test_retrieve(self):
         r = RESTClient(self.TEST_URL, self.TEST_USER, self.TEST_PASS)
         try:
             r._json_request(self.TEST_URL)
         except HTTPError as e:
-            # authentification has been succeeded, but no object could
+            # authentification succeeded, but no object could
             # be found
             assert '404: Not Found' in str(e)
 

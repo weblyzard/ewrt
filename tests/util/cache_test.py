@@ -5,7 +5,6 @@
 import pytest
 import unittest
 
-from unittest.case import TestCase
 from multiprocessing import Pool
 from shutil import rmtree
 from os.path import exists, join
@@ -18,7 +17,7 @@ from eWRT.util.cache import (MemoryCache, MemoryCached, DiskCached, DiskCache,
 
 get_cache_dir = lambda no: get_resource(__file__, ('.unittest-temp%d' % (no), ))
 
-class TestCached(TestCase):
+class TestCached(unittest.TestCase):
     ''' tests the MemoryCached Decorator '''
     @staticmethod
     def add(a=2, b=3): 
@@ -77,18 +76,17 @@ class SkipTestDiskCached(TestCached):
     def sub(a, b):
         return a-b 
     
-    def __init__(self):
+    def setUp(self):
         self.diskCache = DiskCache(get_cache_dir(4))
 
-    def teardown(self):
+    def tearDown(self):
         ''' remove the cache directories '''
         for cacheDirNo in range(10):
             if exists(get_cache_dir(cacheDirNo)):
                 rmtree(get_cache_dir(cacheDirNo))
         
     def testObjectKeyGeneration(self):
-        ''' ensures that the diskcache object's location does not change '''
-        
+        ''' ensures that the diskcache object's location does not change '''   
         CACHE_DIR = get_cache_dir(3)
         d = DiskCache(CACHE_DIR)
         getCacheLocation = lambda x: join(CACHE_DIR, Cache.getObjectId(x))
@@ -210,7 +208,7 @@ def num_to_string(n):
     return(str(n))
 
 @pytest.mark.skip("requires local redis instance running")
-class TestRedisCache(TestCase):
+class TestRedisCache(unittest.TestCase):
  
     def test_int_type_preservation(self):
         x = dummy_function(1)

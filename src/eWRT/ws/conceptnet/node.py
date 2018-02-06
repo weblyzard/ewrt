@@ -41,6 +41,10 @@ class Node(object):
     @staticmethod
     def lang(node_url):
         ''' ::returns: the language of the given node_url '''
+        if isinstance(node_url, dict):
+            if not 'language' in node_url:
+                return 'en'
+            return node_url['language']
         lang = node_url.split("/")
         if len(lang) < 3:
             warn('Cannot extract language for node %s.' % (node_url, ))
