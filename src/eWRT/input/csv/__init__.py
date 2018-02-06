@@ -29,4 +29,4 @@ def get_csv_data(csv_file, column_expression_list, filter_expression):
     '''
     return [[eval(column_expression) for column_expression
              in column_expression_list]
-             for row in DictReader(csv_file) if eval(filter_expression)]
+            for row in DictReader(csv_file) if eval(filter_expression)]

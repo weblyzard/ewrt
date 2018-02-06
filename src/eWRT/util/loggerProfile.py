@@ -20,13 +20,14 @@ Pre-defined logging profiles
 '''
 from __future__ import print_function
 
-import logging, unittest
+import logging
 
 from six import string_types
-from os import remove, makedirs
+from os import makedirs
 from os.path import exists, dirname
 
 DEFAULT_LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+
 
 def get_stdout_logger(name, level=logging.DEBUG):
     '''
@@ -45,6 +46,7 @@ def get_stdout_logger(name, level=logging.DEBUG):
 
     logger.addHandler(ch)
     return logger
+
 
 def get_file_logger(name, filename, level=logging.DEBUG):
     '''
@@ -66,6 +68,7 @@ def get_file_logger(name, filename, level=logging.DEBUG):
     logger.addHandler(ch)
     return logger
 
+
 LOG_LEVELS = {'CRITICAL': logging.CRITICAL,
               'ERROR': logging.ERROR,
               'WARNING': logging.WARNING,
@@ -76,6 +79,7 @@ LOG_FORMAT = {'standard': '%(asctime)s %(levelname)s %(pathname)s:%(lineno)d.%(f
 EWRT_LOG_LVL = 65
 DEFAULT_LOG_LEVEL = 'ERROR'
 DEFAULT_LOG_FILE = '/tmp/eWRT.log'
+
 
 def init_logging(log_file=DEFAULT_LOG_FILE, log_level=None,
                  max_bytes=102400, max_files=5, log_format=None):

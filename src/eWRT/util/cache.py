@@ -19,7 +19,6 @@ from time import time
 from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
 
 
-
 # (C)opyrights 2008-2015 by Albert Weichselbraun <albert@weichselbraun.net>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -38,17 +37,16 @@ __author__ = "Albert Weichselbraun"
 __copyright__ = "GPL"
 
 
-
-
-
 try:
     from cPickle import dump, load
 except ImportError:
     from pickle import dump, load
 
-get_unique_temp_file = lambda fname: join(dirname(fname),
-                                          "_%s-%s-%d" % (basename(fname),
-                                          gethostname(), getpid()))
+
+def get_unique_temp_file(fname): return join(dirname(fname),
+                                             "_%s-%s-%d" % (basename(fname),
+                                                            gethostname(), getpid()))
+
 
 class Cache(object):
     ''' An abstract class for caching functions '''
@@ -97,7 +95,6 @@ class Cache(object):
         return sha1(repr(obj).encode("utf8")).hexdigest()
 
 
-
 class DiskCache(Cache):
     ''' @class DiskCache
         Caches abitrary functions based on the function's arguments (fetch) or
@@ -123,7 +120,6 @@ class DiskCache(Cache):
         self._cache_hit = 0
         self._cache_miss = 0
 
-
     def fetch(self, fetch_function, *args, **kargs):
         ''' fetches the object with the given id, querying
              a) the cache and
@@ -140,18 +136,15 @@ class DiskCache(Cache):
         objectId = self.getKey(*args, **kargs)
         return self.fetchObjectId(objectId, fetch_function, *args, **kargs)
 
-
     def __contains__(self, key):
         ''' returns whether the key is already stored in the cache '''
         cache_file = self._get_fname(self.getObjectId(key))
         return exists(cache_file)
 
-
     def __delitem__(self, key):
         ''' removes the given item from the cache '''
         cache_file = self._get_fname(self.getObjectId(key))
         remove(cache_file)
-
 
     def fetchObjectId(self, key, fetch_function, *args, **kargs):
         ''' fetches the object with the given id, querying
@@ -202,7 +195,6 @@ class DiskCache(Cache):
         remove(temp_file)
         return obj
 
-
     def _remove(self, fname):
         ''' removes the given files (if it exists) '''
         try:
@@ -210,11 +202,9 @@ class DiskCache(Cache):
         except OSError:
             pass
 
-
     def getCacheStatistics(self):
         ''' returns statistics regarding the cache's hit/miss ratio '''
         return {'cache_hits': self._cache_hit, 'cache_misses': self._cache_miss}
-
 
     def _get_fname(self, obj_id):
         ''' Computes the filename of the file with the given
@@ -225,14 +215,15 @@ class DiskCache(Cache):
         '''
         assert len(obj_id) >= self.cache_nesting_level
 
-        obj_dir = join(*([self.cache_dir] + list(obj_id[:self.cache_nesting_level])))
+        obj_dir = join(
+            *([self.cache_dir] + list(obj_id[:self.cache_nesting_level])))
         if not exists(obj_dir):
             try:
                 makedirs(obj_dir)
             except OSError:            # required for multithreading
                 pass
 
-        return join(obj_dir, obj_id+self.cache_file_suffix)
+        return join(obj_dir, obj_id + self.cache_file_suffix)
 
 
 class DiskCached(object):
@@ -253,7 +244,8 @@ class DiskCached(object):
             ::param cache_nesting_level: optional number of nesting level (0)
             ::param cache_file_suffix:   optional suffix for cache files
         '''
-        self.cache = DiskCache(cache_dir, cache_nesting_level, cache_file_suffix)
+        self.cache = DiskCache(
+            cache_dir, cache_nesting_level, cache_file_suffix)
 
     def __call__(self, fn):
         self.cache.fn = fn
@@ -307,7 +299,8 @@ class MemoryCache(Cache):
         if self.max_cache_size == 0 or len(self._cacheData) <= self.max_cache_size:
             return
 
-        (key, _) = sorted(self._usage.items(), key=itemgetter(1), reverse=True).pop()
+        (key, _) = sorted(self._usage.items(),
+                          key=itemgetter(1), reverse=True).pop()
         del self._usage[key]
         del self._cacheData[key]
 
@@ -318,6 +311,7 @@ class MemoryCached(MemoryCache):
           @MemoryCached or @MemoryCached(max_cache_size)
           def myfunction(*args):            ...
     '''
+
     def __init__(self, arg):
         ''' initializes the MemoryCache object
             ::param arg: either the max_cache_size or the function to call
@@ -332,6 +326,7 @@ class MemoryCached(MemoryCache):
     def __call__(self, *args, **kargs):
         if self._fn == None:
             fn = args[0]
+
             def wrapped_fn(*args, **kargs):
                 return self.fetch(fn, *args, **kargs)
             return wrapped_fn
@@ -371,7 +366,6 @@ class IterableCache(DiskCache):
 
         return self
 
-
     def next(self):
         return self._read_next_element() if self._cached else self._cache_next_element()
 
@@ -389,7 +383,6 @@ class IterableCache(DiskCache):
             self._pickle_iterator.close()
             raise StopIteration
 
-
     def _read_next_element(self):
         ''' returns the next element from the cache '''
         self._cache_hit += 1
@@ -398,7 +391,8 @@ class IterableCache(DiskCache):
         except IOError:
             self._pickle_iterator.close()
             raise StopIteration
-        
+
+
 class RedisCache(Cache):
 
     def __init__(self, max_cache_size=0, fn=None, host='localhost', port=6379, db=0):
@@ -438,10 +432,11 @@ class RedisCache(Cache):
         if self.max_cache_size == 0 or self._cacheData.dbsize() < self.max_cache_size:
             return
         usage_dict = {k: self._usage[k] for k in self._usage.keys()}
-        (key, _) = sorted(usage_dict.items(), key=itemgetter(1), reverse=True).pop()
+        (key, _) = sorted(usage_dict.items(),
+                          key=itemgetter(1), reverse=True).pop()
         del self._usage[key]
         del self._cacheData[key]
-            
+
 
 class RedisCached(RedisCache):
     ''' Decorator based on MemoryCache for caching arbitrary function calls
@@ -449,6 +444,7 @@ class RedisCached(RedisCache):
           @MemoryCached or @MemoryCached(max_cache_size)
           def myfunction(*args):            ...
     '''
+
     def __init__(self, arg):
         ''' initializes the RedisCache object
             ::param arg: either the max_cache_size or the function to call
@@ -463,6 +459,7 @@ class RedisCached(RedisCache):
     def __call__(self, *args, **kargs):
         if self._fn == None:
             fn = args[0]
+
             def wrapped_fn(*args, **kargs):
                 return self.fetch(fn, *args, **kargs)
             return wrapped_fn
