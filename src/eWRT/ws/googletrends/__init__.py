@@ -8,20 +8,19 @@ except ImportError:
     from sys import exit
     warn("This module requires google Trends ")
     LOADED = False
-    
+
+
 class GoogleTrends(object):
     ''' ## Documentation for the Class Google Trends
         fetches the Google trends for a set of keywords '''
 
-    
     def __init__(self, user=GOOGLE_USER, password=GOOGLE_PASS):
         ''' Constructor establishes the connection
             @param user
             @param password
         '''
         self.connector = pyGTrends(user, password)
-        
- 
+
     def getTrends(self, keywords, date=None, section=None):
         ''' getTrends fetches the trends
             @param keywords
@@ -42,6 +41,7 @@ class GoogleTrends(object):
             trends = self.connector.csv()
 
         return trends
+
 
 if __name__ == "__main__":
     a = GoogleTrends()
