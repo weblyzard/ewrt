@@ -8,19 +8,19 @@
 # (C)opyrights 2015 by Albert Weichselbraun <albert@weichselbraun.net>
 #
 # The code published in this module is either under the GNU General
-# Public License (see below) or under the license specified in the 
-# function. 
+# Public License (see below) or under the license specified in the
+# function.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -45,9 +45,10 @@ OCR_TRANSLATION_TABLE = {ord(u'8'): u'B',
                          ord(u'ü'): u'u',
                          ord(u'é'): u'e',
                          ord(u'û'): u'u',
-                         ord(u'à') :u'a',
-                         ord(u'â') :u'a',
+                         ord(u'à'): u'a',
+                         ord(u'â'): u'a',
                          }
+
 
 def ocr_normalize(ocr_text):
     '''
@@ -62,14 +63,12 @@ def ocr_normalize(ocr_text):
     return ocr_text.translate(OCR_TRANSLATION_TABLE)
 
 
-
 # -------------------------------------------------------------------------
 #
 # Unittests
-# 
+#
 # -------------------------------------------------------------------------
 
 def test_ocr_normalize():
     assert ocr_normalize(u'002 in Österreich') == u'OOZ in Osterreich'
-    assert ocr_normalize(u'6000 Zürich')  == u'GOOO Zurich'
-
+    assert ocr_normalize(u'6000 Zürich') == u'GOOO Zurich'

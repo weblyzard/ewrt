@@ -5,7 +5,11 @@
 Access to the Facebook API.
 """
 import time
-import logging, json, sys, unittest, urllib
+import logging
+import json
+import sys
+import unittest
+import urllib
 
 from urllib2 import HTTPError, URLError
 
@@ -16,6 +20,7 @@ from eWRT.config import FACEBOOK_ACCESS_KEY
 
 logging.getLogger(__name__)
 
+
 class FacebookWS(object):
     """ 
     @class FacebookWS
@@ -24,25 +29,26 @@ class FacebookWS(object):
     set in the configuration file. These can be retrieved from facebook
     """
     FB_OBJECT_TYPES = ['post', 'user', 'page', 'event', 'group', 'path']
-    
-    # Expires July 8, 2017 9https://developers.facebook.com/docs/apps/changelog)
-    GRAPH_API_VERSION = 'v2.3' 
-    
+
+    # Expires July 8, 2017
+    # 9https://developers.facebook.com/docs/apps/changelog)
+    GRAPH_API_VERSION = 'v2.3'
+
     retrieve = Retrieve('facebookWS')
     # added: class properties for storing searchTerm and searchType
 
     def __init__(self, term=None, objectType='all', since=None, limit=None):
         """ init """
         self.term = term
-        
+
         if objectType == 'all':
             objectType = 'post'
-        
+
         self.objectType = objectType
 
         if since and not isinstance(since, int):
             since = time.mktime(since.timetuple())
-            
+
         self.since = since
         self.limit = limit
 
@@ -81,59 +87,60 @@ class FacebookWS(object):
         '''
 
         if not 'access_token' in args:
-            # args['access_token'] = "b07f413baf9650d2363f1c8813ece6da" #very unflexible, its hardcoded...
+            # args['access_token'] = "b07f413baf9650d2363f1c8813ece6da" #very
+            # unflexible, its hardcoded...
             args['access_token'] = FACEBOOK_ACCESS_KEY
 
-        if method == 'post': 
+        if method == 'post':
             args['method'] = 'POST'
 
-        url = "https://graph.facebook.com/%s?%s" % (path, urllib.urlencode(args))
+        url = "https://graph.facebook.com/%s?%s" % (
+            path, urllib.urlencode(args))
         result = cls._requestURL(url, maxDoc)
         return result
-    
+
     def getJsonListStructure(self):
         request = None
         args = {}
         args['q'] = self.term
-        
+
         if isinstance(args['q'], unicode):
             args['q'] = args['q'].encode('utf-8')
-        
+
         if self.since:
             args['since'] = int(self.since)
-            
+
         if self.limit:
             args['limit'] = self.limit
-        
+
         if self.objectType == 'path':
             args_string = ''
-        
+
             if 'q' in args:
                 del args['q']
-        
+
             if len(args):
                 args_string = '?%s' % urllib.urlencode(args)
-                
-            request = {'method': "GET", 
-                       "relative_url" : '%s/%s%s' % (self.GRAPH_API_VERSION,
-                                                     self.term, args_string)}
-                                          
+
+            request = {'method': "GET",
+                       "relative_url": '%s/%s%s' % (self.GRAPH_API_VERSION,
+                                                    self.term, args_string)}
+
         elif self.objectType in self.FB_OBJECT_TYPES:
             args['type'] = self.objectType
-            request = {'method': "GET", 
-                       "relative_url" : "/search?%s" % urllib.urlencode(args)}
-            
+            request = {'method': "GET",
+                       "relative_url": "/search?%s" % urllib.urlencode(args)}
+
         elif self.objectType == 'all':
             for obj_type in self.FB_OBJECT_TYPES:
                 if obj_type == 'path':
                     continue
                 args['type'] = obj_type
-                request = {'method': "GET", 
-                           "relative_url" : "/search?"+urllib.urlencode(args)}
-        
+                request = {'method': "GET",
+                           "relative_url": "/search?" + urllib.urlencode(args)}
+
         return request
-                
-    
+
     @classmethod
     def _requestURL(cls, url, maxDoc=None, result=None, tried=None):
         '''
@@ -155,13 +162,13 @@ class FacebookWS(object):
             fetched = json.loads(f.read())
             tried = True
             logging.debug('processing url %s' % url)
-            
+
             if isinstance(fetched, dict):
 
                 if 'data' in fetched:
                     if not len(fetched['data']):
                         return result
-                    
+
                     result.extend(fetched['data'])
 
                     # process paging

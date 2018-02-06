@@ -16,11 +16,12 @@ from eWRT.access.http import Retrieve
 
 
 API_URL = 'https://www.googleapis.com/plus/v1/{path}?{query}'
-DEFAULT_ORDER_BY = 'recent' # other possibility: best
+DEFAULT_ORDER_BY = 'recent'  # other possibility: best
 MAX_RESULTS_PER_PAGE = 20
-DEFAULT_MAX_RESULTS = 20 # requires only 1 api access
+DEFAULT_MAX_RESULTS = 20  # requires only 1 api access
 
 logger = logging.getLogger('eWRT.ws.google')
+
 
 class GooglePlus(object):
     '''
@@ -33,8 +34,7 @@ class GooglePlus(object):
         self.api_key = api_key
         self.api_url = api_url
         self.retrieve = Retrieve('google-plus')
-    
-        
+
     def search(self, search_terms, max_results=DEFAULT_MAX_RESULTS):
         ''' searches Google+ for the given search_terms 
         :param search_terms: search terms
@@ -43,22 +43,22 @@ class GooglePlus(object):
         :type max_results: int
         :returns: generator with the result
         '''
-        for search_term in search_terms: 
+        for search_term in search_terms:
             if isinstance(search_term, unicode):
                 search_term = search_term.encode('utf-8')
             params = {'query': '"%s"' % search_term,
                       'orderBy': DEFAULT_ORDER_BY,
                       'maxResults': max_results}
-        
+
             fetched = self.make_request(params, 'activities')
-            
+
             for item in fetched['items']:
-                try: 
+                try:
                     yield self.convert_item(item)
-                except Exception as e: 
+                except Exception as e:
                     logger.info('Error %s occured' % e)
                     continue
-        
+
     def get_activity(self, activity_id):
         ''' returns the activity with the given ID
         :param activity_id: GooglePlus activity ID
@@ -68,7 +68,7 @@ class GooglePlus(object):
         '''
         item = self.make_request(path='activities/%s' % activity_id)
         return self.convert_item(item)
-    
+
     def make_request(self, params=None, path='activities'):
         ''' executes the request to GooglePlus
         :param params: paremeters for the query
@@ -90,20 +90,20 @@ class GooglePlus(object):
         :type path: string
         :returns: GooglePlus request URL
         :rtype: str
-        
+
         Usage: 
             >>> plus = GooglePlus('abcd')
             >>> plus.get_request_url()
             'https://www.googleapis.com/plus/v1/activities?key=abcd'
         '''
         params = params if params else {}
-        
+
         if not 'key' in params:
             params['key'] = self.api_key
-        
+
         if 'maxResults' in params and params['maxResults'] > DEFAULT_MAX_RESULTS:
             params['maxResults'] = DEFAULT_MAX_RESULTS
-        
+
         return self.api_url.format(path=path, query=urlencode(params))
 
     @classmethod
@@ -114,33 +114,34 @@ class GooglePlus(object):
         :rtype: dict
         '''
 
-        last_modified = datetime.strptime(item['updated'], 
+        last_modified = datetime.strptime(item['updated'],
                                           '%Y-%m-%dT%H:%M:%S.%fZ')
-        published = datetime.strptime(item['updated'], 
-                                          '%Y-%m-%dT%H:%M:%S.%fZ')
+        published = datetime.strptime(item['updated'],
+                                      '%Y-%m-%dT%H:%M:%S.%fZ')
 
         content = cls.convert_content(item['object']['content'])
 
         if not item['verb'] == 'post':
-            raise Exception('Skipping activity of type "%s"' % item['verb']) 
+            raise Exception('Skipping activity of type "%s"' % item['verb'])
 
         if not len(content):
             logger.info('Skipping "%s" -> content is empty' % item['title'])
             raise Exception('content is empty')
-    
+
         if 'attachments' in item['object']:
             for attachment in item['object']['attachments']:
                 if attachment['objectType'] == 'article':
                     if not 'content' in attachment:
                         raise Exception('no content in attachment')
-                    
-                    content = '%s\n"%s" (%s)' % (content, 
-                                                 cls.convert_content(attachment['content']),
-                                                 attachment['url'])   
-    
+
+                    content = '%s\n"%s" (%s)' % (content,
+                                                 cls.convert_content(
+                                                     attachment['content']),
+                                                 attachment['url'])
+
         activity = {'content': content,
                     'title': item['actor']['displayName'],
-                    'url':item['url'],
+                    'url': item['url'],
                     'last_modified': last_modified,
                     'user_id': item['actor']['id'],
                     'user_img_url': item['actor']['image']['url'],
@@ -157,7 +158,8 @@ class GooglePlus(object):
             activity['geocode'] = item['geocode']
 
         return activity
-        
+
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()

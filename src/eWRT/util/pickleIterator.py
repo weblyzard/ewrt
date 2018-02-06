@@ -26,6 +26,7 @@ try:
 except ImportError:
     from pickle import dumps, loads
 
+
 class AbstractIterator(object):
     '''
     Abstract Iterator class used to implement ReadPickleIterator
@@ -34,7 +35,8 @@ class AbstractIterator(object):
 
     def __init__(self, fname, file_mode=None):
         self.fname = self.get_filename(fname)
-        self.f = gzip.open(self.fname, file_mode) if file_mode else gzip.open(self.fname)
+        self.f = gzip.open(
+            self.fname, file_mode) if file_mode else gzip.open(self.fname)
 
     def __iter__(self):
         return self
@@ -53,6 +55,7 @@ class AbstractIterator(object):
     def get_filename(cls, fname):
         return fname if fname.endswith('.gz') else fname + '.gz'
 
+
 class WritePickleIterator(AbstractIterator):
     ''' writes pickeled elements (available as iterator) to a file '''
 
@@ -63,6 +66,7 @@ class WritePickleIterator(AbstractIterator):
         ''' dumps the following object to the pickle file '''
         p = b2a_base64(dumps(obj))
         self.f.write(p)
+
 
 class ReadPickleIterator(AbstractIterator):
     ''' provides an iterator over pickeled elements '''

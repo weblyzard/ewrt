@@ -41,6 +41,7 @@ from numpy.linalg import norm
 from eWRT.util.cache import MemoryCached
 from eWRT.lib.thirdparty.advas.phonetics import caverphone, metaphone, nysiis
 
+
 def wordSimilarity(s1, s2, similarityMeasure):
     ''' computes the given similarity metric on a strings
         words.
@@ -56,8 +57,9 @@ def wordSimilarity(s1, s2, similarityMeasure):
     assert len(words1) == len(words2)
 
     score = float(sum([min([similarityMeasure(w1, w2) for w1 in words1])
-                 for w2 in words2])) / len(words1)
+                       for w2 in words2])) / len(words1)
     return score
+
 
 @MemoryCached
 def lev(s1, s2):
@@ -74,13 +76,16 @@ def lev(s1, s2):
     for i, c1 in enumerate(s1):
         current_row = [i + 1]
         for j, c2 in enumerate(s2):
-            insertions = previous_row[j + 1] + 1 # j+1 instead of j since previous_row and current_row are one character longer
+            # j+1 instead of j since previous_row and current_row are one
+            # character longer
+            insertions = previous_row[j + 1] + 1
             deletions = current_row[j] + 1       # than s2
             substitutions = previous_row[j] + (c1 != c2)
             current_row.append(min(insertions, deletions, substitutions))
         previous_row = current_row
 
     return previous_row[-1]
+
 
 @MemoryCached
 def damerauLev(seq1, seq2):
@@ -128,9 +133,10 @@ def damerauLev(seq1, seq2):
             thisrow[y] = min(delcost, addcost, subcost)
             # This block deals with transpositions
             if (x > 0 and y > 0 and seq1[x] == seq2[y - 1]
-                and seq1[x-1] == seq2[y] and seq1[x] != seq2[y]):
+                    and seq1[x - 1] == seq2[y] and seq1[x] != seq2[y]):
                 thisrow[y] = min(thisrow[y], twoago[y - 2] + 1)
     return thisrow[len(seq2) - 1]
+
 
 @MemoryCached
 def soundex(name, length=4):
@@ -149,8 +155,9 @@ def soundex(name, length=4):
     # translate alpha chars in name to soundex digits
     for c in name.upper():
         if c.isalpha():
-            if not fc: fc = c   # remember first letter
-            d = digits[ord(c)-ord('A')]
+            if not fc:
+                fc = c   # remember first letter
+            d = digits[ord(c) - ord('A')]
             # duplicate consecutive soundex digits are skipped
             if not sndx or (d != sndx[-1]):
                 sndx += d
@@ -159,7 +166,7 @@ def soundex(name, length=4):
     sndx = fc + sndx[1:]
 
     # remove all 0s from the soundex code
-    sndx = sndx.replace('0','')
+    sndx = sndx.replace('0', '')
 
     # return soundex code padded to length characters
     return (sndx + (length * '0'))[:length]
@@ -203,7 +210,9 @@ class VectorSpaceModel(object):
 # UNITTESTS
 # --------------------------------------------------------------------
 
+
 from unittest import TestCase
+
 
 def testMetaPhone():
     ''' compares output produced by the advas metaphone
@@ -217,10 +226,12 @@ def testMetaPhone():
     assert metaphone('John') == 'jhn'
     assert metaphone('Microprocessor') == 'mkrprksr'
 
+
 def testNysiis():
     ''' tests the New York State Identification and Intelligence
         Algorithm (NYSIIS) code for the given term '''
     assert nysiis("Albert").lower() == 'albard'
+
 
 def testCaverphone():
     ''' tests the caverphone algorithm '''
@@ -235,7 +246,7 @@ def testSoundex():
     assert soundex("Smith") == "S530"
     assert soundex("Albert") == "A416"
 
-    assert soundex("Weichselbraun",8) == "W2241650"
+    assert soundex("Weichselbraun", 8) == "W2241650"
 
 
 def testWordSimilarity():
@@ -243,7 +254,7 @@ def testWordSimilarity():
     assert wordSimilarity("Ana Toth", "Toth Ana", lev) == 0
     assert wordSimilarity("Anna Toth", "Toth Ana", lev) == 0.5
 
-    assert wordSimilarity("Anna Toth", "Toht Ana", lev) == 3./2
+    assert wordSimilarity("Anna Toth", "Toht Ana", lev) == 3. / 2
     assert wordSimilarity("Anna Toth", "Toht Ana", damerauLev) == 1.0
 
 
@@ -254,6 +265,7 @@ def testLevenshteinDistance():
     assert lev("tothi", "alfredKurz") == 10
     assert lev("maria", "marion") == 2
     assert lev("safety measures", "safety measures") == 0
+
 
 def testDamerauLev():
     ''' tests the Damerau-Levenshtein distance
@@ -268,21 +280,18 @@ def testDamerauLev():
 class TestVSM(TestCase):
 
     def testVSM(self):
-        v1 = VectorSpaceModel( ('albert', 'jasna', 'perth') )
-        v2 = VectorSpaceModel( ('perth', 'jasna', 'parik') )
+        v1 = VectorSpaceModel(('albert', 'jasna', 'perth'))
+        v2 = VectorSpaceModel(('perth', 'jasna', 'parik'))
         self.assertAlmostEqual(v1 * v1, 1.0)
         self.assertAlmostEqual(v2 * v2, 1.0)
 
-        self.assertAlmostEqual(v1 * v2, 2/3.)
+        self.assertAlmostEqual(v1 * v2, 2 / 3.)
 
     def testBinaryVersusStandardVSM(self):
-        v1 = VectorSpaceModel( ('perth', 'perth', 'jasna'), binary=False)
-        v2 = VectorSpaceModel( ('perth', 'jasna', 'jasna'), binary=False )
-        v3 = VectorSpaceModel( ('perth', 'perth', 'jasna'), binary=True)
-        v4 = VectorSpaceModel( ('perth', 'jasna', 'jasna'), binary=True )
+        v1 = VectorSpaceModel(('perth', 'perth', 'jasna'), binary=False)
+        v2 = VectorSpaceModel(('perth', 'jasna', 'jasna'), binary=False)
+        v3 = VectorSpaceModel(('perth', 'perth', 'jasna'), binary=True)
+        v4 = VectorSpaceModel(('perth', 'jasna', 'jasna'), binary=True)
 
-        self.assertAlmostEqual(v1*v2, 4/5.)
-        self.assertAlmostEqual(v3*v4, 1.0)
-
-
-
+        self.assertAlmostEqual(v1 * v2, 4 / 5.)
+        self.assertAlmostEqual(v3 * v4, 1.0)

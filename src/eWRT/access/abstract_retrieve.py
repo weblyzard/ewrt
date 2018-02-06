@@ -2,6 +2,7 @@
 
 import abc
 
+
 class AbstractRetriever(object):
 
     __metaclass__ = abc.ABCMeta
@@ -9,7 +10,6 @@ class AbstractRetriever(object):
     @abc.abstractmethod
     def set_up(self, *args, **kwargs):
         pass
-
 
     @abc.abstractmethod
     def tear_down(self, *args, **kwargs):

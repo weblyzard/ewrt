@@ -9,6 +9,7 @@ Access to conceptnet data structures using its REST interface
 
 from warnings import warn
 
+
 class Node(object):
     '''
     A ConceptNet node.
@@ -35,7 +36,7 @@ class Node(object):
             e.g. (3 for "/c/en/coal" or
                   5 for "/c/en/coal/n/energy storage)
         '''
-        return len(self.url.split("/"))-1
+        return len(self.url.split("/")) - 1
 
     @staticmethod
     def lang(node_url):
@@ -49,4 +50,3 @@ class Node(object):
             warn('Cannot extract language for node %s.' % (node_url, ))
             return ''
         return lang[2]
-

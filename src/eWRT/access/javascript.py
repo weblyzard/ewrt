@@ -16,6 +16,7 @@ __version__ = '0.0.8'
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class SetUpOpenAndTearDown(object):
 
     def __init__(self, set_up_func, tear_down_func):
@@ -29,6 +30,7 @@ class SetUpOpenAndTearDown(object):
             function(*args, **kwargs)
             self.tear_down_func(*args, **kwargs)
         return _wrapper
+
 
 class JavascriptRetriever(abstract_retrieve.AbstractRetriever):
     '''
@@ -55,7 +57,6 @@ class JavascriptRetriever(abstract_retrieve.AbstractRetriever):
         self.waiting_time_in_secs = waiting_time_in_secs
         self._initialize_display()
 
-
     def _initialize_display(self):
         if not self.display:
             self.display = pyvirtualdisplay.Display()
@@ -66,10 +67,8 @@ class JavascriptRetriever(abstract_retrieve.AbstractRetriever):
             self.browser.implicitly_wait(self.waiting_time_in_secs)
             self.num_selenium_retrievers += 1
 
-
     def set_up(self, *args, **kwargs):
         self._initialize_display()
-
 
     def tear_down(self, *args, **kwargs):
         '''
@@ -86,4 +85,3 @@ class JavascriptRetriever(abstract_retrieve.AbstractRetriever):
         self.browser.get(url=url)
         sleep(2)
         return self.browser.page_source
-

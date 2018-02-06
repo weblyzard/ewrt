@@ -57,7 +57,8 @@ HTTP_TEMPORARY_ERROR_CODES = (500, 503, 504)
 from socket import setdefaulttimeout
 DEFAULT_TIMEOUT = 60
 
-getHostName = lambda x: "://".join(urlsplit(x)[:2])
+
+def getHostName(x): return "://".join(urlsplit(x)[:2])
 
 
 class Retrieve(object):
@@ -229,4 +230,3 @@ class Retrieve(object):
                            split_url.path,
                            split_url.query,
                            split_url.fragment))
-
