@@ -56,6 +56,7 @@ SUPPORTED_COUNTRIES = ('AT', 'DE')
 
 logger = logging.getLogger('logger')
 
+
 class GoogleBlogSearch(object):
     ''' implements functions for accessing Google's Blogsearch '''
 
@@ -91,7 +92,7 @@ class GoogleBlogSearch(object):
             max = date.today().strftime(dateFormat)
             min = (date.today() - timedelta(days=maxAge)).strftime(dateFormat)
             maxAgeString = '&tbs=cdr:1,cd_min:{min},cd_max:{max}'.format(
-                                                min=min, max=max)
+                min=min, max=max)
         else:
             maxAgeString = ''
 
@@ -120,35 +121,38 @@ class GoogleBlogSearch(object):
                 firstElement = False
             else:
                 itemList = element.xpath('./h3[@class="r"]/a')
-                if len(itemList)==1:
+                if len(itemList) == 1:
                     url = itemList[0].attrib['href']
-                    abstract = ' '.join(element.xpath('./div[@class="s"]/text()'))
+                    abstract = ' '.join(element.xpath(
+                        './div[@class="s"]/text()'))
                     url = GoogleBlogSearch.parse_url(url)
-    
+
                     if url:
                         blogLink = {}
                         blogLink['url'] = url
                         blogLink['source'] = 'GoogleBlogSearch - Keyword "%s"' % searchTerm
                         blogLink['abstract'] = abstract
                         blogLink['reach'] = '0'
+
                         try:
                             blogLink['date'] = GoogleBlogSearch.get_link_date(element)
                         except IndexError as e:
                             pass
+
                         urls.append(blogLink)
-    
+
                         counter += 1
-    
+
                     if (counter + offset) >= maxResults:
                         break
 
         if maxResults > (MAX_RESULTS_PAGE) and (counter + offset) < maxResults:
 
             urls.extend(GoogleBlogSearch.get_blog_links(searchTerm,
-                        maxResults=maxResults, offset=(counter + offset) ,
-                        maxAge=maxAge))
+                                                        maxResults=maxResults, offset=(
+                                                            counter + offset),
+                                                        maxAge=maxAge))
         return urls
-
 
     @staticmethod
     def parse_url(url):
@@ -169,7 +173,8 @@ class GoogleBlogSearch(object):
             elif isinstance(query['q'], list):
                 correct_url = query['q'][0]
             else:
-                logger.critical('Unknown type "%s" for query["q"]' % type(query['q']))
+                logger.critical(
+                    'Unknown type "%s" for query["q"]' % type(query['q']))
 
         return correct_url
 
@@ -200,4 +205,3 @@ class GoogleBlogSearch(object):
                 linkDate = now - tdelta
 
         return linkDate
-    

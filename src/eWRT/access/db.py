@@ -5,29 +5,29 @@
 """
 
 # (C)opyrights 2004-2010 by Albert Weichselbraun <albert@weichselbraun.net>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__author__   = "Albert Weichselbraun"
+__author__ = "Albert Weichselbraun"
 __revision__ = "$Revision$"
 
 
 from types import StringTypes
 from warnings import warn
 try:
-    import psycopg2 
+    import psycopg2
     import psycopg2.extras
 except ImportError:
     warn("Cannot import postgresql library.")
@@ -41,7 +41,6 @@ import logging
 log = logging.getLogger(__name__)
 
 
-
 class IDB(object):
     """ @interface IDB
         database access interface
@@ -51,9 +50,9 @@ class IDB(object):
      """
 
     def connect(self):
-        """ connects to the database """   
+        """ connects to the database """
 
-    def query(self,qu):
+    def query(self, qu):
         """ processes a queries to the database and returns
             the result.
             @param[in] query (list or string)
@@ -75,7 +74,6 @@ class IDB(object):
         if exc_type != None:
             log.critical("Database error: %s" % exc_type)
         self.close()
-        
 
 
 class MysqlDb(IDB):
@@ -83,28 +81,29 @@ class MysqlDb(IDB):
     def __init__(self, dbname, host="", username="", passwd="", connect=True):
         """ @param[in] connect immediately connect to the database
         """
-        self.dbname   = dbname
-        self.host     = host
+        self.dbname = dbname
+        self.host = host
         self.username = username
-        self.passwd   = passwd
+        self.passwd = passwd
 
         if connect:
             self.connect()
 
     def connect(self):
-        self.db=MySQLdb.connect(host=self.host, user=self.username, passwd=self.passwd, db=self.dbname)
+        self.db = MySQLdb.connect(
+            host=self.host, user=self.username, passwd=self.passwd, db=self.dbname)
 
-    def query(self,query):
+    def query(self, query):
         """ queries the database and stores the result in a dict """
-        crs=self.db.cursor(MySQLdb.cursors.DictCursor)
+        crs = self.db.cursor(MySQLdb.cursors.DictCursor)
 
-        if type(query) in StringTypes: query=(query,)
+        if type(query) in StringTypes:
+            query = (query,)
         for q in query:
             crs.execute(q)
-        tmp=crs.fetchall()
+        tmp = crs.fetchall()
         crs.close()
         return tmp
-
 
     def close(self):
         self.db.close()
@@ -122,11 +121,11 @@ class PostgresqlDb(IDB):
             @param[in] multiThreaded specifies whether the connection will be used
                                      in a multi-threaded environment.
         """
-        self.dbname   = dbname
-        self.host     = host
+        self.dbname = dbname
+        self.host = host
         self.username = username
-        self.passwd   = passwd
-        self.db       = None
+        self.passwd = passwd
+        self.db = None
         self.multiThreaded = multiThreaded
         if connect:
             self.connect()
@@ -139,36 +138,37 @@ class PostgresqlDb(IDB):
             work in multi-threaded environments
         """
         if self.multiThreaded:
-            self.db = psycopg2.connect("dbname='%s' user='%s' host='%s' password='%s'" % (self.dbname, self.username, self.host, self.passwd)) 
+            self.db = psycopg2.connect("dbname='%s' user='%s' host='%s' password='%s'" % (
+                self.dbname, self.username, self.host, self.passwd))
 
         else:
             dbKey = (self.dbname, self.username, self.host, self.passwd)
             if dbKey not in self.__db:
-                self.__db[dbKey] = psycopg2.connect("dbname='%s' user='%s' host='%s' password='%s'" % (self.dbname, self.username, self.host, self.passwd)) 
-            self.db= self.__db[dbKey]
+                self.__db[dbKey] = psycopg2.connect("dbname='%s' user='%s' host='%s' password='%s'" % (
+                    self.dbname, self.username, self.host, self.passwd))
+            self.db = self.__db[dbKey]
 
-
-    def query(self,qu):
+    def query(self, qu):
         """ @param[in] qu a list or string containing the database quer(y|ies)
             @returns the query results
          """
-        if type(qu) in StringTypes: qu=(qu,)
-        if PostgresqlDb.DEBUG: 
-            log.debug( "Query: %s" % qu )
+        if type(qu) in StringTypes:
+            qu = (qu,)
+        if PostgresqlDb.DEBUG:
+            log.debug("Query: %s" % qu)
         cur = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        [ cur.execute(q) for q in qu ]
+        [cur.execute(q) for q in qu]
         return cur.fetchall()
-    
+
     def execute(self, q):
         cur = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
         return cur.execute(q)
-    
+
     def getCursor(self):
         return self.db.cursor()
-    
+
     def commit(self):
         self.db.commit()
-
 
     def close(self):
         self.db.close()

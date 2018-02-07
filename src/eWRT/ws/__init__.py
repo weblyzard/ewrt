@@ -97,5 +97,5 @@ class AbstractIterableWebSource(AbstractWebSource):
                 output_format=None):
         """calls the web source's API
         """
-        
+
         raise NotImplemented

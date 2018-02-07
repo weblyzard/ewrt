@@ -7,7 +7,6 @@ Access to conceptnet data structures using its REST interface
 ::author: Albert Weichselbraun <albert.weichselbraun@htwchur.ch>
 """
 
-from json import loads
 try:
     from urllib import quote
 except ImportError:
@@ -23,6 +22,7 @@ class LookupResult(Result):
     '''
     An object for handling ConceptNet search results
     '''
+
     def __init__(self, term=None, rel_type='c', lang='en', pos_tag=None, conceptnet_url=None, strict=False, count=DEFAULT_MAX_EDGE_COUNT):
         '''
         ::param term: the lookup term
@@ -36,7 +36,8 @@ class LookupResult(Result):
         ::return: a list of edges matching the lookup query
         '''
         if not conceptnet_url:
-            conceptnet_url = "%s/%s/%s/%s" % (CONCEPTNET_BASE_URL, rel_type, lang, term)
+            conceptnet_url = "%s/%s/%s/%s" % (CONCEPTNET_BASE_URL,
+                                              rel_type, lang, term)
         host, url = conceptnet_url.split("/", 3)[2:]
         conceptnet_url = "http://{host}/{url}?limit={count}".format(
             host=host, url=quote(url).replace('//', '/'), count=count)
@@ -51,7 +52,6 @@ class LookupResult(Result):
         _, url_type, lang, concept_name, pos, sense = \
             concept_url.split('/', 6)
         return Concept(lang, concept_name, pos, sense)
-
 
     @staticmethod
     def _split(s, delimiter, size):
@@ -68,6 +68,6 @@ if __name__ == '__main__':
     r = LookupResult('lord', strict=True)
     from eWRT.ws.conceptnet.util import VALID_SENSE_FILTER, VALID_LANGUAGES
     r.apply_language_filter(VALID_LANGUAGES)
-    #r.apply_edge_filter(VALID_SENSE_FILTER)
+    # r.apply_edge_filter(VALID_SENSE_FILTER)
     #print("\n".join(map(repr, r.get_senses())))
     print(r.get_vsm(stopword_list=()))

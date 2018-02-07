@@ -20,18 +20,21 @@ from eWRT.ws.conceptnet.lookup_result import LookupResult
 LOGGER = getLogger("eWRT.ws.conceptnet.util")
 LOGGER.setLevel(INFO)
 
-hdlr = FileHandler("eWRT.ws.conceptnet.util.%s.log" % (strftime("%Y-%m-%d_%H%M")))
+hdlr = FileHandler("eWRT.ws.conceptnet.util.%s.log" %
+                   (strftime("%Y-%m-%d_%H%M")))
 hdlr.setFormatter(Formatter('%(asctime)s %(levelname)s %(message)s'))
 LOGGER.addHandler(hdlr)
 
 VALID_LANGUAGES = ('en', )
 # only allow hypernym, hyponym and synonym relations for senses
-VALID_SENSE_FILTER = [(u'rel', u'/r/IsA'), (u'rel', u'/r/Synonym'), (u'rel', u'/r/InstanceOf')]
-# requires at least 4 levels to describe the sense 
+VALID_SENSE_FILTER = [(u'rel', u'/r/IsA'),
+                      (u'rel', u'/r/Synonym'), (u'rel', u'/r/InstanceOf')]
+# requires at least 4 levels to describe the sense
 # (e.g. /c/en/senes/x while /c/en/dog would fail this criteria)
 MIN_SENSE_SPECIFICITY = 3
 
 #MAX_CONTEXT_COUNT_SENSES = 100
+
 
 def ground_term(term, input_context, pos_tag=None, stopword_list=STOPWORD_DICT['en'], limit=1):
     '''
@@ -48,27 +51,30 @@ def ground_term(term, input_context, pos_tag=None, stopword_list=STOPWORD_DICT['
     lookup_result = LookupResult(term=term, pos_tag=pos_tag)
     lookup_result.apply_language_filter(VALID_LANGUAGES)
     lookup_result.apply_edge_filter(VALID_SENSE_FILTER)
-    
+
     senses = lookup_result.get_senses()
     LOGGER.info("Disambiguating senses for term '%s'", term.encode("utf8"))
 
     result = []
     for no, sense in enumerate(senses):
         if sense.specificity() < MIN_SENSE_SPECIFICITY:
-            LOGGER.warn('Scipping sense #%d for %s: %s - to low specificity', no, term, sense.url.encode("utf8"))
-            continue 
+            LOGGER.warn('Scipping sense #%d for %s: %s - to low specificity',
+                        no, term, sense.url.encode("utf8"))
+            continue
 
         sense_context = get_textual_data(sense, VALID_LANGUAGES, stopword_list)
-        #if '/c/en/look_at' in sense.url:
+        # if '/c/en/look_at' in sense.url:
         #    LOGGER.debug(context_result.edges)
         #    LOGGER.debug(sense, "&", ", ".join(sense_context.keys()))
 
         try:
-            current_sim_score = context_vector * VectorSpaceModel(sense_context)
+            current_sim_score = context_vector * \
+                VectorSpaceModel(sense_context)
         except ZeroDivisionError:
-            # ignore empty contexts (e.g. due to words removed by the stopword_list)
+            # ignore empty contexts (e.g. due to words removed by the
+            # stopword_list)
             continue
-        
+
         result.append((sense, current_sim_score))
 
     return sorted(result, key=itemgetter(1), reverse=True)[:limit]
@@ -79,9 +85,11 @@ def get_textual_data(sense, valid_languages, stopword_list):
     '''
     ::returns: a vector space representation of the given concept
     '''
-    context_result = LookupResult(conceptnet_url=CONCEPTNET_BASE_URL+"/"+sense.url.encode("utf8"), strict=True)
-    context_result.apply_language_filter(valid_languages) 
-    LOGGER.info("Found %d assertions for sense '%s'.", len(context_result.edges), sense)
+    context_result = LookupResult(
+        conceptnet_url=CONCEPTNET_BASE_URL + "/" + sense.url.encode("utf8"), strict=True)
+    context_result.apply_language_filter(valid_languages)
+    LOGGER.info("Found %d assertions for sense '%s'.",
+                len(context_result.edges), sense)
     return context_result.get_vsm(stopword_list)
 
 

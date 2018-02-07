@@ -172,12 +172,6 @@ class MultiRESTClient(object):
         except:
             return False
         
-    def status(self):
-        '''
-        :returns: the status of the Recognize web service.
-        '''
-        return self.request(path='status')
-
     @classmethod
     def fix_urls(cls, urls, user=None, password=None):
         ''' fixes the urls and put them into the correct format, to maintain
@@ -274,9 +268,13 @@ class MultiRESTClient(object):
 
         return response
 
+    def get_service_urls(self): 
+        ''' '''
+        return [client.service_url for client in self.clients]
+    
     @classmethod
     def get_document_batch(cls, documents, batch_size=None):
         batch_size = batch_size if batch_size else cls.MAX_BATCH_SIZE
         for i in range(0, len(documents), batch_size):
             yield documents[i:i+batch_size]
-
+            

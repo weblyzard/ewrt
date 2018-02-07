@@ -14,25 +14,30 @@ from os.path import basename
 
 from eWRT.util.module_path import get_resource
 
+
 def read_wordlist(fname):
     ''' reads a language wordlist from a file '''
     with open(fname) as f:
         return set(map(str.lower, map(str.strip, f.readlines())))
 
+
 # returns the language name based on the language file's name
-get_lang_name = lambda fname: basename(fname).split(".")[0]
+def get_lang_name(fname): return basename(fname).split(".")[0]
+
 
 LANG_DATA_DIR = get_resource(__file__, 'data')
 
 ##
 # \var STOPWORD_DICT: a dictionary of the 100 most common words in the given language
-STOPWORD_DICT = {get_lang_name(fname): read_wordlist(fname) for fname in glob(LANG_DATA_DIR+"/*.csv")}
+STOPWORD_DICT = {get_lang_name(fname): read_wordlist(
+    fname) for fname in glob(LANG_DATA_DIR + "/*.csv")}
 DELETE_CHARS = ",.!?\"'"
 DELETE_TABLE = {ch: None for ch in DELETE_CHARS}
 
 
 import string
 table = string.maketrans('ac', 'cx')
+
 
 def detect_language(text):
     ''' detects the most probable language for a given text '''
@@ -41,12 +46,12 @@ def detect_language(text):
 
     text = text.lower()
     text = re.sub(r'[^\w]', ' ', text)
-    
+
     cleaned_text = ''
     try:
-        cleaned_text = text.translate(DELETE_TABLE) #python3
+        cleaned_text = text.translate(DELETE_TABLE)  # python3
     except Exception as e:
-        cleaned_text = text.translate(None, DELETE_CHARS) #python2.6
+        cleaned_text = text.translate(None, DELETE_CHARS)  # python2.6
     words = [word.strip() for word in cleaned_text.split(" ")]
     current_lang = None
     current_wordcount = 0
@@ -65,7 +70,7 @@ class DetectLanguageTest(unittest.TestCase):
         ''' tests the language detection based on examples '''
 
         text = u"#maryboo #health #baby #mom #food #cosmetics #love  http://t.co/nPqzL8MRKa"
-        #RT @LesbianGIFs_: She's HOT AF 😩🔥 http://t.co/xZ2VFdAtNx
+        # RT @LesbianGIFs_: She's HOT AF 😩🔥 http://t.co/xZ2VFdAtNx
         print(detect_language(text))
 
         text = u'''Das Glück der Erde liegt in diesem Fall im Dreck. Begeistert
@@ -88,11 +93,11 @@ class DetectLanguageTest(unittest.TestCase):
 
         assert detect_language(text) == 'de'
 
-
     def test_exceptions(self):
         ''' results for empyt strings '''
         assert detect_language(u" ") == None
         assert detect_language(u"") == None
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -25,8 +25,12 @@ CONCEPTNET_BASE_URL = 'http://api.conceptnet.io'
 CLEANUP_TRANSLATION_MAP = {'!': None, '.': None, '?': None,
                            '"': None, "'": None}
 
-Concept  = namedtuple("Concept", "language concept_name pos sense")
-tokenize = lambda sentence: sentence.translate(CLEANUP_TRANSLATION_MAP).split(" ")
+Concept = namedtuple("Concept", "language concept_name pos sense")
+
+
+def tokenize(sentence): return sentence.translate(
+    CLEANUP_TRANSLATION_MAP).split(" ")
+
 
 @DiskCached(".conceptnet-query-cache")
 def retrieve_conceptnet_query_result(query):
@@ -85,8 +89,8 @@ class Result(object):
                        (e.g. '/c/en/battery/n/the_battery_used_to_heat_the_filaments_of_a_vacuum_tube'
                              for '/c/en/battery')
         '''
-        matches_filter = lambda url: url.startswith(filter_url) if \
-                            include_subconcepts else lambda url: url==filter_url
+        def matches_filter(url): return url.startswith(filter_url) if \
+            include_subconcepts else lambda url: url == filter_url
 
         return [Node(url, self.edges) for url in chain(
                 [e['start'] for e in self.edges],
@@ -106,16 +110,16 @@ class Result(object):
         vsm = Counter()
 
         for attr_value in (edge[attr] for edge in self.edges for attr
-           in self.RELEVANT_VSM_ATTRIBUTES
-           if attr in edge):
+                           in self.RELEVANT_VSM_ATTRIBUTES
+                           if attr in edge):
 
             # handle list values
             if isinstance(attr_value, list):
                 attr_value = chain(*map(tokenize, attr_value))
                 vsm.update(attr_value)
             else:
-                vsm.update( tokenize(attr_value) )
+                vsm.update(tokenize(attr_value))
 
         # apply stopword list
-        map(vsm.pop, [ s for s in stopword_list if s in vsm])
+        map(vsm.pop, [s for s in stopword_list if s in vsm])
         return vsm

@@ -7,26 +7,27 @@
 """
 
 # (C)opyrights 2011 by Albert Weichselbraun <albert@weichselbraun.net>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__author__    = "Albert Weichselbraun"
-__revision__  = "$Id$"
+__author__ = "Albert Weichselbraun"
+__revision__ = "$Id$"
 __copyright__ = "GPL"
 
 
 from collections import Counter
+
 
 class AssertReturnValue(object):
     """ decorator class used to time functions """
@@ -38,12 +39,12 @@ class AssertReturnValue(object):
         @param counterNameTrue: counter to increase if the condition is true
         @param counterNameFalse:counter to increase if the condition is false  
         """
-        self.fn               = None
+        self.fn = None
         self.evalExpression = evalExpression
         self.counterNameTrue = counterNameTrue
         self.counterNameFalse = counterNameFalse
-        self.counter          = Counter()
-        
+        self.counter = Counter()
+
     def _assertReturnValue(self, x):
         if eval(self.evalExpression):
             self.counter[self.counterNameTrue] += 1
@@ -56,7 +57,7 @@ class AssertReturnValue(object):
         function ones the decorator is used.
         """
         def wrapper(*fargs, **kw):
-            returnValue = self.fn(*fargs, **kw) 
+            returnValue = self.fn(*fargs, **kw)
             self._assertReturnValue(returnValue)
             return returnValue
 
@@ -67,4 +68,3 @@ class AssertReturnValue(object):
         wrapper.__doc__ = fn.__doc__
         wrapper.counter = self.counter
         return wrapper
-

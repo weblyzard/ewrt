@@ -11,7 +11,7 @@
 # -----------------------------------------------------------------------
 
 __revision__ = "$Revision: 545 $"
-__author__   = "Albert Weichselbraun"
+__author__ = "Albert Weichselbraun"
 
 import os
 
@@ -48,7 +48,8 @@ class ReutersParser(handler.ContentHandler):
     def clear(self):
         self.isRelevantText = False
         self.text = []
-        
+
+
 class Reuters(object):
 
     @staticmethod
@@ -62,27 +63,29 @@ class Reuters(object):
         parseString(s, rps)
         return rps.getText()
 
+
 class ReutersGetCorpus(object):
     """ An iterator for all documents in the given language """
 
     def __init__(self, lang):
-        self.files = glob( os.path.join( REUTERS_DATA_DIR, lang, "*.xml") )
+        self.files = glob(os.path.join(REUTERS_DATA_DIR, lang, "*.xml"))
 
     def __iter__(self):
         return self
 
     def next(self):
         if self.files:
-            xmlTxt = open( self.files.pop() ).read()
-            return Reuters.getText( xmlTxt )
+            xmlTxt = open(self.files.pop()).read()
+            return Reuters.getText(xmlTxt)
         else:
             raise StopIteration
+
 
 class ReutersGetZipCorpus(object):
     """ An iterator over all documents in a zipped reuters corpus """
 
     def __init__(self, baseDir, lang):
-        self.zipFiles = glob( os.path.join( baseDir, lang, "*.zip") )
+        self.zipFiles = glob(os.path.join(baseDir, lang, "*.zip"))
         self.zip, self.files = self.openNextZipFile()
 
     def __iter__(self):
@@ -93,7 +96,7 @@ class ReutersGetZipCorpus(object):
             self.zip, self.files = self.openNextZipFile()
 
         fname = self.files.pop()
-        return fname, Reuters.getText( self.zip.read( fname ))
+        return fname, Reuters.getText(self.zip.read(fname))
 
     def openNextZipFile(self):
         if not self.zipFiles:
@@ -101,15 +104,15 @@ class ReutersGetZipCorpus(object):
 
         fname = self.zipFiles.pop()
         zip = ZipFile(fname)
-        
+
         return zip, zip.namelist()
 
 
 if __name__ == '__main__':
     import sys
-    for nr,t in enumerate(ReutersGetZipCorpus( "./eval", "it") ):
+    for nr, t in enumerate(ReutersGetZipCorpus("./eval", "it")):
         print(t)
         sys.exit(0)
 
-    for nr,t in enumerate(ReutersGetCorpus("de")):
+    for nr, t in enumerate(ReutersGetCorpus("de")):
         print nr
