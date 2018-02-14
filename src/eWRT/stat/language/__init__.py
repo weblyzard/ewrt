@@ -35,8 +35,7 @@ DELETE_CHARS = ",.!?\"'"
 DELETE_TABLE = {ch: None for ch in DELETE_CHARS}
 
 
-import string
-table = string.maketrans('ac', 'cx')
+table = str.maketrans('ac', 'cx')
 
 
 def detect_language(text):
