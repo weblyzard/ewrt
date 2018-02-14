@@ -29,15 +29,15 @@ def getReview(asin_list):
 
     for asin in asin_list:
         result = []
-        for page in xrange(MAX_PAGES_TO_PARSE):
+        for page in range(MAX_PAGES_TO_PARSE):
             xmlOutput = a.queryReview(asin, ReviewPage=str(page + 1))
             xmlParser = ResultList(
                 "ItemLookupResponse/Items/Item/CustomerReviews/Review", hunt=("TotalReviewPages",))
             xmlParser.parse(xmlOutput)
             result.extend(xmlParser.xmlResult)
 
-            print("%s: page %s/%s" % (asin, page + 1,
-                                      xmlParser.huntValue.get('TotalReviewPages', 0)))
+            print(("%s: page %s/%s" % (asin, page + 1,
+                                      xmlParser.huntValue.get('TotalReviewPages', 0))))
             if page + 1 >= int(xmlParser.huntValue.get('TotalReviewPages', 0)):
                 break
 
@@ -47,7 +47,7 @@ def getReview(asin_list):
             if not "CustomerId" in review:
                 print("Skipping record\n")
                 continue
-            print "INSERT INTO Review (asin,customerId,rating,helpfulVotes,totalVotes,date,summary,content) VALUES('%(ASIN)s', '%(CustomerId)s', %(Rating)s, %(HelpfulVotes)s, %(TotalVotes)s, '%(Date)s', '%(Summary)s', '%(Content)s');" % (review)
+            print("INSERT INTO Review (asin,customerId,rating,helpfulVotes,totalVotes,date,summary,content) VALUES('%(ASIN)s', '%(CustomerId)s', %(Rating)s, %(HelpfulVotes)s, %(TotalVotes)s, '%(Date)s', '%(Summary)s', '%(Content)s');" % (review))
 
 
 def exportTopBooks(number):
@@ -55,7 +55,7 @@ def exportTopBooks(number):
 
     a = AmazonWS()
     result = []
-    for page in xrange(number / 10):
+    for page in range(number / 10):
         xmlOutput = a.searchItem(ItemPage=str(page + 1))
         xmlParser = ResultList("ItemSearchResponse/Items/Item")
         xmlParser.parse(xmlOutput)
@@ -66,7 +66,7 @@ def exportTopBooks(number):
         if len(dataSet['ASIN']) < 10:
             continue
         assert(len(dataSet['ASIN']) == 10)
-        print "INSERT INTO Book2 (asin,salesrank,title,detailPageUrl) VALUES ('%(ASIN)s', %(SalesRank)s, '%(Title)s', '%(DetailPageURL)s');" % (dataSet)
+        print("INSERT INTO Book2 (asin,salesrank,title,detailPageUrl) VALUES ('%(ASIN)s', %(SalesRank)s, '%(Title)s', '%(DetailPageURL)s');" % (dataSet))
 
 
 # retrieve the reviews for the given asins

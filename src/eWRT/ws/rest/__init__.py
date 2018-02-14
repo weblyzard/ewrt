@@ -10,20 +10,13 @@
 import traceback
 import logging
 import random
+import urllib.request
+import urllib.parse
+import urllib.error
 
-try:
-    # urllib2 is merged into urllib in python3 (SV)
-    from urllib.error import HTTPError
-except:
-    from urllib2 import HTTPError  # python2
 
-import urllib
-
-try:
-    from urllib.parse import urlsplit, urlunsplit  # porting to python 3.4 (SV)
-except:
-    from urlparse import urlsplit, urlunsplit  # python2
-
+from urllib.error import HTTPError  # python2
+from urllib.parse import urlsplit, urlunsplit  # porting to python 3.4 (SV)
 from six import string_types
 from json import dumps, loads
 from functools import partial
@@ -123,8 +116,8 @@ class RESTClient(object):
                 url = url + "?" + urllib.parse.urlencode(query_parameters,
                                                          doseq=True)
             except:
-                url = url + "?" + urllib.urlencode(query_parameters,
-                                                   doseq=True)
+                url = url + "?" + urllib.parse.urlencode(query_parameters,
+                                                         doseq=True)
 
         return url
 
@@ -149,6 +142,7 @@ class RESTClient(object):
         return self._json_request(url, parameters, return_plain,
                                   json_encode_arguments, content_type)
 
+
 class MultiRESTClient(object):
     ''' allows multiple URLs for access REST services '''
     MAX_BATCH_SIZE = 500
@@ -171,7 +165,7 @@ class MultiRESTClient(object):
             return True
         except:
             return False
-        
+
     @classmethod
     def fix_urls(cls, urls, user=None, password=None):
         ''' fixes the urls and put them into the correct format, to maintain
@@ -261,20 +255,19 @@ class MultiRESTClient(object):
                     errors.append(msg)
 
         if len(errors) == len(self.clients):
-            print ('\n'.join(errors))
+            print(('\n'.join(errors)))
             raise Exception('Could not make request to path %s: %s' % (
                 path,
                 '\n'.join(errors)))
 
         return response
 
-    def get_service_urls(self): 
+    def get_service_urls(self):
         ''' '''
         return [client.service_url for client in self.clients]
-    
+
     @classmethod
     def get_document_batch(cls, documents, batch_size=None):
         batch_size = batch_size if batch_size else cls.MAX_BATCH_SIZE
         for i in range(0, len(documents), batch_size):
-            yield documents[i:i+batch_size]
-            
+            yield documents[i:i + batch_size]

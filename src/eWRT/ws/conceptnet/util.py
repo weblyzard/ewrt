@@ -27,8 +27,8 @@ LOGGER.addHandler(hdlr)
 
 VALID_LANGUAGES = ('en', )
 # only allow hypernym, hyponym and synonym relations for senses
-VALID_SENSE_FILTER = [(u'rel', u'/r/IsA'),
-                      (u'rel', u'/r/Synonym'), (u'rel', u'/r/InstanceOf')]
+VALID_SENSE_FILTER = [('rel', '/r/IsA'),
+                      ('rel', '/r/Synonym'), ('rel', '/r/InstanceOf')]
 # requires at least 4 levels to describe the sense
 # (e.g. /c/en/senes/x while /c/en/dog would fail this criteria)
 MIN_SENSE_SPECIFICITY = 3

@@ -30,7 +30,7 @@ import re
 
 from random import choice
 from xml.dom import minidom
-from urllib import urlencode
+from urllib.parse import urlencode
 
 from eWRT.access.http import Retrieve
 from eWRT.config import OPENCALAIS_KEY, OPENCALAIS_CACHE_DIR, OPENCALAIS_URL, USER_AGENT
@@ -77,7 +77,7 @@ class Calais(object):
         Creates a random 10-character ID for your submission.  
         """
         chars = str.letters + str.digits
-        return "".join( [ choice(chars) for i in xrange(10) ] )
+        return "".join( [ choice(chars) for i in range(10) ] )
     
 
     @staticmethod
@@ -162,7 +162,7 @@ class Calais(object):
                     annotations = annotations.firstChild
                 
                 nodeName = annotations.nodeName
-                nodeAttr = dict(annotations.attributes.items())
+                nodeAttr = dict(list(annotations.attributes.items()))
         
                 nodeAttr.update( {'data': annotations.firstChild.data } )
 

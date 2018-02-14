@@ -13,8 +13,8 @@ import unittest
 import json
 
 from six import string_types
-from urllib import urlencode, quote
-from urlparse import urlparse
+from urllib.parse import urlencode, quote
+from urllib.parse import urlparse
 
 from eWRT.access.http import Retrieve
 
@@ -29,24 +29,25 @@ MAPPING = {'0': 'trustworthiness',
            '4': 'child_safety',
            'target': 'target'}
 
+
 class WebOfTrust(object):
-    
+
     def __init__(self, api_key, service_url=SERVICE_URL):
         self.api_key = api_key
         self.service_url = service_url
         self.retrieve = Retrieve('eWRT.ws.wot')
-        
-    def get_reputation(self, hosts): 
-        query={'hosts': self._encode_hosts(hosts),
-               'api_key': self.api_key}
-        
+
+    def get_reputation(self, hosts):
+        query = {'hosts': self._encode_hosts(hosts),
+                 'api_key': self.api_key}
+
         urlObj = self.retrieve.open(self.service_url % query)
-        
+
         if not urlObj:
             raise Exception('got no result')
-        
-        return self._format_result(json.loads(urlObj.read())) 
-        
+
+        return self._format_result(json.loads(urlObj.read()))
+
     @classmethod
     def _encode_hosts(cls, hosts):
         ''' 
@@ -57,21 +58,21 @@ class WebOfTrust(object):
         '''
         if isinstance(hosts, string_types):
             hosts = [hosts]
-        
+
         selected_hosts = []
-        
+
         for host in hosts:
-            
+
             if not host.startswith('http'):
                 host = 'http://%s' % host
             netloc = '%s/' % quote(urlparse(host).netloc)
-            
-            if not netloc in selected_hosts: 
+
+            if not netloc in selected_hosts:
                 selected_hosts.append(netloc)
-        
+
         assert len(hosts) <= MAX_HOSTS, 'too many hosts (max: %s)!' % MAX_HOSTS
         return ''.join(selected_hosts)
-    
+
     @classmethod
     def _encode_url(cls, service_url, query):
         ''' encodes the url '''
@@ -85,29 +86,30 @@ class WebOfTrust(object):
         details
         '''
         result = {}
-        for host, reputation in data.iteritems():
+        for host, reputation in data.items():
             r = {}
-            for attr_name, new_attr_name in MAPPING.iteritems():
+            for attr_name, new_attr_name in MAPPING.items():
                 if attr_name in reputation:
                     r[new_attr_name] = reputation[attr_name]
             r['wot_link'] = WOT_LINK % r['target']
             result[host] = r
-            
+
         return result
 
-class TestWOT(unittest.TestCase):
-    
-    def test_format_result(self):
-        data = {u'diepresse.com': {u'1': [93, 54], u'0': [92, 57], 
-                                   u'2': [93, 54], u'target': u'diepresse.com', 
-                                   u'4': [93, 54]}, 
-                u'derstandard.at': {u'1': [93, 60], u'0': [93, 62], 
-                                    u'2': [93, 61], u'target': u'derstandard.at', 
-                                    u'4': [93, 60]}}
-        for details in WebOfTrust._format_result(data).itervalues():
-            assert all(attr in details for attr in MAPPING.values())
 
-        
+class TestWOT(unittest.TestCase):
+
+    def test_format_result(self):
+        data = {'diepresse.com': {'1': [93, 54], '0': [92, 57],
+                                  '2': [93, 54], 'target': 'diepresse.com',
+                                  '4': [93, 54]},
+                'derstandard.at': {'1': [93, 60], '0': [93, 62],
+                                   '2': [93, 61], 'target': 'derstandard.at',
+                                   '4': [93, 60]}}
+        for details in WebOfTrust._format_result(data).values():
+            assert all(attr in details for attr in list(MAPPING.values()))
+
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()

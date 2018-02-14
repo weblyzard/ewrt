@@ -7,7 +7,7 @@
     this library is still a draft and might change considerable
 
 '''
-from __future__ import print_function
+
 
 
 # (C)opyrights 2008-2010 by Albert Weichselbraun <albert@weichselbraun.net>
@@ -34,7 +34,7 @@ import gzip
 
 from shutil import rmtree
 from os.path import join, exists
-from cPickle import load, UnpicklingError
+from pickle import load, UnpicklingError
 from subprocess import Popen
 from glob import glob
 

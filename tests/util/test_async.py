@@ -23,31 +23,33 @@ class TestAsync(unittest.TestCase):
 
     @staticmethod
     def _delCacheDir():
-        if exists( TestAsync.TEST_CACHE_DIR ):
-            rmtree( TestAsync.TEST_CACHE_DIR )
+        if exists(TestAsync.TEST_CACHE_DIR):
+            rmtree(TestAsync.TEST_CACHE_DIR)
 
     def test_max_process_limit(self):
         ''' tests the max process limit '''
         async = Async(self.TEST_CACHE_DIR, max_processes=1)
-        for x in xrange(2):
-            async.post( [ "/bin/sleep", str(x+1) ] )
+        for x in range(2):
+            async.post(["/bin/sleep", str(x + 1)])
 
         assert async.has_processes_limit_reached() == True
 
         time.sleep(2)
         flag = async.has_processes_limit_reached()
-        print(flag, [ p.pid for p in async.cur_processes ])
-        assert flag  == False
+        print((flag, [p.pid for p in async.cur_processes]))
+        assert flag == False
 
     def test_debug_mode(self):
         ''' tests the debug mode '''
-        async = Async(self.TEST_CACHE_DIR, max_processes=1, debug_dir=self.TEST_CACHE_DIR)
-        for x in xrange(2):
-            async.post( ["/bin/echo", "hallo"] )
+        async = Async(self.TEST_CACHE_DIR, max_processes=1,
+                      debug_dir=self.TEST_CACHE_DIR)
+        for x in range(2):
+            async.post(["/bin/echo", "hallo"])
 
-        print(glob( join(self.TEST_CACHE_DIR, "debug*")))
-        assert len( glob( join(self.TEST_CACHE_DIR, "debug*.out") )  ) == 2
-        assert len( glob( join(self.TEST_CACHE_DIR, "debug*.err") )  ) == 2
-        
+        print((glob(join(self.TEST_CACHE_DIR, "debug*"))))
+        assert len(glob(join(self.TEST_CACHE_DIR, "debug*.out"))) == 2
+        assert len(glob(join(self.TEST_CACHE_DIR, "debug*.err"))) == 2
+
+
 if __name__ == '__main__':
     unittest.main()

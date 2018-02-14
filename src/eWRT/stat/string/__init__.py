@@ -30,7 +30,7 @@
 #
 import math
 try:
-    from itertools import izip_longest as zip_longest
+    from itertools import zip_longest as zip_longest
 except ImportError:
     from itertools import zip_longest
 from operator import mul, itemgetter
@@ -53,7 +53,7 @@ def wordSimilarity(s1, s2, similarityMeasure):
 
     '''
     wordList = list(zip_longest(s1.split(), s2.split(), fillvalue=""))
-    words1, words2 = map(itemgetter(0), wordList), map(itemgetter(1), wordList)
+    words1, words2 = list(map(itemgetter(0), wordList)), list(map(itemgetter(1), wordList))
     assert len(words1) == len(words2)
 
     score = float(sum([min([similarityMeasure(w1, w2) for w1 in words1])
@@ -72,7 +72,7 @@ def lev(s1, s2):
     if not s1:
         return len(s2)
 
-    previous_row = xrange(len(s2) + 1)
+    previous_row = range(len(s2) + 1)
     for i, c1 in enumerate(s1):
         current_row = [i + 1]
         for j, c2 in enumerate(s2):
@@ -120,13 +120,13 @@ def damerauLev(seq1, seq2):
     # However, only the current and two previous rows are needed at once,
     # so we only store those.
     oneago = None
-    thisrow = range(1, len(seq2) + 1) + [0]
-    for x in xrange(len(seq1)):
+    thisrow = list(range(1, len(seq2) + 1)) + [0]
+    for x in range(len(seq1)):
         # Python lists wrap around for negative indices, so put the
         # leftmost column at the *end* of the list. This matches with
         # the zero-indexed strings and saves extra calculation.
         twoago, oneago, thisrow = oneago, thisrow, [0] * len(seq2) + [x + 1]
-        for y in xrange(len(seq2)):
+        for y in range(len(seq2)):
             delcost = oneago[y] + 1
             addcost = thisrow[y - 1] + 1
             subcost = oneago[y - 1] + (seq1[x] != seq2[y])
@@ -196,7 +196,7 @@ class VectorSpaceModel(object):
     def createVSMRepresentation(v1, v2):
         ''' creates the VSM representation for the two vectors
             to compare '''
-        complete_token_list = set(v1.keys() + v2.keys())
+        complete_token_list = set(list(v1.keys()) + list(v2.keys()))
         vsm1 = [v1[k] for k in complete_token_list]
         vsm2 = [v2[k] for k in complete_token_list]
         return vsm1, vsm2

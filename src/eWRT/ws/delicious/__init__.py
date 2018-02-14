@@ -21,9 +21,9 @@
 __version__ = "$Header$"
 
 import re
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
-from urllib import quote
+from urllib.parse import quote
 from time import sleep
 from hashlib import md5
 
@@ -59,7 +59,7 @@ class Delicious(TagInfoService):
         try:
             content = Delicious._get_content(url)
             return Delicious._parse_counts(content)
-        except urllib2.HTTPError:
+        except urllib.error.HTTPError:
             return 0
 
     @staticmethod
@@ -169,5 +169,5 @@ if __name__ == '__main__':
     #    print Delicious.getUrlInfo( url ), "counts"
     #    print Delicious.getTagInfo( ("debian", "linux") ), "counts"
     #    print Delicious.getRelatedTag( ("debian", "linux") ), "counts"
-    print Delicious.getTagInfo(("debian", "linux")), "counts"
-    print Delicious.getRelatedTags(('debian', 'linux'))
+    print(Delicious.getTagInfo(("debian", "linux")), "counts")
+    print(Delicious.getRelatedTags(('debian', 'linux')))

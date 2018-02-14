@@ -95,7 +95,7 @@ class XCL2RDF(object):
                 outgoingConnections[c1].append(c2)
         
         rdfGraph = Graph()
-        for p, s_list in incomingConnections.items():
+        for p, s_list in list(incomingConnections.items()):
             for s in s_list:
                 for o in outgoingConnections[p]:
                     XCL2RDF._addOntologyStatement(rdfGraph, 

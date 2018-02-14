@@ -18,7 +18,7 @@ import requests
 import logging
 
 from six import string_types
-from urllib import urlencode
+from urllib.parse import urlencode
 
 from eWRT.ws import AbstractWebSource
 
@@ -78,7 +78,7 @@ class GoogleTranslator(AbstractWebSource):
 
     def translate(self, text, target_language, source_language=None):
         ''' translates the text '''
-        if isinstance(text, unicode):
+        if isinstance(text, str):
             text = text.encode('utf8')
         params = {'target': target_language, 'q': text}
 

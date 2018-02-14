@@ -80,7 +80,7 @@ class CmlBuilder(object):
 
         # XML documents only can contain strings therefore unicode(v)
         # moreover, we filter all non-parameters and self, cls.
-        filtered_kwargs = {k:unicode(v) for k, v in kwargs.iteritems() if is_param(k) and v}
+        filtered_kwargs = {k:str(v) for k, v in kwargs.items() if is_param(k) and v}
 
         cleaned_kwargs = {}
         error_msg = 'The attribute is invalid: %s:%s'
@@ -88,7 +88,7 @@ class CmlBuilder(object):
         # check the sanity of all attributes.
         # each check function is looked up in a _attribute_checks dictionary
         # in the case of a bad attribute an exception is raised.
-        for attr, v in filtered_kwargs.iteritems():
+        for attr, v in filtered_kwargs.items():
             check_func = self._attribute_checks.get(attr)
             if check_func: assert check_func(attr, v), error_msg % (attr, v)
             cleaned_kwargs[attr] = v
@@ -621,14 +621,14 @@ class TestCmlBuilder(unittest.TestCase):
 
         test_result = '<cml:ratings xmlns:cml="cml" points="5"/>\n'
         builder = CmlBuilder()
-        self.assertEquals(builder.radio_buttons_rating().dumps(), test_result)
+        self.assertEqual(builder.radio_buttons_rating().dumps(), test_result)
 
 
     def test_text(self):
 
         builder = CmlBuilder()
         builder.text(label='My test label', name='uniquename')
-        self.assertEquals(builder.dumps(),
+        self.assertEqual(builder.dumps(),
                           '<cml:text xmlns:cml="cml" name="uniquename" label="My test label"/>\n')
 
 
@@ -636,7 +636,7 @@ class TestCmlBuilder(unittest.TestCase):
 
         builder = CmlBuilder()
         builder.textarea(label='Some explanation', name='textareaid')
-        self.assertEquals(builder.dumps(),
+        self.assertEqual(builder.dumps(),
                           '<cml:text xmlns:cml="cml" name="textareaid" label="Some explanation"/>\n')
 
 
@@ -649,7 +649,7 @@ class TestCmlBuilder(unittest.TestCase):
         builder.text('Sample text field:', name='name')\
                .textarea('my textarea')
 
-        self.assertEquals(builder.dumps(), test_result)
+        self.assertEqual(builder.dumps(), test_result)
 
 
     def test_attr_name_ok(self):
@@ -698,7 +698,7 @@ class TestCmlBuilder(unittest.TestCase):
 
         builder = CmlBuilder()
         builder.checkbox('A single checkbox', name='checkboxcheck')
-        self.assertEquals(builder.dumps(),
+        self.assertEqual(builder.dumps(),
                           '<cml:checkbox xmlns:cml="cml" name="checkboxcheck" label="A single checkbox"/>\n')
 
 
@@ -713,7 +713,7 @@ class TestCmlBuilder(unittest.TestCase):
   <cml:checkbox label="Graz"/>
 </cml:checkboxes>
 '''
-        self.assertEquals(builder.dumps(), result)
+        self.assertEqual(builder.dumps(), result)
 
 
     def test_dropdown(self):
@@ -727,7 +727,7 @@ class TestCmlBuilder(unittest.TestCase):
   <cml:option label="supercow"/>
 </cml:select>
 '''
-        self.assertEquals(result, builder.dumps())
+        self.assertEqual(result, builder.dumps())
 
 
 

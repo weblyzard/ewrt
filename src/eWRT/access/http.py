@@ -2,7 +2,6 @@
 
 ''' @package eWRT.access.http
     provides access to resources using http '''
-from __future__ import print_function
 
 
 # (C)opyrights 2008-2015 by Albert Weichselbraun <albert@weblyzard.com>
@@ -20,11 +19,14 @@ from __future__ import print_function
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-try:
-    # urllib2 is merged into urllib in python3 (SV)
-    import urllib.request as urllib2
-except:
-    import urllib2  # python2
+import logging
+import urllib
+import time
+import io
+
+from urllib.parse import urlsplit, urlunsplit
+from gzip import GzipFile
+from random import randint
 
 from eWRT.config import (USER_AGENT, DEFAULT_WEB_REQUEST_SLEEP_TIME,
                          PROXY_SERVER)
@@ -33,20 +35,7 @@ from eWRT.config import (USER_AGENT, DEFAULT_WEB_REQUEST_SLEEP_TIME,
 #DEFAULT_WEB_REQUEST_SLEEP_TIME = 1
 #PROXY_SERVER = None
 
-try:
-    from urllib.parse import urlsplit, urlunsplit  # porting to python 3.4 (SV)
-except:
-    from urlparse import urlsplit, urlunsplit  # python2
 
-import time
-import io
-
-from gzip import GzipFile
-from random import randint
-
-
-# logging
-import logging
 log = logging.getLogger(__name__)
 
 RETRY_WAIT_TIME_RANGE = (2, 10)              # in seconds
@@ -119,7 +108,7 @@ class Retrieve(object):
         urlObj = None
         tries = 0
         while not urlObj:
-            request = urllib2.Request(url, data, headers)
+            request = urllib.request.Request(url, data, headers)
 
             if head_only:
                 request.get_method = lambda: 'HEAD'
@@ -133,14 +122,15 @@ class Retrieve(object):
 
             opener = []
             if PROXY_SERVER:
-                opener.append(urllib2.ProxyHandler({"http": PROXY_SERVER}))
+                opener.append(urllib.request.ProxyHandler(
+                    {"http": PROXY_SERVER}))
             if user and pwd:
                 opener.append(auth_handler(url, user, pwd))
 
-            urllib2.install_opener(urllib2.build_opener(*opener))
+            urllib.request.install_opener(urllib.request.build_opener(*opener))
             try:
-                urlObj = urllib2.urlopen(request)
-            except urllib2.HTTPError as e:
+                urlObj = urllib.request.urlopen(request)
+            except urllib.error.HTTPError as e:
                 if e.code in HTTP_TEMPORARY_ERROR_CODES and tries < retry:
                     time.sleep(randint(*RETRY_WAIT_TIME_RANGE))
                     tries += 1
@@ -157,9 +147,9 @@ class Retrieve(object):
     @staticmethod
     def _getHTTPBasicAuthOpener(url, user, pwd):
         ''' returns an opener, capable of handling http-auth '''
-        passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
+        passman = urllib.request.HTTPPasswordMgrWithDefaultRealm()
         passman.add_password(None, url, user, pwd)
-        auth_handler = urllib2.HTTPBasicAuthHandler(passman)
+        auth_handler = urllib.request.HTTPBasicAuthHandler(passman)
         return auth_handler
 
     @staticmethod
@@ -167,9 +157,9 @@ class Retrieve(object):
         '''
         returns an opener, capable of handling http-digest authentification
         '''
-        passwdmngr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+        passwdmngr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
         passwdmngr.add_password('realm', url, user, pwd)
-        auth_handler = urllib2.HTTPDigestAuthHandler(passwdmngr)
+        auth_handler = urllib.request.HTTPDigestAuthHandler(passwdmngr)
         return auth_handler
 
     @staticmethod

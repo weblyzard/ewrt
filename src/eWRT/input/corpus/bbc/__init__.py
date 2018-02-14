@@ -31,7 +31,7 @@ class BBCGetCorpus(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         if self.files:
             htmlTxt = open(self.files.pop()).read()
             return HtmlToText.getText(htmlTxt)
@@ -48,4 +48,4 @@ if __name__ == '__main__':
     def n(x): return x.replace("'", "''")
     for num, text in enumerate(BBCGetCorpus("7[3456789]*.stm")):
         title = BBCGetCorpus.getTitle(text)
-        print "INSERT INTO evaluation_documents (content_id, title, content) VALUES ('%d', '%s', '%s');" % (num, n(title), n(text))
+        print("INSERT INTO evaluation_documents (content_id, title, content) VALUES ('%d', '%s', '%s');" % (num, n(title), n(text)))

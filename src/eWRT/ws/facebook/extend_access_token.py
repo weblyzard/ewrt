@@ -6,7 +6,7 @@ a new one.
 
 :author: heinz-peterlang
 '''
-import urlparse
+import urllib.parse
 
 from eWRT.access.http import Retrieve
 from eWRT.config import (FACEBOOK_APPLICATION_ID, FACEBOOK_SECRET_KEY,
@@ -28,16 +28,16 @@ def get_new_access_token(client_id=FACEBOOK_APPLICATION_ID,
     result = x.read()
     new_access_token = access_token
 
-    for key, param in urlparse.parse_qs(result).iteritems():
-        print key, param
+    for key, param in urllib.parse.parse_qs(result).items():
+        print(key, param)
         if key == 'access_token':
             if isinstance(param, list):
                 param = param[0]
 
             if param == access_token:
-                print 'access token still the same'
+                print('access token still the same')
             else:
-                print 'got new access_token %s' % param
+                print('got new access_token %s' % param)
                 new_access_token = param
 
     return new_access_token

@@ -3,7 +3,7 @@
 ''' @package eWRT.util.cache
     caches arbitrary objects
 '''
-from __future__ import print_function
+
 
 import redis
 import pickle
@@ -38,7 +38,7 @@ __copyright__ = "GPL"
 
 
 try:
-    from cPickle import dump, load
+    from pickle import dump, load
 except ImportError:
     from pickle import dump, load
 
@@ -299,7 +299,7 @@ class MemoryCache(Cache):
         if self.max_cache_size == 0 or len(self._cacheData) <= self.max_cache_size:
             return
 
-        (key, _) = sorted(self._usage.items(),
+        (key, _) = sorted(list(self._usage.items()),
                           key=itemgetter(1), reverse=True).pop()
         del self._usage[key]
         del self._cacheData[key]
@@ -366,7 +366,7 @@ class IterableCache(DiskCache):
 
         return self
 
-    def next(self):
+    def __next__(self):
         return self._read_next_element() if self._cached else self._cache_next_element()
 
     def _cache_next_element(self):
@@ -431,8 +431,8 @@ class RedisCache(Cache):
             longest time '''
         if self.max_cache_size == 0 or self._cacheData.dbsize() < self.max_cache_size:
             return
-        usage_dict = {k: self._usage[k] for k in self._usage.keys()}
-        (key, _) = sorted(usage_dict.items(),
+        usage_dict = {k: self._usage[k] for k in list(self._usage.keys())}
+        (key, _) = sorted(list(usage_dict.items()),
                           key=itemgetter(1), reverse=True).pop()
         del self._usage[key]
         del self._cacheData[key]

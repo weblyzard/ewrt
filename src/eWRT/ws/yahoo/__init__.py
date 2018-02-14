@@ -9,24 +9,24 @@
 
 # (C)opyrights 2008-2010 by Albert Weichselbraun <albert@weichselbraun.net>
 #                           Heinz Peter Lang <hplang@langatium.net>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __version__ = "$Header$"
-
-from urllib import urlopen, urlencode, quote
-from urllib2 import URLError
+from urllib.request import urlopen
+from urllib.parse import urlencode, quote
+from urllib.error import URLError
 from nose.plugins.attrib import attr
 from socket import setdefaulttimeout
 
@@ -38,6 +38,7 @@ from eWRT.access.http import Retrieve
 
 setdefaulttimeout(60)
 
+
 class Yahoo(TagInfoService):
     """ interfaces with yahoo's search service 
         * Search: Yahoo! BOSS
@@ -46,9 +47,9 @@ class Yahoo(TagInfoService):
     __slots__ = ('r', )
 
     def __init__(self):
-        self.r = Retrieve( Yahoo.__name__, sleep_time=0 )
+        self.r = Retrieve(Yahoo.__name__, sleep_time=0)
 
-    def query(self, terms, count=0, queryParams={} ):
+    def query(self, terms, count=0, queryParams={}):
         """ returns search results for the given terms
             @param[in] terms       ... a list of search terms
             @param[in] count       ... number of results to return (0 if we are
@@ -57,16 +58,16 @@ class Yahoo(TagInfoService):
                                           the request
             @returns the search results
         """
-        assert ( isinstance(terms, tuple) or isinstance(terms, list) )
-        queryParams.update( {'appid': YAHOO_APP_ID,
-                             'count': count,
-                             'format': 'json'
-        } )
-        params = urlencode( queryParams )
-        url = YAHOO_SEARCH_URL % "%2B".join(map( quote, terms) ) +"?"+ params
-        print url
+        assert (isinstance(terms, tuple) or isinstance(terms, list))
+        queryParams.update({'appid': YAHOO_APP_ID,
+                            'count': count,
+                            'format': 'json'
+                            })
+        params = urlencode(queryParams)
+        url = YAHOO_SEARCH_URL % "%2B".join(map(quote, terms)) + "?" + params
+        print(url)
         try:
-            result = eval( self.r.open(url).read().replace("\\/", "/" ))
+            result = eval(self.r.open(url).read().replace("\\/", "/"))
             return result['ysearchresponse']
         except URLError:
             return ""
@@ -77,13 +78,12 @@ class Yahoo(TagInfoService):
             query result.
             @param[in] query_result     Result of the query
         """
-        return [ YahooSearchResult(r) for r in query_result['resultset_web'] ] \
-           if 'resultset_web' in query_result else []
-
+        return [YahooSearchResult(r) for r in query_result['resultset_web']] \
+            if 'resultset_web' in query_result else []
 
     def getTagInfo(self, tag):
         """ @Override """
-        return int( self.query(tag)['totalhits'] )
+        return int(self.query(tag)['totalhits'])
 
 
 class YahooSearchResult(object):
@@ -101,21 +101,22 @@ class YahooSearchResult(object):
 
     def getPageContent(self):
         """ @returns the content of the found web page """
-        return urlopen( self.search_result['url'] ).read()
+        return urlopen(self.search_result['url']).read()
 
     def getPageText(self):
         """ @returns the text of the found web page """
         try:
-            return HtmlToText.getText( self.getPageContent() )
+            return HtmlToText.getText(self.getPageContent())
         except:
             return ""
+
 
 class TestYahoo(object):
     """ tests the yahoo search API """
 
     SEARCH_QUERIES = {
-        'energy': ( ('energy', 'coal'), ('energy', 'sustainable') ),
-        'latex' : ( ('latex', 'bibtex'), ('latex', 'knutz') )
+        'energy': (('energy', 'coal'), ('energy', 'sustainable')),
+        'latex': (('latex', 'bibtex'), ('latex', 'knutz'))
     }
 
     def __init__(self):
@@ -123,33 +124,37 @@ class TestYahoo(object):
 
     @attr("remote")
     def testSearchCounts(self):
-        for query, refinedQueries in self.SEARCH_QUERIES.iteritems():
-            qCount = int(self.y.query( (query, ) )['totalhits'])
+        for query, refinedQueries in self.SEARCH_QUERIES.items():
+            qCount = int(self.y.query((query, ))['totalhits'])
 
             for q in refinedQueries:
-                print query, q, "**",qCount, int(self.y.query( q )['totalhits'])
-                assert qCount > int(self.y.query( q )['totalhits'])
-    
+                print(query, q, "**", qCount,
+                      int(self.y.query(q)['totalhits']))
+                assert qCount > int(self.y.query(q)['totalhits'])
+
     @attr("remote")
     def testTagInfo(self):
         """ tests the tag info service """
-        assert self.y.getTagInfo( ('weblyzard',)) > 10
-        assert self.y.getTagInfo( ('a_query_which_should_not_appear_at_all', )) == 0
+        assert self.y.getTagInfo(('weblyzard',)) > 10
+        assert self.y.getTagInfo(
+            ('a_query_which_should_not_appear_at_all', )) == 0
 
     @attr("remote")
     def testYahooSearchResult(self):
         """ tests the Yahoo Search Result objects """
-        for resultSite in Yahoo.getSearchResults(self.y.query( ("linux", "firefox", ),  \
-                            count=1, queryParams={'view':'keyterms', 'abstract': 'long'} )):
+        for resultSite in Yahoo.getSearchResults(self.y.query(("linux", "firefox", ),
+                                                              count=1, queryParams={'view': 'keyterms', 'abstract': 'long'})):
 
-            print resultSite.search_result['keyterms']['terms']
-            assert len( resultSite.getPageText() ) > len(resultSite.search_result['abstract'])
+            print(resultSite.search_result['keyterms']['terms'])
+            assert len(resultSite.getPageText()) > len(
+                resultSite.search_result['abstract'])
             assert 'http' in resultSite.search_result['url']
 
     @attr("remote")
     def testBorderlineYahooSearchResult(self):
         """ tests borderline cases such as empty search results """
-        assert len( Yahoo.getSearchResults(self.y.query( ('ksdaf', 'sadfj93', 'kd9', ), count=10, queryParams={'view':'keyterms', 'abstract': 'long'}) ) ) == 0
+        assert len(Yahoo.getSearchResults(self.y.query(('ksdaf', 'sadfj93', 'kd9', ),
+                                                       count=10, queryParams={'view': 'keyterms', 'abstract': 'long'}))) == 0
 
     @attr("remote")
     def testMultiProcessingRetrieve(self):
@@ -157,7 +162,7 @@ class TestYahoo(object):
         from multiprocessing import Pool
         p = Pool(4)
 
-        TEST_URLS = ['http://www.derstandard.at', 
+        TEST_URLS = ['http://www.derstandard.at',
                      'http://www.dilbert.com',
                      'http://www.wetter.at',
                      'http://www.wu.ac.at',
@@ -165,9 +170,9 @@ class TestYahoo(object):
                      'http://www.tuwien.ac.at',
                      'http://www.boku.ac.at',
                      'http://www.univie.ac.at',
-                    ]
+                     ]
         # f=open("/tmp/aw", "w")
-        for res in p.map( p_fetchWebPage, TEST_URLS ):
+        for res in p.map(p_fetchWebPage, TEST_URLS):
             # f.write(res)
             # f.write("\n-----\n\n\n")
             assert len(res) > 20
@@ -177,10 +182,9 @@ class TestYahoo(object):
     def testFailingUrls(self):
         """ tests the module with URLs known to fail(!) """
         TEST_URLS = ['http://www.mfsa.com.mt/insguide/english/glossarysearch.jsp?letter=all',
-                    ]
+                     ]
         for url in TEST_URLS:
-            assert len( p_fetchWebPage(url).strip() ) > 0
-
+            assert len(p_fetchWebPage(url).strip()) > 0
 
 
 def p_fetchWebPage(url):
@@ -190,21 +194,20 @@ def p_fetchWebPage(url):
         @remarks
         helper function for the testMultiProcessing test
     """
-    r = YahooSearchResult( {'url': url} )
+    r = YahooSearchResult({'url': url})
     return r.getPageText()
 
 
 if __name__ == '__main__':
     y = Yahoo()
-    #print y.query( ("energy",) )
-    #print y.query( ("energy", "coal") )
-    #print y.query( ("d'alembert", "law") )
-    r = y.query( ("linux", "python", ), count=5, queryParams={'view': 'keyterms', 'abstract': 'long'} )
-    print "***", r
+    # print y.query( ("energy",) )
+    # print y.query( ("energy", "coal") )
+    # print y.query( ("d'alembert", "law") )
+    r = y.query(("linux", "python", ), count=5, queryParams={
+                'view': 'keyterms', 'abstract': 'long'})
+    print("***", r)
     for entry in r['resultset_web']:
-        print entry.keys()
-        print entry['keyterms']['terms']
-        print entry['url']
-        print entry['abstract']
-
-
+        print(list(entry.keys()))
+        print(entry['keyterms']['terms'])
+        print(entry['url'])
+        print(entry['abstract'])

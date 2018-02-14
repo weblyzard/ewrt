@@ -79,7 +79,7 @@ class EmailParser(object):
         try:
             if '@' in possible_email_obj['To']:
                 is_email = True
-        except TypeError, e:
+        except TypeError as e:
             is_email = False
 
         return is_email

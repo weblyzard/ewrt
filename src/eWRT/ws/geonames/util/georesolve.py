@@ -39,7 +39,7 @@ class GazetteerEntryNotFound(Exception):
     def __init__(self, id, query):
         self.id = id
         self.query = query
-        print id, query
+        print(id, query)
 
     def __str__(self):
         return "Gazetteer lookup for entity-id '%s' failed." % (self.id)
@@ -146,7 +146,7 @@ class Gazetteer(object):
                 parentLocationName = self.__getPreferredGeoName(
                     parentLocationEntity)
                 if parentLocationEntity in geoIdPath:
-                    print "%s in %s" % (parentLocationName, geoPath)
+                    print("%s in %s" % (parentLocationName, geoPath))
                     break
                 geoPath.append(parentLocationName)
 
@@ -187,9 +187,9 @@ class Gazetteer(object):
         # todo: is it necessary, that this functions can process multiple parents?
         # multiple parents (!)
         if result.__len__() > 1:
-            print '### result > 1 ###'
-            print '    child_id:  %s' % child_id
-            print '    parent_id: %s ' % [e['parent_id'] for e in result]
+            print('### result > 1 ###')
+            print('    child_id:  %s' % child_id)
+            print('    parent_id: %s ' % [e['parent_id'] for e in result])
 
         # todo: does it make sense to fetch infinite loops
         if result == []:
@@ -229,7 +229,7 @@ class Gazetteer(object):
 
     def getGeoDict(self, geoId):
         """ returns a dictinary with all information about the given geoId """
-        print geoId
+        print(geoId)
         query = "SELECT * FROM gazetteerentity WHERE id = %s" % geoId
         res = self.db.query(query)
         if len(res) > 0:
@@ -271,12 +271,12 @@ if __name__ == "__main__":
     a = Gazetteer()
     if sys.argv.__len__() > 1:
         # print a.getGeoIdFromGeoUrl( "Europe/Austria/Vienna/Vienna" )
-        print Gazetteer.getGeoNameFromString(a, sys.argv[1])
+        print(Gazetteer.getGeoNameFromString(a, sys.argv[1]))
     else:
         # print Gazetteer.getGeoNameFromContentID(a, 86597672)
         # print Gazetteer.getGeoNameFromContentID(a, 90160635)
-        print Gazetteer.getGeoNameFromString(a, 'Vienna')
-        print Gazetteer.getGeoNameFromString(a, "Lainach")
-        print Gazetteer.getGeoNameFromString(a, "Spittal an der Drau")
-        print Gazetteer.getGeoNameFromString(a, "Salzburg")
-        print Gazetteer.getGeoNameFromString(a, "London")
+        print(Gazetteer.getGeoNameFromString(a, 'Vienna'))
+        print(Gazetteer.getGeoNameFromString(a, "Lainach"))
+        print(Gazetteer.getGeoNameFromString(a, "Spittal an der Drau"))
+        print(Gazetteer.getGeoNameFromString(a, "Salzburg"))
+        print(Gazetteer.getGeoNameFromString(a, "London"))

@@ -48,10 +48,9 @@ class CoherenceEvaluator(object):
         rdf = ontology if isinstance( ontology, Graph ) else Graph().parse( ontology)
         q   = CoherenceEvaluator._buildSparqlQuery(relation_predicates)
 
-        conceptEval = [ (self.metric.getTermCoherence(s,o), s, p, o) \
-            for s, p, o in rdf.query( q, initNs=dict(rdfs=NS_RDFS, wl=NS_WL) ) ]
+        conceptEval = sorted([ (self.metric.getTermCoherence(s,o), s, p, o) \
+            for s, p, o in rdf.query( q, initNs=dict(rdfs=NS_RDFS, wl=NS_WL) ) ])
 
-        conceptEval.sort()
         return conceptEval
 
 
@@ -62,9 +61,9 @@ class TestTermEval(object):
     def testSparqlQueryGeneration(self):
         """ tests the generation of Sparql queries """
         referenceQuery = "SELECT ?s ?p ?o WHERE { { ?c1 rdfs:subClassOf ?c2; ?p ?c2; rdfs:label ?s. ?c2 rdfs:label ?o. } UNION { ?c1 wl:isRelatedTo ?c2; ?p ?c2; rdfs:label ?s. ?c2 rdfs:label ?o. } UNION { ?c1 wl:modifierOf ?c2; ?p ?c2; rdfs:label ?s. ?c2 rdfs:label ?o. } }"
-        print referenceQuery
-        print "--"
-        print CoherenceEvaluator._buildSparqlQuery( RELATION_PREDICATES )
+        print(referenceQuery)
+        print("--")
+        print(CoherenceEvaluator._buildSparqlQuery( RELATION_PREDICATES ))
         assert( CoherenceEvaluator._buildSparqlQuery() == referenceQuery )
 
     def testEvaluateTerminology(self):
@@ -75,7 +74,7 @@ class TestTermEval(object):
         t = CoherenceEvaluator( c )
         weakConcepts = t.getWeakConcepts( self.TEST_ONTOLOGY )
         assert isinstance( weakConcepts, list )
-        print len(weakConcepts)
+        print(len(weakConcepts))
         assert len(weakConcepts) == 27-1
         
 
@@ -85,6 +84,6 @@ if __name__ == '__main__':
     c = DiceCoherence( dataSource = Yahoo() )
     t = CoherenceEvaluator( c )
     weak = t.getWeakConcepts( "./test/test.rdf" ) 
-    print weak
-    print "---"
-    print "\n".join( ( str(w) for w in weak ) )
+    print(weak)
+    print("---")
+    print("\n".join( ( str(w) for w in weak ) ))

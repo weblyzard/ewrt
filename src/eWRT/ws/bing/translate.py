@@ -17,7 +17,7 @@ import requests
 
 from six import string_types
 from datetime import datetime, timedelta
-from urllib import urlencode
+from urllib.parse import urlencode
 
 from eWRT.ws import AbstractWebSource
 
@@ -75,7 +75,7 @@ class BingTranslator(AbstractWebSource):
                   }
         headers = {'Authorization': 'Bearer %s' % self.access_token}
         resp = requests.get(self.api_url + urlencode(params), headers=headers)
-        return resp.text.replace('"', '').replace(u'\ufeff', '')
+        return resp.text.replace('"', '').replace('\ufeff', '')
 
     def get_new_access_token(self):
         params = {'grant_type': 'client_credentials',

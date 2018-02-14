@@ -8,7 +8,7 @@ Access to conceptnet data structures using its REST interface
 """
 
 try:
-    from urllib import quote
+    from urllib.parse import quote
 except ImportError:
     from urllib.parse import quote
 
@@ -70,4 +70,4 @@ if __name__ == '__main__':
     r.apply_language_filter(VALID_LANGUAGES)
     # r.apply_edge_filter(VALID_SENSE_FILTER)
     #print("\n".join(map(repr, r.get_senses())))
-    print(r.get_vsm(stopword_list=()))
+    print((r.get_vsm(stopword_list=())))

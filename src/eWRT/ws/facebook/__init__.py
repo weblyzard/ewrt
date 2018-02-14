@@ -9,9 +9,8 @@ import logging
 import json
 import sys
 import unittest
-import urllib
-
-from urllib2 import HTTPError, URLError
+import urllib.request, urllib.parse, urllib.error
+from urllib.error import HTTPError, URLError
 
 from eWRT.lib import Webservice, Result
 from eWRT.lib.ResultSet import ResultSet
@@ -74,7 +73,7 @@ class FacebookWS(object):
                 args['type'] = obj_type
                 result.extend(cls.makeRequest('search', args))
         else:
-            raise ValueError, 'Illegal Object type %s' % (objectType)
+            raise ValueError('Illegal Object type %s' % (objectType))
 
         return result
 
@@ -95,7 +94,7 @@ class FacebookWS(object):
             args['method'] = 'POST'
 
         url = "https://graph.facebook.com/%s?%s" % (
-            path, urllib.urlencode(args))
+            path, urllib.parse.urlencode(args))
         result = cls._requestURL(url, maxDoc)
         return result
 
@@ -104,7 +103,7 @@ class FacebookWS(object):
         args = {}
         args['q'] = self.term
 
-        if isinstance(args['q'], unicode):
+        if isinstance(args['q'], str):
             args['q'] = args['q'].encode('utf-8')
 
         if self.since:
@@ -120,7 +119,7 @@ class FacebookWS(object):
                 del args['q']
 
             if len(args):
-                args_string = '?%s' % urllib.urlencode(args)
+                args_string = '?%s' % urllib.parse.urlencode(args)
 
             request = {'method': "GET",
                        "relative_url": '%s/%s%s' % (self.GRAPH_API_VERSION,
@@ -129,7 +128,7 @@ class FacebookWS(object):
         elif self.objectType in self.FB_OBJECT_TYPES:
             args['type'] = self.objectType
             request = {'method': "GET",
-                       "relative_url": "/search?%s" % urllib.urlencode(args)}
+                       "relative_url": "/search?%s" % urllib.parse.urlencode(args)}
 
         elif self.objectType == 'all':
             for obj_type in self.FB_OBJECT_TYPES:
@@ -137,7 +136,7 @@ class FacebookWS(object):
                     continue
                 args['type'] = obj_type
                 request = {'method': "GET",
-                           "relative_url": "/search?" + urllib.urlencode(args)}
+                           "relative_url": "/search?" + urllib.parse.urlencode(args)}
 
         return request
 
@@ -176,19 +175,19 @@ class FacebookWS(object):
                         if 'paging' in fetched and 'previous' in fetched['paging']:
                             result = (cls._requestURL(fetched['paging']['previous'],
                                                       maxDoc, result))
-                            print 'After processing paging', len(result)
+                            print('After processing paging', len(result))
 
                 else:
                     # profiles for example don't contain a data dictionary
                     result.append(fetched)
-                    print 'After appending fetched', len(result)
+                    print('After appending fetched', len(result))
 
-        except HTTPError, e:
-            print 'Error: Bad Request for url %s: %s' % (url, e)
+        except HTTPError as e:
+            print('Error: Bad Request for url %s: %s' % (url, e))
             if not tried:
                 result = cls._requestURL(url, maxDoc, result, True)
-        except URLError, e:
-            print 'URLError for url %s: %s' % (url, e)
+        except URLError as e:
+            print('URLError for url %s: %s' % (url, e))
             if not tried:
                 result = cls._requestURL(url, maxDoc, result, True)
 

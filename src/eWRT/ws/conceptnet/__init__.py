@@ -12,7 +12,7 @@ from itertools import chain
 from json import loads
 from os.path import exists
 try:
-    from cPickle import dump
+    from pickle import dump
 except ImportError:
     from pickle import dump
 
@@ -115,11 +115,11 @@ class Result(object):
 
             # handle list values
             if isinstance(attr_value, list):
-                attr_value = chain(*map(tokenize, attr_value))
+                attr_value = chain(*list(map(tokenize, attr_value)))
                 vsm.update(attr_value)
             else:
                 vsm.update(tokenize(attr_value))
 
         # apply stopword list
-        map(vsm.pop, [s for s in stopword_list if s in vsm])
+        list(map(vsm.pop, [s for s in stopword_list if s in vsm]))
         return vsm

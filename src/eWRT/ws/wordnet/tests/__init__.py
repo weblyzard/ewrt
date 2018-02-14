@@ -14,6 +14,8 @@ from eWRT.ws.wordnet import get_synonmys, get_antonyms, get_terms
 # Unit tests
 # ------------------------------------------------------------------------------------
 
+
 def test_get_antonyms():
-    lemmas = get_antonyms('good') 
-    assert_equal( get_terms( lemmas ), set( ('bad', 'badness', 'ill', 'evil', 'evilness') ) )
+    lemmas = get_antonyms('good')
+    assert_equal(get_terms(lemmas), set(
+        ('bad', 'badness', 'ill', 'evil', 'evilness')))

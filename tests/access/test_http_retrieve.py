@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import unittest
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 from pytest import raises
 
@@ -63,7 +63,7 @@ class TestHttpRetrieve(unittest.TestCase):
         ''' tests whether the socket timeout is honored by our class '''
         SLOW_URL = "http://www.csse.uwa.edu.au/"
 
-        with raises(urllib2.URLError):
+        with raises(urllib.error.URLError):
             r = Retrieve(self.__class__.__name__,
                          default_timeout=0.1).open(SLOW_URL)
             content = r.read()
@@ -90,7 +90,7 @@ class TestHttpRetrieve(unittest.TestCase):
                 ('http://heinz:secret@irgendwas.com', 'heinz', 'secret'))
 
         for test_url, exp_user, exp_passwd in urls:
-            print('testing url ' + test_url)
+            print(('testing url ' + test_url))
             url, user, passwd = Retrieve.get_user_password(test_url)
             assert user == exp_user
             assert passwd == exp_passwd

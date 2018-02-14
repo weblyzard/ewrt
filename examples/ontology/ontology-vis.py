@@ -17,57 +17,63 @@ from eWRT.ontology.visualize import GraphvizVisualize, OutputQueries
 # a directory containing all cxl ontology files
 IMG_OUTPUT_DIR = "./images"
 
-def _createOutputDir( d ):
-    if not path.exists( d ):
+
+def _createOutputDir(d):
+    if not path.exists(d):
         mkdir(d)
 
-def visualizeOntologies( ff ):
+
+def visualizeOntologies(ff):
     """ visualizes the given ontologies
         @param[in] ff   a list of files containing the ontologies to be visualized
     """
-    _createOutputDir( IMG_OUTPUT_DIR )
+    _createOutputDir(IMG_OUTPUT_DIR)
 
     for f in ff:
-        fName, fExt = path.splitext( path.basename(f))
-        rdfOntology = XCL2RDF.toRDF(open(f).read() )
+        fName, fExt = path.splitext(path.basename(f))
+        rdfOntology = XCL2RDF.toRDF(open(f).read())
 
-        g = GraphvizVisualize( rdfOntology, sparqlQuery=OutputQueries._labeledGraphSparqlQuery )
+        g = GraphvizVisualize(
+            rdfOntology, sparqlQuery=OutputQueries._labeledGraphSparqlQuery)
         g.graphTitle = fName
-        g.createImage( path.join(IMG_OUTPUT_DIR, fName), "pdf" )
+        g.createImage(path.join(IMG_OUTPUT_DIR, fName), "pdf")
 
-def visualizeOntologyFile( f ):
+
+def visualizeOntologyFile(f):
     """ visualizes the given ontology file
         @param[in] f   the filename of the ontology to visualize
     """
-    print "Visualizing "+f
+    print("Visualizing " + f)
     rdfOntology = Graph()
-    fName, fExt = path.splitext( path.basename(f))
+    fName, fExt = path.splitext(path.basename(f))
 
-    rdfOntology.parse( f, format="xml" )
+    rdfOntology.parse(f, format="xml")
 
-    g = GraphvizVisualize( rdfOntology, sparqlQuery=OutputQueries._labeledGraphSparqlQuery )
+    g = GraphvizVisualize(
+        rdfOntology, sparqlQuery=OutputQueries._labeledGraphSparqlQuery)
     g.graphTitle = f
-    g.createImage( path.join(IMG_OUTPUT_DIR, fName), "pdf" )
- 
+    g.createImage(path.join(IMG_OUTPUT_DIR, fName), "pdf")
+
 
 def usage():
-    print "ontology-vis.py -d [ontology-directory] -f [ontology-file] -h"
+    print("ontology-vis.py -d [ontology-directory] -f [ontology-file] -h")
+
 
 # main
 if __name__ == '__main__':
     try:
-        opts, args = getopt( sys.argv[1:], "hd:f:", ["help", "input-dir=", "input-file="] )
-    except GetoptError, err:
-        print str(err)
+        opts, args = getopt(sys.argv[1:], "hd:f:", [
+                            "help", "input-dir=", "input-file="])
+    except GetoptError as err:
+        print(str(err))
         usage()
         sys.exit(2)
-    
+
     for o, a in opts:
         if o in ("-d", "--input-dir"):
-            visualizeOntologies( glob(a +"/*.cxl") )
+            visualizeOntologies(glob(a + "/*.cxl"))
         elif o in ("-f", "--input-file"):
-            visualizeOntologyFile( a )
+            visualizeOntologyFile(a)
         elif o in ("-h", "--help"):
             usage()
             sys.exit()
-
