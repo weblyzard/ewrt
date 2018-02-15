@@ -6,6 +6,7 @@
 Convenience functions to access the NLTK WordNet interface
 @author: Albert Weichselbraun
 '''
+import unittest
 from nose.tools import assert_equal
 
 from eWRT.ws.wordnet import get_synonmys, get_antonyms, get_terms
@@ -19,3 +20,9 @@ def test_get_antonyms():
     lemmas = get_antonyms('good')
     assert_equal(get_terms(lemmas), set(
         ('bad', 'badness', 'ill', 'evil', 'evilness')))
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
+    unittest.main()

@@ -23,7 +23,8 @@ class LookupResult(Result):
     An object for handling ConceptNet search results
     '''
 
-    def __init__(self, term=None, rel_type='c', lang='en', pos_tag=None, conceptnet_url=None, strict=False, count=DEFAULT_MAX_EDGE_COUNT):
+    def __init__(self, term=None, rel_type='c', lang='en', pos_tag=None,
+                 conceptnet_url=None, strict=False, count=DEFAULT_MAX_EDGE_COUNT):
         '''
         ::param term: the lookup term
         ::param rel_type: the relation type (c).

@@ -5,9 +5,9 @@
 import pytest
 import unittest
 
-from multiprocessing import Pool
 from shutil import rmtree
 from os.path import exists, join
+from multiprocessing.pool import Pool
 
 from eWRT.util.module_path import get_resource
 from eWRT.util.cache import (MemoryCache, MemoryCached, DiskCached, DiskCache,
@@ -49,9 +49,9 @@ class TestCached(unittest.TestCase):
 
     def testKeywordArguments(self):
         ''' tests keyword arguments '''
-        assert self.add(3, b=7) == 3 + 7
-        assert self.add(3, b=7) == 3 + 7
-        assert self.add(a=9, b=8) == 9 + 8
+        assert self.add(3, b=7) == (3 + 7)
+        assert self.add(3, b=7) == (3 + 7)
+        assert self.add(a=9, b=8) == (9 + 8)
 
 
 class TestMemoryCached(TestCached):

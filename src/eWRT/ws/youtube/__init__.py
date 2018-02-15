@@ -20,7 +20,7 @@ from operator import attrgetter
 from datetime import datetime, timedelta
 from pickle import dump
 from time import sleep
-from apiclient.discovery import build
+from googleapiclient.discovery import build
 
 from eWRT.ws.WebDataSource import WebDataSource
 

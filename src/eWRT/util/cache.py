@@ -1,24 +1,5 @@
 #!/usr/bin/env python
-
-''' @package eWRT.util.cache
-    caches arbitrary objects
-'''
-
-
-import redis
-import pickle
-
-from gzip import GzipFile
-from hashlib import sha1
-from operator import itemgetter
-from os import makedirs, remove, getpid, link
-from os.path import join, exists, dirname, basename, join
-from socket import gethostname
-from time import time
-
-from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
-
-
+#
 # (C)opyrights 2008-2015 by Albert Weichselbraun <albert@weichselbraun.net>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -33,14 +14,30 @@ from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import codecs
+import gzip
 __author__ = "Albert Weichselbraun"
 __copyright__ = "GPL"
 
+''' @package eWRT.util.cache
+    caches arbitrary objects
+'''
 
-try:
-    from pickle import dump, load
-except ImportError:
-    from pickle import dump, load
+import redis
+import pickle
+
+from gzip import GzipFile
+from hashlib import sha1
+from operator import itemgetter
+from os import makedirs, remove, getpid, link
+from os.path import exists, dirname, basename, join
+from socket import gethostname
+from time import time
+
+from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
+
+
+from pickle import dump
 
 
 def get_unique_temp_file(fname): return join(dirname(fname),
@@ -166,9 +163,14 @@ class DiskCache(Cache):
             # case 1: cache hit - return the cached result
             #
             self._cache_hit += 1
-            with GzipFile(cache_file) as f:
-                return load(f)
-
+#             with open(cache_file, 'rb') as f:
+#                 f_decoded = codecs.getreader("ISO-8859-15")(f)
+            with gzip.open(cache_file) as fd:
+                #                 gzip_fd = GzipFile(fileobj=f_decoded)
+                #             with gzip.open(cache_file, 'rt', encoding='utf-8') as f:
+                #             with GzipFile(cache_file) as f:
+                result = fd.read().decode("ISO-8859-15")
+                return str(result)
         #
         # case 2: cache miss
         # - compute and cache the result

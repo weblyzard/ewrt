@@ -53,6 +53,7 @@ class Result(object):
         ::param min_weight: minimum confidence score required for
                            an edge to be included.
         '''
+        print(json_string)
         self.edges = [Edge(edge_dict) for edge_dict in loads(json_string)['edges']
                       if edge_dict['weight'] >= min_weight]
 

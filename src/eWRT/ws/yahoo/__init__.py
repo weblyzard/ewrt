@@ -29,6 +29,7 @@ from urllib.parse import urlencode, quote
 from urllib.error import URLError
 from nose.plugins.attrib import attr
 from socket import setdefaulttimeout
+from multiprocessing.pool import Pool
 
 from eWRT.ws.TagInfoService import TagInfoService
 from eWRT.config import YAHOO_APP_ID, YAHOO_SEARCH_URL
@@ -159,7 +160,6 @@ class TestYahoo(object):
     @attr("remote")
     def testMultiProcessingRetrieve(self):
         """ tests the multi processing capabilities of this module """
-        from multiprocessing import Pool
         p = Pool(4)
 
         TEST_URLS = ['http://www.derstandard.at',
