@@ -115,6 +115,8 @@ class GoogleBlogSearch(object):
                 itemList = element.xpath('./h3[@class="r"]/a')
                 if len(itemList) == 1:
                     url = itemList[0].attrib['href']
+                    if url.startswith('/search?'):
+                        continue
                     abstract = ' '.join(element.xpath(
                         './div[@class="s"]/text()'))
                     url = GoogleBlogSearch.parse_url(url)
