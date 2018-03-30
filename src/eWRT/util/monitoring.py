@@ -39,10 +39,10 @@ easier
 ** enter the above password and encryption method
 
 '''
-from __future__ import print_function
+
 
 import os
-import commands
+import subprocess
 import socket
 
 SEND_NSCA_PATH = os.path.join(os.sep, 'usr', 'sbin', 'send_nsca')
@@ -82,7 +82,7 @@ class NSCA(object):
         cmd = [SEND_NSCA_PATH, '-H', monitoringServer,
                '-d', '\';\'', '-c', SEND_NSCA_CONFIG]
         print("echo '%s' | %s " % (message, ' '.join(cmd)))
-        out = commands.getstatusoutput(
+        out = subprocess.getstatusoutput(
             "echo '%s' | %s " % (message, ' '.join(cmd)))
 
         if not out[1] == '1 data packet(s) sent to host successfully.':
@@ -110,7 +110,7 @@ class Performance(object):
     def __init__(self, label, value, unit='', warn='', critical='', min='', max=''):
 
         label = '\'%s\'' % label
-        assert isinstance(value, (int, long, float, complex))
+        assert isinstance(value, (int, float, complex))
         assert unit in ('', 's', '%', 'B', 'KB', 'MB', 'TB', 'c')
 
         self.message = '%s=%s%s;%s;%s;%s;%s' % (

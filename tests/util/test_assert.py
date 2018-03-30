@@ -10,7 +10,7 @@ class TestAssertReturnValue(unittest.TestCase):
     @AssertReturnValue("int(x)>12", "countPassed", "countFailed")
     def _assertReturnValue(self, value):
         return value
-     
+
     def testAssertCounter(self):
         """ 
         verifies the assertion counters
@@ -22,6 +22,7 @@ class TestAssertReturnValue(unittest.TestCase):
         self._assertReturnValue(-2)
         assert self._assertReturnValue.counter['countPassed'] == 1
         assert self._assertReturnValue.counter['countFailed'] == 1
-        
+
+
 if __name__ == '__main__':
     unittest.main()

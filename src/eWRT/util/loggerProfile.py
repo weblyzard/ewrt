@@ -18,7 +18,7 @@
 '''
 Pre-defined logging profiles
 '''
-from __future__ import print_function
+
 
 import logging
 

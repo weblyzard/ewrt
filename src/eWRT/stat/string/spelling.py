@@ -31,7 +31,7 @@ import collections
 
 from string import ascii_lowercase
 from bz2 import BZ2File
-from cPickle import dump, load
+from pickle import dump, load
 from os.path import dirname, join as pjoin
 
 from logging import getLogger

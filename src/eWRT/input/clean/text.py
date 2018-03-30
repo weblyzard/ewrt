@@ -44,7 +44,7 @@ class PhraseCleanup(object):
     @staticmethod
     def getFullCleanupProfile():
         """ returns the full cleanup profile using all cleanup modules """
-        strCleanupPipe = (unicode.lower, RemovePossessive(), FixDashSpace())
+        strCleanupPipe = (str.lower, RemovePossessive(), FixDashSpace())
         phrCleanupPipe = (SplitEnumerations(),
                           SplitMultiTerms(), SplitBracketExplanations())
         wrdCleanupPipe = (FixSpelling(), RemovePunctationAndBrackets(),)
@@ -228,50 +228,50 @@ class TestPhraseCleanup(object):
         """ verifies that input phrases which contain multiple
             meanings get split"""
         assert self.p.clean(
-            u"quick/speedy output") == [u"quick output", u"speedy output"]
-        assert self.p.clean(u"i/o error") == [u"i/o error", ]
-        assert self.p.clean(u"planning/design") == [u"planning", u"design"]
-        print self.p.clean(u'defective product/ services')
+            "quick/speedy output") == ["quick output", "speedy output"]
+        assert self.p.clean("i/o error") == ["i/o error", ]
+        assert self.p.clean("planning/design") == ["planning", "design"]
+        print(self.p.clean('defective product/ services'))
         assert self.p.clean(
-            u'defective product/ services') == [u'defective product', u'defective services']
+            'defective product/ services') == ['defective product', 'defective services']
 
     def testFixSpellingErrors(self):
-        print self.p.clean(u"determine mening")
-        assert self.p.clean(u"deterrmin mening") == [u"determine meaning", ]
+        print(self.p.clean("determine mening"))
+        assert self.p.clean("deterrmin mening") == ["determine meaning", ]
 
     def testFixDashSpace(self):
         assert self.p.clean(
-            u"semi -automatically and semi- quick") == [u"semi-automatically and semi-quick"]
-        assert self.p.clean(u"run-/config") == [u"run-/config"]
+            "semi -automatically and semi- quick") == ["semi-automatically and semi-quick"]
+        assert self.p.clean("run-/config") == ["run-/config"]
 
     def testRemoveEnumerations(self):
-        print self.p.clean(u"1. fix it, 2. do it")
-        assert self.p.clean(u"1. fix it, 2. do it") == [u"fix it", u"do it"]
-        assert self.p.clean(u"1) fix it, 2) do it") == [u"fix it", u"do it"]
-        assert self.p.clean(u"(1) fix it, (2) do it") == [u"fix it", u"do it"]
-        assert self.p.clean(u"(*) fix it, (*) do it") == [u"fix it", u"do it"]
-        assert self.p.clean(u"a) fix it, b) do it") == [u"fix it", u"do it"]
+        print(self.p.clean("1. fix it, 2. do it"))
+        assert self.p.clean("1. fix it, 2. do it") == ["fix it", "do it"]
+        assert self.p.clean("1) fix it, 2) do it") == ["fix it", "do it"]
+        assert self.p.clean("(1) fix it, (2) do it") == ["fix it", "do it"]
+        assert self.p.clean("(*) fix it, (*) do it") == ["fix it", "do it"]
+        assert self.p.clean("a) fix it, b) do it") == ["fix it", "do it"]
 
         # mistakes found in applications
-        print self.p.clean(u"1. life cycle phase 2. risk management tasks 3. risk management activities")
-        assert self.p.clean(u"1. life cycle phase 2. risk management tasks 3. risk management activities") == \
-            [u"life cycle phase", u"risk management tasks",
-                u"risk management activities"]
+        print(self.p.clean("1. life cycle phase 2. risk management tasks 3. risk management activities"))
+        assert self.p.clean("1. life cycle phase 2. risk management tasks 3. risk management activities") == \
+            ["life cycle phase", "risk management tasks",
+                "risk management activities"]
 
     def testSplitBracketExplanations(self):
         # mistakes found in applications
         # cha -> ha; dow -> now due to the non risk-specific spell checking!
-        assert self.p.clean(u'concept hazard analysis(cha)') == [
-            u'concept hazard analysis', u'ha']
-        print self.p.clean(u'dow fire and explosion index (f&ei)')
-        assert self.p.clean(u'dow fire and explosion index (f&ei)') == [
-            u'now fire and explosion index', u'f&ei']
+        assert self.p.clean('concept hazard analysis(cha)') == [
+            'concept hazard analysis', 'ha']
+        print(self.p.clean('dow fire and explosion index (f&ei)'))
+        assert self.p.clean('dow fire and explosion index (f&ei)') == [
+            'now fire and explosion index', 'f&ei']
 
     def testNumMistakesFixed(self):
         """ @test 
             returns the number of mistakes fixed in the given phrase 
         """
         s = FixSpelling()
-        print s.numMistakesFixed(u'dow fire and explossion index (f&ei)'.split(" "))
+        print(s.numMistakesFixed('dow fire and explossion index (f&ei)'.split(" ")))
         assert s.numMistakesFixed(
-            u'dow fire and explossion index (f&ei)'.split(" ")) == 2
+            'dow fire and explossion index (f&ei)'.split(" ")) == 2

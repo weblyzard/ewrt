@@ -22,7 +22,7 @@ __copyright__ = "GPL"
 import gzip
 from binascii import b2a_base64, a2b_base64
 try:
-    from cPickle import dumps, loads
+    from pickle import dumps, loads
 except ImportError:
     from pickle import dumps, loads
 
@@ -44,7 +44,7 @@ class AbstractIterator(object):
     def __next__(self):
         raise NotImplementedError
 
-    def next(self):
+    def __next__(self):
         ''' Python 2 compatibility '''
         return self.__next__()
 

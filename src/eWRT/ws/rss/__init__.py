@@ -17,11 +17,12 @@ from eWRT.access.http import Retrieve
 
 HTTP_FETCH_DELAY = 0
 
+
 def parse(url, last_modified=None):
     """ 
     Parses the given RSS Feed an returns all articles and the content of
     the page referenced in the <link> tag.
-    
+
     @param url: the url of the rss feed
     @param last_modified: a datetime object that specifies the last time the
                           feed has been queried the last time (only newer 
@@ -29,7 +30,7 @@ def parse(url, last_modified=None):
     """
     feed = feedparser.parse(url, modified=last_modified)
     retrieve = Retrieve("rss", HTTP_FETCH_DELAY)
-    
+
     result = []
     for item in feed['items']:
         if datetime.fromtimestamp(

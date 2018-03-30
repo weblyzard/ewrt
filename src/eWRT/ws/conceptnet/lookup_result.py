@@ -8,7 +8,7 @@ Access to conceptnet data structures using its REST interface
 """
 
 try:
-    from urllib import quote
+    from urllib.parse import quote
 except ImportError:
     from urllib.parse import quote
 
@@ -23,7 +23,8 @@ class LookupResult(Result):
     An object for handling ConceptNet search results
     '''
 
-    def __init__(self, term=None, rel_type='c', lang='en', pos_tag=None, conceptnet_url=None, strict=False, count=DEFAULT_MAX_EDGE_COUNT):
+    def __init__(self, term=None, rel_type='c', lang='en', pos_tag=None,
+                 conceptnet_url=None, strict=False, count=DEFAULT_MAX_EDGE_COUNT):
         '''
         ::param term: the lookup term
         ::param rel_type: the relation type (c).
@@ -70,4 +71,4 @@ if __name__ == '__main__':
     r.apply_language_filter(VALID_LANGUAGES)
     # r.apply_edge_filter(VALID_SENSE_FILTER)
     #print("\n".join(map(repr, r.get_senses())))
-    print(r.get_vsm(stopword_list=()))
+    print((r.get_vsm(stopword_list=())))

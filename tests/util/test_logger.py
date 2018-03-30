@@ -9,23 +9,24 @@ from eWRT.util.loggerProfile import get_file_logger, get_stdout_logger
 from eWRT.util.advLogging import SNMPHandler
 
 
-class TestHandler( unittest.TestCase ):
-    
+class TestHandler(unittest.TestCase):
+
     def test_handler(self):
         ''' tests the handler '''
-        
+
         # Testing the snmp logging
         logger = logging.getLogger('snmp')
         snmpHandler = SNMPHandler('webLyzard.test')
         snmpHandler.setLevel(logging.ERROR)
         logger.addHandler(snmpHandler)
-        
+
         logging.debug('debug')
         logging.info('info')
         logging.warning('warning')
         logging.error('error')
         logging.critical('critical')
-        
+
+
 class TestLogger(unittest.TestCase):
 
     LOG_FNAME = 'test.log'

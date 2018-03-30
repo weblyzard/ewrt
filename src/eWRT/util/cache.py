@@ -1,24 +1,5 @@
 #!/usr/bin/env python
-
-''' @package eWRT.util.cache
-    caches arbitrary objects
-'''
-from __future__ import print_function
-
-import redis
-import pickle
-
-from gzip import GzipFile
-from hashlib import sha1
-from operator import itemgetter
-from os import makedirs, remove, getpid, link
-from os.path import join, exists, dirname, basename, join
-from socket import gethostname
-from time import time
-
-from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
-
-
+#
 # (C)opyrights 2008-2015 by Albert Weichselbraun <albert@weichselbraun.net>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -36,11 +17,26 @@ from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
 __author__ = "Albert Weichselbraun"
 __copyright__ = "GPL"
 
+''' @package eWRT.util.cache
+    caches arbitrary objects
+'''
 
-try:
-    from cPickle import dump, load
-except ImportError:
-    from pickle import dump, load
+import gzip
+import redis
+import pickle
+
+from gzip import GzipFile
+from hashlib import sha1
+from operator import itemgetter
+from os import makedirs, remove, getpid, link
+from os.path import exists, dirname, basename, join
+from socket import gethostname
+from time import time
+
+from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
+
+
+from pickle import dump
 
 
 def get_unique_temp_file(fname): return join(dirname(fname),
@@ -166,9 +162,14 @@ class DiskCache(Cache):
             # case 1: cache hit - return the cached result
             #
             self._cache_hit += 1
-            with GzipFile(cache_file) as f:
-                return load(f)
-
+#             with open(cache_file, 'rb') as f:
+#                 f_decoded = codecs.getreader("ISO-8859-15")(f)
+            with gzip.open(cache_file) as fd:
+                #                 gzip_fd = GzipFile(fileobj=f_decoded)
+                #             with gzip.open(cache_file, 'rt', encoding='utf-8') as f:
+                #             with GzipFile(cache_file) as f:
+                result = fd.read().decode("ISO-8859-15")
+                return str(result)
         #
         # case 2: cache miss
         # - compute and cache the result
@@ -299,7 +300,7 @@ class MemoryCache(Cache):
         if self.max_cache_size == 0 or len(self._cacheData) <= self.max_cache_size:
             return
 
-        (key, _) = sorted(self._usage.items(),
+        (key, _) = sorted(list(self._usage.items()),
                           key=itemgetter(1), reverse=True).pop()
         del self._usage[key]
         del self._cacheData[key]
@@ -366,7 +367,7 @@ class IterableCache(DiskCache):
 
         return self
 
-    def next(self):
+    def __next__(self):
         return self._read_next_element() if self._cached else self._cache_next_element()
 
     def _cache_next_element(self):
@@ -431,8 +432,8 @@ class RedisCache(Cache):
             longest time '''
         if self.max_cache_size == 0 or self._cacheData.dbsize() < self.max_cache_size:
             return
-        usage_dict = {k: self._usage[k] for k in self._usage.keys()}
-        (key, _) = sorted(usage_dict.items(),
+        usage_dict = {k: self._usage[k] for k in list(self._usage.keys())}
+        (key, _) = sorted(list(usage_dict.items()),
                           key=itemgetter(1), reverse=True).pop()
         del self._usage[key]
         del self._cacheData[key]

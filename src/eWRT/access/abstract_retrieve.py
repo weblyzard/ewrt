@@ -3,9 +3,7 @@
 import abc
 
 
-class AbstractRetriever(object):
-
-    __metaclass__ = abc.ABCMeta
+class AbstractRetriever(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def set_up(self, *args, **kwargs):

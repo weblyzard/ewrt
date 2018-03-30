@@ -11,5 +11,5 @@ def test_csv_data():
         for correct, computed in zip(CORRECT, get_csv_data(f,
                                                         ('int(row["a"])', 'int(row["a"])+int(row["b"])'),
                                                         'row["show"]=="True"')):
-            print correct, computed
+            print(correct, computed)
             assert correct == computed

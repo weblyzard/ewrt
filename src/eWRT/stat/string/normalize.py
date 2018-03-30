@@ -28,25 +28,25 @@
 # Sources for look-alike characters:
 # - http://ux.stackexchange.com/questions/53341/are-there-any-letters-numbers-that-should-be-avoided-in-an-id
 # - pwgen source code
-OCR_TRANSLATION_TABLE = {ord(u'8'): u'B',
-                         ord(u'6'): u'G',
-                         ord(u'1'): u'I',
-                         ord(u'l'): u'I',
-                         ord(u'0'): u'O',
-                         ord(u'Q'): u'O',
-                         ord(u'5'): u'S',
-                         ord(u'2'): u'Z',
-                         ord(u'Ä'): u'A',
-                         ord(u'Ö'): u'O',
-                         ord(u'Ü'): u'U',
-                         ord(u'ß'): u'B',
-                         ord(u'ä'): u'a',
-                         ord(u'ö'): u'o',
-                         ord(u'ü'): u'u',
-                         ord(u'é'): u'e',
-                         ord(u'û'): u'u',
-                         ord(u'à'): u'a',
-                         ord(u'â'): u'a',
+OCR_TRANSLATION_TABLE = {ord('8'): 'B',
+                         ord('6'): 'G',
+                         ord('1'): 'I',
+                         ord('l'): 'I',
+                         ord('0'): 'O',
+                         ord('Q'): 'O',
+                         ord('5'): 'S',
+                         ord('2'): 'Z',
+                         ord('Ä'): 'A',
+                         ord('Ö'): 'O',
+                         ord('Ü'): 'U',
+                         ord('ß'): 'B',
+                         ord('ä'): 'a',
+                         ord('ö'): 'o',
+                         ord('ü'): 'u',
+                         ord('é'): 'e',
+                         ord('û'): 'u',
+                         ord('à'): 'a',
+                         ord('â'): 'a',
                          }
 
 
@@ -70,5 +70,5 @@ def ocr_normalize(ocr_text):
 # -------------------------------------------------------------------------
 
 def test_ocr_normalize():
-    assert ocr_normalize(u'002 in Österreich') == u'OOZ in Osterreich'
-    assert ocr_normalize(u'6000 Zürich') == u'GOOO Zurich'
+    assert ocr_normalize('002 in Österreich') == 'OOZ in Osterreich'
+    assert ocr_normalize('6000 Zürich') == 'GOOO Zurich'

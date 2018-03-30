@@ -23,24 +23,16 @@ import unittest
 import optparse
 import sys
 import logging
-
-try:
-    from io import StringIO
-except:
-    import StringIO
-
+import io
 import time
+
 from datetime import datetime, timedelta, date
-
-try:
-    from urllib.parse import urlparse, parse_qs  # porting to python 3.4 (SV)
-except:
-    from urlparse import urlparse, parse_qs  # python2
-
+from urllib.parse import urlparse, parse_qs
 from xml.dom.minidom import parse, parseString
-from lxml import etree
+from lxml import html as html_parser
 
 from eWRT.access.http import Retrieve
+
 
 SEARCH_URL = 'http://www.google.com/search?hl=en&ie=UTF-8&q={searchTerm}&num={number}&safe=active&start={start}'
 #
@@ -108,8 +100,8 @@ class GoogleBlogSearch(object):
 
         logger.debug('Searching URL %s' % url)
         html_content = GoogleBlogSearch.get_content(url)
-#         print html_content
-        tree = etree.HTML(html_content)
+
+        tree = html_parser.fromstring(html_content)
         resultList = tree.xpath('.//div[@id="ires"]/ol')
 
         counter = 0
@@ -123,6 +115,8 @@ class GoogleBlogSearch(object):
                 itemList = element.xpath('./h3[@class="r"]/a')
                 if len(itemList) == 1:
                     url = itemList[0].attrib['href']
+                    if url.startswith('/search?'):
+                        continue
                     abstract = ' '.join(element.xpath(
                         './div[@class="s"]/text()'))
                     url = GoogleBlogSearch.parse_url(url)
@@ -135,7 +129,8 @@ class GoogleBlogSearch(object):
                         blogLink['reach'] = '0'
 
                         try:
-                            blogLink['date'] = GoogleBlogSearch.get_link_date(element)
+                            blogLink['date'] = GoogleBlogSearch.get_link_date(
+                                element)
                         except IndexError as e:
                             pass
 

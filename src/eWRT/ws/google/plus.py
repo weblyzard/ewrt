@@ -8,7 +8,7 @@ Created on Dec 13, 2011
 import json
 import logging
 
-from urllib import urlencode
+from urllib.parse import urlencode
 from datetime import datetime
 
 from eWRT.ws.WebDataSource import WebDataSource
@@ -44,7 +44,7 @@ class GooglePlus(object):
         :returns: generator with the result
         '''
         for search_term in search_terms:
-            if isinstance(search_term, unicode):
+            if isinstance(search_term, str):
                 search_term = search_term.encode('utf-8')
             params = {'query': '"%s"' % search_term,
                       'orderBy': DEFAULT_ORDER_BY,
@@ -146,7 +146,7 @@ class GooglePlus(object):
                     'user_id': item['actor']['id'],
                     'user_img_url': item['actor']['image']['url'],
                     'screen_name': item['actor']['displayName'],
-                    'encoding': u'utf-8',
+                    'encoding': 'utf-8',
                     'user_url': item['actor']['url'],
                     'valid_from': published,
                     'reshares': item['object']['resharers']['totalItems'],

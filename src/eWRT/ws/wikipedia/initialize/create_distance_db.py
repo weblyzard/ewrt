@@ -27,35 +27,36 @@ import xml.parsers.expat
 from sys import stdin
 
 
-quote_str = lambda x: "'%s'" % x.replace("'", "''").replace("_", " ").replace("\\", "").encode("utf8").lower().replace("\"", "")
+def quote_str(x): return "'%s'" % x.replace("'", "''").replace(
+    "_", " ").replace("\\", "").encode("utf8").lower().replace("\"", "")
+
 
 class WikiParse(object):
 
-    RE_REDIRECT = re.compile("#REDIRECT\s*:?\s*\[\[\s*:?\s*(.*?)(?:\]\]|\||#)", re.I)
-    RE_LINK     = re.compile("\[\[([^\]^\|]+)(?:\||\]\])", re.I | re.M)
+    RE_REDIRECT = re.compile(
+        "#REDIRECT\s*:?\s*\[\[\s*:?\s*(.*?)(?:\]\]|\||#)", re.I)
+    RE_LINK = re.compile("\[\[([^\]^\|]+)(?:\||\]\])", re.I | re.M)
 
     INSERT_FUNCTION = "wiki_insert"
 
     def __init__(self):
         self.p = xml.parsers.expat.ParserCreate()
 
-        self.p.StartElementHandler  = self.start_element
-        self.p.EndElementHandler    = self.end_element
+        self.p.StartElementHandler = self.start_element
+        self.p.EndElementHandler = self.end_element
         self.p.CharacterDataHandler = self.char_data
 
         self.container = None
         self._clear()
-        
-        self.count = 0
-        self.prn   = False
 
+        self.count = 0
+        self.prn = False
 
     def _clear(self):
-        self._wiki_concept   = ""
-        self._wiki_links     = set()
+        self._wiki_concept = ""
+        self._wiki_links = set()
         self._wiki_redirects = set()
 
-       
     # 3 handler functions
     def start_element(self, name, attrs):
         self.container = name.lower()
@@ -66,13 +67,13 @@ class WikiParse(object):
                 self.clear()
         return
 
-        #if self.prn:
+        # if self.prn:
 # 	    if self._wiki_concept in self._wiki_redirects:
 # 		self._wiki_redirects.remove( self._wiki_concept )
 # 	    if self._wiki_concept in self._wiki_links:
 # 		self._wiki_links.remove( self._wiki_concept )
 # 	    self._wiki_links = self._wiki_links.difference(self._wiki_redirects)  # remove redirects from links
-# 
+#
 # 	    print "SELECT %s(%s, ARRAY[%s]::text[], ARRAY[%s]::text[]);" % (self.INSERT_FUNCTION,
 # 		       self._wiki_concept,
 # 		       ",".join( self._wiki_redirects ),
@@ -80,7 +81,7 @@ class WikiParse(object):
 #             #else:
 #             #        if self._wiki_concept == "'template:australian rules football'":
 #             #        	self.prn = True
-# 
+#
 #             self._clear()
 
     def char_data(self, data):
@@ -88,8 +89,10 @@ class WikiParse(object):
             self._wiki_concept = quote_str(data)
             self.container = ''
         elif self.container == 'text':
-            self._wiki_redirects = self._wiki_redirects.union( map(quote_str, self.RE_REDIRECT.findall(data)) )
-            self._wiki_links     = self._wiki_links.union( map(quote_str, self.RE_LINK.findall(data)) )
+            self._wiki_redirects = self._wiki_redirects.union(
+                list(map(quote_str, self.RE_REDIRECT.findall(data))))
+            self._wiki_links = self._wiki_links.union(
+                list(map(quote_str, self.RE_LINK.findall(data))))
 
     def parse(self, fhandle):
         self.p.ParseFile(fhandle)
@@ -98,4 +101,3 @@ class WikiParse(object):
 if __name__ == '__main__':
     w = WikiParse()
     w.parse(stdin)
-

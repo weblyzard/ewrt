@@ -11,6 +11,7 @@ from twisted.web import resource
 from eWRT.ws.rest.server.exception import (MissingArgumentErrorMsg,
                                            UnknownArgumentErrorMsg)
 
+
 class WeblyzardService(resource.Resource):
     '''
     The Weblyzard RESTless service base class
@@ -28,32 +29,32 @@ class WeblyzardService(resource.Resource):
         argspec = getargspec(function)
         self.func_args = argspec.args
         self.func_required_args = self.func_args if not argspec.defaults \
-                  else self.func_args[:-len(argspec.defaults)]
+            else self.func_args[:-len(argspec.defaults)]
         self.func_required_args.remove('self')
         self.function = function
-    
+
     def render_GET(self, request):
-        args = { key: value[0] for key, value in request.args.items() }
+        args = {key: value[0] for key, value in list(request.args.items())}
         return self.call(self.function, args)
-    
+
     def render_POST(self, request):
-        args = loads( request.content.read() )
+        args = loads(request.content.read())
         return self.call(self.function, args)
-    
+
     @classmethod
     def check_arguments(cls, request):
         """ @deprecated: use call instead """
-        
+
         for arg in cls.VALID_ARGS:
             if not arg in request.args:
                 return MissingArgumentErrorMsg(cls.check_arguments, arg)()
-        
+
         return True
-    
+
     def call(self, function, args):
         """ calls the given function if all required arguments have been
             supplied, or output its docstring otherwise.
-            
+
             @param Function: the function to call
             @param request:  the twisted request object
             @return: the functions return value
@@ -61,11 +62,11 @@ class WeblyzardService(resource.Resource):
         for required_arg in self.func_required_args:
             if required_arg not in args:
                 return MissingArgumentErrorMsg(function, required_arg)()
-        
-        #print self.func_required_args
-        
+
+        # print self.func_required_args
+
         for arg in args:
             if arg not in self.func_args:
                 return UnknownArgumentErrorMsg(function, arg)()
-        
+
         return self.function(**args)
