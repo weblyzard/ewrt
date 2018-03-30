@@ -56,8 +56,8 @@ class YouTubeEntry(dict):
         'channel': None,
         'snippet.title': 'title',
         'snippet.publishedAt': 'published',
-        'snippet.description': 'content',
-        'snippet.channelId': 'channel_id',
+        'snippet.description': 'description',
+        'snippet.channelId': 'user_id',
         'snippet.thumbnails.default.url': 'thumbnail',
         'contentDetails.duration': 'duration',
         'contentDetails.caption': 'caption',
@@ -86,12 +86,12 @@ class YouTubeEntry(dict):
     }
 
     CHANNEL_MAPPING = {
-        'id': 'channel_id',
-        'kind': 'channel_type',
-        'snippet.description': 'channel_description',
-        'snippet.title': 'channel_name',
-        'snippet.country': 'channel_country',
-        'published_at': 'channel_published_at'
+        'id': 'user_id',
+        'kind': 'user_type',
+        'snippet.description': 'user_status',
+        'snippet.title': 'user_name',
+        'snippet.country': 'user_location',
+        'published_at': 'location'
     }
 
     def __init__(self, search_result, mapping=VIDEO_MAPPING):
@@ -299,7 +299,6 @@ class YouTube_v3(WebDataSource):
                                                        get_details=self.get_details)
                     except Exception as e:
                         logger.error('Failed to convert Youtube item: %s' % e)
-                        yield None
 
             if items_count >= max_results:
                 continue_search = False
