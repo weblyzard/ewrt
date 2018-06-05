@@ -186,6 +186,15 @@ class YouTube_v3(WebDataSource):
 
         return yt_dict
 
+    def get_channelId_for_user(self, user_name):
+        ''' 
+
+        https://www.googleapis.com/youtube/v3/channels?key={YOUR_API_KEY}&forUsername={USER_NAME}&part=id
+        '''
+        result = self.client.channels().list(part='id,snippet',
+                                             forUsername=user_name)
+        return result
+
     def get_video_search_feed(self, search_terms, max_results=25, max_comment_count=0):
         """
         Returns a generator of youtube search results
@@ -245,6 +254,7 @@ class YouTube_v3(WebDataSource):
 
         return YouTubeEntry(item)
 
+ 
     def username_to_channels(self,username):
         """
         Retreive the channel_id of a youtube user
@@ -254,14 +264,11 @@ class YouTube_v3(WebDataSource):
         for item in  response['items']:
             yield item['id']
 
-    def search(self,
-               search_terms,
-               max_results=MAX_RESULTS_PER_QUERY,
-               since_date=None,
-               region_code=None,
-               language=None):
-        """
-        Search the Youtube API for videos matching a set of search terms
+    def search(self, search_terms, since_date=None, region_code=None, language=None,
+               max_results=MAX_RESULTS_PER_QUERY, is_channel=False):
+        """ 
+        Search the Youtube API for videos matching a set of search terms 
+
         @param search_terms, a comma separated list of search terms
         @param max_results, the maximum number of results returned
         @param max_age, the maximum number of days ago from which to include results
@@ -278,14 +285,17 @@ class YouTube_v3(WebDataSource):
             since_date = utc_dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
 
         items_per_page = min([max_results, self.MAX_RESULTS_PER_QUERY])
-#         search_terms = search_terms.encode('utf8')
-#         search_terms = quote_plus(search_terms)
-        kwargs = {'q': search_terms,
-                  'part': 'id,snippet',
-                  'type': 'video',
-                  'publishedAfter': since_date,
-                  'maxResults': items_per_page,
-                  'order': 'date'}
+        kwargs = {
+            'part': 'id,snippet',
+            'type': 'video',
+            'publishedAfter': since_date,
+            'maxResults': items_per_page,
+            'order': 'date'}
+        if is_channel:
+            kwargs['channelId'] = search_terms
+        else:
+            kwargs['q'] = search_terms
+
         if region_code:
             kwargs['regionCode'] = region_code
         if language:
@@ -598,3 +608,10 @@ class YouTube_v3(WebDataSource):
 #                 in_reply_to = link.href
 #
 #         return comment_url, in_reply_to
+
+
+# '''api_key = 'AIzaSyBBZcO7UREU-LcU88uyOmMvc2BQD-wxi5k'
+# username = 'https://www.youtube.com/user/rbb/about'
+# client = YouTube_v3(api_key)
+# result = client.get_channelId_for_user(user_name=username)
+# print(result)'''
