@@ -106,7 +106,7 @@ class YouTubeEntry(dict):
         return '** entry: %s' % '\n'.join(['%s: %s' % (k, v) for k, v in self.iteritems()])
 
     def update_entry(self, search_result, mapping=VIDEO_MAPPING):
-        ''' stores the mapped items in a dictionary 
+        ''' stores the mapped items in a dictionary
         @param search_result: the search result returned by youtube
         @param entry_type: string, either comment or video
         '''
@@ -145,7 +145,7 @@ class YouTube_v3(WebDataSource):
     YOUTUBE_API_SERVICE_NAME = 'youtube'
     YOUTUBE_API_VERSION = 'v3'
 
-    ''' 
+    '''
     number of seconds to wait between comment request
     this has been added to prevent the youtube API from
     blocking us via quota per seconds
@@ -167,7 +167,7 @@ class YouTube_v3(WebDataSource):
 
     @classmethod
     def _get_yt_dict(cls, entry, mapping):
-        """ stores the mapped items in a dictionary 
+        """ stores the mapped items in a dictionary
         @param entry: Gdata Entry
         @param mapping: dictionary with the mapping
         @return: yt_dict
@@ -225,7 +225,7 @@ class YouTube_v3(WebDataSource):
                                            part='contentOwnerDetails,snippet').execute()
 
     def like_video(self, video_id):
-        """ Adds to the video rating. This code sets the rating to "like," but you 
+        """ Adds to the video rating. This code sets the rating to "like," but you
             could also support an additional option that supports values of "like"
             and "dislike"."""
         self.client.videos().rate(id=video_id, rating="like").execute()
@@ -254,10 +254,21 @@ class YouTube_v3(WebDataSource):
 
         return YouTubeEntry(item)
 
+ 
+    def username_to_channels(self,username):
+        """
+        Retreive the channel_id of a youtube user
+        @param username, username of youtube account
+        """
+        response = self.client.channels().list(forUsername=username, part='id').execute()
+        for item in  response['items']:
+            yield item['id']
+
     def search(self, search_terms, since_date=None, region_code=None, language=None,
                max_results=MAX_RESULTS_PER_QUERY, is_channel=False):
         """ 
         Search the Youtube API for videos matching a set of search terms 
+
         @param search_terms, a comma separated list of search terms
         @param max_results, the maximum number of results returned
         @param max_age, the maximum number of days ago from which to include results
