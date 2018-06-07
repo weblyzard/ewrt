@@ -10,6 +10,9 @@ from eWRT.ws.rest import RESTClient
 from eWRT.ws import AbstractIterableWebSource
 
 
+def RESULT_PATH(x): return x['items']  # path to the results
+
+
 class CustomSearch(AbstractIterableWebSource):
 
     """wrapper for the Google Custom Search API"""
@@ -21,7 +24,7 @@ class CustomSearch(AbstractIterableWebSource):
     DEFAULT_COMMAND = 'v1'
     DEFAULT_FORMAT = 'json'
     DEFAULT_START_INDEX = 1
-    RESULT_PATH = lambda x: x['items']  # path to the results
+
     DEFAULT_RESULT_LANGUAGE = 'lang_de'  # lang_en
 
     MAPPING = {'date': ('valid_from', 'convert_date'),
@@ -48,27 +51,28 @@ class CustomSearch(AbstractIterableWebSource):
         """calls iterator and results' post-processor"""
 
         fetched = self.invoke_iterator(search_terms, max_results, from_date,
-                                       to_date, command, output_format)
+                                       to_date, command, output_format, language)
 
-        result_path = lambda x: x['items']
-        return self.process_output(fetched, result_path)
+        return self.process_output(fetched, RESULT_PATH)
 
     def request(self, search_term, current_index,
                 max_results=DEFAULT_MAX_RESULTS, from_date=None, to_date=None,
                 command=DEFAULT_COMMAND, output_format=DEFAULT_FORMAT,
                 language=DEFAULT_RESULT_LANGUAGE):
         """calls Google Custom Search API"""
-
         parameters = {'q': '"%s"' % search_term,
                       'alt': output_format,
                       'cx': self.engine_id,
                       'key': self.api_key,
-                      'lr': language,
                       'num': max_results,
-                      'start': current_index}
+                      'start': current_index,
+                      'sort': 'date'}
 
-        # for testing purposes
-        # print(current_index, max_results, search_term)
+        # set language
+        if language is not None and not language.startswith('lang_') and len(language) == 2:
+            language = 'lang_{}'.format(language)
+        if language is not None and len(language) == 7:
+            parameters['lr'] = language
 
         response = self.client.execute(command, query_parameters=parameters)
         return response
@@ -84,4 +88,3 @@ class CustomSearch(AbstractIterableWebSource):
                   }
 
         return result
-
