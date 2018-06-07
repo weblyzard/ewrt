@@ -55,7 +55,8 @@ class AbstractIterableWebSource(AbstractWebSource):
         return self.process_output(fetched, self.RESULT_PATH)
 
     def invoke_iterator(self, search_terms, max_results, from_date=None,
-                        to_date=None, command=None, output_format=None):
+                        to_date=None, command=None, output_format=None,
+                        language=None):
         """iterator: iterates over search terms and API requests"""
 
         for search_term in ["'{0}'".format(t) for t in search_terms]:
@@ -70,13 +71,13 @@ class AbstractIterableWebSource(AbstractWebSource):
                         mid_results = max_results % self.DEFAULT_MAX_RESULTS
                     fetched = self.request(search_term, index, mid_results,
                                            from_date, to_date, command,
-                                           output_format)
+                                           output_format, language)
                     yield fetched
 
             else:
                 fetched = self.request(
                     search_term, self.DEFAULT_START_INDEX, max_results,
-                    from_date, to_date, command, output_format)
+                    from_date, to_date, command, output_format, language)
                 yield fetched
 
     def process_output(self, results, path):
@@ -94,7 +95,7 @@ class AbstractIterableWebSource(AbstractWebSource):
 
     def request(self, search_term, current_index, max_results,
                 from_date=None, to_date=None, command=None,
-                output_format=None):
+                output_format=None, language=None):
         """calls the web source's API
         """
 

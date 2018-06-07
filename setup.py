@@ -21,6 +21,7 @@ setup(
                       'oauth2client==2.2.0',  # YT
                       'google-api-python-client==1.4.0',  # YT,
                       'six',
+                      'gdata'
                       #                         'python-oauth2' #linkedin
                       ],
     classifiers=[
