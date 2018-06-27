@@ -230,11 +230,25 @@ class YouTube_v3(WebDataSource):
             and "dislike"."""
         self.client.videos().rate(id=video_id, rating="like").execute()
 
-    def _build_youtube_item(self, item, max_comment_count=0, get_details=False):
-        """ """
-
-        video_id = item['id']['videoId']
-        channel_id = item['snippet']['channelId']
+    def _build_youtube_item(self, item=None, video_id=None, channel_id=None,
+                            max_comment_count=0, get_details=False):
+        ''' 
+        Build the youtube result from an API response.
+        @param item
+        @param video_id
+        @param channel_id
+        @param max_comment_count
+        @param get_details
+        '''
+        if item is not None:
+            video_id = item['id']['videoId']
+            channel_id = item['snippet']['channelId']
+        else:
+            item = {}
+            if video_id:
+                item['id'] = video_id
+            if channel_id:
+                item['snippet'] = {'channel_id': channel_id}
 
         # retrieve comments and details as requested
         if max_comment_count > 0:
