@@ -4,6 +4,7 @@ Web Service access.
 
 """
 from __future__ import print_function
+from time import sleep
 
 
 class AbstractWebSource(object):
@@ -66,12 +67,23 @@ class AbstractIterableWebSource(AbstractWebSource):
                 # number of reguests
                 for index in range(self.DEFAULT_START_INDEX,
                                    max_results + 1, self.DEFAULT_MAX_RESULTS):
+
+                    sleep(1) # throttle
+
                     # detect the last iteration
                     if (index + self.DEFAULT_MAX_RESULTS > max_results):
                         mid_results = max_results % self.DEFAULT_MAX_RESULTS
                     fetched = self.request(search_term, index, mid_results,
                                            from_date, to_date, command,
                                            output_format, language)
+                    result_length = 0
+                    if 'searchInformation' in fetched and 'formattedTotalResults' in fetched['searchInformation']:
+                        result_length = float(
+                            fetched['searchInformation']['formattedTotalResults'])
+
+                    if result_length == 0:
+                        break
+
                     yield fetched
 
             else:
@@ -81,10 +93,12 @@ class AbstractIterableWebSource(AbstractWebSource):
                 yield fetched
 
     def process_output(self, results, path):
-        """results' post-processor: iterates over the API responses
-        and calls the output convertor
         """
-
+        The results' post-processor: iterates over the API responses
+        and calls the output convertor.
+        @param results
+        @param path
+        """
         for result in results:
             for item in path(result):
                 try:
@@ -96,7 +110,8 @@ class AbstractIterableWebSource(AbstractWebSource):
     def request(self, search_term, current_index, max_results,
                 from_date=None, to_date=None, command=None,
                 output_format=None, language=None):
-        """calls the web source's API
+        """
+        Calls the web source's API
         """
 
         raise NotImplemented

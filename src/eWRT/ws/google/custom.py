@@ -10,7 +10,8 @@ from eWRT.ws.rest import RESTClient
 from eWRT.ws import AbstractIterableWebSource
 
 
-def RESULT_PATH(x): return x['items']  # path to the results
+# path to the results
+def RESULT_PATH(x): return x['items'] if 'items' in x else []
 
 
 class CustomSearch(AbstractIterableWebSource):
@@ -66,6 +67,7 @@ class CustomSearch(AbstractIterableWebSource):
                       'key': self.api_key,
                       'num': max_results,
                       'start': current_index,
+                      #                       'tbm': 'nws',
                       'sort': 'date'}
 
         # set language
