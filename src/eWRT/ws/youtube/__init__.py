@@ -45,10 +45,12 @@ def get_value(key, dictionary):
     return None
 
 
+YOUTUBE_SEARCH_URL = 'https://www.youtube.com/watch?v='
+
+
 class YouTubeEntry(dict):
 
     DATE_FIELDS = ('published', 'last_modified')
-    YOUTUBE_SEARCH_URL = 'https://www.youtube.com/watch?v='
 
     VIDEO_MAPPING = {
         'id': 'video_id',
@@ -99,8 +101,8 @@ class YouTubeEntry(dict):
         dict.__init__(self)
         self.update(self.update_entry(search_result, mapping=mapping))
 
-        if 'video_id' in self:
-            self['url'] = ''.join([self.YOUTUBE_SEARCH_URL, self['video_id']])
+        if 'video_id' in self and self['video_id']:
+            self['url'] = ''.join([YOUTUBE_SEARCH_URL, self['video_id']])
 
     def __repr__(self):
         return '** entry: %s' % '\n'.join(['%s: %s' % (k, v) for k, v in self.iteritems()])
@@ -165,6 +167,19 @@ class YouTube_v3(WebDataSource):
                             developerKey=self.api_key)
         self.sleep_time = sleep_time
 
+    def _convert_item_to_video(self, item, max_comment_count=0):
+        """ """
+        video = YouTubeEntry(item, 'video')
+
+        # retrieve comments, if required
+        if max_comment_count > 0:
+            video['comments'] = self._get_video_comments(
+                video_id=video['video_id'])
+
+        # set the URL of the video
+        video['url'] = ''.join([YOUTUBE_SEARCH_URL, video['video_id']])
+        return video
+
     @classmethod
     def _get_yt_dict(cls, entry, mapping):
         """ stores the mapped items in a dictionary
@@ -194,6 +209,20 @@ class YouTube_v3(WebDataSource):
         result = self.client.channels().list(part='id,snippet',
                                              forUsername=user_name)
         return result
+
+    def get_video_by_id(self, video_id, max_comment_count=0):
+        '''
+        Returns a full video item by video ID.
+        @param video_id, the ID to retrieve a video by.
+        @param max_comment_count
+        '''
+        video_result = self.client.videos().list(id=video_id,
+                                                 part='contentDetails,statistics,snippet').execute()
+        if video_result is None or not 'items' in video_result or len(video_result['items']) != 1:
+            return None
+        video_result = video_result['items'][0]
+        return self._build_youtube_item(item=video_result, video_id=video_id,
+                                        max_comment_count=max_comment_count)
 
     def get_video_search_feed(self, search_terms, max_results=25, max_comment_count=0):
         """
@@ -232,17 +261,19 @@ class YouTube_v3(WebDataSource):
 
     def _build_youtube_item(self, item=None, video_id=None, channel_id=None,
                             max_comment_count=0, get_details=False):
-        ''' 
+        """
         Build the youtube result from an API response.
         @param item
         @param video_id
         @param channel_id
         @param max_comment_count
         @param get_details
-        '''
+        """
         if item is not None:
-            video_id = item['id']['videoId']
-            channel_id = item['snippet']['channelId']
+            if video_id is None and 'id' in item and 'video_id' in item['id']:
+                video_id = item['id']['videoId']
+            if channel_id is None and 'snippet' in item and 'channelId' in item['snippet']:
+                channel_id = item['snippet']['channelId']
         else:
             item = {}
             if video_id:
