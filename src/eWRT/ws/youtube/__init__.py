@@ -271,6 +271,8 @@ class YouTube_v3(WebDataSource):
         """
         if item is not None:
             if video_id is None and 'id' in item and 'video_id' in item['id']:
+                video_id = item['id']['video_id']
+            elif video_id is None and 'id' in item and 'videoId' in item['id']:
                 video_id = item['id']['videoId']
             if channel_id is None and 'snippet' in item and 'channelId' in item['snippet']:
                 channel_id = item['snippet']['channelId']
@@ -350,7 +352,6 @@ class YouTube_v3(WebDataSource):
         items_count = 0
 
         while continue_search:
-
             response = self.client.search().list(**kwargs).execute()
             total_results = response['pageInfo']['totalResults']
 
