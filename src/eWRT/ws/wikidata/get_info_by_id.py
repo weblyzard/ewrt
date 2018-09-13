@@ -15,7 +15,7 @@ import sys
 from pprint import pprint
 
 import pywikibot
-from eWRT.ws.wikidata.definitions.property_definitions import person_properties
+from eWRT.ws.wikidata.definitions import person_properties
 
 site = pywikibot.Site('en', 'wikipedia')  # any site will work, this is just an example
 repo = site.data_repository()  # this is a DataSite object

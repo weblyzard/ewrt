@@ -1,14 +1,11 @@
 import datetime
 import warnings
 from pprint import pprint
-from collections import OrderedDict
 
+from eWRT.ws.wikidata.definitions import (person_properties,
+                                          location_properties,
+                                          organization_properties)
 from eWRT.ws.wikidata.get_image_from_wikidataid import get_image, NoImageFoundError
-from eWRT.ws.wikidata.definitions.property_definitions import (person_properties,
-                                                               location_properties,
-                                                               organization_properties)
-
-from eWRT.ws.wikidata.wp_to_wd import is_preferred
 
 RELEVANT_LANGUAGES = ['en']
 
@@ -16,36 +13,29 @@ ENTITY_TYPES = {'person': person_properties,
                 'organization': organization_properties,
                 'geo': location_properties}
 
-TEMPORAL_ATTRIBUTES = {'P580': 'start date',
+TEMPORAL_QUALIFIERS = {'P580': 'start date',
                        'P582': 'end date',
                        'P585': 'point in time',
                        }
 
-IMAGE_ATTRIBUTES = {
-    'P18': 'image',
-    'P41': 'flag image',
-    'P1442': 'image of grave'
-}
-
+# other claim qualifiers we don't want to skip, if present
 OTHER_QUALIFIERS = {'P642': 'at_organization',
                     'P854': 'reference_url',
                     'P1686': 'for_work'}
 
+CLAIMS_OF_INTEREST = ["P18", "P19", 'P39', 'P106', 'P108', 'P102']
 
 
-
-class ParseEntity:
+class ParseItemPage:
     """Methods to parse pywikibot.ItemPage for a specifiable list
         of properties, returning a dict of property labels and values."""
     LITERAL_PROPERTIES = ['labels', 'aliases', 'descriptions']
 
-    CLAIMS_OF_INTEREST = ["P18", "P19", 'P39', 'P106', 'P108', 'P102']
-
-    def __init__(self, raw_entity, include_literals=False, claims_of_interest=None,
+    def __init__(self, itempage, include_literals=False, claims_of_interest=None,
                  entity_type_properties=None,
                  entity_type='person', languages=None):
         """
-        :param raw_entity: pywikibot.ItemPage to be parsed
+        :param itempage: pywikibot.ItemPage to be parsed
         :param include_literals: bool defining whether to include further literals
         (descriptions, aliases) in the output. If False, only labels are included.
         :param claims_of_interest: list of claims by their WikiData identifiers
@@ -57,6 +47,7 @@ class ParseEntity:
         """
 
         # include 'labels' only if include_literals == False
+        itempage.get()
         self.include_literals = include_literals
         if self.include_literals:
             self.literals = self.LITERAL_PROPERTIES
@@ -78,25 +69,28 @@ class ParseEntity:
         else:
             self._image_requested = False
 
-        self.raw_entity = raw_entity
+        self.item_raw = itempage
         self.process_attributes()
         if not self.include_literals:
             self.details = {key: self.details[key] for key in self.details if
                             self.details[key] and key not in self.LITERAL_PROPERTIES}
 
     def process_attributes(self):
-        """Workflow:
+        """Exctract information about the item, specified
+        by the predicates in self.claims_of_interest:
           - extract literal attributes
-          - find image link (if requested)
+          - find image link(s) (if requested)
           - make best effort attempt to parse
             the other claims_of_interest"""
-        self.details = self.extract_literal_properties(self.raw_entity, self.languages,
+
+        # get the ent
+        self.details = self.extract_literal_properties(self.item_raw, self.languages,
                                                        self.literals)
         if self._image_requested:
             try:
                 (self.details['image_description'],
                  _,
-                 self.details['full_image']) = get_image(self.raw_entity)
+                 self.details['full_image']) = get_image(itempage=self.item_raw)
             except NoImageFoundError:
                 pass
         # else:
@@ -104,23 +98,25 @@ class ParseEntity:
         self.process_other_claims()
 
     def process_other_claims(self):
-        """Generic"""
+        """Generic best effort method to parse additional predicates
+        and their qualifiers."""
         for claim in self.claims_of_interest:
 
             try:
                 values = []
                 claim_name = self.entity_type_properties[claim]
                 self.details[claim_name] = {'values': values}
-                claim_instances = self.raw_entity.claims[claim]
-                for sub_claim in self.raw_entity.claims[claim]:
+                claim_instances = self.item_raw.claims[claim]
+                for sub_claim in self.item_raw.claims[claim]:
                     try:
                         value = ParseClaim(sub_claim, self.languages, self.literals).claim_details
-                        values.append(value)
+                        if value:
+                            values.append(value)
                     except Exception as e:
                         pass
 
                 if len(claim_instances) > 1:
-                    preferred = is_preferred(claim_instances)
+                    preferred = self.attribute_preferred_values(claim_instances)
                     if len(preferred) == 1:
                         self.details[claim_name]['preferred'] = preferred[0]
                 elif len(claim_instances) == 0:
@@ -136,7 +132,7 @@ class ParseEntity:
         """Create a dictionary with the entity's labels, descriptions and
         aliases in the selected languages.
         :param entity: pywikibot.Claim() or pywikibot.ItemPage
-        :param languages: list of languages by their ISO code for which to 
+        :param languages: list of languages by their ISO code for which to
         extract literals
         :param literals: list of literals to parse (default:
         ['labels', 'aliases', 'descriptions']"""
@@ -151,19 +147,43 @@ class ParseEntity:
                     pass
         return literal_properties
 
+    @classmethod
+    def attribute_preferred_values(self, claim_instances):
+        def gettargets(claim):
+            return [claim.target for claim in claim_instances]
+
+        if len(claim_instances) == 1:
+            return gettargets(claim_instances)
+        else:
+            preferred = [claim for claim in claim_instances if claim.rank == 'preferred']
+            if len(preferred) == 1:
+                pass
+            elif len(preferred):
+                warnings.warn('No claim instance marked as preferred!')
+            else:
+                warnings.warn(
+                    'Incorrectly tagged data: several instances '
+                    'marked as preferred, this should not happen!')
+            return [claim.target for claim in preferred]
+
 
 class ParseClaim:
-    """"""
+    """Parse an individual claim and its qualifiers"""
 
     def __init__(self, claim, languages, literals):
         """
         Parse additional information about a specified claim. The result
         (dict format) is accessible through ParseClaim(claim).claim_details
+
         :param claim: pywikibot.Claim object to be parsed
+        :type claim: pywikibot.Claim
         :param languages: list of language ISO codes
+        :type languages: List(str)
         :param literals: list of literal properties to be included in result
+        :type literals: List(str)
         """
         self.claim = claim
+        self.claim.get()
         self.languages = languages
         self.literals = literals
         self.claim_details = self.parse_claim()
@@ -171,6 +191,7 @@ class ParseClaim:
     def parse_claim(self):
         """Identify literal attributes and temporal attributes,
         perform default operations on remaining qualifiers. of the claim.
+
         :return: dictionary of claim attributes/qualifiers and their values."""
         claim_details = self.extract_literal_claim()
         if isinstance(self.claim.target, basestring):
@@ -193,10 +214,10 @@ class ParseClaim:
         return claim_details
 
     def extract_literal_claim(self):
-        """Literals parsed by `ParseEntity.extract_literal_properties()`"""
+        """Literals parsed by `ParseEntity.extract_literal_properties()"""
         target = self.claim.target
-        claim_details = ParseEntity.extract_literal_properties(target, self.languages,
-                                                               self.literals)
+        claim_details = ParseItemPage.extract_literal_properties(target, self.languages,
+                                                                 self.literals)
         claim_details['url'] = 'https://www.wikidata.org/wiki/' + self.claim.target.id
         return claim_details
 
@@ -205,7 +226,7 @@ class ParseClaim:
         attributes. If present, send it to self.claim_temporal_attributes()"""
 
         temporal_attributes = {}
-        for attribute in TEMPORAL_ATTRIBUTES:
+        for attribute in TEMPORAL_QUALIFIERS:
             try:
                 temporal_attributes[attribute] = self.claim_temporal_attributes(attribute)
             except ValueError:
@@ -213,7 +234,7 @@ class ParseClaim:
         return temporal_attributes
 
     def claim_temporal_attributes(self, temporal_attribute):
-        """Parse an individual temporal attribute."""
+        """Parse an individual temporal attribute (start date, end date,...)"""
 
         if self.claim.has_qualifier and temporal_attribute in self.claim.qualifiers:
             try:
@@ -226,11 +247,13 @@ class ParseClaim:
                     wb_time_string = wb_time_string = json['datavalue']['value']['time']
 
                     normalized_date_string = wb_time_string[8:]
+                    if wb_time_string.startswith('-'):
+                        normalized_date_string = '-' + normalized_date_string
                     pprint(normalized_date_string)
                 else:
                     print('year is')
                     print(claim_date.target.year)
-                date =datetime.datetime.strptime(normalized_date_string,
+                date = datetime.datetime.strptime(normalized_date_string,
                                                   '%Y-%m-%dT%H:%M:%SZ')
                 return date
             except TypeError:
@@ -254,6 +277,8 @@ def end_date(instance):
 
 def guess_current_value(attribute_instances):
     """
+    Guess the value still holding in a list-form attribute. Use with caution:
+    For most use cases, ParseItemPage.attribute_preferred_values is better.
 
     :param attribute_instances: list of claim values as returned by ParseClaim
     :type attribute_instances: list

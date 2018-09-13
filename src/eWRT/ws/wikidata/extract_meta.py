@@ -1,5 +1,16 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
+'''
+Created on September 13, 2018
+
+@author: Jakob Steixner, <jakob.steixner@modul.ac.at
+
+Retrieve Wikidata's image based on (exact) Wikipedia
+article in any language. Also allows to retrieve other
+types of images (e.g. flags, coats of arms, etc.) where given.
+
+'''
 import ujson
 import warnings
 from urllib2 import urlopen
@@ -7,7 +18,7 @@ from urllib2 import urlopen
 import pywikibot.pagegenerators
 import wikipedia
 import wikipedia_wl
-from eWRT.ws.wikidata.wikidata_attributes import ParseEntity
+from eWRT.ws.wikidata.wikibot_parse_item import ParseItemPage
 
 ENTITY_TYPE_IDENTIFIERS = {
     'person': 'Q5',
@@ -98,8 +109,8 @@ def collect_wikidata_attributes(entity_raw, languages, wd_parameters=['P17'], in
     for language in wikipedia_data:
         entity_extracted_details[language['language'] + 'wiki'] = language
 
-    entity = ParseEntity(entity_raw, claims_of_interest=wd_parameters,
-                         include_literals=include_literals, entity_type=entity_type)
+    entity = ParseItemPage(entity_raw, claims_of_interest=wd_parameters,
+                           include_literals=include_literals, entity_type=entity_type)
     for key in entity.details:
         entity_extracted_details[key] = entity.details[key]
     entity_extracted_details['wikidata_id'] = entity_raw.id
