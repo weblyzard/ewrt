@@ -1,3 +1,17 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+'''
+Created on September 10, 2018
+
+@author: Jakob Steixner, <jakob.steixner@modul.ac.at
+
+Retrieve Wikidata's image based on (exact) Wikipedia
+article in any language. Also allows to retrieve other
+types of images (e.g. flags, coats of arms, etc.) where given.
+
+'''
+
 import glob
 import ujson
 from pprint import pprint
@@ -5,43 +19,56 @@ import subprocess as sb
 from collections import Counter
 
 class OutputStatistics:
+    """Tools to process statistics about the results from
+    a batch of items processed by
+    eWRT.ws.wikidata.extract_meta.collect_wikidata_attributes"""
 
     def __init__(self, paths=None, data=None, total_length=0):
         if not data and not paths:
             raise ValueError("One of data and paths has to be set!")
         self.total_length = total_length
 
-        self._data = data
-        self.paths = paths
+        self._data = data  # data provided as list of dicts
+        self.paths = paths  # list of paths to load sub results one by
+                            # one save memore when working with large datasets
         self.malformed = 0
-        self.unset = Counter()
+        self.unset = Counter()  # counter properties: number of items
+                                # where this property is not set.
 
     @property
     def data(self):
+        """The as a list/generator of dicts as formatted by
+        eWRT.ws.wikidata.extract_meta.collect_wikidata_attributes """
         if self._data:
             self.data = self._data
         else:
             for path in self.paths:
                 try:
-                    yield self.from_json(path)
+                    yield self.json_load(path)
                 except Exception as e:
                     print('encountered exception: {}'.format(e))
                     self.malformed += 1
 
-    def from_json(self, filename):
+    def json_load(self, filename):
+
         with open(filename) as json_dump:
             return ujson.load(json_dump)
 
     @classmethod
     def from_glob(cls, glob_string):
+        """data as generator over json files, specified by glob string"""
         file_list = glob.glob(glob_string)
         return OutputStatistics.from_pathlist(file_list, total_length=len(file_list))
 
     @classmethod
     def from_pathlist(cls, paths):
+        """explicit list of paths"""
         return OutputStatistics(paths=paths, total_length=len(paths))
 
     def count_attribute_set(self, attr):
+        """count the number of items in the data
+        where the attribute `attr` is set
+        :param attr: str identifying a property"""
         attr_present = 0
         for item in self.data:
             if attr in item:
@@ -53,6 +80,9 @@ class OutputStatistics:
         return attr_present
 
     def count_at_least_one(self, attributes):
+        """count the number of items where at
+        least one of several related attributes, e.g.
+        temporal or geographic, is set."""
         neither = []
         attr_present = 0
         for item in self.data:
