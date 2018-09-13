@@ -29,10 +29,8 @@ def get_images(raw_entity, image_width=DEFAULT_THUMBNAIL_WIDTH, image_types=imag
     :param raw_entity: pywikibot.ItemPage
     :param image_width: width of the thumbnail
     """
-    try:
-        claims = raw_entity.claims
-    except AttributeError:
-        claims = raw_entity.text['claims']
+    raw_entity.get()
+    claims = raw_entity.claims
     images_retrieved = []
     for image_type in image_types:
         try:
@@ -62,7 +60,7 @@ def get_image(raw_entity, image_width=DEFAULT_THUMBNAIL_WIDTH):
     """Get the `image`='P18' only.
     :param raw_entity: ItemPage
     :param image_width: width in pixels (int)"""
-    return get_images(raw_entity=raw_entity, image_width=width, image_types=['P18'])[0]
+    return get_images(raw_entity=raw_entity, image_width=image_width, image_types=['P18'])[0]
 
 def get_thumbnail(*args, **kwargs):
     """Return thumbnail only."""

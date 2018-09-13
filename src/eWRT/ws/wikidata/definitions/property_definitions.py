@@ -4,6 +4,25 @@
 # for properties typically associated with
 # a variety of entity types
 
+from collections import OrderedDict
+
+local_attributes = OrderedDict([("P131", u"located in the administrative territorial entity"),
+                                ("P17", u"country"),
+                                ("P19", u"place of birth"),
+                                ("P551", u"residence"),
+                                ("P27", u"country of citizenship"),
+                                ("P159", u"headquarters location"),
+                                ("P740", u"location of formation"),
+                                ])
+
+image_attributes = {
+    "P18": u"image",
+    "P41": u"flag image",
+    "P94": u"coat of arms image",
+    "P242": u"locator map image",
+    "P1442": u"image of grave",
+    "P154": u"logo image",}
+
 location_properties = {
     "P18": u"image",
     "P31": u"instance of",
@@ -83,8 +102,6 @@ location_properties = {
     "P1791": u"category of people buried here",
 }
 
-
-
 person_properties = {
     "P18": u"image",
     "P19": u"place of birth",
@@ -144,7 +161,6 @@ person_properties = {
     "P551": u"residence",
     "P2218": u"net worth estimate"
 }
-
 
 organization_properties = {
     "P154": u"logo image",
