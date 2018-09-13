@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import datetime
+
 import ujson
 import warnings
 from urllib2 import urlopen
@@ -89,6 +89,26 @@ def wp_summary_from_wdid(wikidata_id, languages=None):
         return None
 
 
+def collect_wikidata_attributes(entity_raw, languages, wd_parameters=['P17'], include_literals=True,
+                                entity_type='person'):
+    wikipedia_data = wp_summary_from_wdid(entity_raw.id, languages=languages)
+    if not wikipedia_data:
+        raise ValueError
+    entity_extracted_details = {'url': wikipedia_data[0]['url']}
+    for language in wikipedia_data:
+        entity_extracted_details[language['language'] + 'wiki'] = language
+
+    entity = ParseEntity(entity_raw, claims_of_interest=wd_parameters,
+                         include_literals=include_literals, entity_type=entity_type)
+    for key in entity.details:
+        entity_extracted_details[key] = entity.details[key]
+    entity_extracted_details['wikidata_id'] = entity_raw.id
+    entity_extracted_details['entityType'] = entity_type.capitalize() + 'Entity'
+    # parsed_entities.append(entity_extracted_details)
+
+    return entity_extracted_details
+
+
 def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
                                include_literals, entity_type, languages):
     """
@@ -116,22 +136,16 @@ def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
         for j in range(limit_per_query):
             try:
                 entity_raw = generator.next()
+                entity_raw.get()
 
             except StopIteration:
                 break
-            wikipedia_data = wp_summary_from_wdid(entity_raw.id, languages=languages)
-            if not wikipedia_data:
+
+            try:
+                yield collect_wikidata_attributes(entity_raw, languages=languages,
+                                            wd_parameters=wd_parameters,
+                                            include_literals=include_literals,
+                                            entity_type=entity_type)
+            except ValueError:
                 continue
-            entity_extracted_details = {'url': wikipedia_data[0]['url']}
-            for language in wikipedia_data:
-                entity_extracted_details[language['language'] + 'wiki'] = language
 
-            entity = ParseEntity(entity_raw, claims_of_interest=wd_parameters,
-                                 include_literals=include_literals, entity_type=entity_type)
-            for key in entity.details:
-                entity_extracted_details[key] = entity.details[key]
-            entity_extracted_details['wikidata_id'] = entity_raw.id
-            entity_extracted_details['entityType'] = entity_type.capitalize() + 'Entity'
-            # parsed_entities.append(entity_extracted_details)
-
-            yield entity_extracted_details

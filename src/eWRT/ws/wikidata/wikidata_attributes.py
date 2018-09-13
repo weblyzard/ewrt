@@ -1,18 +1,16 @@
 import datetime
-import ujson
 import warnings
 from pprint import pprint
+from collections import OrderedDict
 
-from wl_data_scripts.projects.wikibot.get_image_from_wikidataid import get_image, NoImageFoundError
-from wl_data_scripts.projects.wikibot.data.property_definitions import (person_properties,
-                                                                        location_properties,
-                                                                        organization_properties)
+from eWRT.ws.wikidata.get_image_from_wikidataid import get_image, NoImageFoundError
+from eWRT.ws.wikidata.definitions.property_definitions import (person_properties,
+                                                               location_properties,
+                                                               organization_properties)
 
-from wl_data_scripts.projects.wikibot.wp_to_wd import is_preferred
+from eWRT.ws.wikidata.wp_to_wd import is_preferred
 
-
-
-RELEVANT_LANGUAGES = ['en', 'de', 'fr', 'es']
+RELEVANT_LANGUAGES = ['en']
 
 ENTITY_TYPES = {'person': person_properties,
                 'organization': organization_properties,
@@ -32,6 +30,9 @@ IMAGE_ATTRIBUTES = {
 OTHER_QUALIFIERS = {'P642': 'at_organization',
                     'P854': 'reference_url',
                     'P1686': 'for_work'}
+
+
+
 
 class ParseEntity:
     """Methods to parse pywikibot.ItemPage for a specifiable list
