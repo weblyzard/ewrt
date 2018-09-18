@@ -132,8 +132,6 @@ class ParseItemPage:
             # warnings.warn(
             #    'claim {} not available for entity {}'.format(claim, self.details['labels']))
         if 'country' not in self.details or not self.details['country'] and self._require_country:
-            claim_name = 'country'
-            claim = 'P17'
             country_info = self.get_country_from_any(self.item_raw,
                                                      local_attributes=local_attributes,
                                                      languages=self.languages)
@@ -164,28 +162,36 @@ class ParseItemPage:
                                    literals).claim_details
                 if value:
                     values.append(value)
-            except:
+            except Exception as e:
                 pass
         if values:
             claim_details = {'values': values,
                              'url': 'https://www.wikidata.org/wiki/Property:' + claim_id}
         else:
-            return None
+            claim_details = {}
         if len(claim_instances) > 1:
             try:
-                preferred = cls.attribute_preferred_value(claim_instances)
-                if len(preferred) == 1:
-                    preferred = preferred[0]
-                    preferred_id = preferred.id
-                    preferred_labels = ParseItemPage.extract_literal_properties(preferred,
-                                                                                languages=languages,
-                                                                                literals=[
-                                                                                    'labels'])[
-                        'labels']
-                    claim_details['preferred'] = {
-                        'url': preferred_id,
-                        'labels': preferred_labels
-                    }
+                marked_preferred = cls.attribute_preferred_value(claim_instances)
+                if len(marked_preferred) == 1:
+                    preferred = marked_preferred[0]
+                    try:
+                        preferred_id = preferred.id
+                        preferred_labels = ParseItemPage.extract_literal_properties(preferred,
+                                                                                    languages=languages,
+                                                                                    literals=[
+                                                                                        'labels'])[
+                            'labels']
+                        claim_details['preferred'] = {
+                            'url': preferred_id,
+                            'labels': preferred_labels
+                        }
+                    except AttributeError:
+                        if isinstance(preferred, WbTime):
+                            claim_details['preferred'] = preferred.toTimestr(force_iso=True)
+                        elif isinstance(preferred, basestring):
+                            claim_details['preferred'] = preferred
+
+
             except ValueError as e:
                 warnings.warn('encountered exception: {}'.format(e))
 
@@ -289,8 +295,15 @@ class ParseItemPage:
                 for location in itempage.claims[location_type]:
                     if location:
                         try:
-                            return ParseItemPage.get_country_from_location(location.target,
+                            country = ParseItemPage.get_country_from_location(location.target,
                                                                            languages=languages)
+                            if len(country) == 1:
+                                return country
+                            elif 'preferred' in country:
+                                return {"url":"https://www.wikidata.org/wiki/Property:P17",
+                                        'values': [country['preferred']]}
+                            else:
+                                pass
                         except ValueError:
                             pass
                     else:
@@ -389,7 +402,7 @@ class ParseClaim:
                 if not claim_date:
                     raise ValueError('No dates found.')
 
-                normalized_date_string = claim_date.toTimestr(force_iso=True)
+                normalized_date_string = claim_date.target.toTimestr(force_iso=True)
                 # pprint(normalized_date_string)
                 # date = datetime.datetime.strptime(normalized_date_string,
                 #                                   '%Y-%m-%dT%H:%M:%SZ')
