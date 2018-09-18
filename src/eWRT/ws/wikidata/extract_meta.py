@@ -87,7 +87,8 @@ def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
                          limit_per_query,
                          limit_per_query * i)
         # logger.debug('Query is\n' + query)
-        generator = pywikibot.pagegenerators.WikidataSPARQLPageGenerator(query, site=wikidata_site)
+        generator = pywikibot.pagegenerators.WikidataSPARQLPageGenerator(
+            query, site=wikidata_site)
         if not generator:
             break
         # parsed_entities = []

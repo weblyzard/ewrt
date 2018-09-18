@@ -10,14 +10,14 @@ Retrieve info about an entity, specifying a list of
 relevant attributes and languages for literals
 
 '''
-
 import warnings
+
+from pywikibot import WbTime
 
 from eWRT.ws.wikidata.definitions import (local_attributes,
                                           image_attributes,
                                           GENERIC_PROPERTIES)
 from eWRT.ws.wikidata.get_image_from_wikidataid import get_image, NoImageFoundError
-from pywikibot import WbTime
 
 RELEVANT_LANGUAGES = ['en']
 
@@ -160,7 +160,8 @@ class ParseItemPage:
         assert claim_instances
         for sub_claim in claim_instances:
             try:
-                value = ParseClaim(sub_claim, languages, literals).claim_details
+                value = ParseClaim(sub_claim, languages,
+                                   literals).claim_details
                 if value:
                     values.append(value)
             except:
@@ -235,7 +236,8 @@ class ParseItemPage:
                     claim_instance.get()
                 except AttributeError:
                     pass
-            preferred = [claim for claim in claim_instances if claim.rank == 'preferred']
+            preferred = [
+                claim for claim in claim_instances if claim.rank == 'preferred']
             if len(preferred) == 1:
                 return [claim.target for claim in preferred]
 
@@ -259,7 +261,8 @@ class ParseItemPage:
         try:
             location_item_page.get()
         except AttributeError:
-            raise ValueError('Parameter location_item_page has to be an ItemPage!')
+            raise ValueError(
+                'Parameter location_item_page has to be an ItemPage!')
 
         try:
             country = location_item_page.claims['P17']
@@ -331,13 +334,15 @@ class ParseClaim:
             return claim_details
         elif isinstance(self.claim.target, WbTime):
             try:
-                claim_details['value'] = self.claim.target.toTimestr(force_iso=True)
+                claim_details['value'] = self.claim.target.toTimestr(
+                    force_iso=True)
             except AttributeError:
                 pass
             return claim_details
         else:
             claim_details = self.extract_literal_claim()
-        claim_details['url'] = 'https://www.wikidata.org/wiki/' + self.claim.target.id
+        claim_details['url'] = 'https://www.wikidata.org/wiki/' + \
+            self.claim.target.id
         dates = self.get_claim_dates()
         if dates:
             claim_details['temporal_attributes'] = dates
@@ -396,14 +401,14 @@ class ParseClaim:
 
 def start_date(instance):
     if 'temporal_attributes' not in instance or 'P580' not in instance[
-        'temporal_attributes']:
+            'temporal_attributes']:
         return None
     return instance['temporal_attributes']['P580']['string']
 
 
 def end_date(instance):
     if 'temporal_attributes' not in instance or 'P582' not in instance[
-        'temporal_attributes']:
+            'temporal_attributes']:
         return None
     return instance['temporal_attributes']['P582']['string']
 
@@ -429,7 +434,8 @@ def guess_current_value(attribute_instances):
             try:
                 assert instance_has_startdate or instance_has_enddate
             except AssertionError:
-                raise ValueError('No instances of claim with start or end dates found!')
+                raise ValueError(
+                    'No instances of claim with start or end dates found!')
             begins_doesnt_end = [instance for instance in instance_has_startdate if
                                  not end_date(instance)]
             if len(begins_doesnt_end) == 1:
@@ -438,7 +444,8 @@ def guess_current_value(attribute_instances):
                 most_recent_instance = begins_doesnt_end[0]
                 return most_recent_instance
 
-            most_recent_startdate = max(map(start_date, instance_has_startdate))
+            most_recent_startdate = max(
+                map(start_date, instance_has_startdate))
 
             most_recent_instances = filter(
                 map(lambda i: start_date(i) == most_recent_startdate, instance_has_startdate))
