@@ -7,4 +7,3 @@ from property_definitions import (image_attributes,
                                   GENERIC_PROPERTIES)
 
 from countries_iso_codes import COUNTRY_ISO2_CODES_DICT
-

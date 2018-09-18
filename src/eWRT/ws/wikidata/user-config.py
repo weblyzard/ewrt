@@ -407,7 +407,8 @@ proxy = None
 # in user-config.py for wikis with extra write actions.
 actions_to_block = []
 
-# Set simulate to True or use -simulate option to block all actions given above.
+# Set simulate to True or use -simulate option to block all actions given
+# above.
 simulate = False
 
 # How many pages should be put to a queue in asynchronous mode.

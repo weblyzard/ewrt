@@ -16,10 +16,10 @@ Usage as CLI: python postprocess_geo.py
 '''
 import sys
 import warnings
-
 import pywikibot
+
 from eWRT.ws.wikidata.definitions import local_attributes
-from eWRT.ws.wikidata.extract_meta import WIKIDATA_SITE, collect_attributes_from_wd_and_wd
+from eWRT.ws.wikidata.extract_meta import WIKIDATA_SITE
 from eWRT.ws.wikidata.wikibot_parse_item import ParseItemPage
 from eWRT.ws.wikidata.enrich_from_wikipedia import RELEVANT_LANGUAGES
 from eWRT.ws.wikidata.wp_to_wd import wikidata_from_wptitle
@@ -41,10 +41,12 @@ def extract_country_or_none(entity_extract):
                                                              languages=RELEVANT_LANGUAGES,
                                                              literals=['labels'])
         if len(countries_found) > 1:
-            warnings.warn('More than one country found for entity {}'.format(entity_id))
+            warnings.warn(
+                'More than one country found for entity {}'.format(entity_id))
         return countries_found
     except ValueError:
-        warnings.warn('Unable to determine country for entity {}!'.format(entity_id))
+        warnings.warn(
+            'Unable to determine country for entity {}!'.format(entity_id))
         return None
 
 

@@ -10,14 +10,15 @@ a known id.
 entity types.
 Starting point is the
 [pywikibot manual](https://www.mediawiki.org/wiki/Manual:Pywikibot/Wikidata)'''
-
+import pywikibot
 import sys
+
 from pprint import pprint
 
-import pywikibot
 from eWRT.ws.wikidata.definitions import person_properties
 
-site = pywikibot.Site('en', 'wikipedia')  # any site will work, this is just an example
+# any site will work, this is just an example
+site = pywikibot.Site('en', 'wikipedia')
 repo = site.data_repository()  # this is a DataSite object
 
 CLAIMS_OF_INTEREST = ["P19", 'P39', 'P106', 'P108', 'P102', 'P1411']
@@ -41,7 +42,8 @@ if __name__ == '__main__':
     if item.claims:
         for claim in item.claims:
             if claim in CLAIMS_OF_INTEREST:
-                targets = [(value, value.getTarget()) for value in item.claims[claim]]
+                targets = [(value, value.getTarget())
+                           for value in item.claims[claim]]
                 claims[name_or_id(claim)] = data = []
                 for container, value in targets:
                     value_data = {}
