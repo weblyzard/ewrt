@@ -66,7 +66,6 @@ def wp_summary_from_wdid(wikidata_id, languages=None, sitelinks=None):
     """
     if not languages:
         languages = RELEVANT_LANGUAGES
-    has_page = False
     wikipedia_data = []
     if not sitelinks:
         sitelinks = get_sitelinks_from_wd_id(wikidata_id, languages=languages)
