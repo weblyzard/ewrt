@@ -4,16 +4,18 @@
 # for properties typically associated with
 # a variety of entity types
 
+import copy
 from collections import OrderedDict
 
-local_attributes = OrderedDict([("P131", u"located in the administrative territorial entity"),
-                                ("P17", u"country"),
-                                ("P19", u"place of birth"),
-                                ("P551", u"residence"),
-                                ("P27", u"country of citizenship"),
-                                ("P159", u"headquarters location"),
-                                ("P740", u"location of formation"),
-                                ])
+local_attributes = OrderedDict([
+    ("P17", u"country"),
+    ("P131", u"located in the administrative territorial entity"),
+    ("P19", u"place of birth"),
+    ("P551", u"residence"),
+    ("P27", u"country of citizenship"),
+    ("P159", u"headquarters location"),
+    ("P740", u"location of formation"),
+])
 
 image_attributes = {
     "P18": u"image",
@@ -21,7 +23,7 @@ image_attributes = {
     "P94": u"coat of arms image",
     "P242": u"locator map image",
     "P1442": u"image of grave",
-    "P154": u"logo image",}
+    "P154": u"logo image", }
 
 location_properties = {
     "P18": u"image",
@@ -218,3 +220,11 @@ organization_properties = {
     "P4090": u"Biodiversity Repository ID",
     "P4290": u"official app",
 }
+
+ENTITY_TYPE_DEFINITIONS = {'person': person_properties,
+                           'organization': organization_properties,
+                           'geo': location_properties}
+
+GENERIC_PROPERTIES = copy.copy(person_properties)
+GENERIC_PROPERTIES.update(organization_properties)
+GENERIC_PROPERTIES.update(location_properties)

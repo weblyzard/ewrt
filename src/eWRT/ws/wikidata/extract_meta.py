@@ -6,18 +6,13 @@ Created on September 13, 2018
 
 @author: Jakob Steixner, <jakob.steixner@modul.ac.at
 
-Retrieve Wikidata's image based on (exact) Wikipedia
-article in any language. Also allows to retrieve other
-types of images (e.g. flags, coats of arms, etc.) where given.
+Loop
 
 '''
-import ujson
-import warnings
-from urllib2 import urlopen
 
 import pywikibot.pagegenerators
-import wikipedia
-import wikipedia_wl
+
+from eWRT.ws.wikidata.enrich_from_wikipedia import wp_summary_from_wdid
 from eWRT.ws.wikidata.wikibot_parse_item import ParseItemPage
 
 ENTITY_TYPE_IDENTIFIERS = {
@@ -35,114 +30,66 @@ LIMIT %s
 OFFSET %s
 """
 
-RELEVANT_LANGUAGES = ['en', 'de', 'fr', 'es']
-
 WIKIDATA_SITE = pywikibot.Site("wikidata", "wikidata")
 
-JONAS_TYPE = 'entity_matview'
 
-
-def wp_summary_from_wdid(wikidata_id, languages=None):
+def collect_attributes_from_wd_and_wd(itempage, languages, wd_parameters, include_literals=True):
     """
-    :param wikidata_id: Qxxx-ID of the entity in Wikidata's ontology
-    :type wikidata_id: str
-    :param languages: list of language ISO codes, in order of preference
-    :type languages
-    :return: list with one dictionary per language for which a Wikipedia
-    page about this entity exists, each containing the link, summary, title,
-    revision id and revision timestamp
+
+    :param itempage: ItemPage from which to collect information
+    :param languages: list of languages in which to include literals and Wikipedia information
+    :param wd_parameters: list of wikidata properties (Pxxx codes) to be included, if present
+    :param include_literals: Include properties and alternate names. If false, only labels are
+            included.
+    :returns: a dictionary of the collected details about this entity from both Wikipedia and
+            Wikidata.
     """
-    if not languages:
-        languages = RELEVANT_LANGUAGES
-    has_page = False
-    wikipedia_data = []
-    page = urlopen(
-        url=("https://www.wikidata.org/w/api.php?action=wbgetentities&"
-             "format=json&props=sitelinks&ids={}&sitefilter={}".format(
-            wikidata_id, '|'.join([language + 'wiki' for language in languages]))
-        )
-    )
-
-    page_content = ujson.loads(page.read())
-    for language in languages:
-        language_page = {'language': language}
-        wikipedia.set_lang(language)
-
-        try:
-            wikipage_title = page_content['entities'][wikidata_id]['sitelinks'][language + 'wiki'][
-                'title']
-
-            try:
-                wikipage = wikipedia_wl.page(wikipage_title, auto_suggest=False, redirect=False)
-            except wikipedia.exceptions.PageError, wikipedia.exceptions.DisambiguationError:
-                warnings.warn('No wikipedia page found in language {language} for '
-                              'entity {entity}!.'.format(language=language, entity=wikidata_id))
-                continue
-            language_page['revision'] = wikipage.revision_id
-            language_page['summary'] = wikipage.summary
-            language_page['url'] = wikipage.url
-            language_page['title'] = wikipage.title
-            try:
-                language_page['timestamp'] = wikipage.revision_timestamp
-            except KeyError:
-                language_page['timestamp'] = None
-            has_page = True
-            wikipedia_data.append(language_page)
-            # logger.debug(u'Parsed entity {}\'s {}wiki site {}.'.format(wikidata_id, language,
-            #                                                            wikipage_title))
-        except KeyError:
-            continue
-    if has_page:
-        return wikipedia_data
-    else:
-        warnings.warn('No Wikipedia page found in any of the requested languages for '
-                      'item {}!'.format(wikidata_id))
-        return None
-
-
-def collect_wikidata_attributes(entity_raw, languages, wd_parameters=['P17'], include_literals=True,
-                                entity_type='person'):
-    wikipedia_data = wp_summary_from_wdid(entity_raw.id, languages=languages)
+    # with open('wd_dump.json', 'w') as dump:
+    # itempage.get()
+    wikipedia_data = wp_summary_from_wdid(itempage.id, languages=languages,
+                                          sitelinks=itempage.sitelinks)
     if not wikipedia_data:
         raise ValueError
+
+    # use the Wikipedia article in the first language found as the entity's
+    # unique preferred `url`.
     entity_extracted_details = {'url': wikipedia_data[0]['url']}
     for language in wikipedia_data:
         entity_extracted_details[language['language'] + 'wiki'] = language
 
-    entity = ParseItemPage(entity_raw, claims_of_interest=wd_parameters,
-                           include_literals=include_literals, entity_type=entity_type)
-    for key in entity.details:
-        entity_extracted_details[key] = entity.details[key]
-    entity_extracted_details['wikidata_id'] = entity_raw.id
-    entity_extracted_details['entityType'] = entity_type.capitalize() + 'Entity'
-    # parsed_entities.append(entity_extracted_details)
+    entity = ParseItemPage(itempage, include_literals=include_literals,
+                           claims_of_interest=wd_parameters, languages=languages)
+    entity_extracted_details.update(entity.details)
+    entity_extracted_details['wikidata_id'] = itempage.id
 
     return entity_extracted_details
 
 
 def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
                                include_literals, entity_type, languages):
-    """
-    :param languages: list if languages (ISO codes)
+    """Get a list of entities
+    :param languages: list if languages (ISO codes); the order determines
+        which one's Wikipedia page will be used for the preferred `url`.
     :param entity_type: type of entity ('person', 'organization' or 'geo')
     :param include_literals: include 'aliases' and 'descriptions' (bool)
     :type include_literals: bool
     :param wd_parameters: list of wikidata properties to include in result
+    :type wd_parameters: list
     :param limit_per_query: LIMIT set in the SPARQL query
     :type limit_per_query: int
     :param n_queries: maximum number of subsequent queries
     :type n_queries: int
-    :type wd_parameters: list
-    :returns: RawDocument
     """
 
     for i in range(n_queries):
         wikidata_site = WIKIDATA_SITE
-        query = QUERY % (ENTITY_TYPE_IDENTIFIERS[entity_type], limit_per_query, limit_per_query * i)
+        query = QUERY % (ENTITY_TYPE_IDENTIFIERS[entity_type],
+                         limit_per_query,
+                         limit_per_query * i)
         # logger.debug('Query is\n' + query)
         generator = pywikibot.pagegenerators.WikidataSPARQLPageGenerator(query, site=wikidata_site)
         if not generator:
-            continue
+            break
         # parsed_entities = []
         for j in range(limit_per_query):
             try:
@@ -153,10 +100,8 @@ def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
                 break
 
             try:
-                yield collect_wikidata_attributes(entity_raw, languages=languages,
-                                            wd_parameters=wd_parameters,
-                                            include_literals=include_literals,
-                                            entity_type=entity_type)
+                yield collect_attributes_from_wd_and_wd(entity_raw, languages=languages,
+                                                        wd_parameters=wd_parameters,
+                                                        include_literals=include_literals)
             except ValueError:
                 continue
-

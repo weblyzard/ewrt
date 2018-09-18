@@ -6,9 +6,11 @@ Created on September 12, 2018
 
 @author: Jakob Steixner, <jakob.steixner@modul.ac.at
 
-Retrieve Wikidata's image based on (exact) Wikipedia
-article in any language. Also allows to retrieve other
+Retrieve Wikidata's main image based on (exact) Wikipedia
+article title in a specific language. Also allows to retrieve other
 types of images (e.g. flags, coats of arms, etc.) where given.
+
+CLI to get thumbnail link from WikiData ID: <path-to-script> <ID> [size]
 
 '''
 
@@ -18,8 +20,8 @@ import urllib2
 import warnings
 
 import pywikibot
+from eWRT.ws.wikidata.definitions import image_attributes  # mapping of flag, logo, to their codes
 
-from eWRT.ws.wikidata.definitions import image_attributes
 DEFAULT_THUMBNAIL_WIDTH = 128
 
 
@@ -50,7 +52,8 @@ def get_images(itempage, image_width=DEFAULT_THUMBNAIL_WIDTH, image_types=image_
 
         # after:
         # https://stackoverflow.com/questions/34393884/how-to-get-image-url-property-from-wikidata-item-by-api
-        thumbnail_link = 'https://{}.wikimedia.org/w/thumb.php?width={}&f={}'.format(site, image_width,
+        thumbnail_link = 'https://{}.wikimedia.org/w/thumb.php?width={}&f={}'.format(site,
+                                                                                     image_width,
                                                                                      link)
         image_md5 = hashlib.md5(link).hexdigest()
         a, b = image_md5[:2]
@@ -60,11 +63,15 @@ def get_images(itempage, image_width=DEFAULT_THUMBNAIL_WIDTH, image_types=image_
         images_retrieved.append([image_description_page, thumbnail_link, image_direct_link])
     return images_retrieved
 
-def get_image(itempage, image_width=DEFAULT_THUMBNAIL_WIDTH):
+
+def get_image(itempage, image_width=DEFAULT_THUMBNAIL_WIDTH, image_type='P18'):
     """Get the main `image`='P18' only.
     :param itempage: ItemPage
-    :param image_width: width in pixels (int)"""
-    return get_images(itempage=itempage, image_width=image_width, image_types=['P18'])[0]
+    :param image_width: width in pixels (int)
+    :param image_type: Wikidata code of image type, default is `P18`='image'. Can be
+            e. g. flag image, coat of arms, logo,..."""
+    return get_images(itempage=itempage, image_width=image_width, image_types=[image_type])[0]
+
 
 def get_thumbnail(*args, **kwargs):
     """Return thumbnail of main image only."""
@@ -97,4 +104,3 @@ if __name__ == '__main__':
             warnings.warn("No image available for entity!")
 
     print(thumbnails)
-
