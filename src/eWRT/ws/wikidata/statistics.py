@@ -14,14 +14,13 @@ types of images (e.g. flags, coats of arms, etc.) where given.
 
 import glob
 import ujson
-from pprint import pprint
-import subprocess as sb
 from collections import Counter
+
 
 class OutputStatistics:
     """Tools to process statistics about the results from
     a batch of items processed by
-    eWRT.ws.wikidata.extract_meta.collect_wikidata_attributes"""
+    eWRT.ws.wikidata.extract_meta.collect_attributes_from_wd_and_wd"""
 
     def __init__(self, paths=None, data=None, total_length=0):
         if not data and not paths:
@@ -30,15 +29,15 @@ class OutputStatistics:
 
         self._data = data  # data provided as list of dicts
         self.paths = paths  # list of paths to load sub results one by
-                            # one save memore when working with large datasets
+        # one save memore when working with large datasets
         self.malformed = 0
         self.unset = Counter()  # counter properties: number of items
-                                # where this property is not set.
+        # where this property is not set.
 
     @property
     def data(self):
         """The as a list/generator of dicts as formatted by
-        eWRT.ws.wikidata.extract_meta.collect_wikidata_attributes """
+        eWRT.ws.wikidata.extract_meta.collect_attributes_from_wd_and_wd """
         if self._data:
             self.data = self._data
         else:
@@ -58,7 +57,7 @@ class OutputStatistics:
     def from_glob(cls, glob_string):
         """data as generator over json files, specified by glob string"""
         file_list = glob.glob(glob_string)
-        return OutputStatistics.from_pathlist(file_list, total_length=len(file_list))
+        return OutputStatistics.from_pathlist(file_list)
 
     @classmethod
     def from_pathlist(cls, paths):
@@ -87,9 +86,9 @@ class OutputStatistics:
         attr_present = 0
         for item in self.data:
             if any([attr in item and item[attr]['values'] for attr in attributes]):
-                    attr_present += 1
-                    print(item['url'])
-                    continue
+                attr_present += 1
+                print(item['url'])
+                continue
 
             else:
                 neither.append({
@@ -115,7 +114,6 @@ if __name__ == '__main__':
     for attribute in geo_attrs:
         statistics.count_attribute_set(attribute)
     print(statistics.unset)
-
 
 # result with a sample run in debugging:
 # total entities 96
