@@ -91,4 +91,5 @@ def wp_summary_from_wdid(wikidata_id, languages=None, sitelinks=None):
         warnings.warn(
             'No Wikipedia page found in any of the requested languages for '
             'item {}!'.format(wikidata_id))
+
         return None

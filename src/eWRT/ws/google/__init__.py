@@ -126,7 +126,8 @@ class GoogleBlogSearch(object):
                     abstract = ' '.join(element.xpath(
                         './div[@class="s"]/text()'))
                     url = GoogleBlogSearch.parse_url(url)
-
+                    if url is None:
+                        continue
                     if url:
                         blogLink = {}
                         blogLink['url'] = url
@@ -135,7 +136,8 @@ class GoogleBlogSearch(object):
                         blogLink['reach'] = '0'
 
                         try:
-                            blogLink['date'] = GoogleBlogSearch.get_link_date(element)
+                            blogLink['date'] = GoogleBlogSearch.get_link_date(
+                                element)
                         except IndexError as e:
                             pass
 
@@ -158,7 +160,11 @@ class GoogleBlogSearch(object):
     def parse_url(url):
 
         if url.startswith('/'):
-            url = 'www.google.com%s' % url
+            if '?q=' in url:
+                sub_url = url.split('?q=')[1]
+                if not sub_url.startswith('http'):
+                    return None
+            url = 'https://www.google.com%s' % url
 
         o = urlparse(url)
         query = parse_qs(o.query)

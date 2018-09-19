@@ -180,8 +180,7 @@ class ParseItemPage:
                         preferred_labels = \
                             ParseItemPage.extract_literal_properties(preferred,
                                                                      languages=languages,
-                                                                     literals=['labels'])[
-                            'labels']
+                                                                     literals=['labels'])['labels']
                         claim_details['preferred'] = {
                             'url': preferred_id,
                             'labels': preferred_labels
@@ -190,6 +189,7 @@ class ParseItemPage:
                         if isinstance(preferred, WbTime):
                             claim_details['preferred'] = \
                                 preferred.toTimestr(force_iso=True)
+
                         elif isinstance(preferred, basestring):
                             claim_details['preferred'] = preferred
 
@@ -295,6 +295,7 @@ class ParseItemPage:
         """
         itempage.get()
         country_prop_url = "https://www.wikidata.org/wiki/Property:P17"
+
         for location_type in local_attributes:
             if location_type in itempage.claims:
                 for location in itempage.claims[location_type]:
