@@ -63,3 +63,4 @@ htmlcov
 coverage.xml
 .cache/
 .conceptnet-query-cache/
+src/eWRT/ws/wikidata/apicache*
