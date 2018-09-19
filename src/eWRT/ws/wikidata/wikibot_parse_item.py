@@ -165,8 +165,9 @@ class ParseItemPage:
             except Exception as e:
                 pass
         if values:
+            wd_prop_url = 'https://www.wikidata.org/wiki/Property:'
             claim_details = {'values': values,
-                             'url': 'https://www.wikidata.org/wiki/Property:' + claim_id}
+                             'url': wd_prop_url + claim_id}
         else:
             claim_details = {}
         if len(claim_instances) > 1:
@@ -176,18 +177,19 @@ class ParseItemPage:
                     preferred = marked_preferred[0]
                     try:
                         preferred_id = preferred.id
-                        preferred_labels = ParseItemPage.extract_literal_properties(preferred,
-                                                                                    languages=languages,
-                                                                                    literals=[
-                                                                                        'labels'])[
-                            'labels']
+                        preferred_labels = \
+                            ParseItemPage.extract_literal_properties(preferred,
+                                                                     languages=languages,
+                                                                     literals=['labels'])['labels']
                         claim_details['preferred'] = {
                             'url': preferred_id,
                             'labels': preferred_labels
                         }
                     except AttributeError:
                         if isinstance(preferred, WbTime):
-                            claim_details['preferred'] = preferred.toTimestr(force_iso=True)
+                            claim_details['preferred'] = \
+                                preferred.toTimestr(force_iso=True)
+
                         elif isinstance(preferred, basestring):
                             claim_details['preferred'] = preferred
 
@@ -216,7 +218,8 @@ class ParseItemPage:
         for prop in literal_properties:
             for language in languages:
                 try:
-                    literal_properties[prop][language] = entity.text[prop][language]
+                    literal_properties[prop][language] = \
+                        entity.text[prop][language]
                 except (KeyError, AttributeError):
                     pass
         return literal_properties
@@ -273,7 +276,8 @@ class ParseItemPage:
         try:
             country = location_item_page.claims['P17']
             if country:
-                return ParseItemPage.complete_claim_details('P17', country, languages=languages,
+                return ParseItemPage.complete_claim_details('P17', country,
+                                                            languages=languages,
                                                             literals=['labels'])
             else:
                 raise ValueError('No country found for this location!')
@@ -290,17 +294,22 @@ class ParseItemPage:
         :returns dictionary with id, labels of country (or None):
         """
         itempage.get()
+        country_prop_url = "https://www.wikidata.org/wiki/Property:P17"
+
         for location_type in local_attributes:
             if location_type in itempage.claims:
                 for location in itempage.claims[location_type]:
                     if location:
                         try:
-                            country = ParseItemPage.get_country_from_location(location.target,
-                                                                           languages=languages)
+                            country = \
+                                ParseItemPage.get_country_from_location(
+                                    location.target,
+                                    languages=languages
+                                )
                             if len(country) == 1:
                                 return country
                             elif 'preferred' in country:
-                                return {"url":"https://www.wikidata.org/wiki/Property:P17",
+                                return {"url": country_prop_url,
                                         'values': [country['preferred']]}
                             else:
                                 pass
@@ -470,3 +479,4 @@ def guess_current_value(attribute_instances):
             raise ValueError(
                 'Unable to determine most recent instance of attribute!' +
                 '\nError message was: {}'.format(e))
+
