@@ -10,10 +10,11 @@ Starting with a wikidata ID, retrieve additional information from Wikipedia'''
 
 import ujson
 import warnings
+import wikipedia
+
 from urllib2 import urlopen
 
-import wikipedia
-import wikipedia_wl
+from eWRT.ws.wikidata import wikipedia_wl
 
 RELEVANT_LANGUAGES = ['en', 'de', 'fr', 'es']
 
@@ -23,7 +24,8 @@ def wikipedia_page_info_from_sitelinks(wikipage_title, language, wikidata_id):
     wikipedia.set_lang(language)
 
     try:
-        wikipage = wikipedia_wl.page(wikipage_title, auto_suggest=False, redirect=False)
+        wikipage = wikipedia_wl.page(
+            wikipage_title, auto_suggest=False, redirect=False)
     except (wikipedia.exceptions.PageError, wikipedia.exceptions.DisambiguationError):
         warnings.warn('No wikipedia page found in language {language} for '
                       'entity {entity}!.'.format(language=language, entity=wikidata_id))
@@ -43,8 +45,8 @@ def get_sitelinks_from_wd_id(wikidata_id, languages):
     page = urlopen(
         url=("https://www.wikidata.org/w/api.php?action=wbgetentities&"
              "format=json&props=sitelinks&ids={}&sitefilter={}".format(
-            wikidata_id, '|'.join([language + 'wiki' for language in languages]))
-        )
+                 wikidata_id, '|'.join([language + 'wiki' for language in languages]))
+             )
     )
 
     page_content = ujson.loads(page.read())

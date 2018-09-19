@@ -11,9 +11,9 @@ article in any language. Also allows to retrieve other
 types of images (e.g. flags, coats of arms, etc.) where given.
 
 '''
-
 import glob
 import ujson
+
 from collections import Counter
 
 

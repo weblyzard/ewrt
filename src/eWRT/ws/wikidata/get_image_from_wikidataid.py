@@ -18,9 +18,10 @@ import hashlib
 import sys
 import urllib2
 import warnings
-
 import pywikibot
-from eWRT.ws.wikidata.definitions import image_attributes  # mapping of flag, logo, to their codes
+
+# mapping of flag, logo, to their codes
+from eWRT.ws.wikidata.definitions import image_attributes
 
 DEFAULT_THUMBNAIL_WIDTH = 128
 
@@ -47,8 +48,10 @@ def get_images(itempage, image_width=DEFAULT_THUMBNAIL_WIDTH, image_types=image_
         # str(target) returns a string of format [[site:namespace:filename]],
         # e. g. [[commons:File:Barack_Obama.jpg]], the wiki link of the image
         # page. We substitute this for a valid external link
-        site, ns, link = image_interwiki_link = str(target).replace(' ', '_').strip('[]').split(':')
-        image_description_page = 'https://{}.wikimedia.org/wiki/{}:{}'.format(*image_interwiki_link)
+        site, ns, link = image_interwiki_link = str(
+            target).replace(' ', '_').strip('[]').split(':')
+        image_description_page = 'https://{}.wikimedia.org/wiki/{}:{}'.format(
+            *image_interwiki_link)
 
         # after:
         # https://stackoverflow.com/questions/34393884/how-to-get-image-url-property-from-wikidata-item-by-api
@@ -60,7 +63,8 @@ def get_images(itempage, image_width=DEFAULT_THUMBNAIL_WIDTH, image_types=image_
         image_direct_link = 'https://upload.wikimedia.org/wikipedia/{}/{}/{}/{}'.format(
             site, a, a + b, urllib2.quote(link)
         )
-        images_retrieved.append([image_description_page, thumbnail_link, image_direct_link])
+        images_retrieved.append(
+            [image_description_page, thumbnail_link, image_direct_link])
     return images_retrieved
 
 
@@ -83,7 +87,8 @@ if __name__ == '__main__':
     try:
         ids = sys.argv[1].upper()
     except IndexError:
-        raise ValueError("Required argument: wikidata IDs of entity(ies), comma separated!")
+        raise ValueError(
+            "Required argument: wikidata IDs of entity(ies), comma separated!")
 
     thumbnails = []
     for entity_wikidata_id in ids.split(','):
