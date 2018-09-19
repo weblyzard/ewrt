@@ -106,3 +106,23 @@ def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
                                                         include_literals=include_literals)
             except ValueError:
                 continue
+
+
+if __name__ == '__main__':
+    import pprint
+    from eWRT.ws.wikidata.wp_to_wd import wikidata_from_wptitle
+    obama = wikidata_from_wptitle('Barack Obama')
+    wd_parameters = [
+                     'P18',  # image
+                     'P17',  # country
+                     'P19',  # place of birth
+                     'P39',  # position held
+                     'P569',  # date of birth
+                     'P570',  # date of death
+                     'P1411'  # nominated for
+                    ]
+    pprint.pprint(collect_attributes_from_wd_and_wd(obama,
+                                                    languages=['de', 'en', 'hr'],
+                                                    wd_parameters=wd_parameters,
+                                                    include_literals=False))
+

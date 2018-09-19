@@ -26,9 +26,11 @@ def wikipedia_page_info_from_sitelinks(wikipage_title, language, wikidata_id):
     try:
         wikipage = wikipedia_wl.page(
             wikipage_title, auto_suggest=False, redirect=False)
-    except (wikipedia.exceptions.PageError, wikipedia.exceptions.DisambiguationError):
+    except (
+    wikipedia.exceptions.PageError, wikipedia.exceptions.DisambiguationError):
         warnings.warn('No wikipedia page found in language {language} for '
-                      'entity {entity}!.'.format(language=language, entity=wikidata_id))
+                      'entity {entity}!.'.format(language=language,
+                                                 entity=wikidata_id))
     language_page['revision'] = wikipage.revision_id
     language_page['summary'] = wikipage.summary
     language_page['url'] = wikipage.url
@@ -45,8 +47,9 @@ def get_sitelinks_from_wd_id(wikidata_id, languages):
     page = urlopen(
         url=("https://www.wikidata.org/w/api.php?action=wbgetentities&"
              "format=json&props=sitelinks&ids={}&sitefilter={}".format(
-                 wikidata_id, '|'.join([language + 'wiki' for language in languages]))
-             )
+            wikidata_id,
+            '|'.join([language + 'wiki' for language in languages]))
+        )
     )
 
     page_content = ujson.loads(page.read())
@@ -74,7 +77,8 @@ def wp_summary_from_wdid(wikidata_id, languages=None, sitelinks=None):
     for language in languages:
         try:
             wikipage_title = sitelinks[language + 'wiki']
-            wikipedia_page = wikipedia_page_info_from_sitelinks(wikipage_title, language,
+            wikipedia_page = wikipedia_page_info_from_sitelinks(wikipage_title,
+                                                                language,
                                                                 wikidata_id)
             if wikipedia_page:
                 wikipedia_data.append(wikipedia_page)
@@ -84,6 +88,7 @@ def wp_summary_from_wdid(wikidata_id, languages=None, sitelinks=None):
     if wikipedia_data:
         return wikipedia_data
     else:
-        warnings.warn('No Wikipedia page found in any of the requested languages for '
-                      'item {}!'.format(wikidata_id))
+        warnings.warn(
+            'No Wikipedia page found in any of the requested languages for '
+            'item {}!'.format(wikidata_id))
         return None
