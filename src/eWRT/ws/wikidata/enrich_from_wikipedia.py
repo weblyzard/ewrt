@@ -23,7 +23,18 @@ else:
 RELEVANT_LANGUAGES = ['en', 'de', 'fr', 'es']
 
 
-def wikipedia_page_info_from_sitelinks(wikipage_title, language, wikidata_id):
+def wikipedia_page_info_from_title(wikipage_title, language):
+    """
+    Retreive selected meta info about a specific Wikipedia page, identified by
+    its exact title and language.
+    :param wikipage_title:
+    :param language:
+    :param wikidata_id:
+    :return: dict of meta info about individual Wikipedia page
+        (language, id and timestamp of last revision, title, link,
+        summary).
+    :raise wikipedia.exceptions.PageError, wikipedia.exceptions.DisambiguationError
+    """
     language_page = {'language': language}
     wikipedia.set_lang(language)
 
@@ -31,11 +42,8 @@ def wikipedia_page_info_from_sitelinks(wikipage_title, language, wikidata_id):
         wikipage = wikipedia_wl.page(
             wikipage_title, auto_suggest=False, redirect=False)
     except (wikipedia.exceptions.PageError,
-            wikipedia.exceptions.DisambiguationError):
-        warnings.warn('No wikipedia page found in language {language} for '
-                      'entity {entity}!.'.format(language=language,
-                                                 entity=wikidata_id))
-        return None
+            wikipedia.exceptions.DisambiguationError) as e:
+        raise e
 
     language_page['revision'] = wikipage.revision_id
     language_page['summary'] = wikipage.summary
@@ -45,21 +53,32 @@ def wikipedia_page_info_from_sitelinks(wikipage_title, language, wikidata_id):
         language_page['timestamp'] = wikipage.revision_timestamp
     except KeyError:
         language_page['timestamp'] = None
-    has_page = True
     return language_page
 
 
 def get_sitelinks_from_wd_id(wikidata_id, languages):
+    """
+    Get the exact titles of Wikipedia pages about an entity (if they exist)
+    in a number of languages. Sometimes produces false positives when a page
+    exists but only as a redirect.
+    :param wikidata_id: Qxx wikidata ID of an entity
+    :param languages: list of language ISO codes.
+    :return: dict {language: title}
+    """
+    site_versions = [language + 'wiki' for language in languages]
     page = urlopen(
         url=("https://www.wikidata.org/w/api.php?action=wbgetentities&"
              "format=json&props=sitelinks&ids={}&sitefilter={}".format(
             wikidata_id,
-            '|'.join([language + 'wiki' for language in languages]))
+            '|'.join(site_versions))
         )
     )
 
     page_content = ujson.loads(page.read())
-    sitelinks = page_content['entities'][wikidata_id]
+    sitelinks = {lang_version:
+                     page_content['entities'][wikidata_id]['sitelinks'][
+                         lang_version]['title'] for lang_version in
+                 site_versions}
     return sitelinks
 
 
@@ -78,16 +97,20 @@ def wp_summary_from_wdid(wikidata_id, languages=None, sitelinks=None):
     if not languages:
         languages = RELEVANT_LANGUAGES
     wikipedia_data = []
-    if not sitelinks:
+    if not sitelinks or sitelinks:
         sitelinks = get_sitelinks_from_wd_id(wikidata_id, languages=languages)
     for language in languages:
         try:
             wikipage_title = sitelinks[language + 'wiki']
-            wikipedia_page = wikipedia_page_info_from_sitelinks(wikipage_title,
-                                                                language,
-                                                                wikidata_id)
-            if wikipedia_page:
+            try:
+                wikipedia_page = wikipedia_page_info_from_title(wikipage_title,
+                                                                language)
                 wikipedia_data.append(wikipedia_page)
+            except (wikipedia.exceptions.PageError,
+                    wikipedia.exceptions.DisambiguationError):
+                warnings.warn('No Wikipedia page found in language {lang} '
+                              'for entity {id}'.format(lang=language,
+                                                       id=wikidata_id))
         except KeyError:
             pass
 
