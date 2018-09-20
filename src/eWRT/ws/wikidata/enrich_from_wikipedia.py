@@ -26,7 +26,7 @@ RELEVANT_LANGUAGES = ['en', 'de', 'fr', 'es']
 def wikipedia_page_info_from_sitelinks(wikipage_title, language, wikidata_id):
     language_page = {'language': language}
     wikipedia.set_lang(language)
-    
+
     try:
         wikipage = wikipedia_wl.page(
             wikipage_title, auto_suggest=False, redirect=False)
@@ -36,7 +36,7 @@ def wikipedia_page_info_from_sitelinks(wikipage_title, language, wikidata_id):
                       'entity {entity}!.'.format(language=language,
                                                  entity=wikidata_id))
         return None
-        
+
     language_page['revision'] = wikipage.revision_id
     language_page['summary'] = wikipage.summary
     language_page['url'] = wikipage.url
@@ -53,11 +53,11 @@ def get_sitelinks_from_wd_id(wikidata_id, languages):
     page = urlopen(
         url=("https://www.wikidata.org/w/api.php?action=wbgetentities&"
              "format=json&props=sitelinks&ids={}&sitefilter={}".format(
-                wikidata_id,
-                '|'.join([language + 'wiki' for language in languages]))
+            wikidata_id,
+            '|'.join([language + 'wiki' for language in languages]))
         )
     )
-    
+
     page_content = ujson.loads(page.read())
     sitelinks = page_content['entities'][wikidata_id]
     return sitelinks
@@ -90,12 +90,12 @@ def wp_summary_from_wdid(wikidata_id, languages=None, sitelinks=None):
                 wikipedia_data.append(wikipedia_page)
         except KeyError:
             pass
-    
+
     if wikipedia_data:
         return wikipedia_data
     else:
         warnings.warn(
             'No Wikipedia page found in any of the requested languages for '
             'item {}!'.format(wikidata_id))
-        
+
         return None

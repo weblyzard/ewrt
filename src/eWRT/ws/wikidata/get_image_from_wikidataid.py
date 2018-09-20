@@ -34,15 +34,20 @@ class NoImageFoundError(ValueError):
     pass
 
 
-def get_images(itempage, image_width=DEFAULT_THUMBNAIL_WIDTH, image_types=image_attributes):
+def get_images(itempage,
+               image_width=DEFAULT_THUMBNAIL_WIDTH,
+               image_types=image_attributes):
     """Find images of any specified type (e .g. 'image', 'flag'...).
     :param itempage: pywikibot.ItemPage
     :param image_width: width of the thumbnail
-    :param image_types: list of image-type properties identified by their Pxxx codes
+    :param image_types: dict of image-type properties identified
+        by their Pxxx codes, such as `P18`: 'image', `P154`: 'logo image'
+    :returns dict with keys=Pxx codes, values=list of [image_description_url,
+        thumbnail_url, full_image_url]
     """
     itempage.get()
     claims = itempage.claims
-    images_retrieved = []
+    images_retrieved = {}
     for image_type in image_types:
         try:
             image = claims[image_type][0]
@@ -59,7 +64,7 @@ def get_images(itempage, image_width=DEFAULT_THUMBNAIL_WIDTH, image_types=image_
             target).replace(' ', '_').strip('[]').split(':')
         image_description_page = 'https://{}.wikimedia.org/wiki/{}:{}'.format(
             *image_interwiki_link)
-
+        
         # after:
         # https://stackoverflow.com/questions/34393884/how-to-get-image-url-property-from-wikidata-item-by-api
         thumbnail_template = u'https://{}.wikimedia.org/w/thumb.php?width={}&f={}'
@@ -71,8 +76,8 @@ def get_images(itempage, image_width=DEFAULT_THUMBNAIL_WIDTH, image_types=image_
                                                         quote(link)
                                                         )
 
-        images_retrieved.append(
-            [image_description_page, thumbnail_link, image_direct_link])
+        images_retrieved[image_type] = \
+            [image_description_page, thumbnail_link, image_direct_link]
     try:
         assert images_retrieved
     except AssertionError:
@@ -81,18 +86,28 @@ def get_images(itempage, image_width=DEFAULT_THUMBNAIL_WIDTH, image_types=image_
 
 
 def get_image(itempage, image_width=DEFAULT_THUMBNAIL_WIDTH, image_type='P18'):
-    """Get the main `image`='P18' only.
+    """Get one image type (default is `image`='P18') only.
     :param itempage: ItemPage
     :param image_width: width in pixels (int)
     :param image_type: Wikidata code of image type, default is
-            `P18`='image'. Can be e. g. flag image, coat of arms, logo,..."""
-    return get_images(itempage=itempage, image_width=image_width,
-                          image_types=[image_type])[0]
+            `P18`='image'. Can be e. g. flag image, coat of arms, logo,...
+    :returns list of [image_description_url, thumbnail_url, full_image_url]"""
+    try:
+        return get_images(itempage=itempage, image_width=image_width,
+                          image_types=[image_type])[image_type]
+    except KeyError:
+        raise NoImageFoundError
 
 
-def get_thumbnail(*args, **kwargs):
-    """Return thumbnail of main image only."""
-    return get_image(*args, **kwargs)[1]
+def get_thumbnail(itempage, *args, **kwargs):
+    """Return thumbnail of single image type only. Arguments that can be
+    passed on to `get_image` are image_width (int, default
+    `DEFAULT_THUMBNAIL_WIDTH`) and `image_type` as a Wikidata property
+    code.
+
+    :returns image link (str)
+    """
+    return get_image(itempage, *args, **kwargs)[1]
 
 
 if __name__ == '__main__':
@@ -115,11 +130,11 @@ if __name__ == '__main__':
                 'No width specified, using default value of {}px!'.format(
                     DEFAULT_THUMBNAIL_WIDTH))
             width = DEFAULT_THUMBNAIL_WIDTH
-
+        
         try:
             thumbnail = get_thumbnail(page, width)
             thumbnails.append(thumbnail)
         except NoImageFoundError:
             warnings.warn("No image available for entity!")
-
+    
     print(thumbnails)

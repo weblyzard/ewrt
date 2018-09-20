@@ -55,19 +55,19 @@ def collect_attributes_from_wd_and_wd(itempage, languages, wd_parameters,
                                           sitelinks=itempage.sitelinks)
     if not wikipedia_data:
         raise ValueError
-    
+
     # use the Wikipedia article in the first language found as the entity's
     # unique preferred `url`.
     entity_extracted_details = {'url': wikipedia_data[0]['url']}
     for language in wikipedia_data:
         entity_extracted_details[language['language'] + 'wiki'] = language
-    
+
     entity = ParseItemPage(itempage, include_literals=include_literals,
                            claims_of_interest=wd_parameters,
                            languages=languages)
     entity_extracted_details.update(entity.details)
     entity_extracted_details['wikidata_id'] = itempage.id
-    
+
     return entity_extracted_details
 
 
@@ -86,7 +86,7 @@ def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
     :param n_queries: maximum number of subsequent queries
     :type n_queries: int
     """
-    
+
     for i in range(n_queries):
         wikidata_site = WIKIDATA_SITE
         query = QUERY % (ENTITY_TYPE_IDENTIFIERS[entity_type],
@@ -105,10 +105,10 @@ def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
                 else:
                     entity_raw = generator.next()
                 entity_raw.get()
-            
+
             except StopIteration:
                 break
-            
+
             try:
                 yield collect_attributes_from_wd_and_wd(
                     entity_raw,
@@ -122,7 +122,7 @@ def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
 if __name__ == '__main__':
     import pprint
     from eWRT.ws.wikidata.wp_to_wd import wikidata_from_wptitle
-    
+
     obama = wikidata_from_wptitle('Barack Obama')
     wd_parameters = [
         'P18',  # image
