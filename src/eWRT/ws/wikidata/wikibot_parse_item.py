@@ -10,14 +10,18 @@ Retrieve info about an entity, specifying a list of
 relevant attributes and languages for literals
 
 '''
+import sys
 import warnings
-
-from pywikibot import WbTime
 
 from eWRT.ws.wikidata.definitions import (local_attributes,
                                           image_attributes,
                                           GENERIC_PROPERTIES)
-from eWRT.ws.wikidata.get_image_from_wikidataid import get_image, NoImageFoundError
+from eWRT.ws.wikidata.get_image_from_wikidataid import get_image, \
+    NoImageFoundError
+from pywikibot import WbTime
+
+if sys.version_info.major == 3:
+    basestring = (bytes, str)
 
 RELEVANT_LANGUAGES = ['en']
 
@@ -38,9 +42,11 @@ class ParseItemPage:
     """Methods to parse pywikibot.ItemPage for a specifiable list
         of properties, returning a dict of property labels and values."""
     LITERAL_PROPERTIES = ['labels', 'aliases', 'descriptions']
-
-    def __init__(self, itempage, include_literals=False, claims_of_interest=None,
-                 entity_type_properties=None, languages=None, require_country=True):
+    
+    def __init__(self, itempage, include_literals=False,
+                 claims_of_interest=None,
+                 entity_type_properties=None, languages=None,
+                 require_country=True):
         """
         :param itempage: pywikibot.ItemPage to be parsed
         :param include_literals: bool defining whether to include further literals
@@ -51,7 +57,7 @@ class ParseItemPage:
         entity_type_properties.
         :param languages: list of languages of interest in their preferred order
         """
-
+        
         # include 'labels' only if include_literals == False
         itempage.get()
         self.include_literals = include_literals
@@ -65,22 +71,25 @@ class ParseItemPage:
         self.languages = languages
         if not entity_type_properties:
             self.entity_type_properties = GENERIC_PROPERTIES
-
+        
         if claims_of_interest is None:
             self.claims_of_interest = CLAIMS_OF_INTEREST
         else:
             self.claims_of_interest = claims_of_interest
-        self._image_requested = {attribute: image_attributes[attribute] for attribute in
-                                 self.claims_of_interest if attribute in image_attributes}
-
-        self.claims_of_interest = filter(lambda c: c not in self._image_requested,
-                                         self.claims_of_interest)
+        self._image_requested = {attribute: image_attributes[attribute] for
+                                 attribute in
+                                 self.claims_of_interest if
+                                 attribute in image_attributes}
+        
+        self.claims_of_interest = [c for c in self.claims_of_interest if
+                                   c not in self._image_requested]
         self.item_raw = itempage
         self.process_attributes()
         if not self.include_literals:
             self.details = {key: self.details[key] for key in self.details if
-                            self.details[key] and key not in self.LITERAL_PROPERTIES}
-
+                            self.details[
+                                key] and key not in self.LITERAL_PROPERTIES}
+    
     def process_attributes(self):
         """Exctract information about the item, specified
         by the predicates in self.claims_of_interest:
@@ -88,25 +97,27 @@ class ParseItemPage:
           - find image link(s) (if requested)
           - make best effort attempt to parse
             the other claims_of_interest"""
-
+        
         # special process for retrieving literals
-        self.details = self.extract_literal_properties(self.item_raw, self.languages,
+        self.details = self.extract_literal_properties(self.item_raw,
+                                                       self.languages,
                                                        self.literals)
-
+        
         # special methods for images
         for image_type in self._image_requested:
             type_literal = self._image_requested[image_type]
             try:
                 (self.details[type_literal + '_description'],
                  _,
-                 self.details['full_{}'.format(type_literal)]) = get_image(itempage=self.item_raw,
-                                                                           image_type=image_type)
+                 self.details['full_{}'.format(type_literal)]) = get_image(
+                    itempage=self.item_raw,
+                    image_type=image_type)
             except NoImageFoundError:
                 pass
-
+        
         # generic method for other/unkown types of claims
         self.process_other_claims()
-
+    
     def process_other_claims(self):
         """Generic best effort method to parse additional predicates
         and their qualifiers."""
@@ -115,38 +126,43 @@ class ParseItemPage:
                 claim_name = self.entity_type_properties[claim]
                 claim_instances = self.item_raw.claims[claim]
                 if claim_instances:
-                    self.details[claim_name] = self.complete_claim_details(claim, claim_instances,
-                                                                           languages=self.languages,
-                                                                           literals=self.literals, )
+                    self.details[claim_name] = self.complete_claim_details(
+                        claim, claim_instances,
+                        languages=self.languages,
+                        literals=self.literals, )
                     if self.details[claim_name]:
-                        self.details[claim_name][
-                            'url'] = 'https://www.wikidata.org/wiki/Property:' + claim
+                        self.details[claim_name]['url'] = \
+                            'https://www.wikidata.org/wiki/Property:' + claim
                     else:
                         warnings.warn(
                             'Unable to parse claim {claim} for item {item}, '
-                            'should be present!'.format(claim=claim, item=self.item_raw))
-
-            except KeyError:
+                            'should be present!'.format(claim=claim,
+                                                        item=self.item_raw))
+            
+            except KeyError as e:
                 pass
-
+            
             # warnings.warn(
             #    'claim {} not available for entity {}'.format(claim, self.details['labels']))
-        if 'country' not in self.details or not self.details['country'] and self._require_country:
+        if 'country' not in self.details or not self.details[
+            'country'] and self._require_country:
             country_info = self.get_country_from_any(self.item_raw,
                                                      local_attributes=local_attributes,
                                                      languages=self.languages)
             if country_info:
                 self.details['country'] = country_info
-
+        
         for attribute in [a for a in self.details]:
-
-            if not self.details[attribute] or 'values' in self.details[attribute] and not \
+            
+            if not self.details[attribute] or 'values' in self.details[
+                attribute] and not \
                     self.details[attribute]['values']:
                 print('deleting attribute')
                 del self.details[attribute]
-
+    
     @classmethod
-    def complete_claim_details(cls, claim_id, claim_instances, languages, literals):
+    def complete_claim_details(cls, claim_id, claim_instances, languages,
+                               literals):
         """Find values for specified claim types for which no specific
         handling is defined.
         :param claim_id: Pxx id of the attribute.
@@ -172,7 +188,8 @@ class ParseItemPage:
             claim_details = {}
         if len(claim_instances) > 1:
             try:
-                marked_preferred = cls.attribute_preferred_value(claim_instances)
+                marked_preferred = cls.attribute_preferred_value(
+                    claim_instances)
                 if len(marked_preferred) == 1:
                     preferred = marked_preferred[0]
                     try:
@@ -180,7 +197,9 @@ class ParseItemPage:
                         preferred_labels = \
                             ParseItemPage.extract_literal_properties(preferred,
                                                                      languages=languages,
-                                                                     literals=['labels'])['labels']
+                                                                     literals=[
+                                                                         'labels'])[
+                                'labels']
                         claim_details['preferred'] = {
                             'url': preferred_id,
                             'labels': preferred_labels
@@ -189,20 +208,20 @@ class ParseItemPage:
                         if isinstance(preferred, WbTime):
                             claim_details['preferred'] = \
                                 preferred.toTimestr(force_iso=True)
-
+                        
                         elif isinstance(preferred, basestring):
                             claim_details['preferred'] = preferred
-
-
+            
+            
             except ValueError as e:
                 warnings.warn('encountered exception: {}'.format(e))
-
+                
                 # ParseItemPage.extract_literal_properties(preferred[0],
                 #                                          languages=languages,
                 #                                          literals=[
                 #                                              'labels'])
         return claim_details if claim_details else None
-
+    
     @classmethod
     def extract_literal_properties(cls, entity, languages, literals=None):
         """Create a dictionary with the entity's labels, descriptions and
@@ -223,7 +242,7 @@ class ParseItemPage:
                 except (KeyError, AttributeError):
                     pass
         return literal_properties
-
+    
     @classmethod
     def attribute_preferred_value(cls, claim_instances):
         """When an attribute has several instances, try to
@@ -233,10 +252,10 @@ class ParseItemPage:
         :returns a 1-member list containing the unique `preferred`
             value, or the input list if it has length 1. Raises
             ValueError otherwise."""
-
+        
         def gettargets(claim_instances):
             return [claim.target for claim in claim_instances]
-
+        
         if len(claim_instances) == 1:
             return gettargets(claim_instances)
         else:
@@ -249,7 +268,7 @@ class ParseItemPage:
                 claim for claim in claim_instances if claim.rank == 'preferred']
             if len(preferred) == 1:
                 return [claim.target for claim in preferred]
-
+                
                 pass
             elif len(preferred) == 0:
                 raise ValueError('No claim instance marked as preferred!')
@@ -258,7 +277,7 @@ class ParseItemPage:
                     'Incorrectly tagged data: several instances '
                     'marked as preferred, this should not happen!')
             # return [claim.target for claim in preferred]
-
+    
     @classmethod
     def get_country_from_location(cls, location_item_page, languages):
         """Get country info from sub-country location.
@@ -272,7 +291,7 @@ class ParseItemPage:
         except AttributeError:
             raise ValueError(
                 'Parameter location_item_page has to be an ItemPage!')
-
+        
         try:
             country = location_item_page.claims['P17']
             if country:
@@ -283,7 +302,7 @@ class ParseItemPage:
                 raise ValueError('No country found for this location!')
         except KeyError:
             raise ValueError('No country found for this location!')
-
+    
     @classmethod
     def get_country_from_any(cls, itempage, local_attributes, languages):
         """
@@ -295,7 +314,7 @@ class ParseItemPage:
         """
         itempage.get()
         country_prop_url = "https://www.wikidata.org/wiki/Property:P17"
-
+        
         for location_type in local_attributes:
             if location_type in itempage.claims:
                 for location in itempage.claims[location_type]:
@@ -317,13 +336,14 @@ class ParseItemPage:
                             pass
                     else:
                         warnings.warn('Entity {} has location property {} '
-                                      'set to null'.format(itempage.id, location_type))
+                                      'set to null'.format(itempage.id,
+                                                           location_type))
         raise ValueError
 
 
 class ParseClaim:
     """Parse an individual claim and its qualifiers"""
-
+    
     def __init__(self, claim, languages, literals, delay=False):
         """
         Parse additional information about a specified claim. The result
@@ -343,7 +363,7 @@ class ParseClaim:
             self.claim_details = {}
         else:
             self.claim_details = self.parse_claim()
-
+    
     def parse_claim(self):
         """Identify literal attributes and temporal attributes,
         perform default operations on remaining qualifiers. of the claim.
@@ -351,7 +371,7 @@ class ParseClaim:
         :return: dictionary of claim attributes/qualifiers and their values."""
         claim_details = {}
         if isinstance(self.claim.target, basestring):
-
+            
             claim_details['value'] = self.claim.target
             return claim_details
         elif isinstance(self.claim.target, WbTime):
@@ -364,35 +384,38 @@ class ParseClaim:
         else:
             claim_details = self.extract_literal_claim()
         claim_details['url'] = 'https://www.wikidata.org/wiki/' + \
-            self.claim.target.id
+                               self.claim.target.id
         dates = self.get_claim_dates()
         if dates:
             claim_details['temporal_attributes'] = dates
-
+        
         if self.claim.has_qualifier:
             for qualifier in OTHER_QUALIFIERS:
                 if qualifier in self.claim.qualifiers:
                     try:
-                        qualifier_targets = ['https://www.wikidata.org/wiki/' + valid_for.target.id
-                                             for valid_for in self.claim.qualifiers[qualifier]]
-
+                        qualifier_targets = [
+                            'https://www.wikidata.org/wiki/' + valid_for.target.id
+                            for valid_for in self.claim.qualifiers[qualifier]]
+                        
                         claim_details[qualifier] = qualifier_targets
                     except (KeyError, AttributeError):
                         warnings.warn(
-                            'qualifier not found: {}.'.format(OTHER_QUALIFIERS[qualifier]))
+                            'qualifier not found: {}.'.format(
+                                OTHER_QUALIFIERS[qualifier]))
         return claim_details
-
+    
     def extract_literal_claim(self):
         """Literals parsed by `ParseEntity.extract_literal_properties()"""
         target = self.claim.target
-        claim_details = ParseItemPage.extract_literal_properties(target, self.languages,
+        claim_details = ParseItemPage.extract_literal_properties(target,
+                                                                 self.languages,
                                                                  self.literals)
         return claim_details
-
+    
     def get_claim_dates(self):
         """Check if the qualifiers include start time, end time or point in time
         attributes. If present, send it to self.claim_temporal_attributes()"""
-
+        
         temporal_attributes = {}
         for attribute in TEMPORAL_QUALIFIERS:
             try:
@@ -401,17 +424,18 @@ class ParseClaim:
             except ValueError:
                 pass
         return temporal_attributes
-
+    
     def claim_temporal_attributes(self, temporal_attribute):
         """Parse an individual temporal attribute (start date, end date,...)"""
-
+        
         if self.claim.has_qualifier and temporal_attribute in self.claim.qualifiers:
             try:
                 claim_date = self.claim.qualifiers[temporal_attribute][-1]
                 if not claim_date:
                     raise ValueError('No dates found.')
-
-                normalized_date_string = claim_date.target.toTimestr(force_iso=True)
+                
+                normalized_date_string = claim_date.target.toTimestr(
+                    force_iso=True)
                 # pprint(normalized_date_string)
                 # date = datetime.datetime.strptime(normalized_date_string,
                 #                                   '%Y-%m-%dT%H:%M:%SZ')
@@ -423,14 +447,14 @@ class ParseClaim:
 
 def start_date(instance):
     if 'temporal_attributes' not in instance or 'P580' not in instance[
-            'temporal_attributes']:
+        'temporal_attributes']:
         return None
     return instance['temporal_attributes']['P580']['string']
 
 
 def end_date(instance):
     if 'temporal_attributes' not in instance or 'P582' not in instance[
-            'temporal_attributes']:
+        'temporal_attributes']:
         return None
     return instance['temporal_attributes']['P582']['string']
 
@@ -448,29 +472,34 @@ def guess_current_value(attribute_instances):
         return attribute_instances[0]
     else:
         try:
-            instance_has_startdate = [instance for instance in attribute_instances if
+            instance_has_startdate = [instance for instance in
+                                      attribute_instances if
                                       start_date(instance)]
-
-            instance_has_enddate = [instance for instance in attribute_instances if
+            
+            instance_has_enddate = [instance for instance in attribute_instances
+                                    if
                                     end_date(instance)]
             try:
                 assert instance_has_startdate or instance_has_enddate
             except AssertionError:
                 raise ValueError(
                     'No instances of claim with start or end dates found!')
-            begins_doesnt_end = [instance for instance in instance_has_startdate if
+            begins_doesnt_end = [instance for instance in instance_has_startdate
+                                 if
                                  not end_date(instance)]
             if len(begins_doesnt_end) == 1:
-                print('found exactly one instance with start date but no end date, assumming this'
-                      'to be current')
+                print(
+                    'found exactly one instance with start date but no end '
+                    'date, assumming thisto be current')
                 most_recent_instance = begins_doesnt_end[0]
                 return most_recent_instance
-
+            
             most_recent_startdate = max(
                 map(start_date, instance_has_startdate))
-
+            
             most_recent_instances = filter(
-                map(lambda i: start_date(i) == most_recent_startdate, instance_has_startdate))
+                lambda i: start_date(i) == most_recent_startdate,
+                instance_has_startdate)
             if len(most_recent_startdate) > 1:
                 raise ValueError('Several equally recent start dates found.')
             else:
@@ -479,4 +508,3 @@ def guess_current_value(attribute_instances):
             raise ValueError(
                 'Unable to determine most recent instance of attribute!' +
                 '\nError message was: {}'.format(e))
-
