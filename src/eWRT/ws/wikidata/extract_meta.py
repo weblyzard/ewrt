@@ -10,8 +10,9 @@ Loop
 
 '''
 
-import pywikibot.pagegenerators
+import sys
 
+import pywikibot.pagegenerators
 from eWRT.ws.wikidata.enrich_from_wikipedia import wp_summary_from_wdid
 from eWRT.ws.wikidata.wikibot_parse_item import ParseItemPage
 
@@ -33,16 +34,20 @@ OFFSET %s
 WIKIDATA_SITE = pywikibot.Site("wikidata", "wikidata")
 
 
-def collect_attributes_from_wd_and_wd(itempage, languages, wd_parameters, include_literals=True):
+def collect_attributes_from_wd_and_wd(itempage, languages, wd_parameters,
+                                      include_literals=True):
     """
 
     :param itempage: ItemPage from which to collect information
-    :param languages: list of languages in which to include literals and Wikipedia information
-    :param wd_parameters: list of wikidata properties (Pxxx codes) to be included, if present
-    :param include_literals: Include properties and alternate names. If false, only labels are
+    :param languages: list of languages in which to include literals
+            and Wikipedia information
+    :param wd_parameters: list of wikidata properties (Pxxx codes) to be
+            included, if present
+    :param include_literals: Include properties and alternate names. If
+            false, only labels are
             included.
-    :returns: a dictionary of the collected details about this entity from both Wikipedia and
-            Wikidata.
+    :returns: a dictionary of the collected details about this entity from
+            both Wikipedia and Wikidata.
     """
     # with open('wd_dump.json', 'w') as dump:
     # itempage.get()
@@ -58,7 +63,8 @@ def collect_attributes_from_wd_and_wd(itempage, languages, wd_parameters, includ
         entity_extracted_details[language['language'] + 'wiki'] = language
 
     entity = ParseItemPage(itempage, include_literals=include_literals,
-                           claims_of_interest=wd_parameters, languages=languages)
+                           claims_of_interest=wd_parameters,
+                           languages=languages)
     entity_extracted_details.update(entity.details)
     entity_extracted_details['wikidata_id'] = itempage.id
 
@@ -94,16 +100,21 @@ def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
         # parsed_entities = []
         for j in range(limit_per_query):
             try:
-                entity_raw = generator.next()
+                if sys.version_info.major == 3:
+                    entity_raw = next(generator)
+                else:
+                    entity_raw = generator.next()
                 entity_raw.get()
 
             except StopIteration:
                 break
 
             try:
-                yield collect_attributes_from_wd_and_wd(entity_raw, languages=languages,
-                                                        wd_parameters=wd_parameters,
-                                                        include_literals=include_literals)
+                yield collect_attributes_from_wd_and_wd(
+                    entity_raw,
+                    languages=languages,
+                    wd_parameters=wd_parameters,
+                    include_literals=include_literals)
             except ValueError:
                 continue
 
@@ -111,19 +122,19 @@ def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
 if __name__ == '__main__':
     import pprint
     from eWRT.ws.wikidata.wp_to_wd import wikidata_from_wptitle
+
     obama = wikidata_from_wptitle('Barack Obama')
     wd_parameters = [
-                     'P18',  # image
-                     'P17',  # country
-                     'P19',  # place of birth
-                     'P39',  # position held
-                     'P569',  # date of birth
-                     'P570',  # date of death
-                     'P1411'  # nominated for
-                    ]
+        'P18',  # image
+        'P17',  # country
+        'P19',  # place of birth
+        'P39',  # position held
+        'P569',  # date of birth
+        'P570',  # date of death
+        'P1411'  # nominated for
+    ]
     pprint.pprint(collect_attributes_from_wd_and_wd(obama,
-                                                    languages=['de', 'en', 'hr'],
+                                                    languages=['de', 'en',
+                                                               'hr'],
                                                     wd_parameters=wd_parameters,
                                                     include_literals=False))
-
-
