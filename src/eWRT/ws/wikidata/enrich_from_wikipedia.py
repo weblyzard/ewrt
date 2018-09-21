@@ -12,7 +12,7 @@ import sys
 import ujson
 import warnings
 
-import wikipedia as mediawikiapi
+import wikipedia as wikipedia
 from eWRT.ws.wikidata import wikipedia_wl
 
 if sys.version_info.major == 3:
@@ -33,16 +33,16 @@ def wikipedia_page_info_from_title(wikipage_title, language):
     :return: dict of meta info about individual Wikipedia page
         (language, id and timestamp of last revision, title, link,
         summary).
-    :raise mediawikiapi.exceptions.PageError, mediawikiapi.exceptions.DisambiguationError
+    :raise wikipedia.exceptions.PageError, wikipedia.exceptions.DisambiguationError
     """
     language_page = {'language': language}
-    mediawikiapi.set_lang(language)
+    wikipedia.set_lang(language)
 
     try:
         wikipage = wikipedia_wl.page(
             wikipage_title, auto_suggest=False, redirect=False)
-    except (mediawikiapi.exceptions.PageError,
-            mediawikiapi.exceptions.DisambiguationError) as e:
+    except (wikipedia.exceptions.PageError,
+            wikipedia.exceptions.DisambiguationError) as e:
         raise e
 
     language_page['revision'] = wikipage.revision_id
@@ -111,8 +111,8 @@ def wp_summary_from_wdid(wikidata_id, languages=None, sitelinks=None):
                 wikipedia_page = wikipedia_page_info_from_title(wikipage_title,
                                                                 language)
                 wikipedia_data.append(wikipedia_page)
-            except (mediawikiapi.exceptions.PageError,
-                    mediawikiapi.exceptions.DisambiguationError):
+            except (wikipedia.exceptions.PageError,
+                    wikipedia.exceptions.DisambiguationError):
                 warnings.warn('No Wikipedia page found in language {lang} '
                               'for entity {id}'.format(lang=language,
                                                        id=wikidata_id))
