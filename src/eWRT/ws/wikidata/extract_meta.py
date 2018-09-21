@@ -11,6 +11,7 @@ Loop
 '''
 
 import sys
+import time
 
 import pywikibot.pagegenerators
 from eWRT.ws.wikidata.enrich_from_wikipedia import wp_summary_from_wdid
@@ -51,6 +52,11 @@ def collect_attributes_from_wd_and_wd(itempage, languages, wd_parameters,
     """
     # with open('wd_dump.json', 'w') as dump:
     # itempage.get()
+    try:
+        timestamp = itempage._timestamp
+    except AttributeError:
+        timestamp = itempage.latest_revision.timestamp.isoformat()
+    itempage.get()
     wikipedia_data = wp_summary_from_wdid(itempage.id, languages=languages,
                                           sitelinks=itempage.sitelinks)
     if not wikipedia_data:
@@ -67,6 +73,11 @@ def collect_attributes_from_wd_and_wd(itempage, languages, wd_parameters,
                            languages=languages)
     entity_extracted_details.update(entity.details)
     entity_extracted_details['wikidata_id'] = itempage.id
+    # try:
+    #     timestamp = itempage._timestamp
+    # except AttributeError:
+    #     timestamp = itempage.latest_revision.timestamp
+    entity_extracted_details['wikidata_timestamp'] = timestamp
 
     return entity_extracted_details
 
@@ -77,7 +88,7 @@ def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
     :param languages: list if languages (ISO codes); the order determines
         which one's Wikipedia page will be used for the preferred `url`.
     :param entity_type: type of entity ('person', 'organization' or 'geo')
-    :param include_literals: include 'aliases' and 'descriptions' (bool)
+    :param include_Hliterals: include 'aliases' and 'descriptions' (bool)
     :type include_literals: bool
     :param wd_parameters: list of wikidata properties to include in result
     :type wd_parameters: list
@@ -104,7 +115,6 @@ def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
                     entity_raw = next(generator)
                 else:
                     entity_raw = generator.next()
-                entity_raw.get()
 
             except StopIteration:
                 break
@@ -115,7 +125,8 @@ def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
                     languages=languages,
                     wd_parameters=wd_parameters,
                     include_literals=include_literals)
-            except ValueError:
+            except ValueError: # this probably means no Wikipedia page in
+                # any of our languages. We have no use for such entities.
                 continue
 
 
@@ -123,7 +134,7 @@ if __name__ == '__main__':
     import pprint
     from eWRT.ws.wikidata.wp_to_wd import wikidata_from_wptitle
 
-    obama = wikidata_from_wptitle('Barack Obama')
+    obama = wikidata_from_wptitle('Barrack Obama')
     wd_parameters = [
         'P18',  # image
         'P17',  # country
