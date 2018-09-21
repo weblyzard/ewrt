@@ -73,10 +73,7 @@ def collect_attributes_from_wd_and_wd(itempage, languages, wd_parameters,
                            languages=languages)
     entity_extracted_details.update(entity.details)
     entity_extracted_details['wikidata_id'] = itempage.id
-    # try:
-    #     timestamp = itempage._timestamp
-    # except AttributeError:
-    #     timestamp = itempage.latest_revision.timestamp
+
     entity_extracted_details['wikidata_timestamp'] = timestamp
 
     return entity_extracted_details
@@ -88,7 +85,7 @@ def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
     :param languages: list if languages (ISO codes); the order determines
         which one's Wikipedia page will be used for the preferred `url`.
     :param entity_type: type of entity ('person', 'organization' or 'geo')
-    :param include_Hliterals: include 'aliases' and 'descriptions' (bool)
+    :param include_literals: include 'aliases' and 'descriptions' (bool)
     :type include_literals: bool
     :param wd_parameters: list of wikidata properties to include in result
     :type wd_parameters: list
