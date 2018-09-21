@@ -9,9 +9,9 @@ Created on September 20, 2018
 import pytest
 from eWRT.ws.wikidata.enrich_from_wikipedia import (
     wikipedia_page_info_from_title,
-    get_sitelinks_from_wd_id,
-    wp_summary_from_wdid)
-from wikipedia.exceptions import PageError, DisambiguationError
+    get_sitelinks_from_wd_id)
+from wikipedia.exceptions import PageError
+from wikipedia import DisambiguationError
 
 douglas_adams_result_expected = {
     u'title': u'Douglas Adams',
@@ -55,7 +55,8 @@ class TestWikipedia_page_info_from_title():
             print(u'Obligatory keywords contained in summary')
         except AssertionError:
             raise AssertionError(u'Summary does not match expected keywords')
-
+        with pytest.raises(DisambiguationError):
+            page_info = wikipedia_page_info_from_title('Georgia', 'en')
 
     def test_get_sitelinks_from_wdid(self):
         try:

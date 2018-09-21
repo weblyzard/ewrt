@@ -12,7 +12,7 @@ import sys
 import ujson
 import warnings
 
-import wikipedia
+import wikipedia as mediawikiapi
 from eWRT.ws.wikidata import wikipedia_wl
 
 if sys.version_info.major == 3:
@@ -33,16 +33,16 @@ def wikipedia_page_info_from_title(wikipage_title, language):
     :return: dict of meta info about individual Wikipedia page
         (language, id and timestamp of last revision, title, link,
         summary).
-    :raise wikipedia.exceptions.PageError, wikipedia.exceptions.DisambiguationError
+    :raise mediawikiapi.exceptions.PageError, mediawikiapi.exceptions.DisambiguationError
     """
     language_page = {'language': language}
-    wikipedia.set_lang(language)
+    mediawikiapi.set_lang(language)
 
     try:
         wikipage = wikipedia_wl.page(
             wikipage_title, auto_suggest=False, redirect=False)
-    except (wikipedia.exceptions.PageError,
-            wikipedia.exceptions.DisambiguationError) as e:
+    except (mediawikiapi.exceptions.PageError,
+            mediawikiapi.exceptions.DisambiguationError) as e:
         raise e
 
     language_page['revision'] = wikipage.revision_id
@@ -75,11 +75,16 @@ def get_sitelinks_from_wd_id(wikidata_id, languages):
     )
 
     page_content = ujson.loads(page.read())
-    sitelinks = {lang_version:
+    sitelinks = {}
+    for lang_version in site_versions:
+        try:
+            sitelinks[lang_version] = \
                      page_content['entities'][wikidata_id]['sitelinks'][
-                         lang_version]['title'] for lang_version in
-                 site_versions}
-    return sitelinks
+                         lang_version]['title']
+        except KeyError:
+            pass
+
+    return sitelinks if sitelinks else None
 
 
 def wp_summary_from_wdid(wikidata_id, languages=None, sitelinks=None):
@@ -97,7 +102,7 @@ def wp_summary_from_wdid(wikidata_id, languages=None, sitelinks=None):
     if not languages:
         languages = RELEVANT_LANGUAGES
     wikipedia_data = []
-    if not sitelinks or sitelinks:
+    if not sitelinks:
         sitelinks = get_sitelinks_from_wd_id(wikidata_id, languages=languages)
     for language in languages:
         try:
@@ -106,8 +111,8 @@ def wp_summary_from_wdid(wikidata_id, languages=None, sitelinks=None):
                 wikipedia_page = wikipedia_page_info_from_title(wikipage_title,
                                                                 language)
                 wikipedia_data.append(wikipedia_page)
-            except (wikipedia.exceptions.PageError,
-                    wikipedia.exceptions.DisambiguationError):
+            except (mediawikiapi.exceptions.PageError,
+                    mediawikiapi.exceptions.DisambiguationError):
                 warnings.warn('No Wikipedia page found in language {lang} '
                               'for entity {id}'.format(lang=language,
                                                        id=wikidata_id))

@@ -45,8 +45,11 @@ def get_images(itempage,
     :returns dict with keys=Pxx codes, values=list of [image_description_url,
         thumbnail_url, full_image_url]
     """
-    itempage.get()
-    claims = itempage.claims
+    try:
+        itempage.get()
+        claims = itempage.claims
+    except AssertionError:
+        claims = itempage['claims']
     images_retrieved = {}
     for image_type in image_types:
         try:
