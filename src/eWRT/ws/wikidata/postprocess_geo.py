@@ -28,7 +28,7 @@ from eWRT.ws.wikidata.wp_to_wd import wikidata_from_wptitle
 
 def extract_country_or_none(entity_extract):
     """Enrich a processed item in dict form (output of
-    eWRT.ws.wikidata.extract_meta.collect_attributes_from_wd_and_wd)
+    eWRT.ws.wikidata.extract_meta.collect_attributes_from_wp_and_wd)
     with country information using whatever local attribute is available
     :param entity_extract: input dict with attribute:value pairs"""
     try:

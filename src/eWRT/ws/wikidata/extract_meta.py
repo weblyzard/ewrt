@@ -11,7 +11,6 @@ Loop
 '''
 
 import sys
-import time
 
 import pywikibot.pagegenerators
 from eWRT.ws.wikidata.enrich_from_wikipedia import wp_summary_from_wdid
@@ -35,39 +34,51 @@ OFFSET %s
 WIKIDATA_SITE = pywikibot.Site("wikidata", "wikidata")
 
 
-def collect_attributes_from_wd_and_wd(itempage, languages, wd_parameters,
-                                      include_literals=True):
+def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
+                                      include_literals=True,
+                                      raise_on_no_wikipage=True):
     """
 
     :param itempage: ItemPage from which to collect information
     :param languages: list of languages in which to include literals
-            and Wikipedia information
+            and Wikipedia information (2-character ISO codes).
     :param wd_parameters: list of wikidata properties (Pxxx codes) to be
             included, if present
     :param include_literals: Include properties and alternate names. If
             false, only labels are
             included.
+    :param raise_on_no_wikipage: Controls whether an error is raised when
+            no Wikipedia page in any of the requested languages can be
+            identified for this entity. If True (default), no further meta-
+            data about such entities is collected from WikiData. If False,
+            meta-data is still collected.
     :returns: a dictionary of the collected details about this entity from
             both Wikipedia and Wikidata.
     """
-    # with open('wd_dump.json', 'w') as dump:
-    # itempage.get()
+    # ItemPages come in two slightly different formats depending on how
+    # they were created (probably a bug in pywikibot). We want to be able to
+    # deal with both:
     try:
         timestamp = itempage._timestamp
     except AttributeError:
         timestamp = itempage.latest_revision.timestamp.isoformat()
+
     itempage.get()
+    # collect summaries and meta-info from the Wikipedia pages in the relevant
+    # languages:
     wikipedia_data = wp_summary_from_wdid(itempage.id, languages=languages,
                                           sitelinks=itempage.sitelinks)
-    if not wikipedia_data:
+    if not wikipedia_data and raise_on_no_wikipage:
         raise ValueError
 
     # use the Wikipedia article in the first language found as the entity's
-    # unique preferred `url`.
+    # unique preferred `url` - the order of languages is meaningful!
     entity_extracted_details = {'url': wikipedia_data[0]['url']}
+
     for language in wikipedia_data:
         entity_extracted_details[language['language'] + 'wiki'] = language
 
+    # get selected attributes from WikiData
     entity = ParseItemPage(itempage, include_literals=include_literals,
                            claims_of_interest=wd_parameters,
                            languages=languages)
@@ -80,7 +91,8 @@ def collect_attributes_from_wd_and_wd(itempage, languages, wd_parameters,
 
 
 def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
-                               include_literals, entity_type, languages):
+                               include_literals, entity_type, languages,
+                               raise_on_missing_wikipedias=False):
     """Get a list of entities
     :param languages: list if languages (ISO codes); the order determines
         which one's Wikipedia page will be used for the preferred `url`.
@@ -117,32 +129,33 @@ def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
                 break
 
             try:
-                yield collect_attributes_from_wd_and_wd(
+                yield collect_attributes_from_wp_and_wd(
                     entity_raw,
                     languages=languages,
                     wd_parameters=wd_parameters,
                     include_literals=include_literals)
-            except ValueError: # this probably means no Wikipedia page in
+            except ValueError:  # this probably means no Wikipedia page in
                 # any of our languages. We have no use for such entities.
+                if raise_on_missing_wikipedias:
+                    raise ValueError('No information about this entity found!')
                 continue
 
-
-if __name__ == '__main__':
-    import pprint
-    from eWRT.ws.wikidata.wp_to_wd import wikidata_from_wptitle
-
-    obama = wikidata_from_wptitle('Barrack Obama')
-    wd_parameters = [
-        'P18',  # image
-        'P17',  # country
-        'P19',  # place of birth
-        'P39',  # position held
-        'P569',  # date of birth
-        'P570',  # date of death
-        'P1411'  # nominated for
-    ]
-    pprint.pprint(collect_attributes_from_wd_and_wd(obama,
-                                                    languages=['de', 'en',
-                                                               'hr'],
-                                                    wd_parameters=wd_parameters,
-                                                    include_literals=False))
+# if __name__ == '__main__':
+#     import pprint
+#     from eWRT.ws.wikidata.wp_to_wd import wikidata_from_wptitle
+#
+#     obama = wikidata_from_wptitle('Barrack Obama')
+#     wd_parameters = [
+#         'P18',  # image
+#         'P17',  # country
+#         'P19',  # place of birth
+#         'P39',  # position held
+#         'P569',  # date of birth
+#         'P570',  # date of death
+#         'P1411'  # nominated for
+#     ]
+#     pprint.pprint(collect_attributes_from_wp_and_wd(obama,
+#                                                     languages=['de', 'en',
+#                                                                'hr'],
+#                                                     wd_parameters=wd_parameters,
+#                                                     include_literals=False))
