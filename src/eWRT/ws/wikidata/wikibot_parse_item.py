@@ -402,6 +402,10 @@ class ParseClaim:
                         warnings.warn(
                             'qualifier not found: {}.'.format(
                                 OTHER_QUALIFIERS[qualifier]))
+        try:
+            claim_details['claim_id'] = self.claim.snak
+        except:
+            pass
         return claim_details
     
     def extract_literal_claim(self):
