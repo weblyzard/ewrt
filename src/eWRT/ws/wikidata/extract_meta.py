@@ -15,6 +15,7 @@ import sys
 import pywikibot.pagegenerators
 from eWRT.ws.wikidata.enrich_from_wikipedia import wp_summary_from_wdid
 from eWRT.ws.wikidata.wikibot_parse_item import ParseItemPage
+from wikipedia import RedirectError, DisambiguationError
 
 ENTITY_TYPE_IDENTIFIERS = {
     'person': 'Q5',
@@ -32,6 +33,16 @@ OFFSET %s
 """
 
 WIKIDATA_SITE = pywikibot.Site("wikidata", "wikidata")
+
+def get_wikidata_timestamp(item_page):
+    # ItemPages come in two slightly different formats depending on how
+    # they were created (probably a bug in pywikibot). We want to be able to
+    # deal with both:
+    try:
+        timestamp = item_page.timestamp
+    except AttributeError:
+        timestamp = item_page.latest_revision.timestamp.isoformat()
+    return timestamp
 
 
 def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
@@ -55,19 +66,16 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
     :returns: a dictionary of the collected details about this entity from
             both Wikipedia and Wikidata.
     """
-    # ItemPages come in two slightly different formats depending on how
-    # they were created (probably a bug in pywikibot). We want to be able to
-    # deal with both:
-    try:
-        timestamp = itempage._timestamp
-    except AttributeError:
-        timestamp = itempage.latest_revision.timestamp.isoformat()
+    timestamp =  get_wikidata_timestamp(itempage)
 
     itempage.get()
     # collect summaries and meta-info from the Wikipedia pages in the relevant
     # languages:
-    wikipedia_data = wp_summary_from_wdid(itempage.id, languages=languages,
+    try:
+        wikipedia_data = wp_summary_from_wdid(itempage.id, languages=languages,
                                           sitelinks=itempage.sitelinks)
+    except (RedirectError, DisambiguationError):
+        raise ValueError
     if not wikipedia_data and raise_on_no_wikipage:
         raise ValueError
 
@@ -92,7 +100,8 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
 
 def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
                                include_literals, entity_type, languages,
-                               raise_on_missing_wikipedias=False):
+                               raise_on_missing_wikipedias=False,
+                               id_only=False):
     """Get a list of entities
     :param languages: list if languages (ISO codes); the order determines
         which one's Wikipedia page will be used for the preferred `url`.
@@ -127,6 +136,9 @@ def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
 
             except StopIteration:
                 break
+            if id_only:
+                yield entity_raw.id
+                continue
 
             try:
                 yield collect_attributes_from_wp_and_wd(
