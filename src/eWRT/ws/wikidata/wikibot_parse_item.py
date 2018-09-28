@@ -49,12 +49,13 @@ class ParseItemPage:
                  require_country=True):
         """
         :param itempage: pywikibot.ItemPage to be parsed
-        :param include_literals: bool defining whether to include further literals
-        (descriptions, aliases) in the output. If False, only labels are included.
+        :param include_literals: bool defining whether to include
+            further literals (descriptions, aliases) in the output. If
+            False, only labels are included.
         :param claims_of_interest: list of claims by their WikiData identifiers
         that shall be parsed, if present.
-        :param entity_type_properties: dict of property identifiers and their labels
-        entity_type_properties.
+        :param entity_type_properties: dict of property identifiers and
+            their labels entity_type_properties.
         :param languages: list of languages of interest in their preferred order
         """
 
@@ -144,19 +145,19 @@ class ParseItemPage:
 
             # warnings.warn(
             #    'claim {} not available for entity {}'.format(claim, self.details['labels']))
-        if 'country' not in self.details or not self.details[
-            'country'] and self._require_country:
+        if 'country' not in self.details or not self.details[ 'country'] and \
+                self._require_country:
             country_info = self.get_country_from_any(self.item_raw,
                                                      local_attributes=local_attributes,
                                                      languages=self.languages)
             if country_info:
                 try:
                     country_info[0]['claim_id'] = self.item_raw.id + '@' + \
-                                        country_info[0]['claim_id']
+                                                  country_info[0]['claim_id']
                 except KeyError:
                     print(country_info)
-                self.details['country'] = {'values' : country_info,
-                                            'url': 'https://www.wikidata.org/wiki/Property:P17'
+                self.details['country'] = {'values': country_info,
+                                           'url': 'https://www.wikidata.org/wiki/Property:P17'
                                            }
 
         for attribute in [a for a in self.details]:
@@ -244,9 +245,6 @@ class ParseItemPage:
             value, or the input list if it has length 1. Raises
             ValueError otherwise."""
 
-        def gettargets(claim_instances):
-            return [claim.target for claim in claim_instances]
-
         if len(claim_instances) == 1:
             return claim_instances
         else:
@@ -307,8 +305,6 @@ class ParseItemPage:
         :returns dictionary with id, labels of country (or None):
         """
         itempage.get()
-        country_prop_url = "https://www.wikidata.org/wiki/Property:P17"
-
         for location_type in local_attributes:
             if location_type in itempage.claims:
                 for location in itempage.claims[location_type]:
@@ -442,15 +438,15 @@ class ParseClaim:
 
 
 def start_date(instance):
-    if 'temporal_attributes' not in instance or 'P580' not in instance[
-        'temporal_attributes']:
+    if 'temporal_attributes' not in instance or 'P580' not in \
+            instance['temporal_attributes']:
         return None
     return instance['temporal_attributes']['P580']['string']
 
 
 def end_date(instance):
-    if 'temporal_attributes' not in instance or 'P582' not in instance[
-        'temporal_attributes']:
+    if 'temporal_attributes' not in instance or 'P582' not in \
+            instance['temporal_attributes']:
         return None
     return instance['temporal_attributes']['P582']['string']
 
