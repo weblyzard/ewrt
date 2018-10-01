@@ -6,11 +6,10 @@ Created on September 22, 2018
 @author: jakob <jakob.steixner@modul.ac.at>
 '''
 from pprint import pprint
-from pywikibot import WbTime
+
 import mock
-import pytest
-from eWRT.ws.wikidata.extract_meta import (collect_entities_iterative,
-                                           collect_attributes_from_wp_and_wd,
+from pywikibot import ItemPage
+from eWRT.ws.wikidata.extract_meta import (collect_attributes_from_wp_and_wd,
                                            )
 from eWRT.ws.wikidata.sample_itempage import itempage as adams_itempage
 
@@ -29,7 +28,6 @@ from eWRT.ws.wikidata.sample_itempage import itempage as adams_itempage
 adams = mock.Mock()
 
 adams.get.return_value = adams.text = adams_itempage
-adams.sitelinks = adams_itempage[u'sitelinks']
 adams.claims = adams_itempage[u'claims']
 adams.id = 'Q42'
 adams.timestamp = '+2018-09-25T00:00:00Z'
@@ -43,7 +41,11 @@ WD_PARAMETERS = [
     'P1411'  # nominated for
 ]
 
+
 def test_collect_attributes_from_wp_and_wd_offline():
+    """Test the version of the data collection loop that does
+    without a new call to the API for every attribute to retrieve
+    human readable values."""
     adams_data = collect_attributes_from_wp_and_wd(adams, ['en'],
                                                    wd_parameters=WD_PARAMETERS,
                                                    include_literals=False,
@@ -56,9 +58,13 @@ def test_collect_attributes_from_wp_and_wd_offline():
     for claim in adams_data.values():
         if isinstance(claim, dict):
             if 'values' in claim:
-                assert not any(['labels' in instance for instance in claim['values']])
+                # no labels expected to be stored with attribute values
+                assert not any(
+                    ['labels' in instance for instance in claim['values']])
+
 
 def test_collect_attributes_from_wp_and_wd_online():
+    """"""
     adams_data = collect_attributes_from_wp_and_wd(adams, ['en'],
                                                    wd_parameters=WD_PARAMETERS,
                                                    include_literals=False,
@@ -71,8 +77,10 @@ def test_collect_attributes_from_wp_and_wd_online():
     for claim in adams_data.values():
         if isinstance(claim, dict):
             if 'values' in claim:
+                # two types of attributes in
                 try:
-                    assert all(['labels' in instance for instance in claim['values']])
+                    assert all(
+                        ['labels' in instance for instance in claim['values']])
                 except AssertionError:
-                    assert all(['value' in instance for instance in claim['values']])
-
+                    assert all(
+                        ['value' in instance for instance in claim['values']])
