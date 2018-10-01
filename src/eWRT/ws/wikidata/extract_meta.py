@@ -11,9 +11,9 @@ Loop
 '''
 
 import sys
-import requests
 
 import pywikibot.pagegenerators
+import requests
 from eWRT.ws.wikidata.enrich_from_wikipedia import wp_summary_from_wdid
 from eWRT.ws.wikidata.wikibot_parse_item import ParseItemPage
 from wikipedia import RedirectError, DisambiguationError
@@ -35,6 +35,7 @@ OFFSET %s
 
 WIKIDATA_SITE = pywikibot.Site("wikidata", "wikidata")
 
+
 def get_wikidata_timestamp(item_page):
     # ItemPages come in two slightly different formats depending on how
     # they were created (probably a bug in pywikibot). We want to be able to
@@ -50,12 +51,13 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
                                       include_literals=True,
                                       raise_on_no_wikipage=True,
                                       include_attribute_labels=True,
-                                      require_country=True):
+                                      require_country=True,
+                                      include_wikipedia=True):
     """
 
     :param itempage: ItemPage from which to collect information
     :param languages: list of languages in which to include literals
-            and Wikipedia information (2-character ISO codes).
+            and Wikipedia information (2-character{} ISO codes).
     :param wd_parameters: list of wikidata properties (Pxxx codes) to be
             included, if present
     :param include_literals: Include properties and alternate names. If
@@ -69,38 +71,47 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
     :returns: a dictionary of the collected details about this entity from
             both Wikipedia and Wikidata.
     """
-    timestamp =  get_wikidata_timestamp(itempage)
+    timestamp = get_wikidata_timestamp(itempage)
 
     itempage.get()
     # collect summaries and meta-info from the Wikipedia pages in the relevant
     # languages:
     wikipedia_data = []
-    try:
-        wikipedia_data = wp_summary_from_wdid(itempage.id, languages=languages,
-                                          sitelinks=itempage.sitelinks)
-    except (RedirectError, DisambiguationError):
-        raise ValueError
-    except requests.exceptions.ConnectionError:
-        pass
-    if not wikipedia_data:
-        if raise_on_no_wikipage:
+    if include_wikipedia:
+        try:
+            sitelinks = itempage.text['sitelinks']
+        except (KeyError, AttributeError):
+            sitelinks = itempage.sitelinks
+        try:
+            wikipedia_data = wp_summary_from_wdid(itempage.id,
+                                                  languages=languages,
+                                                  sitelinks=sitelinks)
+        except (RedirectError, DisambiguationError):
             raise ValueError
-        else:
+        except requests.exceptions.ConnectionError:
             pass
+        if not wikipedia_data:
+            if raise_on_no_wikipage:
+                raise ValueError
+            else:
+                pass
 
     # use the Wikipedia article in the first language found as the entity's
     # unique preferred `url` - the order of languages is meaningful!
     try:
         entity_extracted_details = {'url': wikipedia_data[0]['url']}
     except (KeyError, IndexError):
-        entity_extracted_details = {'url': 'https://www.wikidata.org/wiki/' + itempage.id}
+        entity_extracted_details = {
+            'url': 'https://www.wikidata.org/wiki/' + itempage.id}
     for language in wikipedia_data:
         entity_extracted_details[language['language'] + 'wiki'] = language
 
     # get selected attributes from WikiData
     entity = ParseItemPage(itempage, include_literals=include_literals,
                            claims_of_interest=wd_parameters,
-                           languages=languages, include_attribute_labels=include_attribute_labels,require_country=require_country)
+                           languages=languages,
+                           include_attribute_labels=include_attribute_labels,
+                           require_country=require_country)
     entity_extracted_details.update(entity.details)
     entity_extracted_details['wikidata_id'] = itempage.id
 
@@ -112,7 +123,10 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
 def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
                                include_literals, entity_type, languages,
                                raise_on_missing_wikipedias=False,
-                               id_only=False):
+                               id_only=False,
+                               include_attribute_labels=True,
+                               require_country=True,
+                               include_wikipedia=True):
     """Get a list of entities
     :param languages: list if languages (ISO codes); the order determines
         which one's Wikipedia page will be used for the preferred `url`.
@@ -156,7 +170,10 @@ def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
                     entity_raw,
                     languages=languages,
                     wd_parameters=wd_parameters,
-                    include_literals=include_literals)
+                    include_literals=include_literals,
+                    include_attribute_labels=include_attribute_labels,
+                    require_country=require_country,
+                    include_wikipedia=include_wikipedia)
             except ValueError:  # this probably means no Wikipedia page in
                 # any of our languages. We have no use for such entities.
                 if raise_on_missing_wikipedias:

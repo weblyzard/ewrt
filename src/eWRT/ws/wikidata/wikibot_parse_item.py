@@ -93,6 +93,10 @@ class ParseItemPage:
         self.claims_of_interest = [c for c in self.claims_of_interest if
                                    c not in self._image_requested]
         self.item_raw = itempage
+        try:
+            self.claims = itempage.text['claims']
+        except AttributeError:
+            self.claims = itempage.claims
         self.process_attributes()
         if not self.include_literals:
             self.details = {key: self.details[key] for key in self.details if
@@ -133,7 +137,7 @@ class ParseItemPage:
         for claim in self.claims_of_interest:
             try:
                 claim_name = self.entity_type_properties[claim]
-                claim_instances = self.item_raw.claims[claim]
+                claim_instances = self.claims[claim]
                 if claim_instances:
                     self.details[claim_name] = self.complete_claim_details(
                         claim, claim_instances,
@@ -170,7 +174,7 @@ class ParseItemPage:
                                            'url': 'https://www.wikidata.org/wiki/Property:P17'
                                            }
 
-        for attribute in self.details:
+        for attribute in [a for a in self.details]:
 
             if not self.details[attribute] or 'values' in self.details[
                 attribute] and not \
