@@ -13,7 +13,7 @@ relevant attributes and languages for literals
 import sys
 import warnings
 
-from eWRT.ws.wikidata.definitions import (local_attributes,
+from eWRT.ws.wikidata.definitions import (local_attributes as LOCAL_ATTRIBUTES,
                                           image_attributes,
                                           GENERIC_PROPERTIES)
 from eWRT.ws.wikidata.get_image_from_wikidataid import get_image, \
@@ -148,7 +148,7 @@ class ParseItemPage:
         if 'country' not in self.details or not self.details[ 'country'] and \
                 self._require_country:
             country_info = self.get_country_from_any(self.item_raw,
-                                                     local_attributes=local_attributes,
+                                                     local_attributes=LOCAL_ATTRIBUTES,
                                                      languages=self.languages)
             if country_info:
                 try:
@@ -302,9 +302,13 @@ class ParseItemPage:
         :param itempage: parent item
         :param local_attributes: attributes which might be used to infer country
         :param languages: languages for country label
-        :returns dictionary with id, labels of country (or None):
+        :returns list with dictionaries ofID, labels of (preferred) country or
+        countries.
+        :raises ValueError if no country can be reconstrued.
         """
-        itempage.get()
+        if local_attributes is None:
+            local_attributes=LOCAL_ATTRIBUTES
+
         for location_type in local_attributes:
             if location_type in itempage.claims:
                 for location in itempage.claims[location_type]:
@@ -315,10 +319,10 @@ class ParseItemPage:
                                     location.target,
                                     languages=languages
                                 )
-                            if len(country['values']) == 1:
-                                return country['values']
-                            elif 'preferred' in country:
+                            if 'preferred' in country:
                                 return country['preferred']
+                            elif len(country['values']) >= 1:
+                                return country['values']
                             else:
                                 pass
                         except ValueError:

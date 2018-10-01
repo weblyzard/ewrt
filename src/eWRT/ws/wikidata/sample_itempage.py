@@ -1,10 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+'''
+An example of a Wikidata page
+'''
 from pywikibot import (Claim, ItemPage)
 from pywikibot.site import DataSite
 
-itempage = ItemPage({
+itempage = {
     u'claims': {u'P535': [Claim.fromJSON(DataSite("wikidata", "wikidata"),
                                          {u'type': u'statement',
                                           u'references': [{
@@ -146,7 +148,8 @@ itempage = ItemPage({
                                           u'property': u'P2469',
                                           u'snaktype': u'value'},
                             u'id': u'Q42$32DACDAA-0C29-489B-B587-7CB5D374EEE5',
-                            u'rank': u'normal'})], u'P1375': [
+                            u'rank': u'normal'})],
+                u'P1375': [
             Claim.fromJSON(DataSite("wikidata", "wikidata"),
                            {u'type': u'statement', u'references': [{
                                u'snaks': {
@@ -170,7 +173,8 @@ itempage = ItemPage({
                                           u'property': u'P1375',
                                           u'snaktype': u'value'},
                             u'id': u'Q42$97db6877-4c06-88ce-2db5-aaba53383fd2',
-                            u'rank': u'normal'})], u'P136': [
+                            u'rank': u'normal'})],
+                u'P136': [
             Claim.fromJSON(DataSite("wikidata", "wikidata"),
                            {u'type': u'statement', u'references': [{
                                u'snaks': {
@@ -4118,7 +4122,8 @@ itempage = ItemPage({
                                 u'property': u'P734',
                                 u'snaktype': u'value'},
                             u'id': u'Q42$24df999a-4629-c679-e1f0-199bcefabbf3',
-                            u'rank': u'normal'})], u'P735': [
+                            u'rank': u'normal'})],
+        u'P735': [
             Claim.fromJSON(DataSite("wikidata", "wikidata"), {
                 u'mainsnak': {u'datatype': u'wikibase-item',
                               u'datavalue': {u'type': u'wikibase-entityid',
@@ -5344,7 +5349,8 @@ itempage = ItemPage({
         u'sl': u'angle\u0161ki pisatelj, humorist in dramatik',
         u'de-at': u'britischer Schriftsteller',
         u'nds': u'englischer Schriftsteller',
-        u'eu': u'idazle eta umorista britaniarra'}, u'aliases': {u'el': [
+        u'eu': u'idazle eta umorista britaniarra'},
+    u'aliases': {u'el': [
         u'\u039d\u03c4\u03ac\u03b3\u03ba\u03bb\u03b1\u03c2 \u039d\u03cc\u03b5\u03bb \u0386\u03bd\u03c4\u03b1\u03bc\u03c2'],
         u'en': [
             u'Douglas No\xebl Adams',
@@ -5426,6 +5432,6 @@ itempage = ItemPage({
         u'be-tarask': [
             u'\u0414\u0443\u0433\u043b\u0430\u0441 \u0410\u0434\u0430\u043c\u0441'],
         u'uk': [
-            u'\u0414\u0443\u0433\u043b\u0430\u0441 \u041d\u043e\u0435\u043b \u0410\u0434\u0430\u043c\u0441']}})
+            u'\u0414\u0443\u0433\u043b\u0430\u0441 \u041d\u043e\u0435\u043b \u0410\u0434\u0430\u043c\u0441']}}
 
 print(itempage['sitelinks'])
