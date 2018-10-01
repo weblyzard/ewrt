@@ -11,6 +11,7 @@ Loop
 '''
 
 import sys
+import requests
 
 import pywikibot.pagegenerators
 from eWRT.ws.wikidata.enrich_from_wikipedia import wp_summary_from_wdid
@@ -47,7 +48,9 @@ def get_wikidata_timestamp(item_page):
 
 def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
                                       include_literals=True,
-                                      raise_on_no_wikipage=True):
+                                      raise_on_no_wikipage=True,
+                                      include_attribute_labels=True,
+                                      require_country=True):
     """
 
     :param itempage: ItemPage from which to collect information
@@ -71,25 +74,33 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
     itempage.get()
     # collect summaries and meta-info from the Wikipedia pages in the relevant
     # languages:
+    wikipedia_data = []
     try:
         wikipedia_data = wp_summary_from_wdid(itempage.id, languages=languages,
                                           sitelinks=itempage.sitelinks)
     except (RedirectError, DisambiguationError):
         raise ValueError
-    if not wikipedia_data and raise_on_no_wikipage:
-        raise ValueError
+    except requests.exceptions.ConnectionError:
+        pass
+    if not wikipedia_data:
+        if raise_on_no_wikipage:
+            raise ValueError
+        else:
+            pass
 
     # use the Wikipedia article in the first language found as the entity's
     # unique preferred `url` - the order of languages is meaningful!
-    entity_extracted_details = {'url': wikipedia_data[0]['url']}
-
+    try:
+        entity_extracted_details = {'url': wikipedia_data[0]['url']}
+    except (KeyError, IndexError):
+        entity_extracted_details = {'url': 'https://www.wikidata.org/wiki/' + itempage.id}
     for language in wikipedia_data:
         entity_extracted_details[language['language'] + 'wiki'] = language
 
     # get selected attributes from WikiData
     entity = ParseItemPage(itempage, include_literals=include_literals,
                            claims_of_interest=wd_parameters,
-                           languages=languages)
+                           languages=languages, include_attribute_labels=include_attribute_labels,require_country=require_country)
     entity_extracted_details.update(entity.details)
     entity_extracted_details['wikidata_id'] = itempage.id
 

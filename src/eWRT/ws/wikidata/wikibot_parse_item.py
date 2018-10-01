@@ -46,7 +46,8 @@ class ParseItemPage:
     def __init__(self, itempage, include_literals=False,
                  claims_of_interest=None,
                  entity_type_properties=None, languages=None,
-                 require_country=True):
+                 require_country=True,
+                 include_attribute_labels=True):
         """
         :param itempage: pywikibot.ItemPage to be parsed
         :param include_literals: bool defining whether to include
@@ -57,10 +58,17 @@ class ParseItemPage:
         :param entity_type_properties: dict of property identifiers and
             their labels entity_type_properties.
         :param languages: list of languages of interest in their preferred order
+        :param require_country: whether to try and deduce country from other
+            location attributes ('location', 'place of birth', 'headquarters
+            location'...).
+        :param include_attribute_labels: Include the labels of attribute values
+            e. g. the names of locations, or just their wikidata ID. Set to False
+            for offline extraction from JSON/testing.
         """
 
         # include 'labels' only if include_literals == False
-        itempage.get()
+        # itempage.get()
+        self.include_attribute_labels = include_attribute_labels
         self.include_literals = include_literals
         if self.include_literals:
             self.literals = self.LITERAL_PROPERTIES
@@ -130,7 +138,8 @@ class ParseItemPage:
                     self.details[claim_name] = self.complete_claim_details(
                         claim, claim_instances,
                         languages=self.languages,
-                        literals=self.literals, )
+                        literals=self.literals,
+                        include_attribute_labels=self.include_attribute_labels)
                     if self.details[claim_name]:
                         self.details[claim_name]['url'] = \
                             'https://www.wikidata.org/wiki/Property:' + claim
@@ -145,11 +154,12 @@ class ParseItemPage:
 
             # warnings.warn(
             #    'claim {} not available for entity {}'.format(claim, self.details['labels']))
-        if 'country' not in self.details or not self.details[ 'country'] and \
+        if ('country' not in self.details or not self.details[ 'country']) and \
                 self._require_country:
             country_info = self.get_country_from_any(self.item_raw,
                                                      local_attributes=LOCAL_ATTRIBUTES,
-                                                     languages=self.languages)
+                                                     languages=self.languages,
+                                                     include_attribute_labels=self.include_attribute_labels)
             if country_info:
                 try:
                     country_info[0]['claim_id'] = self.item_raw.id + '@' + \
@@ -160,7 +170,7 @@ class ParseItemPage:
                                            'url': 'https://www.wikidata.org/wiki/Property:P17'
                                            }
 
-        for attribute in [a for a in self.details]:
+        for attribute in self.details:
 
             if not self.details[attribute] or 'values' in self.details[
                 attribute] and not \
@@ -170,7 +180,7 @@ class ParseItemPage:
 
     @classmethod
     def complete_claim_details(cls, claim_id, claim_instances, languages,
-                               literals):
+                               literals, include_attribute_labels=True):
         """Find values for specified claim types for which no specific
         handling is defined.
         :param claim_id: Pxx id of the attribute.
@@ -179,11 +189,13 @@ class ParseItemPage:
         :param literals: list of literal properties to include
         :returns dictionary with claim id, values"""
         values = []
+        if include_attribute_labels is False:
+            literals = []
         assert claim_instances
         for sub_claim in claim_instances:
             try:
                 value = ParseClaim(sub_claim, languages,
-                                   literals).claim_details
+                                   literals,include_attribute_labels=include_attribute_labels).claim_details
                 if value:
                     values.append(value)
             except Exception as e:
@@ -268,7 +280,7 @@ class ParseItemPage:
             # return [claim.target for claim in preferred]
 
     @classmethod
-    def get_country_from_location(cls, location_item_page, languages):
+    def get_country_from_location(cls, location_item_page, languages, include_attribute_labels=True):
         """Get country info from sub-country location.
         :param location_item_page: a location-type entities ItemPage.
         :type location_item_page: pywikibot.ItemPage
@@ -288,7 +300,8 @@ class ParseItemPage:
                                                                           country,
                                                                           languages=languages,
                                                                           literals=[
-                                                                              'labels'])
+                                                                              'labels'],
+                                                                          include_attribute_labels=include_attribute_labels)
                 return country_identified
             else:
                 raise ValueError('No country found for this location!')
@@ -296,7 +309,8 @@ class ParseItemPage:
             raise ValueError('No country found for this location!')
 
     @classmethod
-    def get_country_from_any(cls, itempage, local_attributes, languages):
+    def get_country_from_any(cls, itempage, local_attributes, languages,
+                             include_attribute_labels=True):
         """
         Try to
         :param itempage: parent item
@@ -317,7 +331,8 @@ class ParseItemPage:
                             country = \
                                 ParseItemPage.get_country_from_location(
                                     location.target,
-                                    languages=languages
+                                    languages=languages,
+                                    include_attribute_labels=include_attribute_labels
                                 )
                             if 'preferred' in country:
                                 return country['preferred']
@@ -337,7 +352,7 @@ class ParseItemPage:
 class ParseClaim:
     """Parse an individual claim and its qualifiers"""
 
-    def __init__(self, claim, languages, literals, delay=False):
+    def __init__(self, claim, languages, literals, delay=False,include_attribute_labels=True):
         """
         Parse additional information about a specified claim. The result
         (dict format) is accessible through ParseClaim(claim).claim_details
@@ -349,6 +364,7 @@ class ParseClaim:
         :param literals: list of literal properties to be included in result
         :type literals: List(str)
         """
+        self.include_attribute_labels = include_attribute_labels
         self.claim = claim
         self.languages = languages
         self.literals = literals
