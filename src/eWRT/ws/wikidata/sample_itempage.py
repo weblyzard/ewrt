@@ -5434,4 +5434,3 @@ itempage = {
         u'uk': [
             u'\u0414\u0443\u0433\u043b\u0430\u0441 \u041d\u043e\u0435\u043b \u0410\u0434\u0430\u043c\u0441']}}
 
-print(itempage['sitelinks'])
