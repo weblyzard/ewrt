@@ -62,6 +62,8 @@ def wikipedia_page_info_from_title(wikipage_title, language, redirect=False,
     """
     def _yield_complete():
         flagged_as_redirect = set()
+        if 'query' not in query_result:
+            raise StopIteration
         if 'redirects' in query_result['query']:
             flagged_as_redirect = set([page_redirect['to'] for page_redirect in
                                        query_result['query']['redirects']])
@@ -90,8 +92,7 @@ def wikipedia_page_info_from_title(wikipage_title, language, redirect=False,
 
     if 'error' in query_result:
             raise ValueError(query_result['error']['info'])
-    for completed_result in _yield_complete()\
-            :
+    for completed_result in _yield_complete():
         yield completed_result
     counter = 0
     while 'continue' in query_result:
