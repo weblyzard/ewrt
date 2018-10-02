@@ -93,7 +93,9 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
         except (KeyError, AttributeError):
             sitelinks = itempage.sitelinks
         if delay_wikipedia_retrieval:
-            wikipedia_data = sitelinks
+            wikipedia_data = {title: sitelinks[title] for title in sitelinks if
+                              any([title == lang + 'wiki' for lang in
+                                   languages])}
         else:
             try:
                 wikipedia_data = wp_summary_from_wdid(itempage.id,
@@ -117,8 +119,11 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
         # fallback to Wikidata ID if no Wikipedia page has been retrieved (yet)
         entity_extracted_details = {
             'url': 'https://www.wikidata.org/wiki/' + itempage.id}
-    for language in wikipedia_data:
-        entity_extracted_details[language['language'] + 'wiki'] = language
+    if delay_wikipedia_retrieval:
+        entity_extracted_details.update(wikipedia_data)
+    else:
+        for language in wikipedia_data:
+            entity_extracted_details[language['language'] + 'wiki'] = language
 
     # get selected attributes from WikiData
     entity = ParseItemPage(itempage, include_literals=include_literals,
@@ -140,7 +145,9 @@ def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
                                id_only=False,
                                include_attribute_labels=True,
                                require_country=True,
-                               include_wikipedia=True):
+                               include_wikipedia=True,
+                               delay_wikipedia_retrieval=True
+                               ):
     """Get a list of entities
     :param languages: list if languages (ISO codes); the order determines
         which one's Wikipedia page will be used for the preferred `url`.
@@ -187,7 +194,8 @@ def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
                     include_literals=include_literals,
                     include_attribute_labels=include_attribute_labels,
                     require_country=require_country,
-                    include_wikipedia=include_wikipedia)
+                    include_wikipedia=include_wikipedia,
+                    delay_wikipedia_retrieval=delay_wikipedia_retrieval)
             except ValueError:  # this probably means no Wikipedia page in
                 # any of our languages. We have no use for such entities.
                 if raise_on_missing_wikipedias:

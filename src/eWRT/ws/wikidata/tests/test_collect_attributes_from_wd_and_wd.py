@@ -84,3 +84,16 @@ def test_collect_attributes_from_wp_and_wd_online():
                 except AssertionError:
                     assert all(
                         ['value' in instance for instance in claim['values']])
+
+def test_collect_attributes_from_wp_and_wd_delay_wikipedia():
+    adams_data = collect_attributes_from_wp_and_wd(adams, ['en'],
+                                                   wd_parameters=WD_PARAMETERS,
+                                                   include_literals=False,
+                                                   raise_on_no_wikipage=False,
+                                                   include_attribute_labels=True,
+                                                   require_country=False,
+                                                   delay_wikipedia_retrieval=True)
+    assert 'enwiki' in adams_data
+    assert isinstance(adams_data['enwiki'], basestring)
+
+print(test_collect_attributes_from_wp_and_wd_delay_wikipedia())
