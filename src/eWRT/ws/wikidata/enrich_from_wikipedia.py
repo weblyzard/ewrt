@@ -42,8 +42,8 @@ def wikipedia_page_info_from_title(wikipage_title, language, redirect=False,
         summary)
     """
     # language_page = {'language': language}
-    API_URL = u'http://' + language.lower() + u'.wikipedia.org/w/api.php'
-    wikipedia.set_lang(language)
+
+    API_URL = wikipedia.API_URL.replace('en.', language.lower() + '.')
     params = {'titles': wikipage_title,
               'prop': 'info|extracts|pageprops',
               'explaintext': '',
