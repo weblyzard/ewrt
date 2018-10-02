@@ -52,7 +52,8 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
                                       raise_on_no_wikipage=True,
                                       include_attribute_labels=True,
                                       require_country=True,
-                                      include_wikipedia=True):
+                                      include_wikipedia=True,
+                                      delay_wikipedia_retrieval=False):
     """
 
     :param itempage: ItemPage from which to collect information
@@ -68,6 +69,15 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
             identified for this entity. If True (default), no further meta-
             data about such entities is collected from WikiData. If False,
             meta-data is still collected.
+    :param require_country: attempt to deduce country attribute from location
+            attributes (requires additional API call(s))
+    :param include_wikipedia: Include information from Wikipedia pages
+            on entity (summary, revision id & timestamp, exact url)
+    :param delay_wikipedia_retrieval: Return only the sitelinks of existing
+            Wikipedia pages in the relevant languages (True) or make a call
+            to the Wikipedia API directly (False). The default `False` makes
+            for fairly expensive operations, where possible, True should be
+            used.
     :returns: a dictionary of the collected details about this entity from
             both Wikipedia and Wikidata.
     """
@@ -82,14 +92,17 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
             sitelinks = itempage.text['sitelinks']
         except (KeyError, AttributeError):
             sitelinks = itempage.sitelinks
-        try:
-            wikipedia_data = wp_summary_from_wdid(itempage.id,
-                                                  languages=languages,
-                                                  sitelinks=sitelinks)
-        except (RedirectError, DisambiguationError):
-            raise ValueError
-        except requests.exceptions.ConnectionError:
-            pass
+        if delay_wikipedia_retrieval:
+            wikipedia_data = sitelinks
+        else:
+            try:
+                wikipedia_data = wp_summary_from_wdid(itempage.id,
+                                                      languages=languages,
+                                                      sitelinks=sitelinks)
+            except (RedirectError, DisambiguationError):
+                raise ValueError
+            except requests.exceptions.ConnectionError:
+                pass
         if not wikipedia_data:
             if raise_on_no_wikipage:
                 raise ValueError
@@ -101,6 +114,7 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
     try:
         entity_extracted_details = {'url': wikipedia_data[0]['url']}
     except (KeyError, IndexError):
+        # fallback to Wikidata ID if no Wikipedia page has been retrieved (yet)
         entity_extracted_details = {
             'url': 'https://www.wikidata.org/wiki/' + itempage.id}
     for language in wikipedia_data:

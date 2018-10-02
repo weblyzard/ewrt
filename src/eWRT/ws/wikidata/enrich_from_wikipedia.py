@@ -29,6 +29,25 @@ RELEVANT_LANGUAGES = ['en', 'de', 'fr', 'es']
 # wikipedia.set_lang('en')
 USER_AGENT = 'weblyzard (https://www.weblyzard.com/privacy-policy/)'
 
+def wikipedia_query(titles, index, language):
+    API_URL = wikipedia.API_URL.replace('en.', language.lower() + '.')
+    params = {'titles': titles,
+              'prop': 'info|extracts|pageprops',
+              'explaintext': '',
+              'exintro': '',
+              'excontinue': index,
+              'ppprop': 'disambiguation',
+              'redirects': '',
+              'inprop': 'url',
+              'action': 'query',
+              'format': 'json'
+              }
+
+    headers = {
+        'User-Agent': USER_AGENT
+    }
+    return requests.get(API_URL, params=params,
+                                headers=headers).json()
 
 def wikipedia_page_info_from_title(wikipage_title, language, redirect=False,
                                    skip_on_empty_summary=True):
@@ -41,52 +60,45 @@ def wikipedia_page_info_from_title(wikipage_title, language, redirect=False,
         (language, id and timestamp of last revision, title, link,
         summary)
     """
-    # language_page = {'language': language}
-
-    API_URL = wikipedia.API_URL.replace('en.', language.lower() + '.')
-    params = {'titles': wikipage_title,
-              'prop': 'info|extracts|pageprops',
-              'explaintext': '',
-              'exintro': '',
-              'ppprop': 'disambiguation',
-              'redirects': '',
-              'inprop': 'url',
-              'action': 'query',
-              'format': 'json'
-              }
-
-    headers = {
-        'User-Agent': USER_AGENT
-    }
-    query_result = requests.get(API_URL, params=params,
-                                headers=headers).json()
-    if 'error' in query_result:
-        raise ValueError(query_result['error']['info'])
-    flagged_as_redirect = set()
-    if 'redirects' in query_result['query']:
-        flagged_as_redirect = set([page_redirect['to'] for page_redirect in
-                                   query_result['query']['redirects']])
-    for page in query_result['query']['pages'].values():
-        title = page['title']
-        if 'missing' in page:
-            continue
-        elif title in flagged_as_redirect and redirect is False:
-            continue
-        elif 'pageprops' in page and 'disambiguation' in page['pageprops']:
-            continue
-        language_page = {'language': language}
-        try:
-            summary = page['extract']
-            language_page['summary'] = summary
-        except KeyError:
-            if skip_on_empty_summary:
+    def _yield_complete():
+        flagged_as_redirect = set()
+        if 'redirects' in query_result['query']:
+            flagged_as_redirect = set([page_redirect['to'] for page_redirect in
+                                       query_result['query']['redirects']])
+        for page in query_result['query']['pages'].values():
+            title = page['title']
+            if 'missing' in page:
                 continue
-        if not summary and skip_on_empty_summary:
-            continue
-        language_page['url'] = page['canonicalurl']
-        language_page['title'] = title
-        language_page['timestamp'] = page['touched']
-        yield language_page
+            elif title in flagged_as_redirect and redirect is False:
+                continue
+            elif 'pageprops' in page and 'disambiguation' in page['pageprops']:
+                continue
+            language_page = {'language': language}
+            try:
+                summary = page['extract']
+                language_page['summary'] = summary
+            except KeyError:
+                continue
+            if not summary and skip_on_empty_summary:
+                continue
+            language_page['url'] = page['canonicalurl']
+            language_page['title'] = title
+            language_page['timestamp'] = page['touched']
+            yield language_page
+
+    query_result = wikipedia_query(wikipage_title, 0, language)
+
+    if 'error' in query_result:
+            raise ValueError(query_result['error']['info'])
+    for completed_result in _yield_complete()\
+            :
+        yield completed_result
+    counter = 0
+    while 'continue' in query_result:
+        query_result = wikipedia_query(wikipage_title, query_result['continue']['excontinue'], language)
+        for completed_result in  _yield_complete():
+            yield completed_result
+
 
 
 def get_sitelinks_from_wd_id(wikidata_id, languages):
@@ -160,5 +172,3 @@ def wp_summary_from_wdid(wikidata_id, languages=None, sitelinks=None):
             'item {}!'.format(wikidata_id))
 
         return None
-
-# print(wp_summary_from_wdid('Q42'))
