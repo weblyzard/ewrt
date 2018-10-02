@@ -30,7 +30,8 @@ RELEVANT_LANGUAGES = ['en', 'de', 'fr', 'es']
 USER_AGENT = 'weblyzard (https://www.weblyzard.com/privacy-policy/)'
 
 
-def wikipedia_page_info_from_title(wikipage_title, language, redirect=False):
+def wikipedia_page_info_from_title(wikipage_title, language, redirect=False,
+                                   skip_on_empty_summary=True):
     """
     Retreive selected meta info about a specific Wikipedia page, identified by
     its exact title and language.
@@ -59,6 +60,8 @@ def wikipedia_page_info_from_title(wikipage_title, language, redirect=False):
     }
     query_result = requests.get(API_URL, params=params,
                                 headers=headers).json()
+    if 'error' in query_result:
+        raise ValueError(query_result['error']['info'])
     flagged_as_redirect = set()
     if 'redirects' in query_result['query']:
         flagged_as_redirect = set([page_redirect['to'] for page_redirect in
@@ -72,10 +75,14 @@ def wikipedia_page_info_from_title(wikipage_title, language, redirect=False):
         elif 'pageprops' in page and 'disambiguation' in page['pageprops']:
             continue
         language_page = {'language': language}
-        summary = page['extract']
-        if not summary:
+        try:
+            summary = page['extract']
+            language_page['summary'] = summary
+        except KeyError:
+            if skip_on_empty_summary:
+                continue
+        if not summary and skip_on_empty_summary:
             continue
-        language_page['summary'] = summary
         language_page['url'] = page['canonicalurl']
         language_page['title'] = title
         language_page['timestamp'] = page['touched']

@@ -10,7 +10,6 @@ import pytest
 from eWRT.ws.wikidata.enrich_from_wikipedia import (
     wikipedia_page_info_from_title,
     get_sitelinks_from_wd_id)
-from wikipedia.exceptions import PageError
 
 douglas_adams_result_expected = {
     u'title': u'Douglas Adams',
@@ -29,6 +28,49 @@ austria_expected = {
     u'revision_id': 1,
     u'revision_timestamp': u'+0000-00-00T00:00:00Z'
 }
+
+countries = ['Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola',
+             'Antigua', '&', 'Deps', 'Argentina', 'Armenia', 'Australia',
+             'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh',
+             'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bhutan',
+             'Bolivia', 'Bosnia', 'Herzegovina', 'Botswana', 'Brazil', 'Brunei',
+             'Bulgaria', 'Burkina', 'Burundi', 'Cambodia', 'Cameroon', 'Canada',
+             'Cape', 'Verde', 'Central', 'African', 'Rep', 'Chad', 'Chile',
+             'China', 'Colombia', 'Comoros', 'Congo', 'Congo', '{Democratic',
+             'Rep}', 'Costa', 'Rica', 'Croatia', 'Cuba', 'Cyprus', 'Czech',
+             'Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican',
+             'Republic', 'East', 'Timor', 'Ecuador', 'Egypt', 'El', 'Salvador',
+             'Equatorial', 'Guinea', 'Eritrea', 'Estonia', 'Ethiopia', 'Fiji',
+             'Finland', 'France', 'Gabon', 'Gambia', 'Georgia', 'Germany',
+             'Ghana', 'Greece', 'Grenada', 'Guatemala', 'Guinea',
+             'Guinea-Bissau', 'Guyana', 'Haiti', 'Honduras', 'Hungary',
+             'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland',
+             '{Republic}', 'Israel', 'Italy', 'Ivory', 'Coast', 'Jamaica',
+             'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', 'Korea',
+             'North', 'Korea', 'South', 'Kosovo', 'Kuwait', 'Kyrgyzstan',
+             'Laos', 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya',
+             'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macedonia',
+             'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta',
+             'Marshall', 'Islands', 'Mauritania', 'Mauritius', 'Mexico',
+             'Micronesia', 'Moldova', 'Monaco', 'Mongolia', 'Montenegro',
+             'Morocco', 'Mozambique', 'Myanmar,', '{Burma}', 'Namibia', 'Nauru',
+             'Nepal', 'Netherlands', 'New', 'Zealand', 'Nicaragua', 'Niger',
+             'Nigeria', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Panama',
+             'Papua', 'New', 'Guinea', 'Paraguay', 'Peru', 'Philippines',
+             'Poland', 'Portugal', 'Qatar', 'Romania', 'Russian', 'Federation',
+             'Rwanda', 'St', 'Kitts', '&', 'Nevis', 'St', 'Lucia', 'Saint',
+             'Vincent', '&', 'the', 'Grenadines', 'Samoa', 'San', 'Marino',
+             'Sao', 'Tome', '&', 'Principe', 'Saudi', 'Arabia', 'Senegal',
+             'Serbia', 'Seychelles', 'Sierra', 'Leone', 'Singapore', 'Slovakia',
+             'Slovenia', 'Solomon', 'Islands', 'Somalia', 'South', 'Africa',
+             'South', 'Sudan', 'Spain', 'Sri', 'Lanka', 'Sudan', 'Suriname',
+             'Swaziland', 'Sweden', 'Switzerland', 'Syria', 'Taiwan',
+             'Tajikistan', 'Tanzania', 'Thailand', 'Togo', 'Tonga', 'Trinidad',
+             '&', 'Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Tuvalu',
+             'Uganda', 'Ukraine', 'United', 'Arab', 'Emirates', 'United',
+             'Kingdom', 'United', 'States', 'Uruguay', 'Uzbekistan', 'Vanuatu',
+             'Vatican', 'City', 'Venezuela', 'Vietnam', 'Yemen', 'Zambia',
+             'Zimbabwe']
 
 
 class TestWikipedia_page_info_from_title():
@@ -57,7 +99,6 @@ class TestWikipedia_page_info_from_title():
         with pytest.raises(StopIteration):
             wikipedia_page_info_from_title('Georgia', 'en').next()
 
-
     def test_get_sitelinks_from_wdid(self):
         try:
             assert get_sitelinks_from_wd_id('Q42', ['en', 'ru', 'sr']) == \
@@ -75,25 +116,33 @@ class TestWikipedia_page_info_from_title():
         titles = u'Wiener Neustadt', u'Douglas Adams', u'Wien 19', u'Ferdinand Raimund', u'Österreich', u'Frankreich', u'Deutschland', u'Mesopotamien', u'Neuschwanstein',
 
         results = list(wikipedia_page_info_from_title('|'.join(titles),
-                'de'))
+                                                      'de'))
         expected_failures = (
-            'Wien 19', # is a redirect, we only accept strict matches
-            u'Döbling', # the result of the redirection
-            'Neuschwanstein' # a disambiguation page
+            'Wien 19',  # is a redirect, we only accept strict matches
+            u'Döbling',  # the result of the redirection
+            'Neuschwanstein'  # a disambiguation page
         )
         titles_retrieved = [r['title'] for r in results]
-        print(titles_retrieved)
+
         assert not any([t in expected_failures for t in titles_retrieved])
         # for t in titles:
         #     if t not in expected_failures:
         #         assert t in titles_retrieved
-        assert all([t in titles_retrieved for t in titles if t not in expected_failures])
+        assert all([t in titles_retrieved for t in titles if
+                    t not in expected_failures])
         assert len(results) == 7
 
-TestWikipedia_page_info_from_title().test_get_multiple_results()
+    def test_get_too_many(self):
+        with pytest.raises(ValueError):
+            country_results = list(wikipedia_page_info_from_title('|'.join(countries),
+                                                      'en'))
+        self.country_results = []
+        for country in wikipedia_page_info_from_title('|'.join(countries[:50]),
+                                                      'en'):
+            self.country_results.append(country)
 
 
-
+TestWikipedia_page_info_from_title().test_get_too_many()
 
 # '''
 # {u'lastrevid': 862105845, u'pagelanguagedir': u'ltr', u'pageid': 26964606,
