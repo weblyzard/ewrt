@@ -60,9 +60,10 @@ def wikipedia_page_info_from_title(wikipage_title, language, redirect=False,
         (language, id and timestamp of last revision, title, link,
         summary)
     """
-    def _yield_complete():
+    def _yield_pages_with_complete_result():
         flagged_as_redirect = set()
         if 'query' not in query_result:
+            print('Query result does not contain "query"!')
             raise StopIteration
         if 'redirects' in query_result['query']:
             flagged_as_redirect = set([page_redirect['to'] for page_redirect in
@@ -92,12 +93,12 @@ def wikipedia_page_info_from_title(wikipage_title, language, redirect=False,
 
     if 'error' in query_result:
             raise ValueError(query_result['error']['info'])
-    for completed_result in _yield_complete():
+    for completed_result in _yield_pages_with_complete_result():
         yield completed_result
     counter = 0
     while 'continue' in query_result:
         query_result = wikipedia_query(wikipage_title, query_result['continue']['excontinue'], language)
-        for completed_result in  _yield_complete():
+        for completed_result in  _yield_pages_with_complete_result():
             yield completed_result
 
 
@@ -155,8 +156,10 @@ def wp_summary_from_wdid(wikidata_id, languages=None, sitelinks=None):
             wikipage_title = sitelinks[language + 'wiki']
             try:
                 wikipedia_page = wikipedia_page_info_from_title(wikipage_title,
-                                                                language).next()
-                wikipedia_data.append(wikipedia_page)
+                                                                language)
+                wikipedia_data.append(wikipedia_page.next())
+            except Exception as e:
+                raise(e)
             except ValueError:
                 warnings.warn('No Wikipedia page or page with empty summary '
                               'found in language {lang} '

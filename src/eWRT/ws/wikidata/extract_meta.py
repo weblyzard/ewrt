@@ -92,10 +92,12 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
             sitelinks = itempage.text['sitelinks']
         except (KeyError, AttributeError):
             sitelinks = itempage.sitelinks
+        relevant_sitelinks = [wiki for wiki in sitelinks if
+                              any([lang + 'wiki' == wiki for lang in
+                                   languages])]
+
         if delay_wikipedia_retrieval:
-            wikipedia_data = {title: sitelinks[title] for title in sitelinks if
-                              any([title == lang + 'wiki' for lang in
-                                   languages])}
+            wikipedia_data = {wiki: sitelinks[wiki] for wiki in relevant_sitelinks}
         else:
             try:
                 wikipedia_data = wp_summary_from_wdid(itempage.id,
@@ -121,7 +123,7 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
             'url': 'https://www.wikidata.org/wiki/' + itempage.id}
     if delay_wikipedia_retrieval:
         entity_extracted_details.update(wikipedia_data)
-    else:
+    elif include_wikipedia:
         for language in wikipedia_data:
             entity_extracted_details[language['language'] + 'wiki'] = language
 
