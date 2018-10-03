@@ -13,6 +13,7 @@ import mock
 import pytest
 from eWRT.ws.wikidata.sample_itempage import itempage
 from eWRT.ws.wikidata.wikibot_parse_item import ParseItemPage
+from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
 
 entity_mock = mock.Mock()
 entity_mock.text = itempage
@@ -89,7 +90,7 @@ def test_attribute_preffered_value():
     assert 'preferred' not in names_without_preferred
 
     try:
-        ParseItemPage.attribute_preferred_value(names_new)
+        attribute_preferred_value(names_new)
         raise AssertionError(
             'This should raise a ValueError: No item marked preferred!')
     except ValueError:
