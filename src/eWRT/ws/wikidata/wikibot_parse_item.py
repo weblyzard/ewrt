@@ -18,6 +18,7 @@ from eWRT.ws.wikidata.definitions import (local_attributes as LOCAL_ATTRIBUTES,
                                           GENERIC_PROPERTIES)
 from eWRT.ws.wikidata.get_image_from_wikidataid import get_image, \
     NoImageFoundError
+from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
 from pywikibot import WbTime
 
 if sys.version_info.major == 3:
@@ -42,7 +43,7 @@ class ParseItemPage:
     """Methods to parse pywikibot.ItemPage for a specifiable list
         of properties, returning a dict of property labels and values."""
     LITERAL_PROPERTIES = ['labels', 'aliases', 'descriptions']
-
+    attribute_preferred_value = attribute_preferred_value
     def __init__(self, itempage, include_literals=False,
                  claims_of_interest=None,
                  entity_type_properties=None, languages=None,
@@ -210,7 +211,7 @@ class ParseItemPage:
             claim_details = {}
         if len(claim_instances) > 1:
             try:
-                marked_preferred = cls.attribute_preferred_value(
+                marked_preferred = attribute_preferred_value(
                     claim_instances)
                 if len(marked_preferred) == 1:
                     preferred = marked_preferred[0]
@@ -248,38 +249,6 @@ class ParseItemPage:
                 except (KeyError, AttributeError):
                     pass
         return literal_properties
-
-    @classmethod
-    def attribute_preferred_value(cls, claim_instances):
-        """When an attribute has several instances, try to
-        retrieve the one with rank=preferred. Raises a ValueError
-        when no or more than one `preferred` instances are found.
-        :param claim_instances: List of `Claim`s.
-        :returns a 1-member list containing the unique `preferred`
-            value, or the input list if it has length 1. Raises
-            ValueError otherwise."""
-
-        if len(claim_instances) == 1:
-            return claim_instances
-        else:
-            for claim_instance in claim_instances:
-                try:
-                    claim_instance.get()
-                except AttributeError:
-                    pass
-            preferred = [
-                claim for claim in claim_instances if claim.rank == 'preferred']
-            if len(preferred) == 1:
-                return [claim for claim in preferred]
-
-                pass
-            elif len(preferred) == 0:
-                raise ValueError('No claim instance marked as preferred!')
-            else:
-                raise ValueError(
-                    'Incorrectly tagged data: several instances '
-                    'marked as preferred, this should not happen!')
-            # return [claim.target for claim in preferred]
 
     @classmethod
     def get_country_from_location(cls, location_item_page, languages, include_attribute_labels=True):
