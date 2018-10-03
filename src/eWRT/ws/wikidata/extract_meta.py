@@ -163,7 +163,6 @@ def collect_entities_iterative(limit_per_query, n_queries, wd_parameters,
     :param n_queries: maximum number of subsequent queries
     :type n_queries: int
     """
-
     for i in range(n_queries):
         wikidata_site = WIKIDATA_SITE
         query = QUERY % (ENTITY_TYPE_IDENTIFIERS[entity_type],

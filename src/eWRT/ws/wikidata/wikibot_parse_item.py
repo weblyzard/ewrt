@@ -98,10 +98,8 @@ class ParseItemPage:
         except AttributeError:
             self.claims = itempage.claims
         self.process_attributes()
-        if not self.include_literals:
-            self.details = {key: self.details[key] for key in self.details if
-                            self.details[
-                                key] and key not in self.LITERAL_PROPERTIES}
+        assert self.details
+
 
     def process_attributes(self):
         """Exctract information about the item, specified
@@ -372,6 +370,8 @@ class ParseClaim:
         self.claim = claim
         self.languages = languages
         self.literals = literals
+        if self.include_attribute_labels:
+            self.literals = ['labels']
         if delay:
             self.claim_details = {}
         else:
