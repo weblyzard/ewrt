@@ -82,8 +82,8 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
             both Wikipedia and Wikidata.
     """
     timestamp = get_wikidata_timestamp(itempage)
-
-    itempage.get()
+    #
+    # itempage.get()
     # collect summaries and meta-info from the Wikipedia pages in the relevant
     # languages:
     wikipedia_data = []
