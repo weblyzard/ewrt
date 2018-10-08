@@ -8,6 +8,9 @@ Created on October 03, 2018
 Split from wikibot_parse_item.ParseItemPage for dependency reasons
 '''
 
+from pywikibot import Claim
+from pywikibot.site import DataSite
+
 
 def attribute_preferred_value(claim_instances):
     """When an attribute has several instances, try to
@@ -21,10 +24,16 @@ def attribute_preferred_value(claim_instances):
     if len(claim_instances) == 1:
         return claim_instances
     else:
-        for claim_instance in claim_instances:
-            try:
-                claim_instance.get()
-            except AttributeError:
+        try:
+            claim_instances = [Claim.fromJSON(DataSite('wikidata', 'wikidata'), claim_instance) for claim_instance in claim_instances]
+        # for claim_instance in claim_instances:
+        #     try:
+        #         claim_instance = Claim.fromJSON(DataSite('wikidata', 'wikidata'), claim_instance)
+        #     except:
+        #         pass
+        #     try:
+        #         claim_instance.get()
+        except TypeError:
                 pass
         preferred = [
             claim for claim in claim_instances if claim.rank == 'preferred']

@@ -10,6 +10,8 @@ Retrieve info about an entity, specifying a list of
 relevant attributes and languages for literals
 
 '''
+
+
 import sys
 import warnings
 
@@ -242,11 +244,19 @@ class ParseItemPage:
             literals = cls.LITERAL_PROPERTIES
         literal_properties = {prop: {} for prop in literals}
         for prop in literal_properties:
+            from wl_data_scripts.projects.wikibot.filters import filter_result
             for language in languages:
                 try:
                     literal_properties[prop][language] = \
                         entity.text[prop][language]
-                except (KeyError, AttributeError):
+                    if isinstance(literal_properties[prop][language], dict):
+                        literal_properties[prop][language] = literal_properties[prop][language]['value']
+                    elif isinstance(literal_properties[prop][language], list):
+                        try:
+                            literal_properties[prop][language] = [entry['value'] for entry in literal_properties[prop][language]]
+                        except TypeError:
+                            pass
+                except (KeyError, AttributeError, TypeError):
                     pass
         return literal_properties
 
@@ -335,6 +345,11 @@ class ParseClaim:
         :param literals: list of literal properties to be included in result
         :type literals: List(str)
         """
+        from pywikibot import Claim
+        from pywikibot.site import DataSite
+        if not isinstance(claim, Claim):
+            claim = Claim.fromJSON(site=DataSite('wikidata', 'wikidata'), data=claim)
+
         self.include_attribute_labels = include_attribute_labels
         self.claim = claim
         self.languages = languages

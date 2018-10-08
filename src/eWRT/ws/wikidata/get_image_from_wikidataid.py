@@ -59,7 +59,13 @@ def get_images(itempage,
             # we don't want to abort the process because
             # one is missing.
             continue
-        target = image.getTarget()
+        try:
+            target = image.getTarget()
+        except AttributeError:
+            from pywikibot import Claim
+            from pywikibot.site import DataSite
+            image = Claim.fromJSON(DataSite('wikidata', 'wikidata'), image)
+            target = image.getTarget()
         # str(target) returns a string of format [[site:namespace:filename]],
         # e. g. [[commons:File:Barack_Obama.jpg]], the wiki link of the image
         # page. We substitute this for a valid external link
