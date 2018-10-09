@@ -104,3 +104,12 @@ def test_filter_language_values():
     result = filter_language_values(language='en',
                                     value_list=unfiltered_positions_held_GW)
     assert result == filtered_positions_held_expected
+
+    # when a language doesn't have the labels of an attribute defined, the
+    # labels field for that attribute should return None, however, the same
+    # of attribute values should be returned (with the Wikidata ID of
+    # their referent and their claim_id
+    result_lv = filter_language_values(language='lv',
+                                    value_list=unfiltered_positions_held_GW)
+    assert len(result) == len(result_lv)
+    assert len([res for res in result_lv if 'labels' in res and res['labels']]) == 1
