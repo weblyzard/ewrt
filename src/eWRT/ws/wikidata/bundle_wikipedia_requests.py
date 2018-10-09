@@ -17,6 +17,7 @@ def collect_multiple_from_wikipedia(sitelinks_cache, entities_cache,
                                     batchsize=20):
     """Request details about a list of titles from Wikipedia and
     update the cached entities with the result.
+    :param batchsize: number of titles to be queried from Wikipedia, per query.
     :param sitelinks_cache: a dictionary of the format
         {
             language1: {
@@ -49,7 +50,6 @@ def batch_enrich_from_wikipedia(wikipedia_pages, language, entities_cache):
     :param entities_cache: Stored entities with their info as retrieved from
         Wikidata to be supplemented with Wikipedia info.
     :type entities_cache: dict
-    :param batchsize:
     :return:
     """
     batch = wikipedia_pages
@@ -130,7 +130,8 @@ def wikipedia_request_dispatcher(sitelinks_cache, entity_cache, languages=None,
             lower_limit, upperlimit = batch_size * step, batch_size * (step + 1)
             batch = {key: total_sitelinks[key] for key in
                      sitelink_list[lower_limit:upperlimit]}
-            for result in batch_enrich_from_wikipedia(wikipedia_pages=batch,
-                                                      language=language,
-                                                      entities_cache=entity_cache):
+            for result in batch_enrich_from_wikipedia(
+                    wikipedia_pages=batch,
+                    language=language,
+                    entities_cache=entity_cache):
                 yield result

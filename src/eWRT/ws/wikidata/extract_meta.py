@@ -40,12 +40,17 @@ WIKIDATA_SITE = pywikibot.Site("wikidata", "wikidata")
 
 
 def get_wikidata_timestamp(item_page):
+    """
+
+    :param item_page:
+    :return:
+    """
     # ItemPages come in two slightly different formats depending on how
     # they were created (probably a bug in pywikibot). We want to be able to
     # deal with both:
     try:
         timestamp = item_page['timestamp']
-    except:
+    except (TypeError, KeyError):
         try:
             timestamp = item_page.timestamp
         except AttributeError:
@@ -62,6 +67,7 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
                                       delay_wikipedia_retrieval=False):
     """
 
+    :param include_attribute_labels:
     :param itempage: ItemPage from which to collect information
     :param languages: list of languages in which to include literals
             and Wikipedia information (2-character{} ISO codes).
@@ -105,7 +111,7 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
     if include_wikipedia:
         try:
             sitelinks = itempage.text['sitelinks']
-        except (KeyError):
+        except KeyError:
             sitelinks = itempage.sitelinks
         except AttributeError:
             sitelinks = itempage['sitelinks']
@@ -181,7 +187,12 @@ class WikidataEntityIterator:
         'person': 'Q5'
     }
 
-    def __init__(self, top_level_categories=None, lazy_load_subclasses=True):
+    def __init__(self, top_level_categories=None, lazy_load_subclasses=True, dump_path=None):
+        if dump_path is None:
+            self.dump_path = \
+                '~/Downloads/wikidatawiki-latest-pages-articles.xml.bz2'
+        else:
+            self.dump_path = dump_path
         # todo: enable to iterate over a single file (dump mode) once
         # while sorting the entities into their different entity types
         if not top_level_categories:
@@ -201,7 +212,7 @@ class WikidataEntityIterator:
 
             self.all_relevant_categories = self.get_relevant_category_ids(
                 top_level_categories)
-        elif set(self.entity_types) == set(('person')):
+        elif self.entity_types.keys() == ['person']:
             self.relevant_categories = {'person': 'Q5'}
 
     def get_relevant_category_ids(self, top_level_categories=None):
@@ -268,31 +279,25 @@ class WikidataEntityIterator:
                                    require_country=True,
                                    include_wikipedia=True,
                                    delay_wikipedia_retrieval=True,
-                                   dump_path='/home/jakob/Downloads/wikidatawiki-latest-pages-articles.xml.bz2',
-                                   entity_type=None,
-                                   n_queries=None
-                                   # no effect, for consistent API only
+                                   n_queries=None  # no effect, for consistent API only
                                    ):
         """
         iteratively parse a xml-dump (with embedded json entities) for entities
         of interest, using bz2file.
         Note: the pure JSON does not contain all relevant meta-info (e. g.
         timestamps and revision IDs)
-        :param dump_path: path to the local copy of the incremental dump
-        :type dump_path: str
-        :param limit: maximum items to be read in (for debugging/testing)
-        :type limit: int
+        :param wd_parameters: attributes to be mirrored
+        :param limit_per_query: maximum items to be read in (for debugging/testing)
+        :type limit_per_query: int
         :return: list of entities to be updated
         :rtype: list
         """
+        dump_path=self.dump_path
         limit = limit_per_query
         if not self.all_relevant_categories:
             self.all_relevant_categories = self.get_relevant_category_ids(
                 self.entity_types)
         relevant_entities_counter = 0
-        to_be_remirrored = []
-        counter_all = 0
-
         with BZ2File(dump_path) as xml_file:
 
             parser = et.iterparse(xml_file, events=('end',))
@@ -305,7 +310,6 @@ class WikidataEntityIterator:
                 if elem.tag == '{http://www.mediawiki.org/xml/export-0.10/}timestamp':
                     timestamp = elem.text
                 if elem.tag == '{http://www.mediawiki.org/xml/export-0.10/}text':
-                    counter_all += 1
 
                     if not elem.text:
                         continue
@@ -329,9 +333,9 @@ class WikidataEntityIterator:
                                     delay_wikipedia_retrieval=delay_wikipedia_retrieval)
                                 entity['category'] = category
                                 yield entity
-                            except ValueError as e:  # this probably means no Wikipedia p:
-                                # age in
-                                # any of our languages. We have no use for such entities.
+                            except ValueError as e:  # this probably means no
+                                # Wikipedia page in any of our languages. We
+                                # have no use for such entities.
                                 if raise_on_missing_wikipedias:
                                     raise ValueError(
                                         'No information about this entity found!')
@@ -345,7 +349,16 @@ class WikidataEntityIterator:
         # raise NotImplementedError
 
     def determine_relevant_category(self, elem_content):
-
+        """
+        Determine whether and which category we are after a detected entity
+        belongs to. The categories are stored in an ordered dict, so if an
+        entity belongs to several categories, it will be parsed as only one,
+        the first one. Example: geo-political entities are both organizations
+        and locations, but parsed only as one or the other depending on
+        the order self.relevant_categories.
+        :param elem_content: A raw entity JSON as retrieved from Wikidata
+        :return:
+        """
         try:
             try:
                 types = elem_content['claims']['P31']
@@ -380,9 +393,9 @@ class WikidataEntityIterator:
                                    delay_wikipedia_retrieval=True
                                    ):
         """Get a list of entities with pywikibot.pagegenerators
+
         :param languages: list if languages (ISO codes); the order determines
             which one's Wikipedia page will be used for the preferred `url`.
-        :param entity_type: type of entity ('person', 'organization' or 'geo')
         :param include_literals: include 'aliases' and 'descriptions' (bool)
         :type include_literals: bool
         :param wd_parameters: list of wikidata properties to include in result

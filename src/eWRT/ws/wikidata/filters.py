@@ -11,6 +11,13 @@ import copy
 
 def filter_result(language, raw_result,
                   literals=('labels', 'descriptions', 'aliases')):
+    """
+
+    :param language:
+    :param raw_result:
+    :param literals:
+    :return:
+    """
     output_formatted_entity = {}
     wikibot_result = raw_result
 
@@ -25,7 +32,7 @@ def filter_result(language, raw_result,
         #     continue
         if key[2:] == 'wiki' or wikibot_result[key] is None:
             continue
-        elif isinstance(wikibot_result[key], (basestring)) or wikibot_result[
+        elif isinstance(wikibot_result[key], basestring) or wikibot_result[
             key] is None:
             output_formatted_entity[key] = wikibot_result[key]
         elif isinstance(wikibot_result[key], dict):
@@ -54,6 +61,12 @@ def filter_result(language, raw_result,
 
 
 def filter_language_values(value_list, language):
+    """
+
+    :param value_list:
+    :param language:
+    :return:
+    """
     values = copy.deepcopy(value_list)
     for value in values:
         if 'qualifiers' in value:

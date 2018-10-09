@@ -22,7 +22,7 @@ logger = logging.Logger(name='wp_bundler')
 def collect_entities_delayed(entity_types,
                              retrieval_mode,
                              num_queries=1,
-                             languages=['en'],
+                             languages=None,
                              limit_per_query=None,
                              include_literals=True,
                              wikidata_fields=None,
@@ -31,7 +31,8 @@ def collect_entities_delayed(entity_types,
                              require_country=False,
                              include_wikipedia=True,
                              debug=False,
-                             memory_saving_limit=500):
+                             memory_saving_limit=500,
+                             dump_path=None):
     """
 
     :param entity_types: dict/Ordered dict of entity types
@@ -50,10 +51,13 @@ def collect_entities_delayed(entity_types,
     :param memory_saving_limit:
     :return:
     """
+    if languages is None:
+        languages = ['en']
     relevant_entity_types = OrderedDict(
         [(entity_type, entity_types[entity_type]) for entity_type in
          entity_types])
-    iterator = WikidataEntityIterator(relevant_entity_types)
+    iterator = WikidataEntityIterator(relevant_entity_types,
+                                      dump_path=dump_path)
     if retrieval_mode == 'API':
         collect_entities_iterative = iterator.collect_entities_iterative
     elif retrieval_mode == 'bz_dump':
@@ -91,14 +95,12 @@ def collect_entities_delayed(entity_types,
                 if debug:
                     logger.debug(datetime.datetime.now().isoformat())
                     logger.debug('retrieving data from wikipedia')
-                    logger.debug(
-                        '; '.join(['{} entries in language {}'.format(language,
-                                                                      len(
-                                                                          wikipedia_sitelinks_to_retrieve[
-                                                                              language]))
-                                   for language in
-                                   wikipedia_sitelinks_to_retrieve])
-                    )
+                    for language in wikipedia_sitelinks_to_retrieve:
+                        logger.debug('{} entries in language {}'.format(
+                            len(wikipedia_sitelinks_to_retrieve[language]),
+                            language
+                        ))
+
                 for merged_result in collect_multiple_from_wikipedia(
                         wikipedia_sitelinks_to_retrieve,
                         entities_retrieved):
