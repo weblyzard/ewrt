@@ -12,16 +12,15 @@ Loop
 
 import sys
 import ujson
-import ijson
+import requests
+import pywikibot.pagegenerators
 
 from collections import OrderedDict
-import pywikibot.pagegenerators
-import requests
 from bz2file import BZ2File
-from eWRT.ws.wikidata.enrich_from_wikipedia import wp_summary_from_wdid
-from eWRT.ws.wikidata.wikibot_parse_item import ParseItemPage
 from lxml import etree as et
 from wikipedia import RedirectError, DisambiguationError
+from eWRT.ws.wikidata.enrich_from_wikipedia import wp_summary_from_wdid
+from eWRT.ws.wikidata.wikibot_parse_item import ParseItemPage
 
 ENTITY_TYPE_IDENTIFIERS = {
     'person': 'Q5',
@@ -35,15 +34,9 @@ ENTITY_TYPES = ['organization', 'person', 'geo']
 QUERY = """SELECT ?item WHERE{
   ?item wdt:P31|wdt:P279* wd:%s .
  }
-LIMIT %s
-OFFSET %s
 """
 
 WIKIDATA_SITE = pywikibot.Site("wikidata", "wikidata")
-
-import ijson
-from ijson.common import ObjectBuilder
-
 
 
 def get_wikidata_timestamp(item_page):
@@ -128,7 +121,8 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
             wikipedia_data = {wiki: sitelinks[wiki] for wiki in
                               relevant_sitelinks}
             try:
-                wikipedia_data = {wiki:wikipedia_data[wiki]['title'] for wiki in wikipedia_data}
+                wikipedia_data = {wiki: wikipedia_data[wiki]['title'] for wiki
+                                  in wikipedia_data}
             except TypeError:
                 pass
         else:
@@ -187,9 +181,7 @@ class WikidataEntityIterator:
         'person': 'Q5'
     }
 
-
-
-    def __init__(self, top_level_categories=None):
+    def __init__(self, top_level_categories=None, lazy_load_subclasses=True):
         # todo: enable to iterate over a single file (dump mode) once
         # while sorting the entities into their different entity types
         if not top_level_categories:
@@ -203,9 +195,14 @@ class WikidataEntityIterator:
             except KeyError as e:
                 raise ValueError(
                     'Category with undefined defaults: {}'.format(e))
-        self.all_relevant_categories = self.get_relevant_category_ids(
-            top_level_categories)
+        self.entity_types = top_level_categories
+        self.all_relevant_categories = []
+        if not lazy_load_subclasses:
 
+            self.all_relevant_categories = self.get_relevant_category_ids(
+                top_level_categories)
+        elif set(self.entity_types) == set(('person')):
+            self.relevant_categories = {'person': 'Q5'}
 
     def get_relevant_category_ids(self, top_level_categories=None):
         """
@@ -216,6 +213,10 @@ class WikidataEntityIterator:
             of either of the top level categories in 'top_level_categories'
         :rtype: frozenset
         """
+        if not self.entity_types:
+            self.entity_types = top_level_categories
+            self.all_relevant_categories = self.get_relevant_category_ids(
+                top_level_categories)
         if top_level_categories is None:
             top_level_categories = self.type_root_identifiers
         all_relevant_categories = frozenset()
@@ -227,7 +228,8 @@ class WikidataEntityIterator:
                     subclasses)
                 self.relevant_categories[label] = subclasses
             except KeyError as e:
-                raise ValueError('Nothing found for category {}: {}'.format(label, e))
+                raise ValueError(
+                    'Nothing found for category {}: {}'.format(label, e))
 
         # all_relevant_categories = (
         #         frozenset(type_subclasses('event')) |
@@ -268,7 +270,8 @@ class WikidataEntityIterator:
                                    delay_wikipedia_retrieval=True,
                                    dump_path='/home/jakob/Downloads/wikidatawiki-latest-pages-articles.xml.bz2',
                                    entity_type=None,
-                                   n_queries=None  # no effect, for consistent API only
+                                   n_queries=None
+                                   # no effect, for consistent API only
                                    ):
         """
         iteratively parse a xml-dump (with embedded json entities) for entities
@@ -283,7 +286,9 @@ class WikidataEntityIterator:
         :rtype: list
         """
         limit = limit_per_query
-
+        if not self.all_relevant_categories:
+            self.all_relevant_categories = self.get_relevant_category_ids(
+                self.entity_types)
         relevant_entities_counter = 0
         to_be_remirrored = []
         counter_all = 0
@@ -293,7 +298,7 @@ class WikidataEntityIterator:
             parser = et.iterparse(xml_file, events=('end',))
 
             for events, elem in parser:
-            #     pass
+                #     pass
                 if limit and relevant_entities_counter > limit:
                     break
                 # if t == 'item':
@@ -308,7 +313,8 @@ class WikidataEntityIterator:
                         elem_content = ujson.loads(elem.text)
 
                         elem_content['timestamp'] = timestamp
-                        category = self.determine_relevant_category(elem_content)
+                        category = self.determine_relevant_category(
+                            elem_content)
                         if category:
                             relevant_entities_counter += 1
                             try:
@@ -336,8 +342,6 @@ class WikidataEntityIterator:
                         del events
                         continue
 
-
-
         # raise NotImplementedError
 
     def determine_relevant_category(self, elem_content):
@@ -346,8 +350,11 @@ class WikidataEntityIterator:
             try:
                 types = elem_content['claims']['P31']
                 for entity_type in self.relevant_categories:
-                    categories = [category['mainsnak']['datavalue']['value']['id'] for category in types]
-                    if any([category in self.relevant_categories[entity_type] for category in categories]):
+                    categories = [
+                        category['mainsnak']['datavalue']['value']['id'] for
+                        category in types]
+                    if any([category in self.relevant_categories[entity_type]
+                            for category in categories]):
                         return entity_type
                 return None
             except TypeError:
@@ -362,9 +369,9 @@ class WikidataEntityIterator:
             raise ValueError('Does not appear to be a correctly '
                              'formatted entity!')
 
-
-    def collect_entities_iterative(self, limit_per_query, n_queries, wd_parameters,
-                                   include_literals, entity_type, languages,
+    def collect_entities_iterative(self, limit_per_query, n_queries,
+                                   wd_parameters,
+                                   include_literals, languages,
                                    raise_on_missing_wikipedias=False,
                                    id_only=False,
                                    include_attribute_labels=True,
@@ -385,47 +392,52 @@ class WikidataEntityIterator:
         :param n_queries: maximum number of subsequent queries
         :type n_queries: int
         """
-        for i in range(n_queries):
-            wikidata_site = WIKIDATA_SITE
-            query = QUERY % (ENTITY_TYPE_IDENTIFIERS[entity_type],
-                             limit_per_query,
-                             limit_per_query * i)
-            # logger.debug('Query is\n' + query)
-            generator = pywikibot.pagegenerators.WikidataSPARQLPageGenerator(
-                query, site=wikidata_site)
-            if not generator:
-                break
-            # parsed_entities = []
-            for j in range(limit_per_query):
-                try:
-                    if sys.version_info.major == 3:
-                        entity_raw = next(generator)
-                    else:
-                        entity_raw = generator.next()
-
-                except StopIteration:
+        for entity_type in self.entity_types:
+            for i in range(n_queries):
+                wikidata_site = WIKIDATA_SITE
+                query = QUERY % (self.entity_types[entity_type])
+                if limit_per_query:
+                    query = query + '\nLIMIT {}\nOFFSET{}'.format(
+                        limit_per_query,
+                        limit_per_query * i)
+                # logger.debug('Query is\n' + query)
+                generator = pywikibot.pagegenerators.WikidataSPARQLPageGenerator(
+                    query, site=wikidata_site)
+                if not generator:
                     break
-                if id_only:
-                    yield entity_raw.id
-                    continue
+                # parsed_entities = []
+                for j in range(limit_per_query):
+                    try:
+                        if sys.version_info.major == 3:
+                            entity_raw = next(generator)
+                        else:
+                            entity_raw = generator.next()
 
-                try:
-                    for result in collect_attributes_from_wp_and_wd(
-                        entity_raw,
-                        languages=languages,
-                        wd_parameters=wd_parameters,
-                        include_literals=include_literals,
-                        include_attribute_labels=include_attribute_labels,
-                        require_country=require_country,
-                        include_wikipedia=include_wikipedia,
-                        delay_wikipedia_retrieval=delay_wikipedia_retrieval):
-                            yield result
-                except ValueError:  # this probably means no Wikipedia page in
-                    # any of our languages. We have no use for such entities.
-                    if raise_on_missing_wikipedias:
-                        raise ValueError(
-                            'No information about this entity found!')
-                    continue
+                    except StopIteration:
+                        break
+                    if id_only:
+                        yield entity_raw.id
+                        continue
+                    try:
+                        result = collect_attributes_from_wp_and_wd(
+                            entity_raw,
+                            languages=languages,
+                            wd_parameters=wd_parameters,
+                            include_literals=include_literals,
+                            include_attribute_labels=include_attribute_labels,
+                            require_country=require_country,
+                            include_wikipedia=include_wikipedia,
+                            delay_wikipedia_retrieval=delay_wikipedia_retrieval)
+
+                        result['category'] = entity_type
+                        yield result
+
+                    except ValueError:  # this probably means no Wikipedia page in
+                        # any of our languages. We have no use for such entities.
+                        if raise_on_missing_wikipedias:
+                            raise ValueError(
+                                'No information about this entity found!')
+                        continue
 
 # if __name__ == '__main__':
 #     import pprint

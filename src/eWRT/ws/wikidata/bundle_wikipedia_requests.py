@@ -8,12 +8,13 @@ Created on October 09, 2018
 
 import warnings
 
+from eWRT.ws.wikidata.enrich_from_wikipedia import \
+    wikipedia_page_info_from_title
 from eWRT.ws.wikidata.filters import filter_result
-from eWRT.ws.wikidata.enrich_from_wikipedia import wikipedia_page_info_from_title
 
 
 def collect_multiple_from_wikipedia(sitelinks_cache, entities_cache,
-                                    debug=False, batchsize=20):
+                                    batchsize=20):
     """Request details about a list of titles from Wikipedia and
     update the cached entities with the result.
     :param sitelinks_cache: a dictionary of the format
@@ -32,12 +33,11 @@ def collect_multiple_from_wikipedia(sitelinks_cache, entities_cache,
     for entry in wikipedia_request_dispatcher(
             wikipedia_sitelinks_to_retrieve,
             entity_cache=entities_cache,
-            debug=debug, batch_size=batchsize):
+            batch_size=batchsize):
         yield entry
 
 
-def batch_enrich_from_wikipedia(wikipedia_pages, language, entities_cache,
-                                debug=False, batchsize=20):
+def batch_enrich_from_wikipedia(wikipedia_pages, language, entities_cache):
     """
     Postprocess Wikidata results by complementing them with Wikipedia data.
 
@@ -49,8 +49,6 @@ def batch_enrich_from_wikipedia(wikipedia_pages, language, entities_cache,
     :param entities_cache: Stored entities with their info as retrieved from
         Wikidata to be supplemented with Wikipedia info.
     :type entities_cache: dict
-    :param debug: boolean, controls whether to serialize the result of the
-        merger to file or send it to the portal.
     :param batchsize:
     :return:
     """
@@ -94,7 +92,7 @@ def batch_enrich_from_wikipedia(wikipedia_pages, language, entities_cache,
 
 
 def wikipedia_request_dispatcher(sitelinks_cache, entity_cache, languages=None,
-                                 batch_size=20, debug=False):
+                                 batch_size=20):
     """
     Split a large dict of Wikipedia sitelinks to pages about entities about
     which information has been retrieved from Wikidata into smaller chunks
@@ -124,7 +122,7 @@ def wikipedia_request_dispatcher(sitelinks_cache, entity_cache, languages=None,
         total_sitelinks = sitelinks_cache[language]
         sitelink_list = total_sitelinks.keys()
         n_sitelinks = len(total_sitelinks)
-        print('{} links in language {}'.format(n_sitelinks,language))
+        print('{} links in language {}'.format(n_sitelinks, language))
         steps = n_sitelinks // batch_size
         if not steps:
             steps = 1
@@ -134,7 +132,5 @@ def wikipedia_request_dispatcher(sitelinks_cache, entity_cache, languages=None,
                      sitelink_list[lower_limit:upperlimit]}
             for result in batch_enrich_from_wikipedia(wikipedia_pages=batch,
                                                       language=language,
-                                                      entities_cache=entity_cache,
-                                                      debug=debug):
+                                                      entities_cache=entity_cache):
                 yield result
-

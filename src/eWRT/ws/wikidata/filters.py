@@ -8,7 +8,9 @@ Created on October 05, 2018
 
 import copy
 
-def filter_result(language, raw_result, literals=('labels', 'descriptions', 'aliases')):
+
+def filter_result(language, raw_result,
+                  literals=('labels', 'descriptions', 'aliases')):
     output_formatted_entity = {}
     wikibot_result = raw_result
 
@@ -23,16 +25,27 @@ def filter_result(language, raw_result, literals=('labels', 'descriptions', 'ali
         #     continue
         if key[2:] == 'wiki' or wikibot_result[key] is None:
             continue
-        elif isinstance(wikibot_result[key], (basestring)) or wikibot_result[key] is None:
+        elif isinstance(wikibot_result[key], (basestring)) or wikibot_result[
+            key] is None:
             output_formatted_entity[key] = wikibot_result[key]
         elif isinstance(wikibot_result[key], dict):
             if key in literals:
                 output_formatted_entity[key] = wikibot_result[key][language]
             elif 'values' in wikibot_result[key]:
-                output_formatted_entity[key] = filter_language_values(
+                output_formatted_entity[key] = {
+                input_key: wikibot_result[key][input_key] for input_key in
+                wikibot_result[key] if input_key not in ('values', 'preferred')}
+
+                output_formatted_entity[key]['values'] = filter_language_values(
                     wikibot_result[key]['values'], language)
+
             else:
                 output_formatted_entity[key] = wikibot_result[key]
+            if 'preferred' in output_formatted_entity[key]:
+                output_formatted_entity[key]['preferred'] = \
+                    filter_language_values(
+                        [wikibot_result[key]['preferred']], language
+                    )[0]
 
         else:
             output_formatted_entity[key] = wikibot_result[key]
