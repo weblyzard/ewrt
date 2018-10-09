@@ -11,7 +11,6 @@ relevant attributes and languages for literals
 
 '''
 
-
 import sys
 import warnings
 
@@ -21,7 +20,8 @@ from eWRT.ws.wikidata.definitions import (local_attributes as LOCAL_ATTRIBUTES,
 from eWRT.ws.wikidata.get_image_from_wikidataid import get_image, \
     NoImageFoundError
 from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
-from pywikibot import WbTime
+from pywikibot import WbTime, Claim
+from pywikibot.site import DataSite
 
 if sys.version_info.major == 3:
     basestring = (bytes, str)
@@ -46,6 +46,7 @@ class ParseItemPage:
         of properties, returning a dict of property labels and values."""
     LITERAL_PROPERTIES = ['labels', 'aliases', 'descriptions']
     attribute_preferred_value = attribute_preferred_value
+
     def __init__(self, itempage, include_literals=False,
                  claims_of_interest=None,
                  entity_type_properties=None, languages=None,
@@ -103,7 +104,6 @@ class ParseItemPage:
         self.process_attributes()
         assert self.details
 
-
     def process_attributes(self):
         """Exctract information about the item, specified
         by the predicates in self.claims_of_interest:
@@ -159,7 +159,7 @@ class ParseItemPage:
 
             # warnings.warn(
             #    'claim {} not available for entity {}'.format(claim, self.details['labels']))
-        if ('country' not in self.details or not self.details[ 'country']) and \
+        if ('country' not in self.details or not self.details['country']) and \
                 self._require_country:
             country_info = self.get_country_from_any(self.item_raw,
                                                      local_attributes=LOCAL_ATTRIBUTES,
@@ -200,7 +200,8 @@ class ParseItemPage:
         for sub_claim in claim_instances:
             try:
                 value = ParseClaim(sub_claim, languages,
-                                   literals,include_attribute_labels=include_attribute_labels).claim_details
+                                   literals,
+                                   include_attribute_labels=include_attribute_labels).claim_details
                 if value:
                     values.append(value)
             except Exception as e:
@@ -244,16 +245,20 @@ class ParseItemPage:
             literals = cls.LITERAL_PROPERTIES
         literal_properties = {prop: {} for prop in literals}
         for prop in literal_properties:
-            from wl_data_scripts.projects.wikibot.filters import filter_result
             for language in languages:
                 try:
                     literal_properties[prop][language] = \
                         entity.text[prop][language]
                     if isinstance(literal_properties[prop][language], dict):
-                        literal_properties[prop][language] = literal_properties[prop][language]['value']
+                        literal_properties[prop][language] = \
+                        literal_properties[prop][language]['value']
                     elif isinstance(literal_properties[prop][language], list):
                         try:
-                            literal_properties[prop][language] = [entry['value'] for entry in literal_properties[prop][language]]
+                            literal_properties[prop][language] = [entry['value']
+                                                                  for entry in
+                                                                  literal_properties[
+                                                                      prop][
+                                                                      language]]
                         except TypeError:
                             pass
                 except (KeyError, AttributeError, TypeError):
@@ -261,7 +266,8 @@ class ParseItemPage:
         return literal_properties
 
     @classmethod
-    def get_country_from_location(cls, location_item_page, languages, include_attribute_labels=True):
+    def get_country_from_location(cls, location_item_page, languages,
+                                  include_attribute_labels=True):
         """Get country info from sub-country location.
         :param location_item_page: a location-type entities ItemPage.
         :type location_item_page: pywikibot.ItemPage
@@ -302,12 +308,18 @@ class ParseItemPage:
         :raises ValueError if no country can be reconstrued.
         """
         if local_attributes is None:
-            local_attributes=LOCAL_ATTRIBUTES
-
+            local_attributes = LOCAL_ATTRIBUTES
+        try:
+            claims = itempage.claims
+        except:
+            claims = itempage.text['claims']
         for location_type in local_attributes:
-            if location_type in itempage.claims:
-                for location in itempage.claims[location_type]:
+            if location_type in claims:
+                for location in claims[location_type]:
                     if location:
+                        if not isinstance(location, Claim):
+                            location = Claim.fromJSON(
+                                DataSite('wikidata', 'wikidata'), data=location)
                         try:
                             country = \
                                 ParseItemPage.get_country_from_location(
@@ -333,7 +345,8 @@ class ParseItemPage:
 class ParseClaim:
     """Parse an individual claim and its qualifiers"""
 
-    def __init__(self, claim, languages, literals, delay=False,include_attribute_labels=True):
+    def __init__(self, claim, languages, literals, delay=False,
+                 include_attribute_labels=True):
         """
         Parse additional information about a specified claim. The result
         (dict format) is accessible through ParseClaim(claim).claim_details
@@ -348,7 +361,8 @@ class ParseClaim:
         from pywikibot import Claim
         from pywikibot.site import DataSite
         if not isinstance(claim, Claim):
-            claim = Claim.fromJSON(site=DataSite('wikidata', 'wikidata'), data=claim)
+            claim = Claim.fromJSON(site=DataSite('wikidata', 'wikidata'),
+                                   data=claim)
 
         self.include_attribute_labels = include_attribute_labels
         self.claim = claim
