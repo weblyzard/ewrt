@@ -190,24 +190,22 @@ def test_collect_multiple_from_wikipedia():
         pass
 
 
-test_collect_multiple_from_wikipedia()
 
-
-def test_enrich_from_wikipedia_online():
+def test_enrich_from_wikipedia_offline():
     """
     No mock, real call to Wikipedia API, basic structure should still be
     the same but literal equivalence between merge_result['enwiki'] and
     cached snapshot is not expected
     """
-    enrichment_result = batch_enrich_from_wikipedia(
-        wikipedia_pages=sitelink_cache['en'],
-        entities_cache=GW_snapshot_wikidata_result,
-        language='en',
-    ).next()
+    with mock.patch(target='eWRT.ws.wikidata.bundle_wikipedia_requests.wikipedia_page_info_from_title',
+            new=batch_enrich_mock):
+        enrichment_result = batch_enrich_from_wikipedia(
+            wikipedia_pages=sitelink_cache['en'],
+            entities_cache=GW_snapshot_wikidata_result,
+            language='en',
+        ).next()
     assert_basic_structure_as_expected(enrichment_result)
-    assert u'2018-10-04T05:06:49Z' < enrichment_result['enwiki'][
-        'timestamp'] < datetime.datetime.now().strftime(u'%Y-%m-%dT%H:%M:%SZ')
-    # todo: add test for similarity of retrieved summary with snapshot?
+    assert GW_snapshot_wikipedia_result['timestamp'] == enrichment_result['enwiki']['timestamp']
 
 
 def assert_basic_structure_as_expected(merged_result):
@@ -232,12 +230,13 @@ def assert_basic_structure_as_expected(merged_result):
                          'Timestamp returned was: {}, expected format  {}'.format(
             wiki_timestamp,
             datetime.datetime.now().strftime(u'%Y-%m-%dT%H:%M:%SZ')))
+    assert u'2018-10-04T05:06:49Z' <= merged_result['enwiki'][
+        'timestamp'] < datetime.datetime.now().strftime(u'%Y-%m-%dT%H:%M:%SZ')
+    # todo: add test for similarity of retrieved summary with snapshot?
 
 
 def mock_batch_enrich(*args, **kwargs):
     for i in range(20): yield i
-
-
 @mock.patch(
     target='eWRT.ws.wikidata.bundle_wikipedia_requests.batch_enrich_from_wikipedia',
     new=mock_batch_enrich)

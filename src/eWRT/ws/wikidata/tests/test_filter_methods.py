@@ -5,7 +5,6 @@ Created on October 09, 2018
 
 @author: jakob <jakob.steixner@modul.ac.at>
 '''
-import datetime
 
 import pytest
 
@@ -37,8 +36,6 @@ expected_result = [
 
 @pytest.mark.parametrize('language,expected', expected_result)
 def test_filter_result(language, expected):
-    filtered_result = filter_result(language, input_raw_result)
-    print
     assert filter_result(language, input_raw_result) == expected
 
 

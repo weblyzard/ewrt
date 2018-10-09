@@ -126,21 +126,23 @@ class TestWikipedia_page_info_from_title():
         assert len(results) == 7
 
     def test_get_too_many(self):
+        """
+        Assert that a Value error is raised if the list of titles is longer
+        than 50 (the limit of the Wikipedia API.
+
+        """
         with pytest.raises(ValueError):
             country_results = list(wikipedia_page_info_from_title('|'.join(countries),
                                                       'en'))
         self.country_results = []
-        import time
-        start_time = time.time()
         selected_countries = countries[:50]
+
         for country in wikipedia_page_info_from_title('|'.join(selected_countries),
                                                       'en', redirect=True):
             self.country_results.append(country)
-        print time.time() - start_time
-
-
-TestWikipedia_page_info_from_title().test_get_too_many()
-
+        # we expect some loss due to pages that are named somewhat differently
+        # in our list than in the English Wikipedia, but not too much.
+        assert 45 <= len(self.country_results) <= 50
 # '''
 # {u'lastrevid': 862105845, u'pagelanguagedir': u'ltr', u'pageid': 26964606,
 #  u'canonicalurl': u'https://en.wikipedia.org/wiki/Austria',
