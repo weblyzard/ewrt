@@ -14,10 +14,8 @@ import sys
 import ujson
 import ijson
 
-from ijson.common import ObjectBuilder
-
+from collections import OrderedDict
 import pywikibot.pagegenerators
-from pywikibot import ItemPage
 import requests
 from bz2file import BZ2File
 from eWRT.ws.wikidata.enrich_from_wikipedia import wp_summary_from_wdid
@@ -28,7 +26,8 @@ from wikipedia import RedirectError, DisambiguationError
 ENTITY_TYPE_IDENTIFIERS = {
     'person': 'Q5',
     'organization': 'Q43229',
-    'geo': 'Q2221906'
+    'geo': 'Q2221906',
+
 }
 
 ENTITY_TYPES = ['organization', 'person', 'geo']
@@ -183,10 +182,12 @@ class WikidataEntityIterator:
     """
     type_root_identifiers = {
         'event': 'Q1190554',  # labelled 'occurence' in WikiData
-        'organization': 'Q43229',
         'geo': 'Q2221906',
+        'organization': 'Q43229',
         'person': 'Q5'
     }
+
+
 
     def __init__(self, top_level_categories=None):
         # todo: enable to iterate over a single file (dump mode) once
@@ -205,6 +206,7 @@ class WikidataEntityIterator:
         self.all_relevant_categories = self.get_relevant_category_ids(
             top_level_categories)
 
+
     def get_relevant_category_ids(self, top_level_categories=None):
         """
         Get a complete up to date
@@ -217,12 +219,16 @@ class WikidataEntityIterator:
         if top_level_categories is None:
             top_level_categories = self.type_root_identifiers
         all_relevant_categories = frozenset()
+        self.relevant_categories = OrderedDict()
         for label in top_level_categories:
             try:
+                subclasses = self.type_subclasses(label)
                 all_relevant_categories = all_relevant_categories | frozenset(
-                    self.type_subclasses(label))
+                    subclasses)
+                self.relevant_categories[label] = subclasses
             except KeyError as e:
                 raise ValueError('Nothing found for category {}: {}'.format(label, e))
+
         # all_relevant_categories = (
         #         frozenset(type_subclasses('event')) |
         #         frozenset(type_subclasses('human')) |
@@ -252,20 +258,23 @@ class WikidataEntityIterator:
         res = list([item.id for item in res])
         return res
 
-    def collect_entities_from_dump(self, limit_per_query, n_queries,
+    def collect_entities_from_dump(self, limit_per_query,
                                    wd_parameters,
-                                   include_literals, entity_type, languages,
+                                   include_literals, languages,
                                    raise_on_missing_wikipedias=False,
-                                   id_only=False,
                                    include_attribute_labels=True,
                                    require_country=True,
                                    include_wikipedia=True,
                                    delay_wikipedia_retrieval=True,
-                                   dump_path='/home/jakob/Downloads/latest-all.json.bz2'
+                                   dump_path='/home/jakob/Downloads/wikidatawiki-latest-pages-articles.xml.bz2',
+                                   entity_type=None,
+                                   n_queries=None  # no effect, for consistent API only
                                    ):
         """
         iteratively parse a xml-dump (with embedded json entities) for entities
         of interest, using bz2file.
+        Note: the pure JSON does not contain all relevant meta-info (e. g.
+        timestamps and revision IDs)
         :param dump_path: path to the local copy of the incremental dump
         :type dump_path: str
         :param limit: maximum items to be read in (for debugging/testing)
@@ -279,7 +288,7 @@ class WikidataEntityIterator:
         to_be_remirrored = []
         counter_all = 0
 
-        with BZ2File('/home/jakob/Downloads/wikidatawiki-latest-pages-articles9.xml-p4317379p5264683.bz2') as xml_file:
+        with BZ2File(dump_path) as xml_file:
 
             parser = et.iterparse(xml_file, events=('end',))
 
@@ -292,16 +301,18 @@ class WikidataEntityIterator:
                     timestamp = elem.text
                 if elem.tag == '{http://www.mediawiki.org/xml/export-0.10/}text':
                     counter_all += 1
-                    print(counter_all)
-                # else:
+
+                    if not elem.text:
+                        continue
                     try:
                         elem_content = ujson.loads(elem.text)
 
                         elem_content['timestamp'] = timestamp
-                        if self.determine_relevant_category(elem_content):
+                        category = self.determine_relevant_category(elem_content)
+                        if category:
                             relevant_entities_counter += 1
                             try:
-                                yield collect_attributes_from_wp_and_wd(
+                                entity = collect_attributes_from_wp_and_wd(
                                     elem_content,
                                     languages=languages,
                                     wd_parameters=wd_parameters,
@@ -310,7 +321,10 @@ class WikidataEntityIterator:
                                     require_country=require_country,
                                     include_wikipedia=include_wikipedia,
                                     delay_wikipedia_retrieval=delay_wikipedia_retrieval)
-                            except ValueError as e:  # this probably means no Wikipedia page in
+                                entity['category'] = category
+                                yield entity
+                            except ValueError as e:  # this probably means no Wikipedia p:
+                                # age in
                                 # any of our languages. We have no use for such entities.
                                 if raise_on_missing_wikipedias:
                                     raise ValueError(
@@ -331,8 +345,11 @@ class WikidataEntityIterator:
         try:
             try:
                 types = elem_content['claims']['P31']
-                categories = [category['mainsnak']['datavalue']['value']['id'] for category in types]
-                return any([category in self.all_relevant_categories for category in categories])
+                for entity_type in self.relevant_categories:
+                    categories = [category['mainsnak']['datavalue']['value']['id'] for category in types]
+                    if any([category in self.relevant_categories[entity_type] for category in categories]):
+                        return entity_type
+                return None
             except TypeError:
                 # print(type(elem_content))
                 del elem_content

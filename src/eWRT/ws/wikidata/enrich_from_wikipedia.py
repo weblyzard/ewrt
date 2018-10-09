@@ -29,6 +29,7 @@ RELEVANT_LANGUAGES = ['en', 'de', 'fr', 'es']
 # wikipedia.set_lang('en')
 USER_AGENT = 'weblyzard (https://www.weblyzard.com/privacy-policy/)'
 
+
 def wikipedia_query(titles, index, language):
     API_URL = wikipedia.API_URL.replace('en.', language.lower() + '.')
     params = {'titles': titles,
@@ -46,8 +47,15 @@ def wikipedia_query(titles, index, language):
     headers = {
         'User-Agent': USER_AGENT
     }
-    return requests.get(API_URL, params=params,
-                                headers=headers).json()
+    try:
+        return requests.get(API_URL, params=params,
+                            headers=headers).json()
+    except requests.exceptions.ChunkedEncodingError:
+        warnings.warn(
+            'Query for titles {} at API {} unsuccessful, retry?'.format(titles,
+                                                                        API_URL))
+        return {}
+
 
 def wikipedia_page_info_from_title(wikipage_title, language, redirect=False,
                                    skip_on_empty_summary=True):
@@ -60,6 +68,7 @@ def wikipedia_page_info_from_title(wikipage_title, language, redirect=False,
         (language, id and timestamp of last revision, title, link,
         summary)
     """
+
     def _yield_pages_with_complete_result():
         flagged_as_redirect = set()
         if 'query' not in query_result:
@@ -92,15 +101,16 @@ def wikipedia_page_info_from_title(wikipage_title, language, redirect=False,
     query_result = wikipedia_query(wikipage_title, 0, language)
 
     if 'error' in query_result:
-            raise ValueError(query_result['error']['info'])
+        raise ValueError(query_result['error']['info'])
     for completed_result in _yield_pages_with_complete_result():
         yield completed_result
     counter = 0
     while 'continue' in query_result:
-        query_result = wikipedia_query(wikipage_title, query_result['continue']['excontinue'], language)
-        for completed_result in  _yield_pages_with_complete_result():
+        query_result = wikipedia_query(wikipage_title,
+                                       query_result['continue']['excontinue'],
+                                       language)
+        for completed_result in _yield_pages_with_complete_result():
             yield completed_result
-
 
 
 def get_sitelinks_from_wd_id(wikidata_id, languages):
@@ -159,7 +169,7 @@ def wp_summary_from_wdid(wikidata_id, languages=None, sitelinks=None):
                                                                 language)
                 wikipedia_data.append(wikipedia_page.next())
             except Exception as e:
-                raise(e)
+                raise (e)
             except ValueError:
                 warnings.warn('No Wikipedia page or page with empty summary '
                               'found in language {lang} '

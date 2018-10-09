@@ -152,7 +152,7 @@ class ParseItemPage:
                         warnings.warn(
                             'Unable to parse claim {claim} for item {item}, '
                             'should be present!'.format(claim=claim,
-                                                        item=self.item_raw))
+                                                        item=self.item_raw.id))
 
             except KeyError as e:
                 pass
