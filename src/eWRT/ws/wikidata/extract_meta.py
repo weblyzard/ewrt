@@ -12,15 +12,16 @@ Loop
 
 import sys
 import ujson
-import requests
-import pywikibot.pagegenerators
-
+import warnings
 from collections import OrderedDict
+
+import pywikibot.pagegenerators
+import requests
 from bz2file import BZ2File
-from lxml import etree as et
-from wikipedia import RedirectError, DisambiguationError
 from eWRT.ws.wikidata.enrich_from_wikipedia import wp_summary_from_wdid
 from eWRT.ws.wikidata.wikibot_parse_item import ParseItemPage
+from lxml import etree as et
+from wikipedia import RedirectError, DisambiguationError
 
 ENTITY_TYPE_IDENTIFIERS = {
     'person': 'Q5',
@@ -123,6 +124,12 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
         except TypeError:
             pass
 
+        if not sitelinks:
+            if raise_on_no_wikipage:
+                raise ValueError
+            else:
+                pass
+
         if delay_wikipedia_retrieval:
             wikipedia_data = {wiki: sitelinks[wiki] for wiki in
                               relevant_sitelinks}
@@ -131,7 +138,7 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
                                   in wikipedia_data}
             except TypeError:
                 pass
-        else:
+        elif sitelinks:
             try:
                 wikipedia_data = wp_summary_from_wdid(itempage.id,
                                                       languages=languages,
@@ -140,12 +147,8 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
             except (RedirectError, DisambiguationError):
                 raise ValueError
             except requests.exceptions.ConnectionError:
-                pass
-        if not wikipedia_data:
-            if raise_on_no_wikipage:
-                raise ValueError
-            else:
-                pass
+                warnings.warn('Failed to get info about entity {} from '
+                              'Wikipedia API!'.format(itempage.id))
 
     # use the Wikipedia article in the first language found as the entity's
     # unique preferred `url` - the order of languages is meaningful!
@@ -162,17 +165,32 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
             entity_extracted_details[language['language'] + 'wiki'] = language
 
     # get selected attributes from WikiData
-    entity = ParseItemPage(itempage, include_literals=include_literals,
-                           claims_of_interest=wd_parameters,
-                           languages=languages,
-                           include_attribute_labels=include_attribute_labels,
-                           require_country=require_country)
+    try:
+        entity = ParseItemPage(
+            itempage,
+            include_literals=include_literals,
+            claims_of_interest=wd_parameters,
+            languages=languages,
+            include_attribute_labels=include_attribute_labels,
+            require_country=require_country)
+    except AssertionError:
+        raise ValueError(
+            'No attributes of interest identified for entity{}'.format(
+                itempage.id))
     entity_extracted_details.update(entity.details)
     entity_extracted_details['wikidata_id'] = itempage.id
 
     entity_extracted_details['wikidata_timestamp'] = timestamp
 
-    return entity_extracted_details
+    if not delay_wikipedia_retrieval:
+        from eWRT.ws.wikidata.filters import filter_result
+        for language in languages:
+            if language + 'wiki' in relevant_sitelinks:
+                monolingual_result = filter_result(language=language,raw_result=entity_extracted_details)
+                monolingual_result['language'] = language
+                yield monolingual_result
+    else:
+        yield entity_extracted_details
 
 
 class WikidataEntityIterator:
@@ -187,14 +205,14 @@ class WikidataEntityIterator:
         'person': 'Q5'
     }
 
-    def __init__(self, top_level_categories=None, lazy_load_subclasses=True, dump_path=None):
+    def __init__(self, top_level_categories=None, lazy_load_subclasses=True,
+                 dump_path=None):
         if dump_path is None:
             self.dump_path = \
                 '~/Downloads/wikidatawiki-latest-pages-articles.xml.bz2'
         else:
             self.dump_path = dump_path
-        # todo: enable to iterate over a single file (dump mode) once
-        # while sorting the entities into their different entity types
+
         if not top_level_categories:
             top_level_categories = self.type_root_identifiers
         elif isinstance(top_level_categories, dict):
@@ -214,6 +232,7 @@ class WikidataEntityIterator:
                 top_level_categories)
         elif self.entity_types.keys() == ['person']:
             self.relevant_categories = {'person': 'Q5'}
+            self.all_relevant_categories = self.relevant_categories
 
     def get_relevant_category_ids(self, top_level_categories=None):
         """
@@ -271,58 +290,77 @@ class WikidataEntityIterator:
         res = list([item.id for item in res])
         return res
 
-    def collect_entities_from_dump(self, limit_per_query,
+    def collect_entities_from_dump(self,
+                                   limit_per_query,  # for consistent API
                                    wd_parameters,
                                    include_literals, languages,
-                                   raise_on_missing_wikipedias=False,
+                                   raise_on_missing_wikipedias=True,
                                    include_attribute_labels=True,
                                    require_country=True,
                                    include_wikipedia=True,
                                    delay_wikipedia_retrieval=True,
-                                   n_queries=None  # no effect, for consistent API only
+                                   n_queries=None
+                                   # no effect, for consistent API only
                                    ):
         """
         iteratively parse a xml-dump (with embedded json entities) for entities
         of interest, using bz2file.
         Note: the pure JSON does not contain all relevant meta-info (e. g.
         timestamps and revision IDs)
+        :param include_literals:
+        :param languages:
+        :param raise_on_missing_wikipedias:
+        :param include_attribute_labels:
+        :param require_country:
+        :param include_wikipedia:
+        :param delay_wikipedia_retrieval:
+        :param n_queries:
         :param wd_parameters: attributes to be mirrored
         :param limit_per_query: maximum items to be read in (for debugging/testing)
         :type limit_per_query: int
         :return: list of entities to be updated
         :rtype: list
         """
-        dump_path=self.dump_path
-        limit = limit_per_query
+
+        def best_guess_open(file_name):
+            """
+            Use bz2file to iterate over a compressed file,
+            regular open otherwise."""
+            if file_name.endswith('.bz2'):
+                return BZ2File(file_name)
+            else:
+                return open(file_name)
+
+        dump_path = self.dump_path
         if not self.all_relevant_categories:
             self.all_relevant_categories = self.get_relevant_category_ids(
                 self.entity_types)
-        relevant_entities_counter = 0
-        with BZ2File(dump_path) as xml_file:
+        with best_guess_open(dump_path) as xml_file:
 
             parser = et.iterparse(xml_file, events=('end',))
 
             for events, elem in parser:
-                #     pass
-                if limit and relevant_entities_counter > limit:
-                    break
-                # if t == 'item':
                 if elem.tag == '{http://www.mediawiki.org/xml/export-0.10/}timestamp':
                     timestamp = elem.text
-                if elem.tag == '{http://www.mediawiki.org/xml/export-0.10/}text':
+                elif elem.tag == '{http://www.mediawiki.org/xml/export-0.10/}text':
 
                     if not elem.text:
                         continue
                     try:
                         elem_content = ujson.loads(elem.text)
-
-                        elem_content['timestamp'] = timestamp
+                        try:
+                            elem_content['timestamp'] = timestamp
+                            del timestamp
+                        except NameError:
+                            warnings.warn('Item {} cannot be assigned a '
+                                          'timestamp!'.format(
+                                elem_content['id']
+                            ))
                         category = self.determine_relevant_category(
                             elem_content)
                         if category:
-                            relevant_entities_counter += 1
                             try:
-                                entity = collect_attributes_from_wp_and_wd(
+                                for entity in collect_attributes_from_wp_and_wd(
                                     elem_content,
                                     languages=languages,
                                     wd_parameters=wd_parameters,
@@ -330,15 +368,16 @@ class WikidataEntityIterator:
                                     include_attribute_labels=include_attribute_labels,
                                     require_country=require_country,
                                     include_wikipedia=include_wikipedia,
-                                    delay_wikipedia_retrieval=delay_wikipedia_retrieval)
-                                entity['category'] = category
-                                yield entity
+                                    delay_wikipedia_retrieval=delay_wikipedia_retrieval,
+                                    raise_on_no_wikipage=raise_on_missing_wikipedias):
+                                    entity['category'] = category
+                                    yield entity
                             except ValueError as e:  # this probably means no
                                 # Wikipedia page in any of our languages. We
                                 # have no use for such entities.
-                                if raise_on_missing_wikipedias:
-                                    raise ValueError(
-                                        'No information about this entity found!')
+                                # if raise_on_missing_wikipedias:
+                                #     raise ValueError(
+                                #         'No information about this entity found!')
                                 continue
 
                     except ValueError:
@@ -394,6 +433,12 @@ class WikidataEntityIterator:
                                    ):
         """Get a list of entities with pywikibot.pagegenerators
 
+        :param raise_on_missing_wikipedias:
+        :param id_only:
+        :param include_attribute_labels:
+        :param require_country:
+        :param include_wikipedia:
+        :param delay_wikipedia_retrieval:
         :param languages: list if languages (ISO codes); the order determines
             which one's Wikipedia page will be used for the preferred `url`.
         :param include_literals: include 'aliases' and 'descriptions' (bool)
@@ -432,7 +477,7 @@ class WikidataEntityIterator:
                         yield entity_raw.id
                         continue
                     try:
-                        result = collect_attributes_from_wp_and_wd(
+                        for result in collect_attributes_from_wp_and_wd(
                             entity_raw,
                             languages=languages,
                             wd_parameters=wd_parameters,
@@ -440,10 +485,10 @@ class WikidataEntityIterator:
                             include_attribute_labels=include_attribute_labels,
                             require_country=require_country,
                             include_wikipedia=include_wikipedia,
-                            delay_wikipedia_retrieval=delay_wikipedia_retrieval)
+                            delay_wikipedia_retrieval=delay_wikipedia_retrieval):
 
-                        result['category'] = entity_type
-                        yield result
+                            result['category'] = entity_type
+                            yield result
 
                     except ValueError:  # this probably means no Wikipedia page in
                         # any of our languages. We have no use for such entities.

@@ -38,6 +38,7 @@ def collect_multiple_from_wikipedia(sitelinks_cache, entities_cache,
         yield entry
 
 
+
 def batch_enrich_from_wikipedia(wikipedia_pages, language, entities_cache):
     """
     Postprocess Wikidata results by complementing them with Wikipedia data.
@@ -67,8 +68,9 @@ def batch_enrich_from_wikipedia(wikipedia_pages, language, entities_cache):
             'No Wikipedia pages to retrieve in language {}!'.format(
                 language))
     for page in retrieved_pages:
+        output_formatted_entity = {'language': language}
         try:
-            output_formatted_entity = {'language': language}
+
             title = page['title']
             wikidata_url = wikipedia_pages[title]
             wikibot_result = entities_cache[wikidata_url]
@@ -130,12 +132,12 @@ def wikipedia_request_dispatcher(sitelinks_cache, entity_cache, languages=None,
                     wikipedia_pages=batch,
                     language=language,
                     entities_cache=entity_cache):
+                result['language'] = language
                 counter_retrieved += 1
                 yield result
         print('successfully_retrieved {} entries in language {}.'.format(
             counter_retrieved, language
         ))
         if not counter_retrieved:
-            raise IndexError(
-                'Failed to map any Wikipedia page infos in language {}'
+            warnings.warn('Failed to map any Wikipedia page infos in language {}'
                 ' back to Wikidata entities, encoding issue?'.format(language))

@@ -8,10 +8,9 @@ Created on October 09, 2018
 
 '''
 
-import datetime
 import logging
-
 from collections import OrderedDict
+
 from eWRT.ws.wikidata.bundle_wikipedia_requests import \
     collect_multiple_from_wikipedia
 from eWRT.ws.wikidata.extract_meta import WikidataEntityIterator
@@ -30,11 +29,11 @@ def collect_entities_delayed(entity_types,
                              include_attribute_labels=False,
                              require_country=False,
                              include_wikipedia=True,
-                             debug=False,
-                             memory_saving_limit=5000,
+                             memory_saving_limit=50,
                              dump_path=None):
     """
 
+    :param dump_path:
     :param entity_types: dict/Ordered dict of entity types
     :param retrieval_mode: read entities from API or dumped file.
     :param num_queries: number of subsequent queries, with automatic offset
@@ -60,15 +59,13 @@ def collect_entities_delayed(entity_types,
                                       dump_path=dump_path)
     if retrieval_mode == 'API':
         collect_entities_iterative = iterator.collect_entities_iterative
-    elif retrieval_mode == 'bz_dump':
+    elif retrieval_mode == 'dump':
         collect_entities_iterative = iterator.collect_entities_from_dump
         num_queries = 1  # starting a query with an offset is undefined for
         # dump mode, multiple queries would thus just produce the same
         # result over again.
-    elif retrieval_mode == 'expanded_dump':
-        raise NotImplementedError('Please use the uninflated dump (.bz2)!')
     else:
-        raise NotImplementedError('Supported modes are: API and bz_dump!')
+        raise NotImplementedError('Supported modes are: API and dump!')
     for n in range(num_queries):
         wikipedia_sitelinks_to_retrieve = {lang: {} for lang in languages}
         entities_retrieved = {}
@@ -82,26 +79,46 @@ def collect_entities_delayed(entity_types,
                 include_attribute_labels=include_attribute_labels,
                 require_country=require_country,
                 include_wikipedia=include_wikipedia)):
-            if delay_wikipedia_retrieval and include_wikipedia:
-                for lang in languages:
-                    try:
-                        wikipedia_sitelinks_to_retrieve[lang][
-                            entity_data[lang + 'wiki']] = entity_data['url']
-                    except KeyError:
-                        pass
+            if include_wikipedia:
                 entities_retrieved[entity_data['url']] = entity_data
-            if delay_wikipedia_retrieval and include_wikipedia and (
-                    idx + 1) % memory_saving_limit == 0:
-                if debug:
-                    logger.debug(datetime.datetime.now().isoformat())
-                    logger.debug('retrieving data from wikipedia')
-                    for language in wikipedia_sitelinks_to_retrieve:
-                        print('{} entries bookmarked in language {}'.format(
-                            len(wikipedia_sitelinks_to_retrieve[language]),
-                            language
-                        ))
+                if delay_wikipedia_retrieval:
+                    for lang in languages:
+                        try:
 
+                            wikipedia_sitelinks_to_retrieve[lang][
+                                entity_data[lang + 'wiki']] = entity_data['url']
 
+                        except (KeyError, ):
+                            pass
+
+                if not delay_wikipedia_retrieval:
+                    for merged_result in collect_multiple_from_wikipedia(
+                            wikipedia_sitelinks_to_retrieve,
+                            entities_retrieved):
+                        yield merged_result
+                    wikipedia_sitelinks_to_retrieve = {lang: {} for lang in
+                                                       languages}
+                    entities_retrieved = {}
+                    if idx >= limit_per_query:
+                        break
+
+            if idx >= limit_per_query or (delay_wikipedia_retrieval and\
+                                          include_wikipedia and \
+                                          (idx + 1) % memory_saving_limit == 0):
+                # if debug:
+                #     logger.debug(datetime.datetime.now().isoformat())
+                #     logger.debug('retrieving data from wikipedia')
+                #     for language in wikipedia_sitelinks_to_retrieve:
+                #         print('{} entries bookmarked in language {}'.format(
+                #             len(wikipedia_sitelinks_to_retrieve[language]),
+                #             language
+                #         ))
+                for raw in entities_retrieved.values():
+                    if not any((e.endswith('wiki') for e in raw)):
+                        raise ValueError(
+                            'Entity {} without any wikipedia '
+                            'sitelinks'.format(raw['wikidata_id'])
+                        )
                 for merged_result in collect_multiple_from_wikipedia(
                         wikipedia_sitelinks_to_retrieve,
                         entities_retrieved):
@@ -111,8 +128,31 @@ def collect_entities_delayed(entity_types,
                 wikipedia_sitelinks_to_retrieve = {lang: {} for lang in
                                                    languages}
                 entities_retrieved = {}
+                if idx >= limit_per_query:
+                    break
             elif not delay_wikipedia_retrieval:
-                yield entity_data
+                from eWRT.ws.wikidata.bundle_wikipedia_requests import \
+                    batch_enrich_from_wikipedia
+                for language in languages:
+                    try:
+                        for entry in batch_enrich_from_wikipedia(
+                                wikipedia_pages={
+                                    language: {
+                                        entity_data[language + 'wiki']['title']:
+                                        entity_data['url']
+                                    }
+                                },
+                                entities_cache={
+                                    entity_data['url']: entity_data
+                                },
+                                language=language):
+                            yield entry
+
+                    except KeyError:
+                        pass
+
+                    yield entity_data
+        print('Successfully parsed {} entities!'.format(idx))
 
         for merged_result in collect_multiple_from_wikipedia(
                 wikipedia_sitelinks_to_retrieve,

@@ -163,7 +163,7 @@ def wp_summary_from_wdid(wikidata_id, languages=None, sitelinks=None):
         sitelinks = get_sitelinks_from_wd_id(wikidata_id, languages=languages)
     for language in languages:
         try:
-            wikipage_title = sitelinks[language + 'wiki']
+            wikipage_title = sitelinks[language + 'wiki']['title']
             try:
                 wikipedia_page = wikipedia_page_info_from_title(wikipage_title,
                                                                 language)
