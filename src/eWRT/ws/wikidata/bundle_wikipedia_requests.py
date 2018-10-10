@@ -66,7 +66,6 @@ def batch_enrich_from_wikipedia(wikipedia_pages, language, entities_cache):
         raise IndexError(
             'No Wikipedia pages to retrieve in language {}!'.format(
                 language))
-    counter_retrieved = 0
     for page in retrieved_pages:
         try:
             output_formatted_entity = {'language': language}
@@ -79,16 +78,12 @@ def batch_enrich_from_wikipedia(wikipedia_pages, language, entities_cache):
 
             output_formatted_entity[
                 language + 'wiki'] = page
-            counter_retrieved += 1
             yield output_formatted_entity
         except (KeyError, AssertionError) as e:
             warnings.warn('Failed to map retrieved Wikipedia info back '
                           'to cached entity: {}'.format(e)
                           )
-    if not counter_retrieved:
-        raise IndexError(
-            'Failed to map any Wikipedia page infos in language {}'
-            ' back to Wikidata entities, encoding issue?'.format(language))
+
 
 
 def wikipedia_request_dispatcher(sitelinks_cache, entity_cache, languages=None,
@@ -114,6 +109,7 @@ def wikipedia_request_dispatcher(sitelinks_cache, entity_cache, languages=None,
         languages = [l for l in sitelinks_cache]
     for language in languages:
         print('processing ' + language)
+        counter_retrieved = 0
         try:
             assert language in sitelinks_cache and sitelinks_cache[language]
         except AssertionError:
@@ -134,4 +130,12 @@ def wikipedia_request_dispatcher(sitelinks_cache, entity_cache, languages=None,
                     wikipedia_pages=batch,
                     language=language,
                     entities_cache=entity_cache):
+                counter_retrieved += 1
                 yield result
+        print('successfully_retrieved {} entries in language {}.'.format(
+            counter_retrieved, language
+        ))
+        if not counter_retrieved:
+            raise IndexError(
+                'Failed to map any Wikipedia page infos in language {}'
+                ' back to Wikidata entities, encoding issue?'.format(language))

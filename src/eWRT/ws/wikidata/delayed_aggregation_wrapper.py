@@ -31,7 +31,7 @@ def collect_entities_delayed(entity_types,
                              require_country=False,
                              include_wikipedia=True,
                              debug=False,
-                             memory_saving_limit=500,
+                             memory_saving_limit=5000,
                              dump_path=None):
     """
 
@@ -96,16 +96,21 @@ def collect_entities_delayed(entity_types,
                     logger.debug(datetime.datetime.now().isoformat())
                     logger.debug('retrieving data from wikipedia')
                     for language in wikipedia_sitelinks_to_retrieve:
-                        logger.debug('{} entries in language {}'.format(
+                        print('{} entries bookmarked in language {}'.format(
                             len(wikipedia_sitelinks_to_retrieve[language]),
                             language
                         ))
+
 
                 for merged_result in collect_multiple_from_wikipedia(
                         wikipedia_sitelinks_to_retrieve,
                         entities_retrieved):
                     yield merged_result
                     continue
+                # reset caches:
+                wikipedia_sitelinks_to_retrieve = {lang: {} for lang in
+                                                   languages}
+                entities_retrieved = {}
             elif not delay_wikipedia_retrieval:
                 yield entity_data
 
