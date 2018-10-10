@@ -150,9 +150,11 @@ sitelink_cache = {
 # mock_enrich = mock.Mock()
 # mock_enrich.return_value = (el for el in [GW_snapshot_wikipedia_result])
 
-batch_enrich_mock = mock.Mock()
-batch_enrich_mock.return_value = (el for el in
-                                  (GW_snapshot_wikipedia_result,))
+def batch_enrich_mock(title, language):
+    print(title
+          )
+    assert (language, title) == ('en', u'George Washington')
+    return ((GW_snapshot_wikipedia_result,))
 
 
 @mock.patch(
@@ -234,9 +236,8 @@ def assert_basic_structure_as_expected(merged_result):
         'timestamp'] < datetime.datetime.now().strftime(u'%Y-%m-%dT%H:%M:%SZ')
     # todo: add test for similarity of retrieved summary with snapshot?
 
-
 def mock_batch_enrich(*args, **kwargs):
-    for i in range(20): yield i
+    for i in range(20): yield {}
 @mock.patch(
     target='eWRT.ws.wikidata.bundle_wikipedia_requests.batch_enrich_from_wikipedia',
     new=mock_batch_enrich)
@@ -251,4 +252,3 @@ def test_wikipedia_request_dispatcher():
     assert returned
     assert len(returned) == 100
 
-# test_wikipedia_request_dispatcher()
