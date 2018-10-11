@@ -15,6 +15,7 @@ from eWRT.ws.wikidata.sample_itempage import itempage
 from eWRT.ws.wikidata.wikibot_parse_item import ParseItemPage
 from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
 
+
 entity_mock = mock.Mock()
 entity_mock.text = itempage
 entity_mock.claims = itempage['claims']
@@ -127,7 +128,7 @@ def test_get_country_from_location():
     except ValueError:
         pass
 
-    # with the local_attributes in the default order, the method should return
+    # with birth place ranked higher than residence, we expect
     # UK
     local_attributes = OrderedDict([
         ("P17", u"country"),
@@ -143,12 +144,11 @@ def test_get_country_from_location():
         local_attributes=local_attributes,
         languages=['en'])
     assert len(country_found) == 1
-    assert country_found[0][
-               'url'] == u'https://www.wikidata.org/wiki/Q145'  # wd-id of UK
+    assert country_found[0]['url'] == u'https://www.wikidata.org/wiki/Q145'
     assert country_found[0]['labels'] == {'en': 'United Kingdom'}
 
-    # with the attributes reordered, i. e. residence before place of birth, this should return
-    # the United States (last residence: Santa Barbara
+    # with the attributes reordered, i. e. residence before place of birth,
+    # this should return the United States (last residence: Santa Barbara
     local_attributes = OrderedDict([
         ("P17", u"country"),
         ("P131", u"located in the administrative territorial entity"),
@@ -171,7 +171,3 @@ def test_get_country_from_location():
              }
             ]
 
-
-# self.fail()
-
-test_get_country_from_location()

@@ -208,7 +208,7 @@ class ParseItemPage:
                                    qualifiers=qualifiers).claim_details
                 if value:
                     values.append(value)
-            except Exception as e:
+            except ValueError as e:
                 pass
         if values:
             wd_prop_url = 'https://www.wikidata.org/wiki/Property:'
@@ -363,8 +363,13 @@ class ParseClaim:
         :param literals: list of literal properties to be included in result
         :type literals: List(str)
         """
+        if not qualifiers:
+            qualifiers=OTHER_QUALIFIERS
         self.qualifiers = qualifiers
-
+        try:
+            self.qualifiers.update(TEMPORAL_QUALIFIERS)
+        except AttributeError:
+            print(self.qualifiers)
         if not isinstance(claim, Claim):
             claim = Claim.fromJSON(site=DataSite('wikidata', 'wikidata'),
                                    data=claim)
@@ -387,9 +392,11 @@ class ParseClaim:
         :return: dictionary of claim attributes/qualifiers and their values."""
         claim_details = {}
         try:
-            claim_details['claim_id'] = self.claim.snak or self.claim.hash
+            claim_details['claim_id'] = self.claim.snak
             if not claim_details['claim_id']:
-                warnings.warn('No claim id identified')
+                claim_details['claim_id'] = self.claim.hash
+                if not claim_details['claim_id']:
+                    warnings.warn('No claim id identified')
         except Exception as e:
             warnings.warn('No claim id identified!')
         if isinstance(self.claim.target, basestring):
@@ -406,10 +413,10 @@ class ParseClaim:
             claim_details['url'] = 'https://www.wikidata.org/wiki/' + \
                                    self.claim.target.id
             claim_details.update(self.extract_literal_claim())
-        dates = self.get_claim_dates()
-        if dates:
-            claim_details['temporal_attributes'] = dates
-
+        # dates = self.get_claim_dates()
+        # if dates:
+        #     claim_details['temporal_attributes'] = dates
+        # self.qualifiers.update(TEMPORAL_QUALIFIERS)
         if self.claim.has_qualifier and self.claim.qualifiers:
             for qualifier in self.qualifiers:
                 if qualifier in self.claim.qualifiers:
@@ -419,7 +426,7 @@ class ParseClaim:
                             claim_instances=self.claim.qualifiers[qualifier],
                             languages=self.languages, literals=[],
                             include_attribute_labels=self.include_attribute_labels,
-                            qualifiers=[])
+                            qualifiers={})
 
                         claim_details[self.qualifiers[qualifier]] = {
                             'url': qualifier,
@@ -438,18 +445,18 @@ class ParseClaim:
                                                                  self.literals)
         return claim_details
 
-    def get_claim_dates(self):
-        """Check if the qualifiers include start time, end time or point in time
-        attributes. If present, send it to self.claim_temporal_attributes()"""
-
-        temporal_attributes = {}
-        for attribute in TEMPORAL_QUALIFIERS:
-            try:
-                temporal_attributes[TEMPORAL_QUALIFIERS[attribute]] = \
-                    self.claim_temporal_attributes(attribute)
-            except ValueError:
-                pass
-        return temporal_attributes
+    # def get_claim_dates(self):
+    #     """Check if the qualifiers include start time, end time or point in time
+    #     attributes. If present, send it to self.claim_temporal_attributes()"""
+    #
+    #     temporal_attributes = {}
+    #     for attribute in TEMPORAL_QUALIFIERS:
+    #         try:
+    #             temporal_attributes[TEMPORAL_QUALIFIERS[attribute]] = \
+    #                 self.claim_temporal_attributes(attribute)
+    #         except ValueError:
+    #             pass
+    #     return temporal_attributes
 
     def claim_temporal_attributes(self, temporal_attribute):
         """Parse an individual temporal attribute (start date, end date,...)"""
