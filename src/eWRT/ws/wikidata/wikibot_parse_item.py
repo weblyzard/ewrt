@@ -51,10 +51,11 @@ class ParseItemPage:
                  claims_of_interest=None,
                  entity_type_properties=None, languages=None,
                  require_country=True,
-                 include_attribute_labels=True):
+                 include_attribute_labels=True,
+                 qualifiers_of_interest=None):
         """
         :param itempage: pywikibot.ItemPage to be parsed
-        :param include_literals: bool defining whether to include
+        :param include_literals: bool defining whether to includehttps://gitlab.semanticlab.net/nlp-backend/issues0
             further literals (descriptions, aliases) in the output. If
             False, only labels are included.
         :param claims_of_interest: list of claims by their WikiData identifiers
@@ -72,6 +73,8 @@ class ParseItemPage:
 
         # include 'labels' only if include_literals == False
         # itempage.get()
+        if not qualifiers_of_interest:
+            self.qualifiers_of_interest = OTHER_QUALIFIERS
         self.include_attribute_labels = include_attribute_labels
         self.include_literals = include_literals
         if self.include_literals:
@@ -144,7 +147,8 @@ class ParseItemPage:
                         claim, claim_instances,
                         languages=self.languages,
                         literals=self.literals,
-                        include_attribute_labels=self.include_attribute_labels)
+                        include_attribute_labels=self.include_attribute_labels,
+                        qualifiers=self.qualifiers_of_interest)
                     if self.details[claim_name]:
                         self.details[claim_name]['url'] = \
                             'https://www.wikidata.org/wiki/Property:' + claim
@@ -178,14 +182,13 @@ class ParseItemPage:
         for attribute in [a for a in self.details]:
 
             if not self.details[attribute] or 'values' in self.details[
-                attribute] and not \
-                    self.details[attribute]['values']:
-                print('deleting attribute')
+                attribute] and not self.details[attribute]['values']:
                 del self.details[attribute]
 
     @classmethod
     def complete_claim_details(cls, claim_id, claim_instances, languages,
-                               literals, include_attribute_labels=True):
+                               literals, include_attribute_labels=True,
+                               qualifiers=None):
         """Find values for specified claim types for which no specific
         handling is defined.
         :param claim_id: Pxx id of the attribute.
@@ -201,7 +204,8 @@ class ParseItemPage:
             try:
                 value = ParseClaim(sub_claim, languages,
                                    literals,
-                                   include_attribute_labels=include_attribute_labels).claim_details
+                                   include_attribute_labels=include_attribute_labels,
+                                   qualifiers=qualifiers).claim_details
                 if value:
                     values.append(value)
             except Exception as e:
@@ -251,7 +255,7 @@ class ParseItemPage:
                         entity.text[prop][language]
                     if isinstance(literal_properties[prop][language], dict):
                         literal_properties[prop][language] = \
-                        literal_properties[prop][language]['value']
+                            literal_properties[prop][language]['value']
                     elif isinstance(literal_properties[prop][language], list):
                         try:
                             literal_properties[prop][language] = [entry['value']
@@ -283,12 +287,13 @@ class ParseItemPage:
         try:
             country = location_item_page.claims['P17']
             if country:
-                country_identified = ParseItemPage.complete_claim_details('P17',
-                                                                          country,
-                                                                          languages=languages,
-                                                                          literals=[
-                                                                              'labels'],
-                                                                          include_attribute_labels=include_attribute_labels)
+                country_identified = ParseItemPage.complete_claim_details(
+                    'P17',
+                    country,
+                    languages=languages,
+                    literals=['labels'],
+                    include_attribute_labels=include_attribute_labels)
+                # country_iso_code = COUNTRY_ISO2_CODES_DICT[country_identified[0]['url']]
                 return country_identified
             else:
                 raise ValueError('No country found for this location!')
@@ -346,7 +351,7 @@ class ParseClaim:
     """Parse an individual claim and its qualifiers"""
 
     def __init__(self, claim, languages, literals, delay=False,
-                 include_attribute_labels=True):
+                 include_attribute_labels=True, qualifiers=None):
         """
         Parse additional information about a specified claim. The result
         (dict format) is accessible through ParseClaim(claim).claim_details
@@ -358,8 +363,8 @@ class ParseClaim:
         :param literals: list of literal properties to be included in result
         :type literals: List(str)
         """
-        from pywikibot import Claim
-        from pywikibot.site import DataSite
+        self.qualifiers = qualifiers
+
         if not isinstance(claim, Claim):
             claim = Claim.fromJSON(site=DataSite('wikidata', 'wikidata'),
                                    data=claim)
@@ -382,7 +387,9 @@ class ParseClaim:
         :return: dictionary of claim attributes/qualifiers and their values."""
         claim_details = {}
         try:
-            claim_details['claim_id'] = self.claim.snak
+            claim_details['claim_id'] = self.claim.snak or self.claim.hash
+            if not claim_details['claim_id']:
+                warnings.warn('No claim id identified')
         except Exception as e:
             warnings.warn('No claim id identified!')
         if isinstance(self.claim.target, basestring):
@@ -403,15 +410,20 @@ class ParseClaim:
         if dates:
             claim_details['temporal_attributes'] = dates
 
-        if self.claim.has_qualifier:
-            for qualifier in OTHER_QUALIFIERS:
+        if self.claim.has_qualifier and self.claim.qualifiers:
+            for qualifier in self.qualifiers:
                 if qualifier in self.claim.qualifiers:
                     try:
-                        qualifier_targets = [
-                            'https://www.wikidata.org/wiki/' + valid_for.target.id
-                            for valid_for in self.claim.qualifiers[qualifier]]
+                        qualifier_targets = ParseItemPage.complete_claim_details(
+                            claim_id=qualifier,
+                            claim_instances=self.claim.qualifiers[qualifier],
+                            languages=self.languages, literals=[],
+                            include_attribute_labels=self.include_attribute_labels,
+                            qualifiers=[])
 
-                        claim_details[qualifier] = qualifier_targets
+                        claim_details[self.qualifiers[qualifier]] = {
+                            'url': qualifier,
+                            'values': qualifier_targets}
                     except (KeyError, AttributeError):
                         warnings.warn(
                             'qualifier not found: {}.'.format(
