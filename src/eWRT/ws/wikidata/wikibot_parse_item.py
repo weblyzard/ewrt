@@ -28,18 +28,51 @@ if sys.version_info.major == 3:
 
 RELEVANT_LANGUAGES = ['en']
 
-TEMPORAL_QUALIFIERS = {'P580': 'start date',
-                       'P582': 'end date',
-                       'P585': 'point in time',
-                       }
-
-# other claim qualifiers we don't want to skip, if present
-OTHER_QUALIFIERS = {'P642': 'at_organization',
-                    'P854': 'reference_url',
-                    'P1686': 'for_work'}
+QUALIFIERS = {'P580': 'start date',
+              'P582': 'end date',
+              'P585': 'point in time',
+              'P642': 'at_organization',
+              'P854': 'reference_url',
+              'P1686': 'for_work'}
 
 CLAIMS_OF_INTEREST = ["P18", "P19", 'P39', 'P106', 'P108', 'P102']
 
+def get_wikidata_timestamp(item_page):
+    """
+
+    :param item_page:
+    :return:
+    """
+    # ItemPages come in two slightly different formats depending on how
+    # they were created (probably a bug in pywikibot). We want to be able to
+    # deal with both:
+    try:
+        timestamp = item_page['timestamp']
+    except (TypeError, KeyError):
+        try:
+            timestamp = item_page.timestamp
+        except AttributeError:
+            timestamp = item_page.latest_revision.timestamp.isoformat()
+        except KeyError:
+            return None
+    return timestamp
+
+
+def mock_item_page(itempage):
+    import mock
+    new_itempage = mock.Mock()
+    try:
+        new_itempage.id = itempage['id']
+    except KeyError:
+        raise ValueError('No id!')
+    try:
+        new_itempage.timestamp = itempage['timestamp']
+    except KeyError:
+        pass
+    new_itempage.sitelinks = itempage['sitelinks']
+    new_itempage.claims = itempage['claims']
+    new_itempage.text = itempage
+    return new_itempage
 
 class ParseItemPage:
     """Methods to parse pywikibot.ItemPage for a specifiable list
@@ -73,8 +106,12 @@ class ParseItemPage:
 
         # include 'labels' only if include_literals == False
         # itempage.get()
-        if not qualifiers_of_interest:
-            self.qualifiers_of_interest = OTHER_QUALIFIERS
+        if isinstance(itempage, dict):
+            itempage = mock_item_page(itempage)
+
+        timestamp = get_wikidata_timestamp(itempage)
+        if  qualifiers_of_interest is None:
+            self.qualifiers_of_interest = QUALIFIERS
         self.include_attribute_labels = include_attribute_labels
         self.include_literals = include_literals
         if self.include_literals:
@@ -105,7 +142,10 @@ class ParseItemPage:
         except AttributeError:
             self.claims = itempage.claims
         self.process_attributes()
+
         assert self.details
+        self.details['wikidata_timestamp'] = timestamp
+        self.details['wikidata_id'] = itempage.id
 
     def process_attributes(self):
         """Exctract information about the item, specified
@@ -292,7 +332,8 @@ class ParseItemPage:
                     country,
                     languages=languages,
                     literals=['labels'],
-                    include_attribute_labels=include_attribute_labels)
+                    include_attribute_labels=include_attribute_labels,
+                qualifiers=[])
                 # country_iso_code = COUNTRY_ISO2_CODES_DICT[country_identified[0]['url']]
                 return country_identified
             else:
@@ -363,13 +404,9 @@ class ParseClaim:
         :param literals: list of literal properties to be included in result
         :type literals: List(str)
         """
-        if not qualifiers:
-            qualifiers=OTHER_QUALIFIERS
+        if qualifiers is None:
+            qualifiers = QUALIFIERS
         self.qualifiers = qualifiers
-        try:
-            self.qualifiers.update(TEMPORAL_QUALIFIERS)
-        except AttributeError:
-            print(self.qualifiers)
         if not isinstance(claim, Claim):
             claim = Claim.fromJSON(site=DataSite('wikidata', 'wikidata'),
                                    data=claim)
@@ -434,7 +471,7 @@ class ParseClaim:
                     except (KeyError, AttributeError):
                         warnings.warn(
                             'qualifier not found: {}.'.format(
-                                OTHER_QUALIFIERS[qualifier]))
+                                self.qualifiers[qualifier]))
         return claim_details
 
     def extract_literal_claim(self):

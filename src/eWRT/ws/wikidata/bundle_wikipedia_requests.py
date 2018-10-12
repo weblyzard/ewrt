@@ -56,8 +56,8 @@ def batch_enrich_from_wikipedia(wikipedia_pages, language, entities_cache):
     batch = wikipedia_pages
     titles = '|'.join(batch.keys())
     try:
-        retrieved_pages = wikipedia_page_info_from_title(titles,
-                                                         language)
+        retrieved_pages = list(wikipedia_page_info_from_title(titles,
+                                                         language))
     except StopIteration:
         raise IndexError
 

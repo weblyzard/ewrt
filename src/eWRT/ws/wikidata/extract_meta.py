@@ -19,7 +19,9 @@ import pywikibot.pagegenerators
 import requests
 from bz2file import BZ2File
 from eWRT.ws.wikidata.enrich_from_wikipedia import wp_summary_from_wdid
-from eWRT.ws.wikidata.wikibot_parse_item import ParseItemPage
+from eWRT.ws.wikidata.wikibot_parse_item import (ParseItemPage,
+                                                 mock_item_page,
+                                                 get_wikidata_timestamp)
 from lxml import etree as et
 from wikipedia import RedirectError, DisambiguationError
 
@@ -40,23 +42,7 @@ QUERY = """SELECT ?item WHERE{
 WIKIDATA_SITE = pywikibot.Site("wikidata", "wikidata")
 
 
-def get_wikidata_timestamp(item_page):
-    """
 
-    :param item_page:
-    :return:
-    """
-    # ItemPages come in two slightly different formats depending on how
-    # they were created (probably a bug in pywikibot). We want to be able to
-    # deal with both:
-    try:
-        timestamp = item_page['timestamp']
-    except (TypeError, KeyError):
-        try:
-            timestamp = item_page.timestamp
-        except AttributeError:
-            timestamp = item_page.latest_revision.timestamp.isoformat()
-    return timestamp
 
 
 def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
@@ -95,15 +81,7 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
             both Wikipedia and Wikidata.
     """
     if isinstance(itempage, dict):
-        import mock
-        new_itempage = mock.Mock()
-        new_itempage.id = itempage['id']
-        new_itempage.timestamp = itempage['timestamp']
-        new_itempage.sitelinks = itempage['sitelinks']
-        new_itempage.claims = itempage['claims']
-        new_itempage.text = itempage
-        itempage = new_itempage
-    timestamp = get_wikidata_timestamp(itempage)
+        itempage = mock_item_page(itempage)
     #
     # itempage.get()
     # collect summaries and meta-info from the Wikipedia pages in the relevant
@@ -178,9 +156,7 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
             'No attributes of interest identified for entity{}'.format(
                 itempage.id))
     entity_extracted_details.update(entity.details)
-    entity_extracted_details['wikidata_id'] = itempage.id
 
-    entity_extracted_details['wikidata_timestamp'] = timestamp
 
     if not delay_wikipedia_retrieval:
         from eWRT.ws.wikidata.filters import filter_result
