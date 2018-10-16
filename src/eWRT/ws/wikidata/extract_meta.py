@@ -80,18 +80,27 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
     :returns: a dictionary of the collected details about this entity from
             both Wikipedia and Wikidata.
     """
-    if isinstance(itempage, dict):
-        itempage = mock_item_page(itempage)
+    # if isinstance(itempage, dict):
+    #     itempage = mock_item_page(itempage)
     #
-    # itempage.get()
+    # itempage['get']()
     # collect summaries and meta-info from the Wikipedia pages in the relevant
     # languages:
+    if hasattr(itempage, 'text'):
+        id = itempage.id
+        try:
+            timestamp = get_wikidata_timestamp(itempage)
+        except AttributeError:
+            pass
+        itempage = itempage.text
+        itempage.update({'id': id, 'timestamp': timestamp})
+
     wikipedia_data = []
     if include_wikipedia:
         try:
-            sitelinks = itempage.text['sitelinks']
+            sitelinks = itempage['sitelinks']
         except KeyError:
-            sitelinks = itempage.sitelinks
+            sitelinks = itempage['sitelinks']
         except AttributeError:
             sitelinks = itempage['sitelinks']
         relevant_sitelinks = [wiki for wiki in sitelinks if
@@ -118,7 +127,7 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
                 pass
         elif sitelinks:
             try:
-                wikipedia_data = wp_summary_from_wdid(itempage.id,
+                wikipedia_data = wp_summary_from_wdid(itempage['id'],
                                                       languages=languages,
                                                       sitelinks=sitelinks)
 
@@ -126,7 +135,7 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
                 raise ValueError
             except requests.exceptions.ConnectionError:
                 warnings.warn('Failed to get info about entity {} from '
-                              'Wikipedia API!'.format(itempage.id))
+                              'Wikipedia API!'.format(itempage['id']))
 
     # use the Wikipedia article in the first language found as the entity's
     # unique preferred `url` - the order of languages is meaningful!
@@ -135,7 +144,7 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
     except (KeyError, IndexError):
         # fallback to Wikidata ID if no Wikipedia page has been retrieved (yet)
         entity_extracted_details = {
-            'url': 'https://www.wikidata.org/wiki/' + itempage.id}
+            'url': 'https://www.wikidata.org/wiki/' + itempage['id']}
     if delay_wikipedia_retrieval:
         entity_extracted_details.update(wikipedia_data)
     elif include_wikipedia:
@@ -154,11 +163,11 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
     except AssertionError:
         raise ValueError(
             'No attributes of interest identified for entity{}'.format(
-                itempage.id))
+                itempage['id']))
     entity_extracted_details.update(entity.details)
 
 
-    if not delay_wikipedia_retrieval:
+    if include_wikipedia and not delay_wikipedia_retrieval:
         from eWRT.ws.wikidata.filters import filter_result
         for language in languages:
             if language + 'wiki' in relevant_sitelinks:
