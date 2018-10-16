@@ -20,7 +20,7 @@ from eWRT.ws.wikidata.definitions import (local_attributes as LOCAL_ATTRIBUTES,
 from eWRT.ws.wikidata.get_image_from_wikidataid import get_image, \
     NoImageFoundError
 from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
-from pywikibot import WbTime, Claim
+from pywikibot import WbTime, Claim, Coordinate
 from pywikibot.site import DataSite
 
 if sys.version_info.major == 3:
@@ -34,6 +34,8 @@ QUALIFIERS = {'P580': 'start date',
               'P642': 'at_organization',
               'P854': 'reference_url',
               'P1686': 'for_work'}
+
+QUALIFIERS = {}
 
 CLAIMS_OF_INTEREST = ["P18", "P19", 'P39', 'P106', 'P108', 'P102']
 
@@ -271,7 +273,16 @@ class ParseItemPage:
                                                   preferred.snak]
 
             except ValueError as e:
-                warnings.warn('encountered exception: {}'.format(e))
+                try:
+                    most_recent = guess_current_value([Claim.fromJSON(site=DataSite('wikidata', 'wikidata'),
+                                   data=claim) for claim in claim_instances])
+                    claim_details['preferred'] = [instance for instance in
+                                                  claim_details['values'] if
+                                                  instance['claim_id'] ==
+                                                  most_recent.snak]
+                except Exception as e:
+
+                    warnings.warn('encountered exception: {}'.format(e))
 
                 # ParseItemPage.extract_literal_properties(preferred[0],
                 #                                          languages=languages,
@@ -453,10 +464,18 @@ class ParseClaim:
             except AttributeError:
                 pass
             return claim_details
-        else:
+        elif isinstance(self.claim.target, Coordinate):
+            claim_details['values'] = self.claim.target.lat, self.claim.target.lon
+        elif not self.claim.target is None:
             claim_details['url'] = 'https://www.wikidata.org/wiki/' + \
                                    self.claim.target.id
             claim_details.update(self.extract_literal_claim())
+        else:
+            warnings.warn('claim {} on item {} is None'.format(
+                self.claim.id,
+                claim_details['claim_id'].split('$')[0]
+            ))
+            return None
         # dates = self.get_claim_dates()
         # if dates:
         #     claim_details['temporal_attributes'] = dates
@@ -489,18 +508,18 @@ class ParseClaim:
                                                                  self.literals)
         return claim_details
 
-    # def get_claim_dates(self):
-    #     """Check if the qualifiers include start time, end time or point in time
-    #     attributes. If present, send it to self.claim_temporal_attributes()"""
-    #
-    #     temporal_attributes = {}
-    #     for attribute in TEMPORAL_QUALIFIERS:
-    #         try:
-    #             temporal_attributes[TEMPORAL_QUALIFIERS[attribute]] = \
-    #                 self.claim_temporal_attributes(attribute)
-    #         except ValueError:
-    #             pass
-    #     return temporal_attributes
+    def get_claim_dates(self):
+        """Check if the qualifiers include start time, end time or point in time
+        attributes. If present, send it to self.claim_temporal_attributes()"""
+
+        temporal_attributes = {}
+        for attribute in TEMPORAL_QUALIFIERS:
+            try:
+                temporal_attributes[TEMPORAL_QUALIFIERS[attribute]] = \
+                    self.claim_temporal_attributes(attribute)
+            except ValueError:
+                pass
+        return temporal_attributes
 
     def claim_temporal_attributes(self, temporal_attribute):
         """Parse an individual temporal attribute (start date, end date,...)"""
@@ -523,6 +542,21 @@ class ParseClaim:
 
 
 def start_date(instance):
+    try:
+        if instance.has_qualifier or instance.qualifiers:
+          if 'P580' in instance.qualifiers:
+
+            if isinstance(instance.qualifiers['P580'][0].target, WbTime):
+                try:
+                    start_date = instance.qualifiers['P580'][0].target.toTimestr(
+                        force_iso=True)
+                    return start_date
+                except AttributeError:
+                    pass
+
+    except Exception as e:
+        pass
+
     if 'temporal_attributes' not in instance or 'P580' not in \
             instance['temporal_attributes']:
         return None
@@ -553,23 +587,23 @@ def guess_current_value(attribute_instances):
                                       attribute_instances if
                                       start_date(instance)]
 
-            instance_has_enddate = [instance for instance in attribute_instances
-                                    if
-                                    end_date(instance)]
+            # instance_has_enddate = [instance for instance in attribute_instances
+            #                         if
+            #                         end_date(instance)]
             try:
-                assert instance_has_startdate or instance_has_enddate
+                assert instance_has_startdate  # or instance_has_enddate
             except AssertionError:
                 raise ValueError(
                     'No instances of claim with start or end dates found!')
-            begins_doesnt_end = [instance for instance in instance_has_startdate
-                                 if
-                                 not end_date(instance)]
-            if len(begins_doesnt_end) == 1:
-                print(
-                    'found exactly one instance with start date but no end '
-                    'date, assumming thisto be current')
-                most_recent_instance = begins_doesnt_end[0]
-                return most_recent_instance
+            # begins_doesnt_end = [instance for instance in instance_has_startdate
+            #                      if
+            #                      not end_date(instance)]
+            # if len(begins_doesnt_end) == 1:
+            #     print(
+            #         'found exactly one instance with start date but no end '
+            #         'date, assumming thisto be current')
+            #     most_recent_instance = begins_doesnt_end[0]
+            #     return most_recent_instance
 
             most_recent_startdate = max(
                 map(start_date, instance_has_startdate))
