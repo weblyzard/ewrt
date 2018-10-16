@@ -106,8 +106,11 @@ class ParseItemPage:
 
         # include 'labels' only if include_literals == False
         # itempage.get()
-        if isinstance(itempage, dict):
-            itempage = mock_item_page(itempage)
+        if not isinstance(itempage, dict):
+            id = itempage.id
+            timestamp = itempage.timestamp
+            itempage = itempage.text
+            itempage.update({'id': id, 'timestamp': timestamp})
 
         timestamp = get_wikidata_timestamp(itempage)
         if  qualifiers_of_interest is None:
@@ -119,7 +122,7 @@ class ParseItemPage:
         else:
             self.literals = ['labels']
         self._require_country = require_country
-        if languages is None:
+        if languages is None:\
             languages = RELEVANT_LANGUAGES
         self.languages = languages
         if not entity_type_properties:
@@ -138,14 +141,14 @@ class ParseItemPage:
                                    c not in self._image_requested]
         self.item_raw = itempage
         try:
-            self.claims = itempage.text['claims']
+            self.claims = itempage['claims']
         except AttributeError:
-            self.claims = itempage.claims
+            self.claims = itempage['claims']
         self.process_attributes()
 
         assert self.details
         self.details['wikidata_timestamp'] = timestamp
-        self.details['wikidata_id'] = itempage.id
+        self.details['wikidata_id'] = itempage['id']
 
     def process_attributes(self):
         """Exctract information about the item, specified
@@ -196,7 +199,7 @@ class ParseItemPage:
                         warnings.warn(
                             'Unable to parse claim {claim} for item {item}, '
                             'should be present!'.format(claim=claim,
-                                                        item=self.item_raw.id))
+                                                        item=self.item_raw['id']))
 
             except KeyError as e:
                 pass
@@ -211,7 +214,7 @@ class ParseItemPage:
                                                      include_attribute_labels=self.include_attribute_labels)
             if country_info:
                 try:
-                    country_info[0]['claim_id'] = self.item_raw.id + '@' + \
+                    country_info[0]['claim_id'] = self.item_raw['id'] + '@' + \
                                                   country_info[0]['claim_id']
                 except KeyError:
                     print(country_info)
@@ -287,12 +290,16 @@ class ParseItemPage:
         ['labels', 'aliases', 'descriptions']"""
         if literals is None:
             literals = cls.LITERAL_PROPERTIES
+        try:
+            entity = entity.text
+        except AttributeError:
+            pass
         literal_properties = {prop: {} for prop in literals}
         for prop in literal_properties:
             for language in languages:
                 try:
                     literal_properties[prop][language] = \
-                        entity.text[prop][language]
+                        entity[prop][language]
                     if isinstance(literal_properties[prop][language], dict):
                         literal_properties[prop][language] = \
                             literal_properties[prop][language]['value']
@@ -356,9 +363,9 @@ class ParseItemPage:
         if local_attributes is None:
             local_attributes = LOCAL_ATTRIBUTES
         try:
-            claims = itempage.claims
+            claims = itempage['claims']
         except:
-            claims = itempage.text['claims']
+            claims = itempage['claims']
         for location_type in local_attributes:
             if location_type in claims:
                 for location in claims[location_type]:
@@ -383,7 +390,7 @@ class ParseItemPage:
                             pass
                     else:
                         warnings.warn('Entity {} has location property {} '
-                                      'set to null'.format(itempage.id,
+                                      'set to null'.format(itempage['id'],
                                                            location_type))
         raise ValueError
 
