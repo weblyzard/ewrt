@@ -164,7 +164,7 @@ class ParseItemPage:
         must be above/below a certain value.
         example: filter for individuals with a stated birth place and a birth
         date in the year 1950
-        >>> params = {'P19': ('has_attr', None), 'P569': ('min', '+1950-01-01'), 'P569': ('max', '+1950-12-31')}
+        >>> params = {('P19', 'has_attr', None), ('P569', 'min', '+1950-01-01'), ('P569', 'max', '+1950-12-31')}
         >>> ParseItemPage(itempage, filter_params=params)
         (this will raise a ValueError for individuals not matching the criteria)
         :param filter_params:
@@ -176,14 +176,12 @@ class ParseItemPage:
                 return testee >= threshold
             elif mode == 'max':
                 return testee <= threshold
-        for item in filter_params.items():
-            claim = item[0]
+        for claim, mode, threshold_value in filter_params:
             if not claim in self.claims:
                 return False
             
-            elif item[1][0] in min_max:
-                func = min_max[item[1][0]]
-                threshold_value = item[1][1]
+            elif mode in min_max:
+                func = min_max[mode]
                 values = self.complete_claim_details(claim,
                                                          self.claims[claim],
                                                          languages=[],
@@ -191,7 +189,7 @@ class ParseItemPage:
                                                          include_attribute_labels=False,
                                                          )
                 best_candidate = func([instance['value'] for instance in values['values'] if instance['value'] is not None])
-                if not inside(threshold_value,best_candidate, mode=item[1][0]):
+                if not inside(threshold_value,best_candidate, mode):
                     return False
             
         return True

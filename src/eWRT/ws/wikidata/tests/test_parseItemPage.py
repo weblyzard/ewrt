@@ -301,9 +301,9 @@ def test_parseItemPage_all():
 
 def test_parseItemPage_filter():
     """Filtering method, allows to filter entities by a) presence of a certain
-    parameter or b) minimal value (str"""
+    parameter or b) maximal/minimal value (use +/- prefixed string for dates!)"""
     try:
-        filter_params = {'P39': ('has_attr', None)}
+        filter_params = {('P39', 'has_attr', None)}
         parsed_with_filter = ParseItemPage(itempage,
                                        include_literals=True,
                                        languages=['en', 'de',
@@ -317,7 +317,7 @@ def test_parseItemPage_filter():
     except ValueError:
         pass
     try:
-        filter_params = {'P19': ('has_attr', None)}
+        filter_params = [('P19', 'has_attr', None)]
         parsed_with_filter = ParseItemPage(itempage,
                                        include_literals=True,
                                        languages=['en', 'de',
@@ -338,7 +338,7 @@ def test_parseItemPage_filter():
         raise ValueError('The sample itempage does contain a claim "P19" '
                          '(place of birth), this should pass the filter')
     try:
-        filter_params = {'P569': ('min', '+1952-01-01')}
+        filter_params = [('P569', 'min', '+1952-01-01')]
         parsed_with_filter = ParseItemPage(itempage,
                                        include_literals=True,
                                        languages=['en', 'de',
@@ -351,7 +351,7 @@ def test_parseItemPage_filter():
         raise ValueError('Failed to identify Douglas Adams birth date as '
                          '>= 1952')
     try:
-        filter_params = {'P569': ('min', '+1956-01-01')}
+        filter_params = [('P569', 'min', '+1956-01-01')]
         parsed_with_filter = ParseItemPage(itempage,
                                        include_literals=True,
                                        languages=['en', 'de',
