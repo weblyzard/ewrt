@@ -29,6 +29,7 @@ ENTITY_TYPE_IDENTIFIERS = {
     'person': 'Q5',
     'organization': 'Q43229',
     'geo': 'Q2221906',
+    'city': 'Q515'
 
 }
 
@@ -51,7 +52,8 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
                                       include_attribute_labels=True,
                                       require_country=True,
                                       include_wikipedia=True,
-                                      delay_wikipedia_retrieval=False):
+                                      delay_wikipedia_retrieval=False,
+                                      param_filter=None):
     """
 
     :param include_attribute_labels:
@@ -159,11 +161,16 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
             claims_of_interest=wd_parameters,
             languages=languages,
             include_attribute_labels=include_attribute_labels,
-            require_country=require_country)
+            require_country=require_country,
+            filter=param_filter)
     except AssertionError:
         raise ValueError(
             'No attributes of interest identified for entity{}'.format(
                 itempage['id']))
+    except ValueError:
+        raise ValueError('entity {} does not match filter criteria'.format(
+            itempage['id']
+        ))
     entity_extracted_details.update(entity.details)
 
 
@@ -187,7 +194,8 @@ class WikidataEntityIterator:
         'event': 'Q1190554',  # labelled 'occurence' in WikiData
         'geo': 'Q2221906',
         'organization': 'Q43229',
-        'person': 'Q5'
+        'person': 'Q5',
+        'city': 'Q515'
     }
 
     def __init__(self, top_level_categories=None, lazy_load_subclasses=True,
@@ -284,8 +292,9 @@ class WikidataEntityIterator:
                                    require_country=True,
                                    include_wikipedia=True,
                                    delay_wikipedia_retrieval=True,
-                                   n_queries=None
-                                   # no effect, for consistent API only
+                                   n_queries=None,
+                                   # no effect, for consistent API only,
+                                   param_filter=None
                                    ):
         """
         iteratively parse a xml-dump (with embedded json entities) for entities
@@ -354,7 +363,8 @@ class WikidataEntityIterator:
                                     require_country=require_country,
                                     include_wikipedia=include_wikipedia,
                                     delay_wikipedia_retrieval=delay_wikipedia_retrieval,
-                                    raise_on_no_wikipage=raise_on_missing_wikipedias):
+                                    raise_on_no_wikipage=raise_on_missing_wikipedias,
+                                    param_filter=param_filter):
                                     entity['category'] = category
                                     yield entity
                             except ValueError as e:  # this probably means no
@@ -414,7 +424,7 @@ class WikidataEntityIterator:
                                    include_attribute_labels=True,
                                    require_country=True,
                                    include_wikipedia=True,
-                                   delay_wikipedia_retrieval=True
+                                   delay_wikipedia_retrieval=True,param_filter=None
                                    ):
         """Get a list of entities with pywikibot.pagegenerators
 

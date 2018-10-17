@@ -30,7 +30,8 @@ def collect_entities_delayed(entity_types,
                              require_country=False,
                              include_wikipedia=True,
                              memory_saving_limit=50,
-                             dump_path=None):
+                             dump_path=None,
+                             param_filter=None):
     """
 
     :param dump_path:
@@ -78,7 +79,8 @@ def collect_entities_delayed(entity_types,
                 delay_wikipedia_retrieval=delay_wikipedia_retrieval,
                 include_attribute_labels=include_attribute_labels,
                 require_country=require_country,
-                include_wikipedia=include_wikipedia)):
+                include_wikipedia=include_wikipedia,
+        param_filter=param_filter)):
             if include_wikipedia:
                 entities_retrieved[entity_data['url']] = entity_data
                 if delay_wikipedia_retrieval:
