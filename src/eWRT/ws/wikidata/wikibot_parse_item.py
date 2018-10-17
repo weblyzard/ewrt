@@ -176,21 +176,32 @@ class ParseItemPage:
                 return testee >= threshold
             elif mode == 'max':
                 return testee <= threshold
+
+        def inside_both(testee, min=None, max=None):
+            if min and not inside(min, testee, 'min'):
+                return False
+            if max and not inside(max, testee, 'max'):
+                return False
+            return True
+
         for claim, mode, threshold_value in filter_params:
             if not claim in self.claims:
                 return False
-            
-            elif mode in min_max:
-                func = min_max[mode]
-                values = self.complete_claim_details(claim,
-                                                         self.claims[claim],
-                                                         languages=[],
-                                                         literals=[],
-                                                         include_attribute_labels=False,
-                                                         )
-                best_candidate = func([instance['value'] for instance in values['values'] if instance['value'] is not None])
-                if not inside(threshold_value,best_candidate, mode):
-                    return False
+
+        for claim in set([item[0] for item in filter_params]):
+
+            filter_claims = {param[1]: param[2] for param in filter_params if param[0] == claim}
+            if not any(filter_claims.values()):
+                continue
+            values = self.complete_claim_details(claim,
+                                                 self.claims[claim],
+                                                 languages=[],
+                                                 literals=[],
+                                                 include_attribute_labels=False,
+                                                 )
+            thresholds = {param: filter_claims[param] for param in ['min', 'max'] if param in filter_claims}
+            if not any([inside_both(instance['value'], **thresholds) for instance in values['values'] if instance['value'] is not None]):
+                return False
             
         return True
 
