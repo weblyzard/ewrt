@@ -11,10 +11,9 @@ from collections import OrderedDict
 
 import mock
 import pytest
+from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
 from eWRT.ws.wikidata.sample_itempage import itempage
 from eWRT.ws.wikidata.wikibot_parse_item import ParseItemPage
-from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
-
 
 entity_mock = mock.Mock()
 entity_mock.text = itempage
@@ -171,3 +170,279 @@ def test_get_country_from_location():
              }
             ]
 
+
+douglas_adams_extract = {
+    'aliases': {'de': [u'Douglas No\xebl Adams', u'Douglas Noel Adams'],
+                'en': [u'Douglas No\xebl Adams',
+                       u'Douglas Noel Adams',
+                       u'Douglas N. Adams']},
+    'descriptions': {'de': u'britischer Schriftsteller',
+                     'en': u'author and humorist',
+                     'sv': u'brittisk f\xf6rfattare'},
+    u'employer': {'url': 'https://www.wikidata.org/wiki/Property:P108',
+                  'values': [
+                      {'claim_id': u'Q42$853B16C8-1AB3-489A-831E-AEAD7E94AB87',
+                       'labels': {'de': u'British Broadcasting Corporation',
+                                  'en': u'BBC',
+                                  'sv': u'BBC'},
+                       'url': u'https://www.wikidata.org/wiki/Q9531'}]},
+    'full_image': 'https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg',
+    u'image_description': 'https://commons.wikimedia.org/wiki/File:Douglas_adams_portrait_cropped.jpg',
+    'labels': {'de': u'Douglas Adams',
+               'en': u'Douglas Adams',
+               'sv': u'Douglas Adams'},
+    u'occupation': {'url': 'https://www.wikidata.org/wiki/Property:P106',
+                    'values': [{
+                        'claim_id': u'Q42$e0f736bd-4711-c43b-9277-af1e9b2fb85f',
+                        'labels': {'de': u'Dramatiker',
+                                   'en': u'playwright',
+                                   'sv': u'dramatiker'},
+                        'url': u'https://www.wikidata.org/wiki/Q214917'},
+                        {
+                            'claim_id': u'q42$E13E619F-63EF-4B72-99D9-7A45C7C6AD34',
+                            'labels': {'de': u'Drehbuchautor',
+                                       'en': u'screenwriter',
+                                       'sv': u'manusf\xf6rfattare'},
+                            'url': u'https://www.wikidata.org/wiki/Q28389'},
+                        {
+                            'claim_id': u'Q42$D6E21D67-05D6-4A0B-8458-0744FCEED13D',
+                            'labels': {'de': u'Romancier',
+                                       'en': u'novelist',
+                                       'sv': u'romanf\xf6rfattare'},
+                            'url': u'https://www.wikidata.org/wiki/Q6625963'},
+                        {
+                            'claim_id': u'Q42$7eb8aaef-4ddf-8b87-bd02-406f91a296bd',
+                            'labels': {'de': u'Kinderbuchautor',
+                                       'en': u"children's writer",
+                                       'sv': u'barnboksf\xf6rfattare'},
+                            'url': u'https://www.wikidata.org/wiki/Q4853732'},
+                        {
+                            'claim_id': u'q42$CBDC4890-D5A2-469C-AEBB-EFB682B891E7',
+                            'labels': {
+                                'de': u'Science-Fiction-Schriftsteller',
+                                'en': u'science fiction writer',
+                                'sv': u'science fiction-f\xf6rfattare'},
+                            'url': u'https://www.wikidata.org/wiki/Q18844224'},
+                        {
+                            'claim_id': u'Q42$58F0D772-9CE4-46AC-BF0D-FBBBAFA09603',
+                            'labels': {'de': u'Komiker',
+                                       'en': u'comedian',
+                                       'sv': u'komiker'},
+                            'url': u'https://www.wikidata.org/wiki/Q245068'},
+                        {
+                            'claim_id': u'Q42$e469cda0-475d-8bb1-1dcd-f72c91161ebf',
+                            'labels': {'de': u'Dramaturg',
+                                       'en': u'dramaturge',
+                                       'sv': u'dramaturg'},
+                            'url': u'https://www.wikidata.org/wiki/Q487596'}]},
+    u'place of birth': {'url': 'https://www.wikidata.org/wiki/Property:P19',
+                        'values': [{
+                            'claim_id': u'q42$3D284234-52BC-4DA3-83A3-7C39F84BA518',
+                            'labels': {'de': u'Cambridge',
+                                       'en': u'Cambridge',
+                                       'sv': u'Cambridge'},
+                            'url': u'https://www.wikidata.org/wiki/Q350'}]},
+    'wikidata_id': 'Q42',
+    'wikidata_timestamp': '+2018-10-04T02:20:35Z'}
+
+
+def test_parseItemPage_all():
+    entity = itempage
+    import pprint
+    parsed_without_attribute_labels = ParseItemPage(entity,
+                                                    include_literals=True,
+                                                    languages=['en', 'de',
+                                                               'sv'],
+                                                    require_country=False,
+                                                    include_attribute_labels=False
+                                                    ).details
+
+    parsed_with_attribute_labels = ParseItemPage(entity, include_literals=True,
+                                                 languages=['en', 'de', 'sv'],
+                                                 require_country=False,
+                                                 include_attribute_labels=True
+                                                 ).details
+    assert set(parsed_with_attribute_labels.keys()) == set(
+        parsed_without_attribute_labels.keys())
+    assert not any(
+        ('labels' in val for val in parsed_without_attribute_labels.values()))
+    # assert any(('labels' in val for val in parsed_with_attribute_labels.values()))
+    assert all((parsed_with_attribute_labels[literal] ==
+                parsed_without_attribute_labels[literal]
+                for literal in ('labels', 'descriptions', 'aliases')))
+    pprint.pprint(parsed_with_attribute_labels)
+
+    assert parsed_with_attribute_labels == douglas_adams_extract
+    for val in parsed_with_attribute_labels.values():
+        if 'values' in val:
+            assert all(('labels' in sub_val for sub_val in val['values']))
+    parsed_with_country = ParseItemPage(entity,
+                                        include_literals=False,
+                                        claims_of_interest=[],
+                                        languages=['en', 'de',
+                                                   'sv'],
+                                        require_country=True,
+                                        include_attribute_labels=True,
+                                        qualifiers_of_interest=[]
+                                        ).details
+    assert 'country' in parsed_with_country
+    pprint.pprint(parsed_with_country['country'])
+    pprint.pprint(parsed_with_country)
+    assert parsed_with_country['country'] == {
+        'url': 'https://www.wikidata.org/wiki/Property:P17',
+        'values': [
+            {'claim_id': u'Q42@q350$8E72D3A5-A067-47CB-AF45-C73ED7CFFF9E',
+             'labels': {'de': u'Vereinigtes K\xf6nigreich',
+                        'en': u'United Kingdom',
+                        'sv': u'Storbritannien'},
+             'url': u'https://www.wikidata.org/wiki/Q145'}]
+    }
+
+
+def test_parseItemPage_filter():
+    """Filtering method, allows to filter entities by a) presence of a certain
+    parameter or b) minimal value (str"""
+    try:
+        filter_params = {'P39': ('has_attr', None)}
+        parsed_with_filter = ParseItemPage(itempage,
+                                       include_literals=True,
+                                       languages=['en', 'de',
+                                                  'sv'],
+                                       require_country=False,
+                                       include_attribute_labels=False,
+                                       filter=filter_params
+                                       ).details
+        raise ValueError('The sample itempage does not contain a claim "P39", '
+                         'this should raise an error!')
+    except ValueError:
+        pass
+    try:
+        filter_params = {'P19': ('has_attr', None)}
+        parsed_with_filter = ParseItemPage(itempage,
+                                       include_literals=True,
+                                       languages=['en', 'de',
+                                                  'sv'],
+                                       require_country=False,
+                                       include_attribute_labels=False,
+                                       filter=filter_params
+                                       ).details
+        parsed_without_filter = ParseItemPage(itempage,
+                                       include_literals=True,
+                                       languages=['en', 'de',
+                                                  'sv'],
+                                       require_country=False,
+                                       include_attribute_labels=False
+                                       ).details
+        assert parsed_with_filter == parsed_without_filter
+    except ValueError:
+        raise ValueError('The sample itempage does contain a claim "P19" '
+                         '(place of birth), this should pass the filter')
+    try:
+        filter_params = {'P569': ('min', '+1952-01-01')}
+        parsed_with_filter = ParseItemPage(itempage,
+                                       include_literals=True,
+                                       languages=['en', 'de',
+                                                  'sv'],
+                                       require_country=False,
+                                       include_attribute_labels=False,
+                                       filter=filter_params
+                                       ).details
+    except ValueError:
+        raise ValueError('Failed to identify Douglas Adams birth date as '
+                         '>= 1952')
+    try:
+        filter_params = {'P569': ('min', '+1956-01-01')}
+        parsed_with_filter = ParseItemPage(itempage,
+                                       include_literals=True,
+                                       languages=['en', 'de',
+                                                  'sv'],
+                                       require_country=False,
+                                       include_attribute_labels=False,
+                                       filter=filter_params
+                                       ).details
+        raise ValueError('Douglas Adams misidentified')
+    except ValueError:
+        pass
+
+
+#
+#
+# {'aliases': {'de': [u'Douglas No\xebl Adams', u'Douglas Noel Adams'],
+#              'en': [u'Douglas No\xebl Adams',
+#                     u'Douglas Noel Adams',
+#                     u'Douglas N. Adams']},
+#  'descriptions': {'de': u'britischer Schriftsteller',
+#                   'en': u'author and humorist',
+#                   'sv': u'brittisk f\xf6rfattare'},
+#  u'employer': {'url': 'https://www.wikidata.org/wiki/Property:P108',
+#                'values': [{'claim_id': u'Q42$853B16C8-1AB3-489A-831E-AEAD7E94AB87',
+#                            'labels': {'de': u'British Broadcasting Corporation',
+#                                       'en': u'BBC',
+#                                       'sv': u'BBC'},
+#                            'url': u'https://www.wikidata.org/wiki/Q9531'}]},
+#  'full_image': 'https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg',
+#  u'image_description': 'https://commons.wikimedia.org/wiki/File:Douglas_adams_portrait_cropped.jpg',
+#  'labels': {'de': u'Douglas Adams',
+#             'en': u'Douglas Adams',
+#             'sv': u'Douglas Adams'},
+#  u'occupation': {'url': 'https://www.wikidata.org/wiki/Property:P106',
+#                  'values': [{'claim_id': u'Q42$e0f736bd-4711-c43b-9277-af1e9b2fb85f',
+#                              'labels': {'de': u'Dramatiker',
+#                                         'en': u'playwright',
+#                                         'sv': u'dramatiker'},
+#                              'url': u'https://www.wikidata.org/wiki/Q214917'},
+#                             {'claim_id': u'q42$E13E619F-63EF-4B72-99D9-7A45C7C6AD34',
+#                              'labels': {'de': u'Drehbuchautor',
+#                                         'en': u'screenwriter',
+#                                         'sv': u'manusf\xf6rfattare'},
+#                              'url': u'https://www.wikidata.org/wiki/Q28389'},
+#                             {'claim_id': u'Q42$D6E21D67-05D6-4A0B-8458-0744FCEED13D',
+#                              'labels': {'de': u'Romancier',
+#                                         'en': u'novelist',
+#                                         'sv': u'romanf\xf6rfattare'},
+#                              'url': u'https://www.wikidata.org/wiki/Q6625963'},
+#                             {'claim_id': u'Q42$7eb8aaef-4ddf-8b87-bd02-406f91a296bd',
+#                              'labels': {'de': u'Kinderbuchautor',
+#                                         'en': u"children's writer",
+#                                         'sv': u'barnboksf\xf6rfattare'},
+#                              'url': u'https://www.wikidata.org/wiki/Q4853732'},
+#                             {'claim_id': u'q42$CBDC4890-D5A2-469C-AEBB-EFB682B891E7',
+#                              'labels': {'de': u'Science-Fiction-Schriftsteller',
+#                                         'en': u'science fiction writer',
+#                                         'sv': u'science fiction-f\xf6rfattare'},
+#                              'url': u'https://www.wikidata.org/wiki/Q18844224'},
+#                             {'claim_id': u'Q42$58F0D772-9CE4-46AC-BF0D-FBBBAFA09603',
+#                              'labels': {'de': u'Komiker',
+#                                         'en': u'comedian',
+#                                         'sv': u'komiker'},
+#                              'url': u'https://www.wikidata.org/wiki/Q245068'},
+#                             {'claim_id': u'Q42$e469cda0-475d-8bb1-1dcd-f72c91161ebf',
+#                              'labels': {'de': u'Dramaturg',
+#                                         'en': u'dramaturge',
+#                                         'sv': u'dramaturg'},
+#                              'url': u'https://www.wikidata.org/wiki/Q487596'}]},
+#  u'place of birth': {'url': 'https://www.wikidata.org/wiki/Property:P19',
+#                      'values': [{'claim_id': u'q42$3D284234-52BC-4DA3-83A3-7C39F84BA518',
+#                                  'labels': {'de': u'Cambridge',
+#                                             'en': u'Cambridge',
+#                                             'sv': u'Cambridge'},
+#                                  'url': u'https://www.wikidata.org/wiki/Q350'}]},
+#  'wikidata_id': 'Q42',
+#  'wikidata_timestamp': '+2018-10-04T02:20:35Z'}
+# {'url': 'https://www.wikidata.org/wiki/Property:P17',
+#  'values': [{'claim_id': u'Q42@q350$8E72D3A5-A067-47CB-AF45-C73ED7CFFF9E',
+#              'labels': {'de': u'Vereinigtes K\xf6nigreich',
+#                         'en': u'United Kingdom',
+#                         'sv': u'Storbritannien'},
+#              'url': u'https://www.wikidata.org/wiki/Q145'}]}
+# {'country': {'url': 'https://www.wikidata.org/wiki/Property:P17',
+#              'values': [{'claim_id': u'Q42@q350$8E72D3A5-A067-47CB-AF45-C73ED7CFFF9E',
+#                          'labels': {'de': u'Vereinigtes K\xf6nigreich',
+#                                     'en': u'United Kingdom',
+#                                     'sv': u'Storbritannien'},
+#                          'url': u'https://www.wikidata.org/wiki/Q145'}]},
+#  'labels': {'de': u'Douglas Adams',
+#             'en': u'Douglas Adams',
+#             'sv': u'Douglas Adams'},
+#  'wikidata_id': 'Q42',
+#  'wikidata_timestamp': '+2018-10-04T02:20:35Z'}

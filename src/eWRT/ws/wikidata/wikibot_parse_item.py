@@ -20,7 +20,7 @@ from eWRT.ws.wikidata.definitions import (local_attributes as LOCAL_ATTRIBUTES,
 from eWRT.ws.wikidata.get_image_from_wikidataid import get_image, \
     NoImageFoundError
 from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
-from pywikibot import WbTime, Claim, Coordinate
+from pywikibot import WbTime, Claim, Coordinate, WbQuantity
 from pywikibot.site import DataSite
 
 if sys.version_info.major == 3:
@@ -38,6 +38,7 @@ QUALIFIERS = {'P580': 'start date',
 QUALIFIERS = {}
 
 CLAIMS_OF_INTEREST = ["P18", "P19", 'P39', 'P106', 'P108', 'P102']
+
 
 def get_wikidata_timestamp(item_page):
     """
@@ -76,6 +77,7 @@ def mock_item_page(itempage):
     new_itempage.text = itempage
     return new_itempage
 
+
 class ParseItemPage:
     """Methods to parse pywikibot.ItemPage for a specifiable list
         of properties, returning a dict of property labels and values."""
@@ -87,7 +89,8 @@ class ParseItemPage:
                  entity_type_properties=None, languages=None,
                  require_country=True,
                  include_attribute_labels=True,
-                 qualifiers_of_interest=None):
+                 qualifiers_of_interest=None,
+                 filter=None):
         """
         :param itempage: pywikibot.ItemPage to be parsed
         :param include_literals: bool defining whether to includehttps://gitlab.semanticlab.net/nlp-backend/issues0
@@ -108,6 +111,13 @@ class ParseItemPage:
 
         # include 'labels' only if include_literals == False
         # itempage.get()
+        self.item_raw = itempage
+        try:
+            self.claims = itempage['claims']
+        except AttributeError:
+            self.claims = itempage['claims']
+        if filter and not self.filter(filter):
+            raise ValueError
         if not isinstance(itempage, dict):
             id = itempage.id
             timestamp = itempage.timestamp
@@ -115,7 +125,7 @@ class ParseItemPage:
             itempage.update({'id': id, 'timestamp': timestamp})
 
         timestamp = get_wikidata_timestamp(itempage)
-        if  qualifiers_of_interest is None:
+        if qualifiers_of_interest is None:
             self.qualifiers_of_interest = QUALIFIERS
         self.include_attribute_labels = include_attribute_labels
         self.include_literals = include_literals
@@ -124,8 +134,8 @@ class ParseItemPage:
         else:
             self.literals = ['labels']
         self._require_country = require_country
-        if languages is None:\
-            languages = RELEVANT_LANGUAGES
+        if languages is None: \
+                languages = RELEVANT_LANGUAGES
         self.languages = languages
         if not entity_type_properties:
             self.entity_type_properties = GENERIC_PROPERTIES
@@ -141,17 +151,53 @@ class ParseItemPage:
 
         self.claims_of_interest = [c for c in self.claims_of_interest if
                                    c not in self._image_requested]
-        self.item_raw = itempage
-        try:
-            self.claims = itempage['claims']
-        except AttributeError:
-            self.claims = itempage['claims']
         self.process_attributes()
 
         assert self.details
         self.details['wikidata_timestamp'] = timestamp
         self.details['wikidata_id'] = itempage['id']
 
+    def filter(self, filter_params):
+        """
+        reject results that do not match a filter.
+        Filters can require the presence of an attribute or require that it
+        must be above/below a certain value.
+        example: filter for individuals with a stated birth place and a birth
+        date in the year 1950
+        >>> params = {'P19': ('has_attr', None), 'P569': ('min', '+1950-01-01'), 'P569': ('max', '+1950-12-31')}
+        >>> ParseItemPage(itempage, filter_params=params)
+        (this will raise a ValueError for individuals not matching the criteria)
+        :param filter_params:
+        :return:
+        """
+        min_max = {'min': max, 'max': min}
+        def inside(threshold, testee, mode):
+            if mode == 'min':
+                return testee >= threshold
+            elif mode == 'max':
+                return testee <= threshold
+        for item in filter_params.items():
+            claim = item[0]
+            if not claim in self.claims:
+                return False
+            
+            elif item[1][0] in min_max:
+                func = min_max[item[1][0]]
+                threshold_value = item[1][1]
+                values = self.complete_claim_details(claim,
+                                                         self.claims[claim],
+                                                         languages=[],
+                                                         literals=[],
+                                                         include_attribute_labels=False,
+                                                         )
+                best_candidate = func([instance['value'] for instance in values['values'] if instance['value'] is not None])
+                if not inside(threshold_value,best_candidate, mode=item[1][0]):
+                    return False
+            
+        return True
+
+        
+        
     def process_attributes(self):
         """Exctract information about the item, specified
         by the predicates in self.claims_of_interest:
@@ -201,7 +247,8 @@ class ParseItemPage:
                         warnings.warn(
                             'Unable to parse claim {claim} for item {item}, '
                             'should be present!'.format(claim=claim,
-                                                        item=self.item_raw['id']))
+                                                        item=self.item_raw[
+                                                            'id']))
 
             except KeyError as e:
                 pass
@@ -273,21 +320,21 @@ class ParseItemPage:
                                                   preferred.snak]
 
             except ValueError as e:
-                try:
-                    most_recent = guess_current_value([Claim.fromJSON(site=DataSite('wikidata', 'wikidata'),
-                                   data=claim) for claim in claim_instances])
-                    claim_details['preferred'] = [instance for instance in
-                                                  claim_details['values'] if
-                                                  instance['claim_id'] ==
-                                                  most_recent.snak]
-                except Exception as e:
+                # try:
+                #     most_recent = guess_current_value([Claim.fromJSON(site=DataSite('wikidata', 'wikidata'),
+                #                    data=claim) for claim in claim_instances])
+                #     claim_details['preferred'] = [instance for instance in
+                #                                   claim_details['values'] if
+                #                                   instance['claim_id'] ==
+                #                                   most_recent.snak]
+                # except Exception as e:
 
-                    warnings.warn('encountered exception: {}'.format(e))
+                warnings.warn('encountered exception: {}'.format(e))
 
-                # ParseItemPage.extract_literal_properties(preferred[0],
-                #                                          languages=languages,
-                #                                          literals=[
-                #                                              'labels'])
+            # ParseItemPage.extract_literal_properties(preferred[0],
+            #                                          languages=languages,
+            #                                          literals=[
+            #                                              'labels'])
         return claim_details if claim_details else None
 
     @classmethod
@@ -351,7 +398,7 @@ class ParseItemPage:
                     languages=languages,
                     literals=['labels'],
                     include_attribute_labels=include_attribute_labels,
-                qualifiers=[])
+                    qualifiers=[])
                 # country_iso_code = COUNTRY_ISO2_CODES_DICT[country_identified[0]['url']]
                 return country_identified
             else:
@@ -376,7 +423,7 @@ class ParseItemPage:
         try:
             claims = itempage['claims']
         except:
-            claims = itempage['claims']
+            claims = itempage.claims
         for location_type in local_attributes:
             if location_type in claims:
                 for location in claims[location_type]:
@@ -465,7 +512,10 @@ class ParseClaim:
                 pass
             return claim_details
         elif isinstance(self.claim.target, Coordinate):
-            claim_details['values'] = self.claim.target.lat, self.claim.target.lon
+            claim_details[
+                'values'] = self.claim.target.lat, self.claim.target.lon
+        elif isinstance(self.claim.target, WbQuantity):
+            claim_details['value'] = float(self.claim.target.amount)
         elif not self.claim.target is None:
             claim_details['url'] = 'https://www.wikidata.org/wiki/' + \
                                    self.claim.target.id
@@ -544,15 +594,16 @@ class ParseClaim:
 def start_date(instance):
     try:
         if instance.has_qualifier or instance.qualifiers:
-          if 'P580' in instance.qualifiers:
+            if 'P580' in instance.qualifiers:
 
-            if isinstance(instance.qualifiers['P580'][0].target, WbTime):
-                try:
-                    start_date = instance.qualifiers['P580'][0].target.toTimestr(
-                        force_iso=True)
-                    return start_date
-                except AttributeError:
-                    pass
+                if isinstance(instance.qualifiers['P580'][0].target, WbTime):
+                    try:
+                        start_date = instance.qualifiers['P580'][
+                            0].target.toTimestr(
+                            force_iso=True)
+                        return start_date
+                    except AttributeError:
+                        pass
 
     except Exception as e:
         pass
