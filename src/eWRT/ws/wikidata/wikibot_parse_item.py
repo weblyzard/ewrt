@@ -510,7 +510,8 @@ class ParseClaim:
         elif not self.claim.target is None:
             claim_details['url'] = 'https://www.wikidata.org/wiki/' + \
                                    self.claim.target.id
-            claim_details.update(self.extract_literal_claim())
+            if self.include_attribute_labels:
+                claim_details.update(self.extract_literal_claim())
         else:
             warnings.warn('claim {} on item {} is None'.format(
                 self.claim.id,
