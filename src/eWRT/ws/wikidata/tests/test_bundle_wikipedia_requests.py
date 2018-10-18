@@ -219,7 +219,7 @@ def assert_basic_structure_as_expected(merged_result):
     assert isinstance(merged_result, dict)
     assert merged_result['language'] == 'en'
     other_language_wikis = ('dewiki', 'frwiki', 'eswiki')
-    assert all([key not in merged_result for key in other_language_wikis])
+    # assert all([key not in merged_result for key in other_language_wikis])
     assert merged_result['labels'] == 'George Washington'
     assert all([key in merged_result['enwiki'] for key in
                 GW_snapshot_wikipedia_result])
