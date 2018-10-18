@@ -31,7 +31,8 @@ def collect_entities_delayed(entity_types,
                              include_wikipedia=True,
                              memory_saving_limit=50,
                              dump_path=None,
-                             param_filter=None):
+                             param_filter=None,
+                             wikidata_postprocessing_steps=None):
     """
 
     :param dump_path:
@@ -51,6 +52,8 @@ def collect_entities_delayed(entity_types,
     :param memory_saving_limit:
     :return:
     """
+    if wikidata_postprocessing_steps is None:
+        wikidata_postprocessing_steps = []
     if languages is None:
         languages = ['en']
     relevant_entity_types = OrderedDict(
@@ -81,6 +84,8 @@ def collect_entities_delayed(entity_types,
                 require_country=require_country,
                 include_wikipedia=include_wikipedia,
         param_filter=param_filter)):
+            for postprocessing_step in wikidata_postprocessing_steps:
+                entity_data = postprocessing_step(entity_data)
             if include_wikipedia:
                 entities_retrieved[entity_data['url']] = entity_data
                 if delay_wikipedia_retrieval:
