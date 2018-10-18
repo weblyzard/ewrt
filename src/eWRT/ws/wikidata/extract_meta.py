@@ -20,7 +20,6 @@ import requests
 from bz2file import BZ2File
 from eWRT.ws.wikidata.enrich_from_wikipedia import wp_summary_from_wdid
 from eWRT.ws.wikidata.wikibot_parse_item import (ParseItemPage,
-                                                 mock_item_page,
                                                  get_wikidata_timestamp)
 from lxml import etree as et
 from wikipedia import RedirectError, DisambiguationError

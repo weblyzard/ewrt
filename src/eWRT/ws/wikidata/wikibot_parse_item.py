@@ -60,24 +60,6 @@ def get_wikidata_timestamp(item_page):
             return None
     return timestamp
 
-
-def mock_item_page(itempage):
-    import mock
-    new_itempage = mock.Mock()
-    try:
-        new_itempage.id = itempage['id']
-    except KeyError:
-        raise ValueError('No id!')
-    try:
-        new_itempage.timestamp = itempage['timestamp']
-    except KeyError:
-        pass
-    new_itempage.sitelinks = itempage['sitelinks']
-    new_itempage.claims = itempage['claims']
-    new_itempage.text = itempage
-    return new_itempage
-
-
 class ParseItemPage:
     """Methods to parse pywikibot.ItemPage for a specifiable list
         of properties, returning a dict of property labels and values."""
@@ -164,7 +146,7 @@ class ParseItemPage:
         must be above/below a certain value.
         example: filter for individuals with a stated birth place and a birth
         date in the year 1950
-        >>> params = {('P19', 'has_attr', None), ('P569', 'min', '+1950-01-01'), ('P569', 'max', '+1950-12-31')}
+        >>> params = [('P19', 'has_attr', None), ('P569', 'min', '+1950-01-01'), ('P569', 'max', '+1950-12-31')]
         >>> ParseItemPage(itempage, filter_params=params)
         (this will raise a ValueError for individuals not matching the criteria)
         :param filter_params:
@@ -432,7 +414,7 @@ class ParseItemPage:
         try:
             claims = itempage['claims']
         except:
-            claims = itempage.claims
+            claims = itempage.text['claims']
         for location_type in local_attributes:
             if location_type in claims:
                 for location in claims[location_type]:

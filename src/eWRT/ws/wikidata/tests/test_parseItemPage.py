@@ -243,7 +243,7 @@ douglas_adams_extract = {
                                        'sv': u'Cambridge'},
                             'url': u'https://www.wikidata.org/wiki/Q350'}]},
     'wikidata_id': 'Q42',
-    'wikidata_timestamp': '+2018-10-04T02:20:35Z'}
+    'wikidata_timestamp': '+2018-09-25T00:00:00Z'}
 
 
 def test_parseItemPage_all():

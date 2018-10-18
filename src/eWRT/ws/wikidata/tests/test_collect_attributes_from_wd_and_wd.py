@@ -13,17 +13,6 @@ from eWRT.ws.wikidata.extract_meta import (collect_attributes_from_wp_and_wd,
                                            )
 from eWRT.ws.wikidata.sample_itempage import itempage as adams_itempage
 
-#
-# def is_connected():
-#     import socket
-#     try:
-#         host = socket.gethostbyname("www.google.com")
-#         socket.create_connection((host, 80), 2)
-#         return True
-#     except:
-#         pass
-#     return False
-
 
 adams = mock.Mock()
 
@@ -51,10 +40,9 @@ def test_collect_attributes_from_wp_and_wd_offline():
                                                    include_literals=False,
                                                    raise_on_no_wikipage=False,
                                                    include_attribute_labels=False,
-                                                   require_country=False)
+                                                   require_country=False).next()
     assert adams_data['date of death']['values'][0]['value'].startswith(
         '+2001-05-11')
-    pprint(adams_data)
     for claim in adams_data.values():
         if isinstance(claim, dict):
             if 'values' in claim:
@@ -70,10 +58,11 @@ def test_collect_attributes_from_wp_and_wd_online():
                                                    include_literals=False,
                                                    raise_on_no_wikipage=False,
                                                    include_attribute_labels=True,
-                                                   require_country=False)
+                                                   include_wikipedia=True,
+                                                   delay_wikipedia_retrieval=False,
+                                                   require_country=False).next()
     assert adams_data['date of death']['values'][0]['value'].startswith(
         '+2001-05-11')
-    pprint(adams_data)
     for claim in adams_data.values():
         if isinstance(claim, dict):
             if 'values' in claim:
@@ -84,16 +73,26 @@ def test_collect_attributes_from_wp_and_wd_online():
                 except AssertionError:
                     assert all(
                         ['value' in instance for instance in claim['values']])
+    assert 'enwiki' in adams_data
+    assert isinstance(adams_data['enwiki'], dict)
+    assert 'summary' in adams_data['enwiki']
 
 def test_collect_attributes_from_wp_and_wd_delay_wikipedia():
+    """
+    Check that the 'delay_wikipedia_retrieval' switch does what it should:
+    return a string for the e. g. 'enwiki' key (the title of the page), instead
+    of the dict with retrieved data.
+    :return:
+    """
     adams_data = collect_attributes_from_wp_and_wd(adams, ['en'],
                                                    wd_parameters=WD_PARAMETERS,
                                                    include_literals=False,
                                                    raise_on_no_wikipage=False,
                                                    include_attribute_labels=True,
                                                    require_country=False,
-                                                   delay_wikipedia_retrieval=True)
+                                                   include_wikipedia=True,
+                                                   delay_wikipedia_retrieval=True).next()
     assert 'enwiki' in adams_data
     assert isinstance(adams_data['enwiki'], basestring)
 
-print(test_collect_attributes_from_wp_and_wd_delay_wikipedia())
+print(test_collect_attributes_from_wp_and_wd_online())

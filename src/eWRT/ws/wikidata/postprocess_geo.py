@@ -20,7 +20,7 @@ import sys
 import warnings
 
 import pywikibot
-from eWRT.ws.wikidata.definitions import local_attributes
+from eWRT.ws.wikidata.definitions import local_attributes, COUNTRY_ISO2_CODES_DICT
 from eWRT.ws.wikidata.enrich_from_wikipedia import RELEVANT_LANGUAGES
 from eWRT.ws.wikidata.extract_meta import WIKIDATA_SITE
 from eWRT.ws.wikidata.wikibot_parse_item import ParseItemPage

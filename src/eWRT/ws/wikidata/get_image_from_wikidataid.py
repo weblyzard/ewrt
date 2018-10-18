@@ -46,10 +46,9 @@ def get_images(itempage,
         thumbnail_url, full_image_url]
     """
     try:
-        itempage.get()
-        claims = itempage.claims
-    except AssertionError:
         claims = itempage['claims']
+    except TypeError:
+        claims = itempage.claims
     images_retrieved = {}
     for image_type in image_types:
         try:
