@@ -54,7 +54,7 @@ def collect_entities_delayed(entity_types,
     :return:
     """
     if wikidata_postprocessing_steps is None:
-        wikidata_postprocessing_steps = []
+        wikidata_postprocessing_steps = {}
     if languages is None:
         languages = ['en']
     relevant_entity_types = OrderedDict(
@@ -85,8 +85,8 @@ def collect_entities_delayed(entity_types,
                 require_country=require_country,
                 include_wikipedia=include_wikipedia,
                 param_filter=param_filter)):
-            for postprocessing_step in wikidata_postprocessing_steps:
-                entity_data = postprocessing_step(entity_data)
+            for step, param_dict in wikidata_postprocessing_steps:
+                entity_data = step(entity_data, **param_dict)
             if include_wikipedia:
                 entities_retrieved[entity_data['url']] = entity_data
                 if delay_wikipedia_retrieval:
