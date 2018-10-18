@@ -32,8 +32,8 @@ def filter_result(language, raw_result,
         #     continue
         if key == language + 'wiki' and isinstance(wikibot_result[key], dict):
             output_formatted_entity[key] = wikibot_result[key]
-        elif key.endswith('wiki') or wikibot_result[key] is None:
-            continue
+        # elif key.endswith('wiki') or wikibot_result[key] is None:
+        #     continue
         elif isinstance(wikibot_result[key], basestring) or wikibot_result[
             key] is None:
             output_formatted_entity[key] = wikibot_result[key]
