@@ -9,6 +9,7 @@ Created on October 09, 2018
 '''
 
 import logging
+
 from collections import OrderedDict
 
 from eWRT.ws.wikidata.bundle_wikipedia_requests import \
@@ -83,7 +84,7 @@ def collect_entities_delayed(entity_types,
                 include_attribute_labels=include_attribute_labels,
                 require_country=require_country,
                 include_wikipedia=include_wikipedia,
-        param_filter=param_filter)):
+                param_filter=param_filter)):
             for postprocessing_step in wikidata_postprocessing_steps:
                 entity_data = postprocessing_step(entity_data)
             if include_wikipedia:
@@ -95,7 +96,7 @@ def collect_entities_delayed(entity_types,
                             wikipedia_sitelinks_to_retrieve[lang][
                                 entity_data[lang + 'wiki']] = entity_data['url']
 
-                        except (KeyError, ):
+                        except (KeyError,):
                             pass
 
                 if not delay_wikipedia_retrieval:
@@ -109,7 +110,7 @@ def collect_entities_delayed(entity_types,
                     if idx >= limit_per_query:
                         break
 
-            if idx >= limit_per_query or (delay_wikipedia_retrieval and\
+            if idx >= limit_per_query or (delay_wikipedia_retrieval and \
                                           include_wikipedia and \
                                           (idx + 1) % memory_saving_limit == 0):
                 # if debug:
@@ -146,7 +147,7 @@ def collect_entities_delayed(entity_types,
                                 wikipedia_pages={
                                     language: {
                                         entity_data[language + 'wiki']['title']:
-                                        entity_data['url']
+                                            entity_data['url']
                                     }
                                 },
                                 entities_cache={
