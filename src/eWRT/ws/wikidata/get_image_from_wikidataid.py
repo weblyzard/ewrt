@@ -17,9 +17,10 @@ CLI to get thumbnail link from WikiData ID: <path-to-script> <ID> [size]
 import hashlib
 import sys
 import warnings
-import pywikibot
 
+import pywikibot
 # mapping of flag, logo, to their codes
+from collections import OrderedDict
 from eWRT.ws.wikidata.definitions import image_attributes
 
 if sys.version_info.major == 3:
@@ -65,6 +66,7 @@ def get_images(itempage,
             from pywikibot.site import DataSite
             image = Claim.fromJSON(DataSite('wikidata', 'wikidata'), image)
             target = image.getTarget()
+        claim_id = image.snak
         # str(target) returns a string of format [[site:namespace:filename]],
         # e. g. [[commons:File:Barack_Obama.jpg]], the wiki link of the image
         # page. We substitute this for a valid external link
@@ -72,7 +74,7 @@ def get_images(itempage,
             target).replace(' ', '_').strip('[]').split(':')
         image_description_page = 'https://{}.wikimedia.org/wiki/{}:{}'.format(
             *image_interwiki_link)
-        
+
         # after:
         # https://stackoverflow.com/questions/34393884/how-to-get-image-url-property-from-wikidata-item-by-api
         thumbnail_template = u'https://{}.wikimedia.org/w/thumb.php?width={}&f={}'
@@ -84,8 +86,11 @@ def get_images(itempage,
                                                         quote(link)
                                                         )
 
-        images_retrieved[image_type] = \
-            [image_description_page, thumbnail_link, image_direct_link]
+        images_retrieved[image_type] = OrderedDict(
+            [('claim_id', claim_id),
+             ('description_page', image_description_page),
+             ('thumbnail', thumbnail_link),
+             ('full', image_direct_link)])
     try:
         assert images_retrieved
     except AssertionError:
@@ -93,7 +98,8 @@ def get_images(itempage,
     return images_retrieved
 
 
-def get_image(itempage, image_width=DEFAULT_THUMBNAIL_WIDTH, image_type='P18'):
+def get_image(itempage, image_width=DEFAULT_THUMBNAIL_WIDTH, image_type='P18',
+              include_claim_id=False):
     """Get one image type (default is `image`='P18') only.
     :param itempage: ItemPage
     :param image_width: width in pixels (int)
@@ -101,8 +107,12 @@ def get_image(itempage, image_width=DEFAULT_THUMBNAIL_WIDTH, image_type='P18'):
             `P18`='image'. Can be e. g. flag image, coat of arms, logo,...
     :returns list of [image_description_url, thumbnail_url, full_image_url]"""
     try:
-        return get_images(itempage=itempage, image_width=image_width,
+        image = get_images(itempage=itempage, image_width=image_width,
                           image_types=[image_type])[image_type]
+        if not include_claim_id:
+            del image['claim_id']
+        return image
+
     except KeyError:
         raise NoImageFoundError
 
@@ -128,7 +138,7 @@ if __name__ == '__main__':
 
     thumbnails = []
     for entity_wikidata_id in ids.split(','):
-        wikidata_site = pywikibot.Site("wikidata", "wikidata")
+        wikidata_site = pywikibot.site.DataSite("wikidata", "wikidata")
         page = pywikibot.ItemPage(site=wikidata_site, title=entity_wikidata_id)
 
         try:
@@ -138,11 +148,11 @@ if __name__ == '__main__':
                 'No width specified, using default value of {}px!'.format(
                     DEFAULT_THUMBNAIL_WIDTH))
             width = DEFAULT_THUMBNAIL_WIDTH
-        
+
         try:
             thumbnail = get_thumbnail(page, width)
             thumbnails.append(thumbnail)
         except NoImageFoundError:
             warnings.warn("No image available for entity!")
-    
+
     print(thumbnails)

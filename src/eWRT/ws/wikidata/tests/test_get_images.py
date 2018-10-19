@@ -7,8 +7,8 @@ Created on September 20, 2018
 '''
 import mock
 import pytest
-from eWRT.ws.wikidata.get_image_from_wikidataid import get_images, get_image
 from eWRT.ws.wikidata.definitions.property_definitions import image_attributes
+from eWRT.ws.wikidata.get_image_from_wikidataid import get_images, get_image
 from pywikibot import Claim
 
 DataSite, itempage = mock.Mock(), mock.Mock()
@@ -125,21 +125,24 @@ for claim in itempage.claims['P18'] + itempage.claims['P1442']:
 
 expected_links = [
     (128, [
+        u'Q42$44889d0f-474c-4fb9-1961-9a3366cbbb9e',
         'https://commons.wikimedia.org/wiki/File:Douglas_adams_portrait_cropped.jpg',
         u'https://commons.wikimedia.org/w/thumb.php?width=128&f=Douglas_adams_portrait_cropped.jpg',
         'https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg']),
     (64, [
+        u'Q42$44889d0f-474c-4fb9-1961-9a3366cbbb9e',
         'https://commons.wikimedia.org/wiki/File:Douglas_adams_portrait_cropped.jpg',
         u'https://commons.wikimedia.org/w/thumb.php?width=64&f=Douglas_adams_portrait_cropped.jpg',
         'https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg'])
 ]
 
 expected_types = [
-    ('P18', [
+    ('P18', [u'Q42$44889d0f-474c-4fb9-1961-9a3366cbbb9e',
         'https://commons.wikimedia.org/wiki/File:Douglas_adams_portrait_cropped.jpg',
         u'https://commons.wikimedia.org/w/thumb.php?width=128&f=Douglas_adams_portrait_cropped.jpg',
         'https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg']),
     ('P1442', [
+        u'Q42$db1ba2ba-47b9-3650-e6c4-db683abf788c',
         "https://commons.wikimedia.org/wiki/File:Douglas_Adams'_gravestone.jpg",
         u"https://commons.wikimedia.org/w/thumb.php?width=128&f=Douglas_Adams'_gravestone.jpg",
         'https://upload.wikimedia.org/wikipedia/commons/f/fe/Douglas_Adams%27_gravestone.jpg']
@@ -155,11 +158,11 @@ def test_get_images(width, expected_links):
     assert len(images) == len(
         [at for at in image_attributes if at in itempage.claims])
     print images.keys()
-    assert all([len(values) == 3 for values in images.values()])
-    assert images['P18'][1]
-    assert get_images(itempage, width)['P18'] == expected_links
+    assert all([len(values.values()) == 4 for values in images.values()])
+    assert images['P18'].values()[1]
+    assert get_images(itempage, width)['P18'].values() == expected_links
 
 
 @pytest.mark.parametrize('image_type,expected_types', expected_types)
 def test_get_image(image_type, expected_types):
-    assert get_image(itempage=itempage, image_type=image_type) == expected_types
+    assert get_image(itempage=itempage, image_type=image_type,include_claim_id=True).values() == expected_types

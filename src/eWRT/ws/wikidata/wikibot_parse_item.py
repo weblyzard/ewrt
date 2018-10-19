@@ -206,11 +206,10 @@ class ParseItemPage:
         for image_type in self._image_requested:
             type_literal = self._image_requested[image_type]
             try:
-                (self.details[type_literal + '_description'],
-                 _,
-                 self.details['full_{}'.format(type_literal)]) = get_image(
+                self.details[type_literal] = {'url': image_type, 'values': [get_image(
                     itempage=self.item_raw,
-                    image_type=image_type)
+                    image_type=image_type,
+                include_claim_id=True)]}
             except NoImageFoundError:
                 pass
 

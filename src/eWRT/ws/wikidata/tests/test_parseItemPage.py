@@ -12,7 +12,7 @@ from collections import OrderedDict
 import mock
 import pytest
 from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
-from eWRT.ws.wikidata.sample_itempage import itempage
+from eWRT.ws.wikidata.sample_itempage import itempage, sample_output
 from eWRT.ws.wikidata.wikibot_parse_item import ParseItemPage
 
 entity_mock = mock.Mock()
@@ -171,79 +171,7 @@ def test_get_country_from_location():
             ]
 
 
-douglas_adams_extract = {
-    'aliases': {'de': [u'Douglas No\xebl Adams', u'Douglas Noel Adams'],
-                'en': [u'Douglas No\xebl Adams',
-                       u'Douglas Noel Adams',
-                       u'Douglas N. Adams']},
-    'descriptions': {'de': u'britischer Schriftsteller',
-                     'en': u'author and humorist',
-                     'sv': u'brittisk f\xf6rfattare'},
-    u'employer': {'url': 'https://www.wikidata.org/wiki/Property:P108',
-                  'values': [
-                      {'claim_id': u'Q42$853B16C8-1AB3-489A-831E-AEAD7E94AB87',
-                       'labels': {'de': u'British Broadcasting Corporation',
-                                  'en': u'BBC',
-                                  'sv': u'BBC'},
-                       'url': u'https://www.wikidata.org/wiki/Q9531'}]},
-    'full_image': 'https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg',
-    u'image_description': 'https://commons.wikimedia.org/wiki/File:Douglas_adams_portrait_cropped.jpg',
-    'labels': {'de': u'Douglas Adams',
-               'en': u'Douglas Adams',
-               'sv': u'Douglas Adams'},
-    u'occupation': {'url': 'https://www.wikidata.org/wiki/Property:P106',
-                    'values': [{
-                        'claim_id': u'Q42$e0f736bd-4711-c43b-9277-af1e9b2fb85f',
-                        'labels': {'de': u'Dramatiker',
-                                   'en': u'playwright',
-                                   'sv': u'dramatiker'},
-                        'url': u'https://www.wikidata.org/wiki/Q214917'},
-                        {
-                            'claim_id': u'q42$E13E619F-63EF-4B72-99D9-7A45C7C6AD34',
-                            'labels': {'de': u'Drehbuchautor',
-                                       'en': u'screenwriter',
-                                       'sv': u'manusf\xf6rfattare'},
-                            'url': u'https://www.wikidata.org/wiki/Q28389'},
-                        {
-                            'claim_id': u'Q42$D6E21D67-05D6-4A0B-8458-0744FCEED13D',
-                            'labels': {'de': u'Romancier',
-                                       'en': u'novelist',
-                                       'sv': u'romanf\xf6rfattare'},
-                            'url': u'https://www.wikidata.org/wiki/Q6625963'},
-                        {
-                            'claim_id': u'Q42$7eb8aaef-4ddf-8b87-bd02-406f91a296bd',
-                            'labels': {'de': u'Kinderbuchautor',
-                                       'en': u"children's writer",
-                                       'sv': u'barnboksf\xf6rfattare'},
-                            'url': u'https://www.wikidata.org/wiki/Q4853732'},
-                        {
-                            'claim_id': u'q42$CBDC4890-D5A2-469C-AEBB-EFB682B891E7',
-                            'labels': {
-                                'de': u'Science-Fiction-Schriftsteller',
-                                'en': u'science fiction writer',
-                                'sv': u'science fiction-f\xf6rfattare'},
-                            'url': u'https://www.wikidata.org/wiki/Q18844224'},
-                        {
-                            'claim_id': u'Q42$58F0D772-9CE4-46AC-BF0D-FBBBAFA09603',
-                            'labels': {'de': u'Komiker',
-                                       'en': u'comedian',
-                                       'sv': u'komiker'},
-                            'url': u'https://www.wikidata.org/wiki/Q245068'},
-                        {
-                            'claim_id': u'Q42$e469cda0-475d-8bb1-1dcd-f72c91161ebf',
-                            'labels': {'de': u'Dramaturg',
-                                       'en': u'dramaturge',
-                                       'sv': u'dramaturg'},
-                            'url': u'https://www.wikidata.org/wiki/Q487596'}]},
-    u'place of birth': {'url': 'https://www.wikidata.org/wiki/Property:P19',
-                        'values': [{
-                            'claim_id': u'q42$3D284234-52BC-4DA3-83A3-7C39F84BA518',
-                            'labels': {'de': u'Cambridge',
-                                       'en': u'Cambridge',
-                                       'sv': u'Cambridge'},
-                            'url': u'https://www.wikidata.org/wiki/Q350'}]},
-    'wikidata_id': 'Q42',
-    'wikidata_timestamp': '+2018-09-25T00:00:00Z'}
+douglas_adams_extract = sample_output
 
 
 def test_parseItemPage_all():
@@ -274,7 +202,7 @@ def test_parseItemPage_all():
 
     assert parsed_with_attribute_labels == douglas_adams_extract
     for val in parsed_with_attribute_labels.values():
-        if 'values' in val:
+        if 'values' in val and 'P18' not in val['url']:
             assert all(('labels' in sub_val for sub_val in val['values']))
     parsed_with_country = ParseItemPage(entity,
                                         include_literals=False,
