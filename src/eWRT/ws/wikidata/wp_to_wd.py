@@ -1,5 +1,5 @@
 import pywikibot
-import wikipedia
+
 
 # class WikiPage:
 #

@@ -42,9 +42,6 @@ QUERY = """SELECT ?item WHERE{
 WIKIDATA_SITE = pywikibot.Site("wikidata", "wikidata")
 
 
-
-
-
 def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
                                       include_literals=True,
                                       raise_on_no_wikipage=True,
@@ -172,12 +169,12 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
         ))
     entity_extracted_details.update(entity.details)
 
-
     if include_wikipedia and not delay_wikipedia_retrieval:
         from eWRT.ws.wikidata.filters import filter_result
         for language in languages:
             if language + 'wiki' in relevant_sitelinks:
-                monolingual_result = filter_result(language=language,raw_result=entity_extracted_details)
+                monolingual_result = filter_result(language=language,
+                                                   raw_result=entity_extracted_details)
                 monolingual_result['language'] = language
                 yield monolingual_result
     else:
@@ -292,8 +289,9 @@ class WikidataEntityIterator:
                                    include_wikipedia=True,
                                    delay_wikipedia_retrieval=True,
                                    n_queries=None,
-                                   # no effect, for consistent API only,
-                                   param_filter=None
+                                   # no effect, for consistent API only, dump
+                                   param_filter=None,
+                                   pre_filter=None
                                    ):
         """
         iteratively parse a xml-dump (with embedded json entities) for entities
@@ -314,7 +312,9 @@ class WikidataEntityIterator:
         :return: list of entities to be updated
         :rtype: list
         """
-
+        if pre_filter is None:
+            pre_filter = (lambda x: True, {})
+        filter_function, filter_params = pre_filter
         def best_guess_open(file_name):
             """
             Use bz2file to iterate over a compressed file,
@@ -351,19 +351,19 @@ class WikidataEntityIterator:
                             ))
                         category = self.determine_relevant_category(
                             elem_content)
-                        if category:
+                        if category and filter_function(elem_content, **filter_params):
                             try:
                                 for entity in collect_attributes_from_wp_and_wd(
-                                    elem_content,
-                                    languages=languages,
-                                    wd_parameters=wd_parameters,
-                                    include_literals=include_literals,
-                                    include_attribute_labels=include_attribute_labels,
-                                    require_country=require_country,
-                                    include_wikipedia=include_wikipedia,
-                                    delay_wikipedia_retrieval=delay_wikipedia_retrieval,
-                                    raise_on_no_wikipage=raise_on_missing_wikipedias,
-                                    param_filter=param_filter):
+                                        elem_content,
+                                        languages=languages,
+                                        wd_parameters=wd_parameters,
+                                        include_literals=include_literals,
+                                        include_attribute_labels=include_attribute_labels,
+                                        require_country=require_country,
+                                        include_wikipedia=include_wikipedia,
+                                        delay_wikipedia_retrieval=delay_wikipedia_retrieval,
+                                        raise_on_no_wikipage=raise_on_missing_wikipedias,
+                                        param_filter=param_filter):
                                     entity['category'] = category
                                     yield entity
                             except ValueError as e:  # this probably means no
@@ -423,7 +423,8 @@ class WikidataEntityIterator:
                                    include_attribute_labels=True,
                                    require_country=True,
                                    include_wikipedia=True,
-                                   delay_wikipedia_retrieval=True,param_filter=None
+                                   delay_wikipedia_retrieval=True,
+                                   param_filter=None, pre_filter=None
                                    ):
         """Get a list of entities with pywikibot.pagegenerators
 
@@ -472,15 +473,14 @@ class WikidataEntityIterator:
                         continue
                     try:
                         for result in collect_attributes_from_wp_and_wd(
-                            entity_raw,
-                            languages=languages,
-                            wd_parameters=wd_parameters,
-                            include_literals=include_literals,
-                            include_attribute_labels=include_attribute_labels,
-                            require_country=require_country,
-                            include_wikipedia=include_wikipedia,
-                            delay_wikipedia_retrieval=delay_wikipedia_retrieval):
-
+                                entity_raw,
+                                languages=languages,
+                                wd_parameters=wd_parameters,
+                                include_literals=include_literals,
+                                include_attribute_labels=include_attribute_labels,
+                                require_country=require_country,
+                                include_wikipedia=include_wikipedia,
+                                delay_wikipedia_retrieval=delay_wikipedia_retrieval):
                             result['category'] = entity_type
                             yield result
 

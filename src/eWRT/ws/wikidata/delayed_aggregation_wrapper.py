@@ -33,7 +33,8 @@ def collect_entities_delayed(entity_types,
                              memory_saving_limit=50,
                              dump_path=None,
                              param_filter=None,
-                             wikidata_postprocessing_steps=None):
+                             wikidata_postprocessing_steps=None,
+                             pre_filter=None):
     """
 
     :param dump_path:
@@ -84,7 +85,8 @@ def collect_entities_delayed(entity_types,
                 include_attribute_labels=include_attribute_labels,
                 require_country=require_country,
                 include_wikipedia=include_wikipedia,
-                param_filter=param_filter)):
+                param_filter=param_filter,
+                pre_filter=pre_filter)):
             for step, param_dict in wikidata_postprocessing_steps:
                 entity_data = step(entity_data, **param_dict)
             if include_wikipedia:
