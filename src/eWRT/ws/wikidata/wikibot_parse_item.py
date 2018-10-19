@@ -14,14 +14,16 @@ relevant attributes and languages for literals
 import sys
 import warnings
 
+from pywikibot import WbTime, Claim, Coordinate, WbQuantity
+from pywikibot.site import DataSite
+
 from eWRT.ws.wikidata.definitions import (local_attributes as LOCAL_ATTRIBUTES,
                                           image_attributes,
                                           GENERIC_PROPERTIES)
 from eWRT.ws.wikidata.get_image_from_wikidataid import get_image, \
     NoImageFoundError
 from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
-from pywikibot import WbTime, Claim, Coordinate, WbQuantity
-from pywikibot.site import DataSite
+
 
 if sys.version_info.major == 3:
     basestring = (bytes, str)
