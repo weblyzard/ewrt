@@ -20,7 +20,7 @@ from collections import Counter
 class OutputStatistics:
     """Tools to process statistics about the results from
     a batch of items processed by
-    eWRT.ws.wikidata.extract_meta.collect_attributes_from_wd_and_wd"""
+    eWRT.ws.wikidata.extract_meta.collect_attributes_from_wp_and_wd"""
 
     def __init__(self, paths=None, data=None, total_length=0):
         if not data and not paths:
@@ -37,7 +37,7 @@ class OutputStatistics:
     @property
     def data(self):
         """The as a list/generator of dicts as formatted by
-        eWRT.ws.wikidata.extract_meta.collect_attributes_from_wd_and_wd """
+        eWRT.ws.wikidata.extract_meta.collect_attributes_from_wp_and_wd """
         if self._data:
             self.data = self._data
         else:
@@ -120,3 +120,4 @@ if __name__ == '__main__':
 # malformed: 0
 # contains attribute `headquarters location`:  35
 # contains attribute `country`:  48
+# contains neither: 30
