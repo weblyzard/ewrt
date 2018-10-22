@@ -73,7 +73,4 @@ if __name__ == '__main__':
     except IndexError:
         print('No language specified, assuming English (\'en\').')
         language = 'en'
-    # from test_item_with_country import TestItem_with_country
-    #
-    # TestItem_with_country().test_item_with_country()
     print(item_with_country(wikipedia_title, language))
