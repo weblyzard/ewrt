@@ -65,14 +65,14 @@ def test_collect_attributes_from_wp_and_wd_online():
         '+2001-05-11')
     for claim in adams_data.values():
         if isinstance(claim, dict):
-            if 'values' in claim:
+            if 'values' in claim and claim['url'] != 'P18':
                 # two types of attributes in
                 try:
                     assert all(
                         ['labels' in instance for instance in claim['values']])
                 except AssertionError:
                     assert all(
-                        ['value' in instance for instance in claim['values']])
+                            ['value' in instance for instance in claim['values']])
     assert 'enwiki' in adams_data
     assert isinstance(adams_data['enwiki'], dict)
     assert 'summary' in adams_data['enwiki']
@@ -94,5 +94,3 @@ def test_collect_attributes_from_wp_and_wd_delay_wikipedia():
                                                    delay_wikipedia_retrieval=True).next()
     assert 'enwiki' in adams_data
     assert isinstance(adams_data['enwiki'], basestring)
-
-print(test_collect_attributes_from_wp_and_wd_online())

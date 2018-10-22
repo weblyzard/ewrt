@@ -7,12 +7,18 @@ Last modified on September 17, 2018
 @author: Jakob Steixner, <jakob.steixner@modul.ac.at
 
 Retrieve info about an entity, specifying a list of
-relevant attributes and languages for literals
+relevant attributes and languages for literals.
+
+These two classes do the brunt of the actual work regarding extraction of
+wikidata metadata.
 
 '''
 
 import sys
 import warnings
+
+from pywikibot import WbTime, Claim, Coordinate, WbQuantity
+from pywikibot.site import DataSite
 
 from eWRT.ws.wikidata.definitions import (local_attributes as LOCAL_ATTRIBUTES,
                                           image_attributes,
@@ -20,8 +26,6 @@ from eWRT.ws.wikidata.definitions import (local_attributes as LOCAL_ATTRIBUTES,
 from eWRT.ws.wikidata.get_image_from_wikidataid import get_image, \
     NoImageFoundError
 from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
-from pywikibot import WbTime, Claim, Coordinate, WbQuantity
-from pywikibot.site import DataSite
 
 if sys.version_info.major == 3:
     basestring = (bytes, str)
@@ -46,12 +50,14 @@ def get_wikidata_timestamp(item_page):
     :param item_page:
     :return:
     """
-    # ItemPages come in two slightly different formats depending on how
-    # they were created (probably a bug in pywikibot). We want to be able to
-    # deal with both:
+
     try:
+        # if fed a pure JSON:
         timestamp = item_page['timestamp']
     except (TypeError, KeyError):
+        # ItemPages come in two slightly different formats depending on how
+        # they were created (probably a bug in pywikibot). We want to be able to
+        # deal with both:
         try:
             timestamp = item_page.timestamp
         except AttributeError:
@@ -60,6 +66,7 @@ def get_wikidata_timestamp(item_page):
             return None
     return timestamp
 
+
 class ParseItemPage:
     """Methods to parse pywikibot.ItemPage for a specifiable list
         of properties, returning a dict of property labels and values."""
@@ -67,18 +74,19 @@ class ParseItemPage:
     attribute_preferred_value = attribute_preferred_value
 
     def __init__(self, itempage, include_literals=False,
-                 claims_of_interest=None,
-                 entity_type_properties=None, languages=None,
+                 wd_parameters=None,
+                 entity_type_properties=None,
+                 languages=None,
                  require_country=True,
                  include_attribute_labels=True,
                  qualifiers_of_interest=None,
-                 filter=None):
+                 param_filter=None):
         """
         :param itempage: pywikibot.ItemPage to be parsed
         :param include_literals: bool defining whether to includehttps://gitlab.semanticlab.net/nlp-backend/issues0
             further literals (descriptions, aliases) in the output. If
             False, only labels are included.
-        :param claims_of_interest: list of claims by their WikiData identifiers
+        :param wd_parameters: list of claims by their WikiData identifiers
         that shall be parsed, if present.
         :param entity_type_properties: dict of property identifiers and
             their labels entity_type_properties.
@@ -98,7 +106,7 @@ class ParseItemPage:
             self.claims = itempage['claims']
         except AttributeError:
             self.claims = itempage['claims']
-        if filter and not self.filter(filter):
+        if param_filter and not self.filter(param_filter):
             raise ValueError
         if not isinstance(itempage, dict):
             id = itempage.id
@@ -122,10 +130,10 @@ class ParseItemPage:
         if not entity_type_properties:
             self.entity_type_properties = GENERIC_PROPERTIES
 
-        if claims_of_interest is None:
+        if wd_parameters is None:
             self.claims_of_interest = CLAIMS_OF_INTEREST
         else:
-            self.claims_of_interest = claims_of_interest
+            self.claims_of_interest = wd_parameters
         self._image_requested = {attribute: image_attributes[attribute] for
                                  attribute in
                                  self.claims_of_interest if
@@ -153,6 +161,7 @@ class ParseItemPage:
         :return:
         """
         min_max = {'min': max, 'max': min}
+
         def inside(threshold, testee, mode):
             if mode == 'min':
                 return testee >= threshold
@@ -172,7 +181,8 @@ class ParseItemPage:
 
         for claim in set([item[0] for item in filter_params]):
 
-            filter_claims = {param[1]: param[2] for param in filter_params if param[0] == claim}
+            filter_claims = {param[1]: param[2] for param in filter_params if
+                             param[0] == claim}
             if not any(filter_claims.values()):
                 continue
             values = self.complete_claim_details(claim,
@@ -181,14 +191,15 @@ class ParseItemPage:
                                                  literals=[],
                                                  include_attribute_labels=False,
                                                  )
-            thresholds = {param: filter_claims[param] for param in ['min', 'max'] if param in filter_claims}
-            if not any([inside_both(instance['value'], **thresholds) for instance in values['values'] if instance['value'] is not None]):
+            thresholds = {param: filter_claims[param] for param in
+                          ['min', 'max'] if param in filter_claims}
+            if not any(
+                    [inside_both(instance['value'], **thresholds) for instance
+                     in values['values'] if instance['value'] is not None]):
                 return False
-            
+
         return True
 
-        
-        
     def process_attributes(self):
         """Exctract information about the item, specified
         by the predicates in self.claims_of_interest:
@@ -206,11 +217,11 @@ class ParseItemPage:
         for image_type in self._image_requested:
             type_literal = self._image_requested[image_type]
             try:
-                (self.details[type_literal + '_description'],
-                 _,
-                 self.details['full_{}'.format(type_literal)]) = get_image(
-                    itempage=self.item_raw,
-                    image_type=image_type)
+                self.details[type_literal] = {'url': image_type,
+                                              'values': [dict(get_image(
+                                                  itempage=self.item_raw,
+                                                  image_type=image_type,
+                                                  include_claim_id=True))]}
             except NoImageFoundError:
                 pass
 

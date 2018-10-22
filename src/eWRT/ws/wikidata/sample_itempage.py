@@ -3,7 +3,10 @@
 '''
 An example of a Wikidata page
 '''
-from pywikibot import (Claim, ItemPage)
+
+from collections import OrderedDict
+
+from pywikibot import (Claim)
 from pywikibot.site import DataSite
 
 itempage = {
@@ -150,190 +153,190 @@ itempage = {
                             u'id': u'Q42$32DACDAA-0C29-489B-B587-7CB5D374EEE5',
                             u'rank': u'normal'})],
                 u'P1375': [
-            Claim.fromJSON(DataSite("wikidata", "wikidata"),
-                           {u'type': u'statement', u'references': [{
-                               u'snaks': {
-                                   u'P143': [
-                                       {
-                                           u'datatype': u'wikibase-item',
-                                           u'datavalue': {
-                                               u'type': u'wikibase-entityid',
-                                               u'value': {
-                                                   u'entity-type': u'item',
-                                                   u'numeric-id': 54919}},
-                                           u'property': u'P143',
-                                           u'snaktype': u'value'}]},
-                               u'hash': u'759b2a264fff886006b6f49c3ef2f1acbfd1cef0',
-                               u'snaks-order': [
-                                   u'P143']}],
-                            u'mainsnak': {u'datatype': u'external-id',
-                                          u'datavalue': {
-                                              u'type': u'string',
-                                              u'value': u'000010283'},
-                                          u'property': u'P1375',
-                                          u'snaktype': u'value'},
-                            u'id': u'Q42$97db6877-4c06-88ce-2db5-aaba53383fd2',
-                            u'rank': u'normal'})],
+                    Claim.fromJSON(DataSite("wikidata", "wikidata"),
+                                   {u'type': u'statement', u'references': [{
+                                       u'snaks': {
+                                           u'P143': [
+                                               {
+                                                   u'datatype': u'wikibase-item',
+                                                   u'datavalue': {
+                                                       u'type': u'wikibase-entityid',
+                                                       u'value': {
+                                                           u'entity-type': u'item',
+                                                           u'numeric-id': 54919}},
+                                                   u'property': u'P143',
+                                                   u'snaktype': u'value'}]},
+                                       u'hash': u'759b2a264fff886006b6f49c3ef2f1acbfd1cef0',
+                                       u'snaks-order': [
+                                           u'P143']}],
+                                    u'mainsnak': {u'datatype': u'external-id',
+                                                  u'datavalue': {
+                                                      u'type': u'string',
+                                                      u'value': u'000010283'},
+                                                  u'property': u'P1375',
+                                                  u'snaktype': u'value'},
+                                    u'id': u'Q42$97db6877-4c06-88ce-2db5-aaba53383fd2',
+                                    u'rank': u'normal'})],
                 u'P136': [
-            Claim.fromJSON(DataSite("wikidata", "wikidata"),
-                           {u'type': u'statement', u'references': [{
-                               u'snaks': {
-                                   u'P577': [
+                    Claim.fromJSON(DataSite("wikidata", "wikidata"),
+                                   {u'type': u'statement', u'references': [{
+                                       u'snaks': {
+                                           u'P577': [
+                                               {
+                                                   u'datatype': u'time',
+                                                   u'datavalue': {
+                                                       u'type': u'time',
+                                                       u'value': {
+                                                           u'after': 0,
+                                                           u'precision': 11,
+                                                           u'time': u'+00000002013-03-11T00:00:00Z',
+                                                           u'timezone': 0,
+                                                           u'calendarmodel': u'http://www.wikidata.org/entity/Q1985727',
+                                                           u'before': 0}},
+                                                   u'property': u'P577',
+                                                   u'snaktype': u'value'}],
+                                           u'P123': [
+                                               {
+                                                   u'datatype': u'wikibase-item',
+                                                   u'datavalue': {
+                                                       u'type': u'wikibase-entityid',
+                                                       u'value': {
+                                                           u'entity-type': u'item',
+                                                           u'numeric-id': 11148}},
+                                                   u'property': u'P123',
+                                                   u'snaktype': u'value'}],
+                                           u'P1476': [
+                                               {
+                                                   u'datatype': u'monolingualtext',
+                                                   u'datavalue': {
+                                                       u'type': u'monolingualtext',
+                                                       u'value': {
+                                                           u'text': u'Douglas Adams is still the king of comic science fiction',
+                                                           u'language': u'en'}},
+                                                   u'property': u'P1476',
+                                                   u'snaktype': u'value'}],
+                                           u'P854': [
+                                               {
+                                                   u'datatype': u'url',
+                                                   u'datavalue': {
+                                                       u'type': u'string',
+                                                       u'value': u'https://www.theguardian.com/books/2013/mar/11/douglas-adams-king-comic-science-fiction'},
+                                                   u'property': u'P854',
+                                                   u'snaktype': u'value'}]},
+                                       u'hash': u'2f8e9f13763cdad3dcd7bc1cde454c244907cda2',
+                                       u'snaks-order': [
+                                           u'P854',
+                                           u'P1476',
+                                           u'P123',
+                                           u'P577']}],
+                                    u'mainsnak': {u'datatype': u'wikibase-item',
+                                                  u'datavalue': {
+                                                      u'type': u'wikibase-entityid',
+                                                      u'value': {
+                                                          u'entity-type': u'item',
+                                                          u'numeric-id': 24925}},
+                                                  u'property': u'P136',
+                                                  u'snaktype': u'value'},
+                                    u'id': u'Q42$0ff4aeeb-4fdb-56cf-5fe9-916e1bbbbc73',
+                                    u'rank': u'normal'}),
+                    Claim.fromJSON(DataSite("wikidata", "wikidata"),
+                                   {u'type': u'statement', u'references': [{
+                                       u'snaks': {
+                                           u'P577': [
+                                               {
+                                                   u'datatype': u'time',
+                                                   u'datavalue': {
+                                                       u'type': u'time',
+                                                       u'value': {
+                                                           u'after': 0,
+                                                           u'precision': 11,
+                                                           u'time': u'+00000002013-03-11T00:00:00Z',
+                                                           u'timezone': 0,
+                                                           u'calendarmodel': u'http://www.wikidata.org/entity/Q1985727',
+                                                           u'before': 0}},
+                                                   u'property': u'P577',
+                                                   u'snaktype': u'value'}],
+                                           u'P123': [
+                                               {
+                                                   u'datatype': u'wikibase-item',
+                                                   u'datavalue': {
+                                                       u'type': u'wikibase-entityid',
+                                                       u'value': {
+                                                           u'entity-type': u'item',
+                                                           u'numeric-id': 11148}},
+                                                   u'property': u'P123',
+                                                   u'snaktype': u'value'}],
+                                           u'P1476': [
+                                               {
+                                                   u'datatype': u'monolingualtext',
+                                                   u'datavalue': {
+                                                       u'type': u'monolingualtext',
+                                                       u'value': {
+                                                           u'text': u'Douglas Adams is still the king of comic science fiction',
+                                                           u'language': u'en'}},
+                                                   u'property': u'P1476',
+                                                   u'snaktype': u'value'}],
+                                           u'P854': [
+                                               {
+                                                   u'datatype': u'url',
+                                                   u'datavalue': {
+                                                       u'type': u'string',
+                                                       u'value': u'https://www.theguardian.com/books/2013/mar/11/douglas-adams-king-comic-science-fiction'},
+                                                   u'property': u'P854',
+                                                   u'snaktype': u'value'}]},
+                                       u'hash': u'2f8e9f13763cdad3dcd7bc1cde454c244907cda2',
+                                       u'snaks-order': [
+                                           u'P854',
+                                           u'P1476',
+                                           u'P123',
+                                           u'P577']},
                                        {
-                                           u'datatype': u'time',
-                                           u'datavalue': {
-                                               u'type': u'time',
-                                               u'value': {
-                                                   u'after': 0,
-                                                   u'precision': 11,
-                                                   u'time': u'+00000002013-03-11T00:00:00Z',
-                                                   u'timezone': 0,
-                                                   u'calendarmodel': u'http://www.wikidata.org/entity/Q1985727',
-                                                   u'before': 0}},
-                                           u'property': u'P577',
-                                           u'snaktype': u'value'}],
-                                   u'P123': [
-                                       {
-                                           u'datatype': u'wikibase-item',
-                                           u'datavalue': {
-                                               u'type': u'wikibase-entityid',
-                                               u'value': {
-                                                   u'entity-type': u'item',
-                                                   u'numeric-id': 11148}},
-                                           u'property': u'P123',
-                                           u'snaktype': u'value'}],
-                                   u'P1476': [
-                                       {
-                                           u'datatype': u'monolingualtext',
-                                           u'datavalue': {
-                                               u'type': u'monolingualtext',
-                                               u'value': {
-                                                   u'text': u'Douglas Adams is still the king of comic science fiction',
-                                                   u'language': u'en'}},
-                                           u'property': u'P1476',
-                                           u'snaktype': u'value'}],
-                                   u'P854': [
-                                       {
-                                           u'datatype': u'url',
-                                           u'datavalue': {
-                                               u'type': u'string',
-                                               u'value': u'https://www.theguardian.com/books/2013/mar/11/douglas-adams-king-comic-science-fiction'},
-                                           u'property': u'P854',
-                                           u'snaktype': u'value'}]},
-                               u'hash': u'2f8e9f13763cdad3dcd7bc1cde454c244907cda2',
-                               u'snaks-order': [
-                                   u'P854',
-                                   u'P1476',
-                                   u'P123',
-                                   u'P577']}],
-                            u'mainsnak': {u'datatype': u'wikibase-item',
-                                          u'datavalue': {
-                                              u'type': u'wikibase-entityid',
-                                              u'value': {
-                                                  u'entity-type': u'item',
-                                                  u'numeric-id': 24925}},
-                                          u'property': u'P136',
-                                          u'snaktype': u'value'},
-                            u'id': u'Q42$0ff4aeeb-4fdb-56cf-5fe9-916e1bbbbc73',
-                            u'rank': u'normal'}),
-            Claim.fromJSON(DataSite("wikidata", "wikidata"),
-                           {u'type': u'statement', u'references': [{
-                               u'snaks': {
-                                   u'P577': [
-                                       {
-                                           u'datatype': u'time',
-                                           u'datavalue': {
-                                               u'type': u'time',
-                                               u'value': {
-                                                   u'after': 0,
-                                                   u'precision': 11,
-                                                   u'time': u'+00000002013-03-11T00:00:00Z',
-                                                   u'timezone': 0,
-                                                   u'calendarmodel': u'http://www.wikidata.org/entity/Q1985727',
-                                                   u'before': 0}},
-                                           u'property': u'P577',
-                                           u'snaktype': u'value'}],
-                                   u'P123': [
-                                       {
-                                           u'datatype': u'wikibase-item',
-                                           u'datavalue': {
-                                               u'type': u'wikibase-entityid',
-                                               u'value': {
-                                                   u'entity-type': u'item',
-                                                   u'numeric-id': 11148}},
-                                           u'property': u'P123',
-                                           u'snaktype': u'value'}],
-                                   u'P1476': [
-                                       {
-                                           u'datatype': u'monolingualtext',
-                                           u'datavalue': {
-                                               u'type': u'monolingualtext',
-                                               u'value': {
-                                                   u'text': u'Douglas Adams is still the king of comic science fiction',
-                                                   u'language': u'en'}},
-                                           u'property': u'P1476',
-                                           u'snaktype': u'value'}],
-                                   u'P854': [
-                                       {
-                                           u'datatype': u'url',
-                                           u'datavalue': {
-                                               u'type': u'string',
-                                               u'value': u'https://www.theguardian.com/books/2013/mar/11/douglas-adams-king-comic-science-fiction'},
-                                           u'property': u'P854',
-                                           u'snaktype': u'value'}]},
-                               u'hash': u'2f8e9f13763cdad3dcd7bc1cde454c244907cda2',
-                               u'snaks-order': [
-                                   u'P854',
-                                   u'P1476',
-                                   u'P123',
-                                   u'P577']},
-                               {
-                                   u'snaks': {
-                                       u'P854': [
-                                           {
-                                               u'datatype': u'url',
-                                               u'datavalue': {
-                                                   u'type': u'string',
-                                                   u'value': u'http://www.screenonline.org.uk/people/id/1233876/index.html'},
-                                               u'property': u'P854',
-                                               u'snaktype': u'value'}]},
-                                   u'hash': u'bab32d323b6c92d91ff7d0c4707346012900761b',
-                                   u'snaks-order': [
-                                       u'P854']}],
-                            u'mainsnak': {u'datatype': u'wikibase-item',
-                                          u'datavalue': {
-                                              u'type': u'wikibase-entityid',
-                                              u'value': {
-                                                  u'entity-type': u'item',
-                                                  u'numeric-id': 40831}},
-                                          u'property': u'P136',
-                                          u'snaktype': u'value'},
-                            u'id': u'Q42$2ac90f53-4dc5-2ecc-d595-70f7c43f2fda',
-                            u'rank': u'normal'}),
-            Claim.fromJSON(DataSite("wikidata", "wikidata"),
-                           {u'type': u'statement', u'references': [{
-                               u'snaks': {
-                                   u'P854': [
-                                       {
-                                           u'datatype': u'url',
-                                           u'datavalue': {
-                                               u'type': u'string',
-                                               u'value': u'https://www.theguardian.com/commentisfree/2015/aug/07/hitchhikers-guide-galaxy-book-changed-me-vogons-economics'},
-                                           u'property': u'P854',
-                                           u'snaktype': u'value'}]},
-                               u'hash': u'fb6300cf6bc0ce72d3d960d4d671fd772125d3ee',
-                               u'snaks-order': [
-                                   u'P854']}],
-                            u'mainsnak': {u'datatype': u'wikibase-item',
-                                          u'datavalue': {
-                                              u'type': u'wikibase-entityid',
-                                              u'value': {
-                                                  u'entity-type': u'item',
-                                                  u'numeric-id': 128758}},
-                                          u'property': u'P136',
-                                          u'snaktype': u'value'},
-                            u'id': u'Q42$43f046bb-47a4-00aa-5174-aa7ca343396b',
-                            u'rank': u'normal'})], u'P3154': [
+                                           u'snaks': {
+                                               u'P854': [
+                                                   {
+                                                       u'datatype': u'url',
+                                                       u'datavalue': {
+                                                           u'type': u'string',
+                                                           u'value': u'http://www.screenonline.org.uk/people/id/1233876/index.html'},
+                                                       u'property': u'P854',
+                                                       u'snaktype': u'value'}]},
+                                           u'hash': u'bab32d323b6c92d91ff7d0c4707346012900761b',
+                                           u'snaks-order': [
+                                               u'P854']}],
+                                    u'mainsnak': {u'datatype': u'wikibase-item',
+                                                  u'datavalue': {
+                                                      u'type': u'wikibase-entityid',
+                                                      u'value': {
+                                                          u'entity-type': u'item',
+                                                          u'numeric-id': 40831}},
+                                                  u'property': u'P136',
+                                                  u'snaktype': u'value'},
+                                    u'id': u'Q42$2ac90f53-4dc5-2ecc-d595-70f7c43f2fda',
+                                    u'rank': u'normal'}),
+                    Claim.fromJSON(DataSite("wikidata", "wikidata"),
+                                   {u'type': u'statement', u'references': [{
+                                       u'snaks': {
+                                           u'P854': [
+                                               {
+                                                   u'datatype': u'url',
+                                                   u'datavalue': {
+                                                       u'type': u'string',
+                                                       u'value': u'https://www.theguardian.com/commentisfree/2015/aug/07/hitchhikers-guide-galaxy-book-changed-me-vogons-economics'},
+                                                   u'property': u'P854',
+                                                   u'snaktype': u'value'}]},
+                                       u'hash': u'fb6300cf6bc0ce72d3d960d4d671fd772125d3ee',
+                                       u'snaks-order': [
+                                           u'P854']}],
+                                    u'mainsnak': {u'datatype': u'wikibase-item',
+                                                  u'datavalue': {
+                                                      u'type': u'wikibase-entityid',
+                                                      u'value': {
+                                                          u'entity-type': u'item',
+                                                          u'numeric-id': 128758}},
+                                                  u'property': u'P136',
+                                                  u'snaktype': u'value'},
+                                    u'id': u'Q42$43f046bb-47a4-00aa-5174-aa7ca343396b',
+                                    u'rank': u'normal'})], u'P3154': [
             Claim.fromJSON(DataSite("wikidata", "wikidata"),
                            {u'type': u'statement',
                             u'mainsnak': {u'datatype': u'external-id',
@@ -4123,130 +4126,136 @@ itempage = {
                                 u'snaktype': u'value'},
                             u'id': u'Q42$24df999a-4629-c679-e1f0-199bcefabbf3',
                             u'rank': u'normal'})],
-        u'P735': [
-            Claim.fromJSON(DataSite("wikidata", "wikidata"), {
-                u'mainsnak': {u'datatype': u'wikibase-item',
-                              u'datavalue': {u'type': u'wikibase-entityid',
-                                             u'value': {u'entity-type': u'item',
-                                                        u'numeric-id': 463035}},
-                              u'property': u'P735',
-                              u'snaktype': u'value'}, u'rank': u'preferred',
-                u'qualifiers': {u'P1545': [
-                    {u'datatype': u'string',
-                     u'datavalue': {u'type': u'string', u'value': u'1'},
-                     u'property': u'P1545',
-                     u'hash': u'2a1ced1dca90648ea7e306acbadd74fc81a10722',
-                     u'snaktype': u'value'}]}, u'qualifiers-order': [u'P1545'],
-                u'references': [{
-                    u'snaks': {
-                        u'P248': [
+                u'P735': [
+                    Claim.fromJSON(DataSite("wikidata", "wikidata"), {
+                        u'mainsnak': {u'datatype': u'wikibase-item',
+                                      u'datavalue': {
+                                          u'type': u'wikibase-entityid',
+                                          u'value': {u'entity-type': u'item',
+                                                     u'numeric-id': 463035}},
+                                      u'property': u'P735',
+                                      u'snaktype': u'value'},
+                        u'rank': u'preferred',
+                        u'qualifiers': {u'P1545': [
+                            {u'datatype': u'string',
+                             u'datavalue': {u'type': u'string', u'value': u'1'},
+                             u'property': u'P1545',
+                             u'hash': u'2a1ced1dca90648ea7e306acbadd74fc81a10722',
+                             u'snaktype': u'value'}]},
+                        u'qualifiers-order': [u'P1545'],
+                        u'references': [{
+                            u'snaks': {
+                                u'P248': [
+                                    {
+                                        u'datatype': u'wikibase-item',
+                                        u'datavalue': {
+                                            u'type': u'wikibase-entityid',
+                                            u'value': {
+                                                u'entity-type': u'item',
+                                                u'numeric-id': 36578}},
+                                        u'property': u'P248',
+                                        u'snaktype': u'value'}],
+                                u'P813': [
+                                    {
+                                        u'datatype': u'time',
+                                        u'datavalue': {
+                                            u'type': u'time',
+                                            u'value': {
+                                                u'after': 0,
+                                                u'precision': 11,
+                                                u'time': u'+00000002015-07-07T00:00:00Z',
+                                                u'timezone': 0,
+                                                u'calendarmodel': u'http://www.wikidata.org/entity/Q1985727',
+                                                u'before': 0}},
+                                        u'property': u'P813',
+                                        u'snaktype': u'value'}],
+                                u'P227': [
+                                    {
+                                        u'datatype': u'external-id',
+                                        u'datavalue': {
+                                            u'type': u'string',
+                                            u'value': u'119033364'},
+                                        u'property': u'P227',
+                                        u'snaktype': u'value'}]},
+                            u'hash': u'a02f3a77ddd343e6b88be25696b055f5131c3d64',
+                            u'snaks-order': [
+                                u'P248',
+                                u'P227',
+                                u'P813']},
                             {
-                                u'datatype': u'wikibase-item',
-                                u'datavalue': {
-                                    u'type': u'wikibase-entityid',
-                                    u'value': {
-                                        u'entity-type': u'item',
-                                        u'numeric-id': 36578}},
-                                u'property': u'P248',
-                                u'snaktype': u'value'}],
-                        u'P813': [
-                            {
-                                u'datatype': u'time',
-                                u'datavalue': {
-                                    u'type': u'time',
-                                    u'value': {
-                                        u'after': 0,
-                                        u'precision': 11,
-                                        u'time': u'+00000002015-07-07T00:00:00Z',
-                                        u'timezone': 0,
-                                        u'calendarmodel': u'http://www.wikidata.org/entity/Q1985727',
-                                        u'before': 0}},
-                                u'property': u'P813',
-                                u'snaktype': u'value'}],
-                        u'P227': [
-                            {
-                                u'datatype': u'external-id',
-                                u'datavalue': {
-                                    u'type': u'string',
-                                    u'value': u'119033364'},
-                                u'property': u'P227',
-                                u'snaktype': u'value'}]},
-                    u'hash': u'a02f3a77ddd343e6b88be25696b055f5131c3d64',
-                    u'snaks-order': [
-                        u'P248',
-                        u'P227',
-                        u'P813']},
-                    {
-                        u'snaks': {
-                            u'P143': [
-                                {
-                                    u'datatype': u'wikibase-item',
-                                    u'datavalue': {
-                                        u'type': u'wikibase-entityid',
-                                        u'value': {
-                                            u'entity-type': u'item',
-                                            u'numeric-id': 328}},
-                                    u'property': u'P143',
-                                    u'snaktype': u'value'}]},
-                        u'hash': u'fa278ebfc458360e5aed63d5058cca83c46134f1',
-                        u'snaks-order': [
-                            u'P143']}],
-                u'type': u'statement',
-                u'id': u'Q42$1d7d0ea9-412f-8b5b-ba8d-405ab9ecf026'}),
-            Claim.fromJSON(DataSite("wikidata", "wikidata"), {
-                u'mainsnak': {u'datatype': u'wikibase-item',
-                              u'datavalue': {u'type': u'wikibase-entityid',
-                                             u'value': {u'entity-type': u'item',
-                                                        u'numeric-id': 19688263}},
-                              u'property': u'P735',
-                              u'snaktype': u'value'}, u'rank': u'normal',
-                u'qualifiers': {u'P1545': [
-                    {u'datatype': u'string',
-                     u'datavalue': {u'type': u'string', u'value': u'2'},
-                     u'property': u'P1545',
-                     u'hash': u'7241753c62a310cf84895620ea82250dcea65835',
-                     u'snaktype': u'value'}]}, u'qualifiers-order': [u'P1545'],
-                u'references': [{
-                    u'snaks': {
-                        u'P248': [
-                            {
-                                u'datatype': u'wikibase-item',
-                                u'datavalue': {
-                                    u'type': u'wikibase-entityid',
-                                    u'value': {
-                                        u'entity-type': u'item',
-                                        u'numeric-id': 36578}},
-                                u'property': u'P248',
-                                u'snaktype': u'value'}],
-                        u'P813': [
-                            {
-                                u'datatype': u'time',
-                                u'datavalue': {
-                                    u'type': u'time',
-                                    u'value': {
-                                        u'after': 0,
-                                        u'precision': 11,
-                                        u'time': u'+00000002015-07-07T00:00:00Z',
-                                        u'timezone': 0,
-                                        u'calendarmodel': u'http://www.wikidata.org/entity/Q1985727',
-                                        u'before': 0}},
-                                u'property': u'P813',
-                                u'snaktype': u'value'}],
-                        u'P227': [
-                            {
-                                u'datatype': u'external-id',
-                                u'datavalue': {
-                                    u'type': u'string',
-                                    u'value': u'119033364'},
-                                u'property': u'P227',
-                                u'snaktype': u'value'}]},
-                    u'hash': u'a02f3a77ddd343e6b88be25696b055f5131c3d64',
-                    u'snaks-order': [
-                        u'P248',
-                        u'P227',
-                        u'P813']}],
-                u'type': u'statement',
-                u'id': u'Q42$1e106952-4b58-6067-c831-8593ce3d70f5'})],
+                                u'snaks': {
+                                    u'P143': [
+                                        {
+                                            u'datatype': u'wikibase-item',
+                                            u'datavalue': {
+                                                u'type': u'wikibase-entityid',
+                                                u'value': {
+                                                    u'entity-type': u'item',
+                                                    u'numeric-id': 328}},
+                                            u'property': u'P143',
+                                            u'snaktype': u'value'}]},
+                                u'hash': u'fa278ebfc458360e5aed63d5058cca83c46134f1',
+                                u'snaks-order': [
+                                    u'P143']}],
+                        u'type': u'statement',
+                        u'id': u'Q42$1d7d0ea9-412f-8b5b-ba8d-405ab9ecf026'}),
+                    Claim.fromJSON(DataSite("wikidata", "wikidata"), {
+                        u'mainsnak': {u'datatype': u'wikibase-item',
+                                      u'datavalue': {
+                                          u'type': u'wikibase-entityid',
+                                          u'value': {u'entity-type': u'item',
+                                                     u'numeric-id': 19688263}},
+                                      u'property': u'P735',
+                                      u'snaktype': u'value'},
+                        u'rank': u'normal',
+                        u'qualifiers': {u'P1545': [
+                            {u'datatype': u'string',
+                             u'datavalue': {u'type': u'string', u'value': u'2'},
+                             u'property': u'P1545',
+                             u'hash': u'7241753c62a310cf84895620ea82250dcea65835',
+                             u'snaktype': u'value'}]},
+                        u'qualifiers-order': [u'P1545'],
+                        u'references': [{
+                            u'snaks': {
+                                u'P248': [
+                                    {
+                                        u'datatype': u'wikibase-item',
+                                        u'datavalue': {
+                                            u'type': u'wikibase-entityid',
+                                            u'value': {
+                                                u'entity-type': u'item',
+                                                u'numeric-id': 36578}},
+                                        u'property': u'P248',
+                                        u'snaktype': u'value'}],
+                                u'P813': [
+                                    {
+                                        u'datatype': u'time',
+                                        u'datavalue': {
+                                            u'type': u'time',
+                                            u'value': {
+                                                u'after': 0,
+                                                u'precision': 11,
+                                                u'time': u'+00000002015-07-07T00:00:00Z',
+                                                u'timezone': 0,
+                                                u'calendarmodel': u'http://www.wikidata.org/entity/Q1985727',
+                                                u'before': 0}},
+                                        u'property': u'P813',
+                                        u'snaktype': u'value'}],
+                                u'P227': [
+                                    {
+                                        u'datatype': u'external-id',
+                                        u'datavalue': {
+                                            u'type': u'string',
+                                            u'value': u'119033364'},
+                                        u'property': u'P227',
+                                        u'snaktype': u'value'}]},
+                            u'hash': u'a02f3a77ddd343e6b88be25696b055f5131c3d64',
+                            u'snaks-order': [
+                                u'P248',
+                                u'P227',
+                                u'P813']}],
+                        u'type': u'statement',
+                        u'id': u'Q42$1e106952-4b58-6067-c831-8593ce3d70f5'})],
                 u'P1477': [Claim.fromJSON(DataSite("wikidata", "wikidata"),
                                           {u'type': u'statement',
                                            u'references': [{
@@ -5437,5 +5446,67 @@ itempage = {
     u'timestamp': '+2018-10-04T02:20:35Z'
 }
 
-if True:
-    keys = itempage.keys()
+sample_output = {'wikidata_timestamp': '+2018-09-25T00:00:00Z',
+                 u'image': {'url': 'P18',
+                            'values': [OrderedDict(
+                                [('claim_id',
+                                  u'Q42$44889d0f-474c-4fb9-1961-9a3366cbbb9e'),
+                                 ('description_page',
+                                  'https://commons.wikimedia.org/wiki/File:Douglas_adams_portrait_cropped.jpg'),
+                                 ('thumbnail',
+                                  u'https://commons.wikimedia.org/w/thumb.php?width=128&f=Douglas_adams_portrait_cropped.jpg'),
+                                 ('full',
+                                  'https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg')])]},
+                 'labels': {'de': u'Douglas Adams', 'en': u'Douglas Adams',
+                            'sv': u'Douglas Adams'},
+                 u'employer': {
+                     'url': 'https://www.wikidata.org/wiki/Property:P108',
+                     'values': [
+                         {'url': u'https://www.wikidata.org/wiki/Q9531',
+                          'labels': {'de': u'British Broadcasting Corporation',
+                                     'en': u'BBC',
+                                     'sv': u'BBC'},
+                          'claim_id': u'Q42$853B16C8-1AB3-489A-831E-AEAD7E94AB87'}]},
+                 u'place of birth': {
+                     'url': 'https://www.wikidata.org/wiki/Property:P19',
+                     'values': [{'url': u'https://www.wikidata.org/wiki/Q350',
+                                 'labels': {'de': u'Cambridge',
+                                            'en': u'Cambridge',
+                                            'sv': u'Cambridge'},
+                                 'claim_id': u'q42$3D284234-52BC-4DA3-83A3-7C39F84BA518'}]},
+                 'descriptions': {'de': u'britischer Schriftsteller',
+                                  'en': u'author and humorist',
+                                  'sv': u'brittisk f\xf6rfattare'},
+                 'wikidata_id': 'Q42', 'aliases': {
+        'de': [u'Douglas No\xebl Adams', u'Douglas Noel Adams'],
+        'en': [u'Douglas No\xebl Adams', u'Douglas Noel Adams',
+               u'Douglas N. Adams']}, u'occupation': {
+        'url': 'https://www.wikidata.org/wiki/Property:P106', 'values': [
+            {'url': u'https://www.wikidata.org/wiki/Q214917',
+             'labels': {'de': u'Dramatiker', 'en': u'playwright',
+                        'sv': u'dramatiker'},
+             'claim_id': u'Q42$e0f736bd-4711-c43b-9277-af1e9b2fb85f'},
+            {'url': u'https://www.wikidata.org/wiki/Q28389',
+             'labels': {'de': u'Drehbuchautor', 'en': u'screenwriter',
+                        'sv': u'manusf\xf6rfattare'},
+             'claim_id': u'q42$E13E619F-63EF-4B72-99D9-7A45C7C6AD34'},
+            {'url': u'https://www.wikidata.org/wiki/Q6625963',
+             'labels': {'de': u'Romancier', 'en': u'novelist',
+                        'sv': u'romanf\xf6rfattare'},
+             'claim_id': u'Q42$D6E21D67-05D6-4A0B-8458-0744FCEED13D'},
+            {'url': u'https://www.wikidata.org/wiki/Q4853732',
+             'labels': {'de': u'Kinderbuchautor', 'en': u"children's writer",
+                        'sv': u'barnboksf\xf6rfattare'},
+             'claim_id': u'Q42$7eb8aaef-4ddf-8b87-bd02-406f91a296bd'},
+            {'url': u'https://www.wikidata.org/wiki/Q18844224',
+             'labels': {'de': u'Science-Fiction-Schriftsteller',
+                        'en': u'science fiction writer',
+                        'sv': u'science fiction-f\xf6rfattare'},
+             'claim_id': u'q42$CBDC4890-D5A2-469C-AEBB-EFB682B891E7'},
+            {'url': u'https://www.wikidata.org/wiki/Q245068',
+             'labels': {'de': u'Komiker', 'en': u'comedian', 'sv': u'komiker'},
+             'claim_id': u'Q42$58F0D772-9CE4-46AC-BF0D-FBBBAFA09603'},
+            {'url': u'https://www.wikidata.org/wiki/Q487596',
+             'labels': {'de': u'Dramaturg', 'en': u'dramaturge',
+                        'sv': u'dramaturg'},
+             'claim_id': u'Q42$e469cda0-475d-8bb1-1dcd-f72c91161ebf'}]}}

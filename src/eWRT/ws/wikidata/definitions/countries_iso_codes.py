@@ -195,4 +195,32 @@ COUNTRY_CODES = [['country', 'ISO2Code', 'ISO3Code'],
                  ['http://www.wikidata.org/entity/Q29999', 'NL', 'NED'],
                  ]
 
+
+
 COUNTRY_ISO2_CODES_DICT = {entry[0]: entry[1] for entry in COUNTRY_CODES[1:]}
+
+# # Code to import ISO codes for non-independent territorries/obsolete countries
+# # should we decide to use them too:
+#
+#
+# countries_old = copy.copy(COUNTRY_ISO2_CODES_DICT)
+# import pywikibot
+# QUERY = """
+# SELECT ?item WHERE{
+#     ?item wdt:P297 ?iso_code
+# }
+# """
+# site = pywikibot.Site('wikidata', 'wikidata')
+# from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
+#
+# import pywikibot.pagegenerators
+# generator = pywikibot.pagegenerators.WikidataSPARQLPageGenerator(
+#             QUERY, site=site)
+#
+# for result in generator:
+#     result.get()
+#     # print result.id, result.claims['P297']
+#     if 'http://www.wikidata.org/entity/'+ result.id not in COUNTRY_ISO2_CODES_DICT:
+#         COUNTRY_ISO2_CODES_DICT['http://www.wikidata.org/entity/'+ result.id ] = \
+#         attribute_preferred_value(result.claims['P297'])
+#         print('adding code for country: ' + result.id)

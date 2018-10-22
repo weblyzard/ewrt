@@ -158,11 +158,11 @@ def batch_enrich_mock(title, language):
 
 
 @mock.patch(
-    target='eWRT.ws.wikidata.bundle_wikipedia_requests.wikipedia_page_info_from_title',
+    target='eWRT.ws.wikidata.bundle_wikipedia_requests.wikipedia_page_info_from_titles',
     new=batch_enrich_mock)
 def test_batch_enrich_from_wikipedia():
     """
-    Using a mock for wikipedia_page_info_from_title, this test runs fully
+    Using a mock for wikipedia_page_info_from_titles, this test runs fully
     offline."""
     enrichment_result = batch_enrich_from_wikipedia(
         wikipedia_pages=sitelink_cache['en'],
@@ -188,6 +188,7 @@ def test_collect_multiple_from_wikipedia():
             entities_cache=GW_snapshot_wikidata_result
         ).next()
         raise ValueError
+
     except StopIteration:
         pass
 
@@ -199,7 +200,7 @@ def test_enrich_from_wikipedia_offline():
     the same but literal equivalence between merge_result['enwiki'] and
     cached snapshot is not expected
     """
-    with mock.patch(target='eWRT.ws.wikidata.bundle_wikipedia_requests.wikipedia_page_info_from_title',
+    with mock.patch(target='eWRT.ws.wikidata.bundle_wikipedia_requests.wikipedia_page_info_from_titles',
             new=batch_enrich_mock):
         enrichment_result = batch_enrich_from_wikipedia(
             wikipedia_pages=sitelink_cache['en'],
@@ -236,7 +237,15 @@ def assert_basic_structure_as_expected(merged_result):
         'timestamp'] < datetime.datetime.now().strftime(u'%Y-%m-%dT%H:%M:%SZ')
     # todo: add test for similarity of retrieved summary with snapshot?
 
+
+batch_calls = 0
 def mock_batch_enrich(*args, **kwargs):
+    """generator that yields 20 entities at a time, for no more than a
+    total of 100"""
+    global batch_calls
+    batch_calls += 1
+    if batch_calls > 5:
+        raise StopIteration
     for i in range(20): yield {}
 @mock.patch(
     target='eWRT.ws.wikidata.bundle_wikipedia_requests.batch_enrich_from_wikipedia',
@@ -250,5 +259,5 @@ def test_wikipedia_request_dispatcher():
 
     returned = [result for result in results]
     assert returned
-    assert len(returned) == 100
+    assert len(returned) >= 100
 

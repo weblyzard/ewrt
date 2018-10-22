@@ -4,6 +4,9 @@
 Created on October 05, 2018
 
 @author: jakob <jakob.steixner@modul.ac.at>
+
+Filter multilingual result to produce monolingual documents by rejecting
+labels etc. in the non-required languages.
 '''
 
 import copy

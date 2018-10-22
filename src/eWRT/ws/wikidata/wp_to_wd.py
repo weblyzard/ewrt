@@ -1,10 +1,9 @@
-import pywikibot
-import wikipedia
+"""
+From the Wikipedia title in a specific language, identify the Wikidata
+entity it refers to and return it as a pywikibot.Page
+"""
 
-# class WikiPage:
-#
-#     def __init__(self, title, language='en', site=None):
-#         self.itempage = wikidata_from_wptitle(title, language, site)
+import pywikibot
 
 
 def wikidata_from_wptitle(title, language='de'
