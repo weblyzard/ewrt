@@ -8,7 +8,7 @@ Created on September 20, 2018
 
 import pytest
 from eWRT.ws.wikidata.enrich_from_wikipedia import (
-    wikipedia_page_info_from_title,
+    wikipedia_page_info_from_titles,
     get_sitelinks_from_wd_id)
 
 douglas_adams_result_expected = {
@@ -74,7 +74,7 @@ class TestWikipedia_page_info_from_title():
                               ('Österreich', 'de', austria_expected)])
     def test_wikipedia_page_info_from_title(self, title, language, expected):
         try:
-            page_info = wikipedia_page_info_from_title(title, language).next()
+            page_info = wikipedia_page_info_from_titles(title, language).next()
             print('Retrieved meta info!')
         except StopIteration:
             raise ValueError(u'No English Wikipedia page identified for '
@@ -90,7 +90,7 @@ class TestWikipedia_page_info_from_title():
         except AssertionError:
             raise AssertionError(u'Summary does not match expected keywords')
         with pytest.raises(StopIteration):
-            wikipedia_page_info_from_title('Georgia', 'en').next()
+            wikipedia_page_info_from_titles('Georgia', 'en').next()
 
     def test_get_sitelinks_from_wdid(self):
         try:
@@ -108,7 +108,7 @@ class TestWikipedia_page_info_from_title():
         any redirects or disambiguation pages since we're working with exact titles"""
         titles = u'Wiener Neustadt', u'Douglas Adams', u'Wien 19', u'Ferdinand Raimund', u'Österreich', u'Frankreich', u'Deutschland', u'Mesopotamien', u'Neuschwanstein',
 
-        results = list(wikipedia_page_info_from_title('|'.join(titles),
+        results = list(wikipedia_page_info_from_titles('|'.join(titles),
                                                       'de'))
         expected_failures = (
             'Wien 19',  # is a redirect, we only accept strict matches
@@ -132,12 +132,12 @@ class TestWikipedia_page_info_from_title():
 
         """
         with pytest.raises(ValueError):
-            country_results = list(wikipedia_page_info_from_title('|'.join(countries),
+            country_results = list(wikipedia_page_info_from_titles('|'.join(countries),
                                                       'en'))
         self.country_results = []
         selected_countries = countries[:50]
 
-        for country in wikipedia_page_info_from_title('|'.join(selected_countries),
+        for country in wikipedia_page_info_from_titles('|'.join(selected_countries),
                                                       'en', redirect=True):
             self.country_results.append(country)
         # we expect some loss due to pages that are named somewhat differently
@@ -158,7 +158,7 @@ class TestWikipedia_page_info_from_title():
 #  }
 
 # timeit.timeit('''
-# print(wikipedia_page_info_from_title("Austria", "en"))
+# print(wikipedia_page_info_from_titles("Austria", "en"))
 # ''', setup=setup, number=1)
 
 # {u'batchcomplete': u'', u'query': {u'pages': {
