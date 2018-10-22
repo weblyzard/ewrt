@@ -23,11 +23,6 @@ else:
 
 RELEVANT_LANGUAGES = ['en', 'de', 'fr', 'es']
 
-# setup = '''
-#
-# import wikipedia, requests
-# from eWRT.ws.wikidata import wikipedia_wl
-# wikipedia.set_lang('en')
 USER_AGENT = 'weblyzard (https://www.weblyzard.com/privacy-policy/)'
 
 
