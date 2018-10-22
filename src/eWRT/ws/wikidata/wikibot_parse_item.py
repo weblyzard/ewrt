@@ -7,7 +7,10 @@ Last modified on September 17, 2018
 @author: Jakob Steixner, <jakob.steixner@modul.ac.at
 
 Retrieve info about an entity, specifying a list of
-relevant attributes and languages for literals
+relevant attributes and languages for literals.
+
+These two classes do the brunt of the actual work regarding extraction of
+wikidata metadata.
 
 '''
 
@@ -48,12 +51,14 @@ def get_wikidata_timestamp(item_page):
     :param item_page:
     :return:
     """
-    # ItemPages come in two slightly different formats depending on how
-    # they were created (probably a bug in pywikibot). We want to be able to
-    # deal with both:
+
     try:
+        # if fed a pure JSON:
         timestamp = item_page['timestamp']
     except (TypeError, KeyError):
+        # ItemPages come in two slightly different formats depending on how
+        # they were created (probably a bug in pywikibot). We want to be able to
+        # deal with both:
         try:
             timestamp = item_page.timestamp
         except AttributeError:
@@ -69,18 +74,19 @@ class ParseItemPage:
     attribute_preferred_value = attribute_preferred_value
 
     def __init__(self, itempage, include_literals=False,
-                 claims_of_interest=None,
-                 entity_type_properties=None, languages=None,
+                 wd_parameters=None,
+                 entity_type_properties=None,
+                 languages=None,
                  require_country=True,
                  include_attribute_labels=True,
                  qualifiers_of_interest=None,
-                 filter=None):
+                 param_filter=None):
         """
         :param itempage: pywikibot.ItemPage to be parsed
         :param include_literals: bool defining whether to includehttps://gitlab.semanticlab.net/nlp-backend/issues0
             further literals (descriptions, aliases) in the output. If
             False, only labels are included.
-        :param claims_of_interest: list of claims by their WikiData identifiers
+        :param wd_parameters: list of claims by their WikiData identifiers
         that shall be parsed, if present.
         :param entity_type_properties: dict of property identifiers and
             their labels entity_type_properties.
@@ -100,7 +106,7 @@ class ParseItemPage:
             self.claims = itempage['claims']
         except AttributeError:
             self.claims = itempage['claims']
-        if filter and not self.filter(filter):
+        if param_filter and not self.filter(param_filter):
             raise ValueError
         if not isinstance(itempage, dict):
             id = itempage.id
@@ -124,10 +130,10 @@ class ParseItemPage:
         if not entity_type_properties:
             self.entity_type_properties = GENERIC_PROPERTIES
 
-        if claims_of_interest is None:
+        if wd_parameters is None:
             self.claims_of_interest = CLAIMS_OF_INTEREST
         else:
-            self.claims_of_interest = claims_of_interest
+            self.claims_of_interest = wd_parameters
         self._image_requested = {attribute: image_attributes[attribute] for
                                  attribute in
                                  self.claims_of_interest if

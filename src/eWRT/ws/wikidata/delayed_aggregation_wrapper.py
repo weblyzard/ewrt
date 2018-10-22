@@ -21,31 +21,26 @@ logger = logging.Logger(name='wp_bundler')
 
 def collect_entities_delayed(entity_types,
                              retrieval_mode,
-                             num_queries=1,
-                             languages=None,
-                             limit_per_query=None,
-                             include_literals=True,
-                             wikidata_fields=None,
-                             delay_wikipedia_retrieval=True,
-                             include_attribute_labels=False,
-                             require_country=False,
-                             include_wikipedia=True,
-                             memory_saving_limit=50,
-                             dump_path=None,
-                             param_filter=None,
+                             include_wikipedia=False,
                              wikidata_postprocessing_steps=None,
-                             pre_filter=None):
+                             languages=None,
+                             n_queries=1,
+                             delay_wikipedia_retrieval=False,
+                             limit_per_query=1000,
+                             dump_path=None,
+                             memory_saving_limit=50,
+                             **kwargs):
     """
 
     :param dump_path:
     :param entity_types: dict/Ordered dict of entity types
     :param retrieval_mode: read entities from API or dumped file.
-    :param num_queries: number of subsequent queries, with automatic offset
+    :param n_queries: number of subsequent queries, with automatic offset
         (only used with retrieval mode API)
     :param languages: list of languages (ISO code)
     :param limit_per_query: limit
     :param include_literals:
-    :param wikidata_fields:
+    :param wd_parameters:
     :param delay_wikipedia_retrieval:
     :param include_attribute_labels:
     :param require_country:
@@ -55,7 +50,7 @@ def collect_entities_delayed(entity_types,
     :return:
     """
     if wikidata_postprocessing_steps is None:
-        wikidata_postprocessing_steps = {}
+        wikidata_postprocessing_steps = []
     if languages is None:
         languages = ['en']
     relevant_entity_types = OrderedDict(
@@ -67,26 +62,19 @@ def collect_entities_delayed(entity_types,
         collect_entities_iterative = iterator.collect_entities_iterative
     elif retrieval_mode == 'dump':
         collect_entities_iterative = iterator.collect_entities_from_dump
-        num_queries = 1  # starting a query with an offset is undefined for
+        n_queries = 1  # starting a query with an offset is undefined for
         # dump mode, multiple queries would thus just produce the same
         # result over again.
     else:
         raise NotImplementedError('Supported modes are: API and dump!')
-    for n in range(num_queries):
+    for n in range(n_queries):
         wikipedia_sitelinks_to_retrieve = {lang: {} for lang in languages}
         entities_retrieved = {}
-        for idx, entity_data in enumerate(collect_entities_iterative(
-                limit_per_query=limit_per_query,
-                n_queries=num_queries,
-                wd_parameters=wikidata_fields,
-                include_literals=include_literals,
-                languages=languages,
-                delay_wikipedia_retrieval=delay_wikipedia_retrieval,
-                include_attribute_labels=include_attribute_labels,
-                require_country=require_country,
+        for idx, entity_data in enumerate(collect_entities_iterative(limit_per_query=limit_per_query, languages=languages,
+                n_queries=n_queries,
                 include_wikipedia=include_wikipedia,
-                param_filter=param_filter,
-                pre_filter=pre_filter)):
+                delay_wikipedia_retrieval=delay_wikipedia_retrieval,
+                **kwargs)):
             for step, param_dict in wikidata_postprocessing_steps:
                 entity_data = step(entity_data, **param_dict)
             if include_wikipedia:
@@ -158,7 +146,7 @@ def collect_entities_delayed(entity_types,
                                 language=language):
                             yield entry
 
-                    except KeyError:
+                    except KeyError as e:
                         pass
 
                     yield entity_data

@@ -206,7 +206,7 @@ def test_parseItemPage_all():
             assert all(('labels' in sub_val for sub_val in val['values']))
     parsed_with_country = ParseItemPage(entity,
                                         include_literals=False,
-                                        claims_of_interest=[],
+                                        wd_parameters=[],
                                         languages=['en', 'de',
                                                    'sv'],
                                         require_country=True,
@@ -233,13 +233,13 @@ def test_parseItemPage_filter():
     try:
         filter_params = {('P39', 'has_attr', None)}
         parsed_with_filter = ParseItemPage(itempage,
-                                       include_literals=True,
-                                       languages=['en', 'de',
+                                           include_literals=True,
+                                           languages=['en', 'de',
                                                   'sv'],
-                                       require_country=False,
-                                       include_attribute_labels=False,
-                                       filter=filter_params
-                                       ).details
+                                           require_country=False,
+                                           include_attribute_labels=False,
+                                           param_filter=filter_params
+                                           ).details
         raise ValueError('The sample itempage does not contain a claim "P39", '
                          'this should raise an error!')
     except ValueError:
@@ -247,13 +247,13 @@ def test_parseItemPage_filter():
     try:
         filter_params = [('P19', 'has_attr', None)]
         parsed_with_filter = ParseItemPage(itempage,
-                                       include_literals=True,
-                                       languages=['en', 'de',
+                                           include_literals=True,
+                                           languages=['en', 'de',
                                                   'sv'],
-                                       require_country=False,
-                                       include_attribute_labels=False,
-                                       filter=filter_params
-                                       ).details
+                                           require_country=False,
+                                           include_attribute_labels=False,
+                                           param_filter=filter_params
+                                           ).details
         parsed_without_filter = ParseItemPage(itempage,
                                        include_literals=True,
                                        languages=['en', 'de',
@@ -268,26 +268,26 @@ def test_parseItemPage_filter():
     try:
         filter_params = [('P569', 'min', '+1952-01-01')]
         parsed_with_filter = ParseItemPage(itempage,
-                                       include_literals=True,
-                                       languages=['en', 'de',
+                                           include_literals=True,
+                                           languages=['en', 'de',
                                                   'sv'],
-                                       require_country=False,
-                                       include_attribute_labels=False,
-                                       filter=filter_params
-                                       ).details
+                                           require_country=False,
+                                           include_attribute_labels=False,
+                                           param_filter=filter_params
+                                           ).details
     except ValueError:
         raise ValueError('Failed to identify Douglas Adams birth date as '
                          '>= 1952')
     try:
         filter_params = [('P569', 'min', '+1956-01-01')]
         parsed_with_filter = ParseItemPage(itempage,
-                                       include_literals=True,
-                                       languages=['en', 'de',
+                                           include_literals=True,
+                                           languages=['en', 'de',
                                                   'sv'],
-                                       require_country=False,
-                                       include_attribute_labels=False,
-                                       filter=filter_params
-                                       ).details
+                                           require_country=False,
+                                           include_attribute_labels=False,
+                                           param_filter=filter_params
+                                           ).details
         raise ValueError('Douglas Adams misidentified')
     except ValueError:
         pass

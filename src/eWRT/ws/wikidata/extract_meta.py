@@ -42,14 +42,11 @@ QUERY = """SELECT ?item WHERE{
 WIKIDATA_SITE = pywikibot.Site("wikidata", "wikidata")
 
 
-def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
-                                      include_literals=True,
-                                      raise_on_no_wikipage=True,
-                                      include_attribute_labels=True,
-                                      require_country=True,
-                                      include_wikipedia=True,
+def collect_attributes_from_wp_and_wd(itempage, languages,
+                                      include_wikipedia=False,
+                                      raise_on_no_wikipage=False,
                                       delay_wikipedia_retrieval=False,
-                                      param_filter=None):
+                                      **kwargs):
     """
 
     :param include_attribute_labels:
@@ -78,12 +75,7 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
     :returns: a dictionary of the collected details about this entity from
             both Wikipedia and Wikidata.
     """
-    # if isinstance(itempage, dict):
-    #     itempage = mock_item_page(itempage)
-    #
-    # itempage['get']()
-    # collect summaries and meta-info from the Wikipedia pages in the relevant
-    # languages:
+
     if hasattr(itempage, 'text'):
         id = itempage.id
         try:
@@ -95,12 +87,7 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
 
     wikipedia_data = []
     if include_wikipedia:
-        try:
-            sitelinks = itempage['sitelinks']
-        except KeyError:
-            sitelinks = itempage['sitelinks']
-        except AttributeError:
-            sitelinks = itempage['sitelinks']
+        sitelinks = itempage['sitelinks']
         relevant_sitelinks = [wiki for wiki in sitelinks if
                               any([lang + 'wiki' == wiki for lang in
                                    languages])]
@@ -123,6 +110,7 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
                                   in wikipedia_data}
             except TypeError:
                 pass
+
         elif sitelinks:
             try:
                 wikipedia_data = wp_summary_from_wdid(itempage['id'],
@@ -149,16 +137,11 @@ def collect_attributes_from_wp_and_wd(itempage, languages, wd_parameters,
         for language in wikipedia_data:
             entity_extracted_details[language['language'] + 'wiki'] = language
 
-    # get selected attributes from WikiData
+
     try:
         entity = ParseItemPage(
             itempage,
-            include_literals=include_literals,
-            claims_of_interest=wd_parameters,
-            languages=languages,
-            include_attribute_labels=include_attribute_labels,
-            require_country=require_country,
-            filter=param_filter)
+            **kwargs)
     except AssertionError:
         raise ValueError(
             'No attributes of interest identified for entity{}'.format(
@@ -281,17 +264,10 @@ class WikidataEntityIterator:
 
     def collect_entities_from_dump(self,
                                    limit_per_query,  # for consistent API
-                                   wd_parameters,
-                                   include_literals, languages,
-                                   raise_on_missing_wikipedias=True,
-                                   include_attribute_labels=True,
-                                   require_country=True,
-                                   include_wikipedia=True,
-                                   delay_wikipedia_retrieval=True,
                                    n_queries=None,
                                    # no effect, for consistent API only, dump
-                                   param_filter=None,
-                                   pre_filter=None
+                                   pre_filter=None,
+                                   **kwargs
                                    ):
         """
         iteratively parse a xml-dump (with embedded json entities) for entities
@@ -312,6 +288,7 @@ class WikidataEntityIterator:
         :return: list of entities to be updated
         :rtype: list
         """
+
         if pre_filter is None:
             pre_filter = (lambda x: True, {})
         filter_function, filter_params = pre_filter
@@ -355,15 +332,7 @@ class WikidataEntityIterator:
                             try:
                                 for entity in collect_attributes_from_wp_and_wd(
                                         elem_content,
-                                        languages=languages,
-                                        wd_parameters=wd_parameters,
-                                        include_literals=include_literals,
-                                        include_attribute_labels=include_attribute_labels,
-                                        require_country=require_country,
-                                        include_wikipedia=include_wikipedia,
-                                        delay_wikipedia_retrieval=delay_wikipedia_retrieval,
-                                        raise_on_no_wikipage=raise_on_missing_wikipedias,
-                                        param_filter=param_filter):
+                                        **kwargs):
                                     entity['category'] = category
                                     yield entity
                             except ValueError as e:  # this probably means no

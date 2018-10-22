@@ -31,11 +31,14 @@ def collect_multiple_from_wikipedia(sitelinks_cache, entities_cache,
         not including the data from Wikipedia yet to be collected. Keys are
         Wikidata IDs."""
     wikipedia_sitelinks_to_retrieve = sitelinks_cache
-    for entry in wikipedia_request_dispatcher(
+    try:
+        for entry in wikipedia_request_dispatcher(
             wikipedia_sitelinks_to_retrieve,
             entity_cache=entities_cache,
             batch_size=batchsize):
-        yield entry
+            yield entry
+    except Exception as e:
+        pass
 
 
 
