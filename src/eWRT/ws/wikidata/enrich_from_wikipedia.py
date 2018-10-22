@@ -6,12 +6,14 @@ Created on September 13, 2018
 
 @author: Jakob Steixner, <jakob.steixner@modul.ac.at
 
-Starting with a wikidata ID, retrieve additional information from Wikipedia'''
+Starting with a wikidata ID, retrieve additional information from Wikipedia
+either for a single page or a list of pages (identified by their language and
+exact title.
+'''
 
 import sys
 import ujson
 import warnings
-
 import requests
 import wikipedia
 
@@ -27,6 +29,14 @@ USER_AGENT = 'weblyzard (https://www.weblyzard.com/privacy-policy/)'
 
 
 def wikipedia_query(titles, index, language):
+    """
+
+    :param titles: list of titles
+    :param index: allows a continued query if the previous query
+        did not return the full results.
+    :param language: ISO code of language
+    :return:
+    """
     API_URL = wikipedia.API_URL.replace('en.', language.lower() + '.')
     params = {'titles': titles,
               'prop': 'info|extracts|pageprops',
@@ -58,6 +68,8 @@ def wikipedia_page_info_from_title(wikipage_title, language, redirect=False,
     """
     Retreive selected meta info about a specific Wikipedia page, identified by
     its exact title and language.
+    :param redirect:
+    :param skip_on_empty_summary:
     :param wikipage_title:
     :param language:
     :return: dict of meta info about individual Wikipedia page

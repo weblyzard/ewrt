@@ -5,6 +5,11 @@ Created on October 09, 2018
 
 @author: jakob <jakob.steixner@modul.ac.at>
 
+Collects selected meta-info about entities from Wikidata, allowing to
+postpone the supplementation with Wikipedia content for better performance
+by caching the Wikidata-only entities and storing a mapping between them and
+the Wikipedia page identifiers from which to supplement them.
+
 
 '''
 
@@ -32,6 +37,7 @@ def collect_entities_delayed(entity_types,
                              **kwargs):
     """
 
+    :param wikidata_postprocessing_steps:
     :param dump_path:
     :param entity_types: dict/Ordered dict of entity types
     :param retrieval_mode: read entities from API or dumped file.
@@ -39,13 +45,8 @@ def collect_entities_delayed(entity_types,
         (only used with retrieval mode API)
     :param languages: list of languages (ISO code)
     :param limit_per_query: limit
-    :param include_literals:
-    :param wd_parameters:
     :param delay_wikipedia_retrieval:
-    :param include_attribute_labels:
-    :param require_country:
     :param include_wikipedia:
-    :param debug:
     :param memory_saving_limit:
     :return:
     """
@@ -70,11 +71,13 @@ def collect_entities_delayed(entity_types,
     for n in range(n_queries):
         wikipedia_sitelinks_to_retrieve = {lang: {} for lang in languages}
         entities_retrieved = {}
-        for idx, entity_data in enumerate(collect_entities_iterative(limit_per_query=limit_per_query, languages=languages,
-                n_queries=n_queries,
-                include_wikipedia=include_wikipedia,
-                delay_wikipedia_retrieval=delay_wikipedia_retrieval,
-                **kwargs)):
+        for idx, entity_data in enumerate(
+                collect_entities_iterative(limit_per_query=limit_per_query,
+                                           languages=languages,
+                                           n_queries=n_queries,
+                                           include_wikipedia=include_wikipedia,
+                                           delay_wikipedia_retrieval=delay_wikipedia_retrieval,
+                                           **kwargs)):
             for step, param_dict in wikidata_postprocessing_steps:
                 entity_data = step(entity_data, **param_dict)
             if include_wikipedia:
@@ -100,8 +103,8 @@ def collect_entities_delayed(entity_types,
                     if idx >= limit_per_query:
                         break
 
-            if idx >= limit_per_query or (delay_wikipedia_retrieval and \
-                                          include_wikipedia and \
+            if idx >= limit_per_query or (delay_wikipedia_retrieval and
+                                          include_wikipedia and
                                           (idx + 1) % memory_saving_limit == 0):
                 # if debug:
                 #     logger.debug(datetime.datetime.now().isoformat())

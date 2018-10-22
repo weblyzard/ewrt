@@ -27,7 +27,6 @@ from eWRT.ws.wikidata.get_image_from_wikidataid import get_image, \
     NoImageFoundError
 from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
 
-
 if sys.version_info.major == 3:
     basestring = (bytes, str)
 
@@ -66,6 +65,7 @@ def get_wikidata_timestamp(item_page):
         except KeyError:
             return None
     return timestamp
+
 
 class ParseItemPage:
     """Methods to parse pywikibot.ItemPage for a specifiable list
@@ -161,6 +161,7 @@ class ParseItemPage:
         :return:
         """
         min_max = {'min': max, 'max': min}
+
         def inside(threshold, testee, mode):
             if mode == 'min':
                 return testee >= threshold
@@ -180,7 +181,8 @@ class ParseItemPage:
 
         for claim in set([item[0] for item in filter_params]):
 
-            filter_claims = {param[1]: param[2] for param in filter_params if param[0] == claim}
+            filter_claims = {param[1]: param[2] for param in filter_params if
+                             param[0] == claim}
             if not any(filter_claims.values()):
                 continue
             values = self.complete_claim_details(claim,
@@ -189,14 +191,15 @@ class ParseItemPage:
                                                  literals=[],
                                                  include_attribute_labels=False,
                                                  )
-            thresholds = {param: filter_claims[param] for param in ['min', 'max'] if param in filter_claims}
-            if not any([inside_both(instance['value'], **thresholds) for instance in values['values'] if instance['value'] is not None]):
+            thresholds = {param: filter_claims[param] for param in
+                          ['min', 'max'] if param in filter_claims}
+            if not any(
+                    [inside_both(instance['value'], **thresholds) for instance
+                     in values['values'] if instance['value'] is not None]):
                 return False
-            
+
         return True
 
-        
-        
     def process_attributes(self):
         """Exctract information about the item, specified
         by the predicates in self.claims_of_interest:
@@ -214,10 +217,11 @@ class ParseItemPage:
         for image_type in self._image_requested:
             type_literal = self._image_requested[image_type]
             try:
-                self.details[type_literal] = {'url': image_type, 'values': [dict(get_image(
-                    itempage=self.item_raw,
-                    image_type=image_type,
-                include_claim_id=True))]}
+                self.details[type_literal] = {'url': image_type,
+                                              'values': [dict(get_image(
+                                                  itempage=self.item_raw,
+                                                  image_type=image_type,
+                                                  include_claim_id=True))]}
             except NoImageFoundError:
                 pass
 

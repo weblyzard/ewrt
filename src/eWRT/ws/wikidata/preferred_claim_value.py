@@ -6,6 +6,8 @@ Created on October 03, 2018
 @author: jakob <jakob.steixner@modul.ac.at>
 
 Split from wikibot_parse_item.ParseItemPage for dependency reasons
+If an attribute has several values, identify any that may be marked as
+'rank': 'preferred'
 '''
 
 from pywikibot import Claim

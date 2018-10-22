@@ -10,7 +10,7 @@ Retrieve Wikidata's main image based on (exact) Wikipedia
 article title in a specific language. Also allows to retrieve other
 types of images (e.g. flags, coats of arms, etc.) where given.
 
-CLI to get thumbnail link from WikiData ID: <path-to-script> <ID> [size]
+CLI usage to get thumbnail link from WikiData ID: <path-to-script> <ID> [size]
 
 '''
 
@@ -19,8 +19,9 @@ import sys
 import warnings
 
 import pywikibot
-# mapping of flag, logo, to their codes
+
 from collections import OrderedDict
+
 from eWRT.ws.wikidata.definitions import image_attributes
 
 if sys.version_info.major == 3:

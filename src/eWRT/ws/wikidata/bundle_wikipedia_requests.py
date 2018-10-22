@@ -4,6 +4,9 @@
 Created on October 09, 2018
 
 @author: jakob <jakob.steixner@modul.ac.at>
+
+Add Wikipedia information to a batch of skeleton entities with with Wikidata
+metadata and literals only.
 '''
 
 import warnings

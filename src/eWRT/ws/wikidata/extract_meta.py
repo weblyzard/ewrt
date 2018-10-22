@@ -6,23 +6,25 @@ Created on September 13, 2018
 
 @author: Jakob Steixner, <jakob.steixner@modul.ac.at
 
-Loop
+Loop through the entities of a relevant type either directly through the
+API with pywikibot.pagegenerators, or using a dump file (faster).
 
 '''
 
 import sys
 import ujson
 import warnings
-from collections import OrderedDict
-
 import pywikibot.pagegenerators
 import requests
+
+from collections import OrderedDict
 from bz2file import BZ2File
+from lxml import etree as et
+from wikipedia import RedirectError, DisambiguationError
+
 from eWRT.ws.wikidata.enrich_from_wikipedia import wp_summary_from_wdid
 from eWRT.ws.wikidata.wikibot_parse_item import (ParseItemPage,
                                                  get_wikidata_timestamp)
-from lxml import etree as et
-from wikipedia import RedirectError, DisambiguationError
 
 ENTITY_TYPE_IDENTIFIERS = {
     'person': 'Q5',
@@ -49,22 +51,14 @@ def collect_attributes_from_wp_and_wd(itempage, languages,
                                       **kwargs):
     """
 
-    :param include_attribute_labels:
     :param itempage: ItemPage from which to collect information
     :param languages: list of languages in which to include literals
             and Wikipedia information (2-character{} ISO codes).
-    :param wd_parameters: list of wikidata properties (Pxxx codes) to be
-            included, if present
-    :param include_literals: Include properties and alternate names. If
-            false, only labels are
-            included.
     :param raise_on_no_wikipage: Controls whether an error is raised when
             no Wikipedia page in any of the requested languages can be
             identified for this entity. If True (default), no further meta-
             data about such entities is collected from WikiData. If False,
             meta-data is still collected.
-    :param require_country: attempt to deduce country attribute from location
-            attributes (requires additional API call(s))
     :param include_wikipedia: Include information from Wikipedia pages
             on entity (summary, revision id & timestamp, exact url)
     :param delay_wikipedia_retrieval: Return only the sitelinks of existing
@@ -180,8 +174,8 @@ class WikidataEntityIterator:
     def __init__(self, top_level_categories=None, lazy_load_subclasses=True,
                  dump_path=None):
         if dump_path is None:
-            self.dump_path = \
-                '~/Downloads/wikidatawiki-latest-pages-articles.xml.bz2'
+            raise ValueError('Dump path required!')
+
         else:
             self.dump_path = dump_path
 
@@ -248,12 +242,12 @@ class WikidataEntityIterator:
         :return: list of ids of parent class's subclasses
         :rtype: list
         """
-        SUBCLASS_QUERY = """SELECT ?item WHERE {
+        subclass_query = """SELECT ?item WHERE {
           ?item wdt:P279* wd:%s .
           }"""
         try:
             res = pywikibot.pagegenerators.WikidataSPARQLPageGenerator(
-                query=SUBCLASS_QUERY % self.type_root_identifiers[
+                query=subclass_query % self.type_root_identifiers[
                     parent_class_label])
         except KeyError:
             raise KeyError(
@@ -274,15 +268,8 @@ class WikidataEntityIterator:
         of interest, using bz2file.
         Note: the pure JSON does not contain all relevant meta-info (e. g.
         timestamps and revision IDs)
-        :param include_literals:
-        :param languages:
-        :param raise_on_missing_wikipedias:
-        :param include_attribute_labels:
-        :param require_country:
-        :param include_wikipedia:
-        :param delay_wikipedia_retrieval:
+        :param pre_filter:
         :param n_queries:
-        :param wd_parameters: attributes to be mirrored
         :param limit_per_query: maximum items to be read in (for debugging/testing)
         :type limit_per_query: int
         :return: list of entities to be updated
@@ -397,6 +384,8 @@ class WikidataEntityIterator:
                                    ):
         """Get a list of entities with pywikibot.pagegenerators
 
+        :param param_filter:
+        :param pre_filter:
         :param raise_on_missing_wikipedias:
         :param id_only:
         :param include_attribute_labels:
