@@ -63,16 +63,16 @@ def wikipedia_query(titles, index, language):
         return {}
 
 
-def wikipedia_page_info_from_title(wikipage_title, language, redirect=False,
-                                   skip_on_empty_summary=True):
+def wikipedia_page_info_from_titles(wikipage_titles, language, redirect=False,
+                                    skip_on_empty_summary=True):
     """
     Retreive selected meta info about a specific Wikipedia page, identified by
     its exact title and language.
     :param redirect:
     :param skip_on_empty_summary:
-    :param wikipage_title:
+    :param wikipage_titles:
     :param language:
-    :return: dict of meta info about individual Wikipedia page
+    :return: iterator over dicts of meta info about individual Wikipedia page
         (language, id and timestamp of last revision, title, link,
         summary)
     """
@@ -106,7 +106,7 @@ def wikipedia_page_info_from_title(wikipage_title, language, redirect=False,
             language_page['timestamp'] = page['touched']
             yield language_page
 
-    query_result = wikipedia_query(wikipage_title, 0, language)
+    query_result = wikipedia_query(wikipage_titles, 0, language)
 
     if 'error' in query_result:
         raise ValueError(query_result['error']['info'])
@@ -114,7 +114,7 @@ def wikipedia_page_info_from_title(wikipage_title, language, redirect=False,
         yield completed_result
     counter = 0
     while 'continue' in query_result:
-        query_result = wikipedia_query(wikipage_title,
+        query_result = wikipedia_query(wikipage_titles,
                                        query_result['continue']['excontinue'],
                                        language)
         for completed_result in _yield_pages_with_complete_result():
@@ -176,8 +176,8 @@ def wp_summary_from_wdid(wikidata_id, languages=None, sitelinks=None):
             else:
                 continue
             try:
-                wikipedia_page = wikipedia_page_info_from_title(wikipage_title,
-                                                                language)
+                wikipedia_page = wikipedia_page_info_from_titles(wikipage_title,
+                                                                 language)
                 wikipedia_data.append(wikipedia_page.next())
             except Exception as e:
                 raise (e)

@@ -173,11 +173,8 @@ class WikidataEntityIterator:
 
     def __init__(self, top_level_categories=None, lazy_load_subclasses=True,
                  dump_path=None):
-        if dump_path is None:
-            raise ValueError('Dump path required!')
 
-        else:
-            self.dump_path = dump_path
+        self.dump_path = dump_path
 
         if not top_level_categories:
             top_level_categories = self.type_root_identifiers
@@ -275,6 +272,8 @@ class WikidataEntityIterator:
         :return: list of entities to be updated
         :rtype: list
         """
+        if self.dump_path is None:
+            raise ValueError('Dump path required!')
 
         if pre_filter is None:
             pre_filter = (lambda x: True, {})
@@ -372,16 +371,9 @@ class WikidataEntityIterator:
                              'formatted entity!')
 
     def collect_entities_iterative(self, limit_per_query, n_queries,
-                                   wd_parameters,
-                                   include_literals, languages,
                                    raise_on_missing_wikipedias=False,
                                    id_only=False,
-                                   include_attribute_labels=True,
-                                   require_country=True,
-                                   include_wikipedia=True,
-                                   delay_wikipedia_retrieval=True,
-                                   param_filter=None, pre_filter=None
-                                   ):
+                                   **kwargs):
         """Get a list of entities with pywikibot.pagegenerators
 
         :param param_filter:
@@ -404,7 +396,7 @@ class WikidataEntityIterator:
         :type n_queries: int
         """
         for entity_type in self.entity_types:
-            for i in range(n_queries):
+            for i in range(n_queries + 1):
                 wikidata_site = WIKIDATA_SITE
                 query = QUERY % (self.entity_types[entity_type])
                 if limit_per_query:
@@ -431,14 +423,7 @@ class WikidataEntityIterator:
                         continue
                     try:
                         for result in collect_attributes_from_wp_and_wd(
-                                entity_raw,
-                                languages=languages,
-                                wd_parameters=wd_parameters,
-                                include_literals=include_literals,
-                                include_attribute_labels=include_attribute_labels,
-                                require_country=require_country,
-                                include_wikipedia=include_wikipedia,
-                                delay_wikipedia_retrieval=delay_wikipedia_retrieval):
+                                entity_raw, **kwargs):
                             result['category'] = entity_type
                             yield result
 

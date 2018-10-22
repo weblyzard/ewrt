@@ -12,7 +12,7 @@ metadata and literals only.
 import warnings
 
 from eWRT.ws.wikidata.enrich_from_wikipedia import \
-    wikipedia_page_info_from_title
+    wikipedia_page_info_from_titles
 from eWRT.ws.wikidata.filters import filter_result
 
 
@@ -32,7 +32,8 @@ def collect_multiple_from_wikipedia(sitelinks_cache, entities_cache,
         }
     :param entities_cache: a dictionary of retrieved entities' meta_information,
         not including the data from Wikipedia yet to be collected. Keys are
-        Wikidata IDs."""
+        Wikidata IDs.
+    :returns: iterator with wikipedia info about entities (dicts)"""
     wikipedia_sitelinks_to_retrieve = sitelinks_cache
     try:
         for entry in wikipedia_request_dispatcher(
@@ -57,13 +58,14 @@ def batch_enrich_from_wikipedia(wikipedia_pages, language, entities_cache):
     :param entities_cache: Stored entities with their info as retrieved from
         Wikidata to be supplemented with Wikipedia info.
     :type entities_cache: dict
-    :return:
+    :return: iterator of Wikipedia-enriched entities in a single language
+    :rtype: Iterator[dict]
     """
     batch = wikipedia_pages
     titles = '|'.join(batch.keys())
     try:
-        retrieved_pages = list(wikipedia_page_info_from_title(titles,
-                                                         language))
+        retrieved_pages = list(wikipedia_page_info_from_titles(titles,
+                                                               language))
     except StopIteration:
         raise IndexError
 
@@ -110,8 +112,9 @@ def wikipedia_request_dispatcher(sitelinks_cache, entity_cache, languages=None,
         query. The maximum is 50, but queries with more than ~20 titles will
         usually contain truncated results (e. g. without abstracts) for a number
         of titles and require a second call anyway.
-    :
-    : None
+    :returns: Iterator of monolingual entity dicts with Wikidata and Wikipedia
+        data combined.
+    :rtype: Iterator[dict]
     """
     if not languages:
         languages = [l for l in sitelinks_cache]
@@ -127,9 +130,7 @@ def wikipedia_request_dispatcher(sitelinks_cache, entity_cache, languages=None,
         sitelink_list = total_sitelinks.keys()
         n_sitelinks = len(total_sitelinks)
         print('{} links in language {}'.format(n_sitelinks, language))
-        steps = n_sitelinks // batch_size
-        if not steps:
-            steps = 1
+        steps = n_sitelinks // batch_size +1
         for step in range(steps):
             lower_limit, upperlimit = batch_size * step, batch_size * (step + 1)
             batch = {key: total_sitelinks[key] for key in
@@ -139,8 +140,8 @@ def wikipedia_request_dispatcher(sitelinks_cache, entity_cache, languages=None,
                     language=language,
                     entities_cache=entity_cache):
                 result['language'] = language
-                counter_retrieved += 1
                 yield result
+                counter_retrieved += 1
         print('successfully_retrieved {} entries in language {}.'.format(
             counter_retrieved, language
         ))

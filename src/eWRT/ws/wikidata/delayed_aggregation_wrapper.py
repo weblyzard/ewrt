@@ -68,7 +68,7 @@ def collect_entities_delayed(entity_types,
         # result over again.
     else:
         raise NotImplementedError('Supported modes are: API and dump!')
-    for n in range(n_queries):
+    for n in range(n_queries +1):
         wikipedia_sitelinks_to_retrieve = {lang: {} for lang in languages}
         entities_retrieved = {}
         for idx, entity_data in enumerate(
