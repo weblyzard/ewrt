@@ -68,7 +68,13 @@ def get_wikidata_timestamp(item_page):
     return timestamp
 
 class DoesNotMatchFilterError(Exception):
-    print('Entity does not mach filter')
+    def __init__(self, entity, msg=None):
+        if msg is None:
+            # Set some default useful error message
+            msg = "Entity %s does not match filter " % entity
+        super(DoesNotMatchFilterError, self).__init__(msg)
+        self.entity = entity
+
 
 class ParseItemPage:
     """Methods to parse pywikibot.ItemPage for a specifiable list
@@ -110,7 +116,7 @@ class ParseItemPage:
         except AttributeError:
             self.claims = itempage['claims']
         if param_filter and not self.filter(param_filter):
-            raise DoesNotMatchFilterError
+            raise DoesNotMatchFilterError(entity=self.item_raw['id'])
         if not isinstance(itempage, dict):
             id = itempage.id
             timestamp = itempage.timestamp
@@ -188,6 +194,9 @@ class ParseItemPage:
                              param[0] == claim}
             if not any(filter_claims.values()):
                 continue
+
+
+            # values = [value['mainsnak']['datavalue'] for value in self.claims[claim]]
             values = self.complete_claim_details(claim,
                                                  self.claims[claim],
                                                  languages=[],
@@ -197,8 +206,8 @@ class ParseItemPage:
             thresholds = {param: filter_claims[param] for param in
                           ['min', 'max'] if param in filter_claims}
             if not any(
-                    [inside_both(instance['value'], **thresholds) for instance
-                     in values['values'] if instance['value'] is not None]):
+                    (inside_both(instance['value'], **thresholds) for instance
+                     in values['values'] if instance['value'] is not None)):
                 return False
 
         return True
