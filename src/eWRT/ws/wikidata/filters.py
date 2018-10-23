@@ -56,7 +56,8 @@ def filter_result(language, raw_result,
 
             else:
                 output_formatted_entity[key] = wikibot_result[key]
-            if 'preferred' in output_formatted_entity[key]:
+            if (key in output_formatted_entity and
+                    'preferred' in output_formatted_entity[key]):
                 output_formatted_entity[key]['preferred'] = \
                     filter_language_values(
                         [wikibot_result[key]['preferred']], language
