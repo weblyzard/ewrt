@@ -26,13 +26,6 @@ from eWRT.ws.wikidata.enrich_from_wikipedia import wp_summary_from_wdid
 from eWRT.ws.wikidata.wikibot_parse_item import (ParseItemPage,
                                                  get_wikidata_timestamp, DoesNotMatchFilterError)
 
-ENTITY_TYPE_IDENTIFIERS = {
-    'person': 'Q5',
-    'organization': 'Q43229',
-    'geo': 'Q2221906',
-    'city': 'Q515'
-
-}
 
 ENTITY_TYPES = ['organization', 'person', 'geo']
 
