@@ -30,6 +30,7 @@ from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
 if sys.version_info.major == 3:
     basestring = (bytes, str)
 
+
 RELEVANT_LANGUAGES = ['en']
 
 QUALIFIERS = {'P580': 'start date',
@@ -66,6 +67,8 @@ def get_wikidata_timestamp(item_page):
             return None
     return timestamp
 
+class DoesNotMatchFilterError(Exception):
+    print('Entity does not mach filter')
 
 class ParseItemPage:
     """Methods to parse pywikibot.ItemPage for a specifiable list
@@ -107,7 +110,7 @@ class ParseItemPage:
         except AttributeError:
             self.claims = itempage['claims']
         if param_filter and not self.filter(param_filter):
-            raise ValueError
+            raise DoesNotMatchFilterError
         if not isinstance(itempage, dict):
             id = itempage.id
             timestamp = itempage.timestamp
