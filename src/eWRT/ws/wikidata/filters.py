@@ -24,12 +24,6 @@ def filter_result(language, raw_result,
     output_formatted_entity = {}
     wikibot_result = raw_result
 
-    # replace wikidata link as url with first encountered
-    # wikipedia link (assumes languages in order of preference.
-    # for key in DEFAULT_LITERALS:
-    #     if key in wikibot_result:
-    #         output_formatted_entity[key] = wikibot_result[key][language]
-
     for key in wikibot_result:
         # if key in DEFAULT_LITERALS:
         #     continue
@@ -71,10 +65,12 @@ def filter_result(language, raw_result,
 
 def filter_language_values(value_list, language):
     """
-
-    :param value_list:
-    :param language:
-    :return:
+    Filter attribute labels for language, recursively apply to qualifiers of
+    attributes.
+    :param value_list: Attribute values (list of dicts with
+        'labels': {<language1>: 'label, <language2: 'label'}
+    :param language: Output language
+    :return: list of of dicts with {'labels': label_in_language}
     """
     values = copy.deepcopy(value_list)
     for value in values:
