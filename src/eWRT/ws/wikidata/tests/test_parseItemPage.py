@@ -289,7 +289,7 @@ def test_parseItemPage_filter():
                                            param_filter=filter_params
                                            ).details
         raise ValueError('Douglas Adams misidentified')
-    except ValueError:
+    except DoesNotMatchFilterError:
         pass
 
 
