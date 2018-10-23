@@ -24,7 +24,7 @@ from wikipedia import RedirectError, DisambiguationError
 
 from eWRT.ws.wikidata.enrich_from_wikipedia import wp_summary_from_wdid
 from eWRT.ws.wikidata.wikibot_parse_item import (ParseItemPage,
-                                                 get_wikidata_timestamp)
+                                                 get_wikidata_timestamp, DoesNotMatchFilterError)
 
 ENTITY_TYPE_IDENTIFIERS = {
     'person': 'Q5',
@@ -134,14 +134,14 @@ def collect_attributes_from_wp_and_wd(itempage, languages,
 
     try:
         entity = ParseItemPage(
-            itempage,
+            itempage, languages=languages,
             **kwargs)
     except AssertionError:
         raise ValueError(
             'No attributes of interest identified for entity{}'.format(
                 itempage['id']))
-    except ValueError:
-        raise ValueError('entity {} does not match filter criteria'.format(
+    except DoesNotMatchFilterError:
+        raise DoesNotMatchFilterError('entity {} does not match filter criteria'.format(
             itempage['id']
         ))
     entity_extracted_details.update(entity.details)
@@ -300,10 +300,13 @@ class WikidataEntityIterator:
                     timestamp = elem.text
                 elif elem.tag == '{http://www.mediawiki.org/xml/export-0.10/}text':
 
-                    if not elem.text:
-                        continue
-                    try:
-                        elem_content = ujson.loads(elem.text)
+                        if not elem.text:
+                            continue
+
+                        try:
+                            elem_content = ujson.loads(elem.text)
+                        except ValueError:
+                            continue
                         try:
                             elem_content['timestamp'] = timestamp
                             del timestamp
@@ -312,16 +315,22 @@ class WikidataEntityIterator:
                                           'timestamp!'.format(
                                 elem_content['id']
                             ))
-                        category = self.determine_relevant_category(
+                        try:
+                            category = self.determine_relevant_category(
                             elem_content)
-                        if category and filter_function(elem_content, **filter_params):
+                        except ValueError:
+                            continue
+                        if not category:
+                            continue
+                        pre_filter_result = filter_function(elem_content, **filter_params)
+                        if category and pre_filter_result:
                             try:
                                 for entity in collect_attributes_from_wp_and_wd(
                                         elem_content,
                                         **kwargs):
                                     entity['category'] = category
                                     yield entity
-                            except ValueError as e:  # this probably means no
+                            except DoesNotMatchFilterError as e:  # this probably means no
                                 # Wikipedia page in any of our languages. We
                                 # have no use for such entities.
                                 # if raise_on_missing_wikipedias:
@@ -329,12 +338,6 @@ class WikidataEntityIterator:
                                 #         'No information about this entity found!')
                                 continue
 
-                    except ValueError:
-                        del elem
-                        del events
-                        continue
-
-        # raise NotImplementedError
 
     def determine_relevant_category(self, elem_content):
         """
