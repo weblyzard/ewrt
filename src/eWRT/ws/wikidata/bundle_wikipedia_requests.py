@@ -35,14 +35,12 @@ def collect_multiple_from_wikipedia(sitelinks_cache, entities_cache,
         Wikidata IDs.
     :returns: iterator with wikipedia info about entities (dicts)"""
     wikipedia_sitelinks_to_retrieve = sitelinks_cache
-    try:
-        for entry in wikipedia_request_dispatcher(
+    for entry in wikipedia_request_dispatcher(
             wikipedia_sitelinks_to_retrieve,
             entity_cache=entities_cache,
             batch_size=batchsize):
             yield entry
-    except Exception as e:
-        pass
+
 
 
 
@@ -89,7 +87,7 @@ def batch_enrich_from_wikipedia(wikipedia_pages, language, entities_cache):
             output_formatted_entity[
                 language + 'wiki'] = page
             yield output_formatted_entity
-        except (KeyError, AssertionError) as e:
+        except ValueError as e:
             warnings.warn('Failed to map retrieved Wikipedia info back '
                           'to cached entity: {}'.format(e)
                           )
@@ -124,13 +122,12 @@ def wikipedia_request_dispatcher(sitelinks_cache, entity_cache, languages=None,
         try:
             assert language in sitelinks_cache and sitelinks_cache[language]
         except AssertionError:
-            raise StopIteration(
-                'No sitelinks found for language {}.'.format(language))
+            continue
         total_sitelinks = sitelinks_cache[language]
         sitelink_list = total_sitelinks.keys()
         n_sitelinks = len(total_sitelinks)
         print('{} links in language {}'.format(n_sitelinks, language))
-        steps = n_sitelinks // batch_size +1
+        steps = (n_sitelinks -1) // batch_size + 1
         for step in range(steps):
             lower_limit, upperlimit = batch_size * step, batch_size * (step + 1)
             batch = {key: total_sitelinks[key] for key in
