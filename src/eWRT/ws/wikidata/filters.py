@@ -42,7 +42,10 @@ def filter_result(language, raw_result,
             output_formatted_entity[key] = wikibot_result[key]
         elif isinstance(wikibot_result[key], dict):
             if key in literals:
-                output_formatted_entity[key] = wikibot_result[key][language]
+                try:
+                    output_formatted_entity[key] = wikibot_result[key][language]
+                except KeyError:
+                    pass
             elif 'values' in wikibot_result[key]:
                 output_formatted_entity[key] = {
                 input_key: wikibot_result[key][input_key] for input_key in
