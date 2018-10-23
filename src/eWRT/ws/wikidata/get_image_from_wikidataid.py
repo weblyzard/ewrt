@@ -79,8 +79,8 @@ def get_images(itempage,
         # after:
         # https://stackoverflow.com/questions/34393884/how-to-get-image-url-property-from-wikidata-item-by-api
         thumbnail_template = u'https://{}.wikimedia.org/w/thumb.php?width={}&f={}'
-        thumbnail_link = thumbnail_template.format(site, image_width, link)
-        image_md5 = hashlib.md5(link.encode('utf-8')).hexdigest()
+        thumbnail_link = thumbnail_template.format(site, image_width, link.decode('utf8'))
+        image_md5 = hashlib.md5(link).hexdigest()
         a, b = image_md5[:2]
         direct_link_template = 'https://upload.wikimedia.org/wikipedia/{}/{}/{}/{}'
         image_direct_link = direct_link_template.format(site, a, a + b,
