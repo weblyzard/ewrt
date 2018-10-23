@@ -13,7 +13,7 @@ import mock
 import pytest
 from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
 from eWRT.ws.wikidata.sample_itempage import itempage, sample_output
-from eWRT.ws.wikidata.wikibot_parse_item import ParseItemPage
+from eWRT.ws.wikidata.wikibot_parse_item import ParseItemPage, DoesNotMatchFilterError
 
 entity_mock = mock.Mock()
 entity_mock.text = itempage
@@ -242,7 +242,7 @@ def test_parseItemPage_filter():
                                            ).details
         raise ValueError('The sample itempage does not contain a claim "P39", '
                          'this should raise an error!')
-    except ValueError:
+    except DoesNotMatchFilterError:
         pass
     try:
         filter_params = [('P19', 'has_attr', None)]
@@ -289,7 +289,7 @@ def test_parseItemPage_filter():
                                            param_filter=filter_params
                                            ).details
         raise ValueError('Douglas Adams misidentified')
-    except ValueError:
+    except DoesNotMatchFilterError:
         pass
 
 

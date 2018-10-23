@@ -30,6 +30,7 @@ from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
 if sys.version_info.major == 3:
     basestring = (bytes, str)
 
+
 RELEVANT_LANGUAGES = ['en']
 
 QUALIFIERS = {'P580': 'start date',
@@ -66,6 +67,14 @@ def get_wikidata_timestamp(item_page):
             return None
     return timestamp
 
+class DoesNotMatchFilterError(Exception):
+    def __init__(self, entity, msg=None):
+        if msg is None:
+            # Set some default useful error message
+            msg = "Entity %s does not match filter " % entity
+        super(DoesNotMatchFilterError, self).__init__(msg)
+        self.entity = entity
+
 
 class ParseItemPage:
     """Methods to parse pywikibot.ItemPage for a specifiable list
@@ -80,7 +89,8 @@ class ParseItemPage:
                  require_country=True,
                  include_attribute_labels=True,
                  qualifiers_of_interest=None,
-                 param_filter=None):
+                 param_filter=None,
+                 literals=None):
         """
         :param itempage: pywikibot.ItemPage to be parsed
         :param include_literals: bool defining whether to includehttps://gitlab.semanticlab.net/nlp-backend/issues0
@@ -107,7 +117,7 @@ class ParseItemPage:
         except AttributeError:
             self.claims = itempage['claims']
         if param_filter and not self.filter(param_filter):
-            raise ValueError
+            raise DoesNotMatchFilterError(entity=self.item_raw['id'])
         if not isinstance(itempage, dict):
             id = itempage.id
             timestamp = itempage.timestamp
@@ -119,7 +129,9 @@ class ParseItemPage:
             self.qualifiers_of_interest = QUALIFIERS
         self.include_attribute_labels = include_attribute_labels
         self.include_literals = include_literals
-        if self.include_literals:
+        if literals:
+            self.literals = literals
+        elif self.include_literals:
             self.literals = self.LITERAL_PROPERTIES
         else:
             self.literals = ['labels']
@@ -185,6 +197,9 @@ class ParseItemPage:
                              param[0] == claim}
             if not any(filter_claims.values()):
                 continue
+
+
+            # values = [value['mainsnak']['datavalue'] for value in self.claims[claim]]
             values = self.complete_claim_details(claim,
                                                  self.claims[claim],
                                                  languages=[],
@@ -194,8 +209,8 @@ class ParseItemPage:
             thresholds = {param: filter_claims[param] for param in
                           ['min', 'max'] if param in filter_claims}
             if not any(
-                    [inside_both(instance['value'], **thresholds) for instance
-                     in values['values'] if instance['value'] is not None]):
+                    (inside_both(instance['value'], **thresholds) for instance
+                     in values['values'] if instance['value'] is not None)):
                 return False
 
         return True
