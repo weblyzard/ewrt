@@ -89,7 +89,8 @@ class ParseItemPage:
                  require_country=True,
                  include_attribute_labels=True,
                  qualifiers_of_interest=None,
-                 param_filter=None):
+                 param_filter=None,
+                 literals=None):
         """
         :param itempage: pywikibot.ItemPage to be parsed
         :param include_literals: bool defining whether to includehttps://gitlab.semanticlab.net/nlp-backend/issues0
@@ -128,7 +129,9 @@ class ParseItemPage:
             self.qualifiers_of_interest = QUALIFIERS
         self.include_attribute_labels = include_attribute_labels
         self.include_literals = include_literals
-        if self.include_literals:
+        if literals:
+            self.literals = literals
+        elif self.include_literals:
             self.literals = self.LITERAL_PROPERTIES
         else:
             self.literals = ['labels']
