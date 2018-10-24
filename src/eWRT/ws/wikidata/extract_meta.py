@@ -14,18 +14,17 @@ API with pywikibot.pagegenerators, or using a dump file (faster).
 import sys
 import ujson
 import warnings
+from collections import OrderedDict
+
 import pywikibot.pagegenerators
 import requests
-
-from collections import OrderedDict
 from bz2file import BZ2File
-from lxml import etree as et
-from wikipedia import RedirectError, DisambiguationError
-
 from eWRT.ws.wikidata.enrich_from_wikipedia import wp_summary_from_wdid
 from eWRT.ws.wikidata.wikibot_parse_item import (ParseItemPage,
-                                                 get_wikidata_timestamp, DoesNotMatchFilterError)
-
+                                                 get_wikidata_timestamp,
+                                                 DoesNotMatchFilterError)
+from lxml import etree as et
+from wikipedia import RedirectError, DisambiguationError
 
 ENTITY_TYPES = ['organization', 'person', 'geo']
 
@@ -124,7 +123,6 @@ def collect_attributes_from_wp_and_wd(itempage, languages,
         for language in wikipedia_data:
             entity_extracted_details[language['language'] + 'wiki'] = language
 
-
     try:
         entity = ParseItemPage(
             itempage, languages=languages,
@@ -134,9 +132,10 @@ def collect_attributes_from_wp_and_wd(itempage, languages,
             'No attributes of interest identified for entity{}'.format(
                 itempage['id']))
     except DoesNotMatchFilterError:
-        raise DoesNotMatchFilterError('entity {} does not match filter criteria'.format(
-            itempage['id']
-        ))
+        raise DoesNotMatchFilterError(
+            'entity {} does not match filter criteria'.format(
+                itempage['id']
+            ))
     entity_extracted_details.update(entity.details)
 
     if include_wikipedia and not delay_wikipedia_retrieval:
@@ -269,8 +268,8 @@ class WikidataEntityIterator:
             raise ValueError('Dump path required!')
 
         if pre_filter is None:
-            pre_filter = (lambda entity: True, {})
-        filter_function, filter_params = pre_filter
+            pre_filter = [(lambda entity: True, {})]
+
         def best_guess_open(file_name):
             """
             Use bz2file to iterate over a compressed file,
@@ -293,55 +292,58 @@ class WikidataEntityIterator:
                     timestamp = elem.text
                 elif elem.tag == '{http://www.mediawiki.org/xml/export-0.10/}text':
 
-                        if not elem.text:
-                            del elem
-                            del events
-                            continue
+                    if not elem.text:
+                        del elem
+                        del events
+                        continue
 
-                        try:
-                            elem_content = ujson.loads(elem.text)
-                        except ValueError:
-                            del elem
-                            del events
-                            continue
-                        try:
-                            elem_content['timestamp'] = timestamp
-                            del timestamp
-                        except NameError:
-                            warnings.warn('Item {} cannot be assigned a '
-                                          'timestamp!'.format(
-                                elem_content['id']
-                            ))
-                        try:
-                            category = self.determine_relevant_category(
+                    try:
+                        elem_content = ujson.loads(elem.text)
+                    except ValueError:
+                        del elem
+                        del events
+                        continue
+                    try:
+                        elem_content['timestamp'] = timestamp
+                        del timestamp
+                    except NameError:
+                        warnings.warn('Item {} cannot be assigned a '
+                                      'timestamp!'.format(
+                            elem_content['id']
+                        ))
+                    try:
+                        category = self.determine_relevant_category(
                             elem_content)
-                            assert category
-                        except (ValueError,  # if the JSON is empty
-                                AssertionError  # if the entity doesn't fit search categories
-                        ):
+                        assert category
+                    except (ValueError,  # if the JSON is empty
+                            AssertionError
+                    # if the entity doesn't fit search categories
+                            ):
+                        del elem
+                        del events
+                        continue
+                    pre_filter_result = all(
+                        [filter_function(entity=elem_content, **filter_params)
+                         for filter_function, filter_params in pre_filter]
+                    )
+                    if category and pre_filter_result:
+                        try:
+                            for entity in collect_attributes_from_wp_and_wd(
+                                    elem_content,
+                                    **kwargs):
+                                entity['category'] = category
+                                yield entity
+                        except DoesNotMatchFilterError as e:  # this probably means no
+                            # Wikipedia page in any of our languages. We
+                            # have no use for such entities.
+                            # if raise_on_missing_wikipedias:
+                            #     raise ValueError(
+                            #         'No information about this entity found!')
                             del elem
                             del events
                             continue
-                        pre_filter_result = filter_function(entity=elem_content, **filter_params)
-                        if category and pre_filter_result:
-                            try:
-                                for entity in collect_attributes_from_wp_and_wd(
-                                        elem_content,
-                                        **kwargs):
-                                    entity['category'] = category
-                                    yield entity
-                            except DoesNotMatchFilterError as e:  # this probably means no
-                                # Wikipedia page in any of our languages. We
-                                # have no use for such entities.
-                                # if raise_on_missing_wikipedias:
-                                #     raise ValueError(
-                                #         'No information about this entity found!')
-                                del elem
-                                del events
-                                continue
                 del elem
                 del events
-
 
     def determine_relevant_category(self, elem_content):
         """
