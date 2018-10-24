@@ -294,11 +294,15 @@ class WikidataEntityIterator:
                 elif elem.tag == '{http://www.mediawiki.org/xml/export-0.10/}text':
 
                         if not elem.text:
+                            del elem
+                            del events
                             continue
 
                         try:
                             elem_content = ujson.loads(elem.text)
                         except ValueError:
+                            del elem
+                            del events
                             continue
                         try:
                             elem_content['timestamp'] = timestamp
@@ -311,9 +315,12 @@ class WikidataEntityIterator:
                         try:
                             category = self.determine_relevant_category(
                             elem_content)
-                        except ValueError:
-                            continue
-                        if not category:
+                            assert category
+                        except (ValueError,  # if the JSON is empty
+                                AssertionError  # if the entity doesn't fit search categories
+                        ):
+                            del elem
+                            del events
                             continue
                         pre_filter_result = filter_function(elem_content, **filter_params)
                         if category and pre_filter_result:
@@ -329,7 +336,11 @@ class WikidataEntityIterator:
                                 # if raise_on_missing_wikipedias:
                                 #     raise ValueError(
                                 #         'No information about this entity found!')
+                                del elem
+                                del events
                                 continue
+                del elem
+                del events
 
 
     def determine_relevant_category(self, elem_content):
