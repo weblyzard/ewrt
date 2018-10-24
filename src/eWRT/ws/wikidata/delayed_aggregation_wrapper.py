@@ -79,7 +79,7 @@ def collect_entities_delayed(entity_types,
                                            delay_wikipedia_retrieval=delay_wikipedia_retrieval,
                                            **kwargs)):
             for step, param_dict in wikidata_postprocessing_steps:
-                entity_data = step(entity_data, **param_dict)
+                entity_data = step(entity=entity_data, **param_dict)
             if include_wikipedia:
                 entities_retrieved[entity_data['url']] = entity_data
                 if delay_wikipedia_retrieval:

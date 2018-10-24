@@ -322,7 +322,7 @@ class WikidataEntityIterator:
                             del elem
                             del events
                             continue
-                        pre_filter_result = filter_function(elem_content, **filter_params)
+                        pre_filter_result = filter_function(entity=elem_content, **filter_params)
                         if category and pre_filter_result:
                             try:
                                 for entity in collect_attributes_from_wp_and_wd(
