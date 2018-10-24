@@ -269,7 +269,7 @@ class WikidataEntityIterator:
             raise ValueError('Dump path required!')
 
         if pre_filter is None:
-            pre_filter = (lambda x: True, {})
+            pre_filter = (lambda entity: True, {})
         filter_function, filter_params = pre_filter
         def best_guess_open(file_name):
             """
