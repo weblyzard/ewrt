@@ -14,20 +14,18 @@ API with pywikibot.pagegenerators, or using a dump file (faster).
 import sys
 import ujson
 import warnings
-import requests
-
 from collections import OrderedDict
-import pywikibot.pagegenerators
-from lxml import etree as et
-from wikipedia import RedirectError, DisambiguationError
-from bz2file import BZ2File
 
+import pywikibot.pagegenerators
+import requests
+from bz2file import BZ2File
 from eWRT.ws.wikidata.enrich_from_wikipedia import wp_summary_from_wdid
+from eWRT.ws.wikidata.language_filters import filter_result
 from eWRT.ws.wikidata.wikibot_parse_item import (ParseItemPage,
                                                  get_wikidata_timestamp,
                                                  DoesNotMatchFilterError)
-from eWRT.ws.wikidata.language_filters import filter_result
-
+from lxml import etree as et
+from wikipedia import RedirectError, DisambiguationError
 
 ENTITY_TYPES = ['organization', 'person', 'geo']
 
@@ -39,10 +37,22 @@ QUERY = """SELECT ?item WHERE{
 WIKIDATA_SITE = pywikibot.Site("wikidata", "wikidata")
 
 
+def merge_with_wikipedia_by_language(entity, languages=['en']):
+    for language in languages:
+        if language + 'wiki' in entity:
+            monolingual_result = filter_result(
+                language=language,
+                raw_result=entity)
+            monolingual_result[
+                'language'] = language
+            yield monolingual_result
+
+
 def collect_attributes_from_wp_and_wd(itempage, languages,
                                       include_wikipedia=False,
                                       raise_on_no_wikipage=False,
                                       delay_wikipedia_retrieval=False,
+                                      entity_type=None,
                                       **kwargs):
     """
 
@@ -112,8 +122,6 @@ def collect_attributes_from_wp_and_wd(itempage, languages,
                 warnings.warn('Failed to get info about entity {} from '
                               'Wikipedia API!'.format(itempage['id']))
 
-    # use the Wikipedia article in the first language found as the entity's
-    # unique preferred `url` - the order of languages is meaningful!
     try:
         entity_extracted_details = {'url': wikipedia_data[0]['url']}
     except (KeyError, IndexError):
@@ -128,7 +136,7 @@ def collect_attributes_from_wp_and_wd(itempage, languages,
 
     try:
         entity = ParseItemPage(
-            itempage, languages=languages,
+            itempage, languages=languages, entity_type=entity_type,
             **kwargs)
     except AssertionError:
         raise ValueError(
@@ -140,14 +148,11 @@ def collect_attributes_from_wp_and_wd(itempage, languages,
                 itempage['id']
             ))
     entity_extracted_details.update(entity.details)
-
     if include_wikipedia and not delay_wikipedia_retrieval:
-        for language in languages:
-            if language + 'wiki' in relevant_sitelinks:
-                monolingual_result = filter_result(language=language,
-                                                   raw_result=entity_extracted_details)
-                monolingual_result['language'] = language
-                yield monolingual_result
+        for language_result in merge_with_wikipedia_by_language(
+                entity=entity_extracted_details,
+                languages=languages):
+            yield language_result
     else:
         yield entity_extracted_details
 
@@ -257,7 +262,10 @@ class WikidataEntityIterator:
     def collect_entities_from_dump(self,
                                    limit_per_query,  # for consistent API
                                    n_queries=None,
-                                   # no effect, for consistent API only, dump
+                                   # no effect, for consistent API only
+
+                                   include_wikipedia=True,
+                                   delay_wikipedia_retrieval=True,
                                    pre_filter=None,
                                    **kwargs
                                    ):
@@ -326,7 +334,7 @@ class WikidataEntityIterator:
                         assert category
                     except (ValueError,  # if the JSON is empty
                             AssertionError
-                    # if the entity doesn't fit search categories
+                            # if the entity doesn't fit search categories
                             ):
                         del elem
                         del events
@@ -339,9 +347,19 @@ class WikidataEntityIterator:
                         try:
                             for entity in collect_attributes_from_wp_and_wd(
                                     elem_content,
+                                    include_wikipedia=include_wikipedia,
+                                    delay_wikipedia_retrieval=True,
+                                    entity_type=category,
                                     **kwargs):
                                 entity['category'] = category
-                                yield entity
+                                if include_wikipedia and not delay_wikipedia_retrieval:
+                                    for language_result in merge_with_wikipedia_by_language(
+                                            entity=entity,
+                                            languages=kwargs['languages']):
+                                        yield language_result
+                                else:
+                                    yield entity
+
                         except DoesNotMatchFilterError as e:  # this probably means no
                             # Wikipedia page in any of our languages. We
                             # have no use for such entities.

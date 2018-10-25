@@ -17,19 +17,17 @@ wikidata metadata.
 import sys
 import warnings
 
-from pywikibot import WbTime, Claim, Coordinate, WbQuantity
-from pywikibot.site import DataSite
-
 from eWRT.ws.wikidata.definitions import (local_attributes as LOCAL_ATTRIBUTES,
                                           image_attributes,
                                           GENERIC_PROPERTIES)
 from eWRT.ws.wikidata.get_image_from_wikidataid import get_image, \
     NoImageFoundError
 from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
+from pywikibot import WbTime, Claim, Coordinate, WbQuantity
+from pywikibot.site import DataSite
 
 if sys.version_info.major == 3:
     basestring = (bytes, str)
-
 
 RELEVANT_LANGUAGES = ['en']
 
@@ -67,6 +65,7 @@ def get_wikidata_timestamp(item_page):
             return None
     return timestamp
 
+
 class DoesNotMatchFilterError(Exception):
     def __init__(self, entity, msg=None):
         if msg is None:
@@ -86,11 +85,13 @@ class ParseItemPage:
                  wd_parameters=None,
                  entity_type_properties=None,
                  languages=None,
-                 require_country=True,
+                 resolve_country=True,
                  include_attribute_labels=True,
                  qualifiers_of_interest=None,
                  param_filter=None,
-                 literals=None):
+                 literals=None,
+                 entity_type=None,
+                 ):
         """
         :param itempage: pywikibot.ItemPage to be parsed
         :param include_literals: bool defining whether to includehttps://gitlab.semanticlab.net/nlp-backend/issues0
@@ -101,7 +102,7 @@ class ParseItemPage:
         :param entity_type_properties: dict of property identifiers and
             their labels entity_type_properties.
         :param languages: list of languages of interest in their preferred order
-        :param require_country: whether to try and deduce country from other
+        :param resolve_country: whether to try and deduce country from other
             location attributes ('location', 'place of birth', 'headquarters
             location'...).
         :param include_attribute_labels: Include the labels of attribute values
@@ -109,14 +110,12 @@ class ParseItemPage:
             for offline extraction from JSON/testing.
         """
 
-        # include 'labels' only if include_literals == False
-        # itempage.get()
         self.item_raw = itempage
         try:
             self.claims = itempage['claims']
         except AttributeError:
             self.claims = itempage['claims']
-        if param_filter and not self.filter(param_filter):
+        if param_filter and not self.filter(param_filter[entity_type]):
             raise DoesNotMatchFilterError(entity=self.item_raw['id'])
         if not isinstance(itempage, dict):
             id = itempage.id
@@ -135,7 +134,7 @@ class ParseItemPage:
             self.literals = self.LITERAL_PROPERTIES
         else:
             self.literals = ['labels']
-        self._require_country = require_country
+        self._resolve_country = resolve_country
         if languages is None: \
                 languages = RELEVANT_LANGUAGES
         self.languages = languages
@@ -197,7 +196,6 @@ class ParseItemPage:
                              param[0] == claim}
             if not any(filter_claims.values()):
                 continue
-
 
             # values = [value['mainsnak']['datavalue'] for value in self.claims[claim]]
             values = self.complete_claim_details(claim,
@@ -273,7 +271,7 @@ class ParseItemPage:
             # warnings.warn(
             #    'claim {} not available for entity {}'.format(claim, self.details['labels']))
         if ('country' not in self.details or not self.details['country']) and \
-                self._require_country:
+                self._resolve_country:
             country_info = self.get_country_from_any(self.item_raw,
                                                      local_attributes=LOCAL_ATTRIBUTES,
                                                      languages=self.languages,
