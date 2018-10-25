@@ -26,28 +26,42 @@ logger = logging.Logger(name='wp_bundler')
 
 def collect_entities_delayed(entity_types,
                              retrieval_mode,
-                             include_wikipedia=False,
+                             include_wikipedia=True,
                              wikidata_postprocessing_steps=None,
                              languages=None,
                              n_queries=1,
                              delay_wikipedia_retrieval=False,
                              limit_per_query=1000,
                              dump_path=None,
-                             memory_saving_limit=50,
+                             memory_saving_limit=500,
                              **kwargs):
     """
 
-    :param wikidata_postprocessing_steps:
-    :param dump_path:
-    :param entity_types: dict/Ordered dict of entity types
+    :param wikidata_postprocessing_steps: apply postprocessing on the parsed
+        entity, supplied as a list of tuples (function: {kwargs})
+    :type wikidata_postprocessing_steps: list
+    :param dump_path: file path to the dump
+    :type dump_path: basestring
+    :param entity_types: dict/Ordered dict of entity types and their Wikidata
+        codes (e. g. {'human': 'Q5'}
+    :type entity_types: (dict, OrderedDict)
     :param retrieval_mode: read entities from API or dumped file.
+    :type retrieval_mode: basestring
     :param n_queries: number of subsequent queries, with automatic offset
         (only used with retrieval mode API)
+    :type n_queries: int
     :param languages: list of languages (ISO code)
-    :param limit_per_query: limit
-    :param delay_wikipedia_retrieval:
+    :type languages: list
+    :param limit_per_query: limit of entities to retrieve
+    :type limit_per_query: int
+    :param delay_wikipedia_retrieval: Collect Wikidata entities in memory,
+        make batch requests to Wikipedia
+    :type delay_wikipedia_retrieval: bool
     :param include_wikipedia:
-    :param memory_saving_limit:
+    :type include_wikipedia: bool
+    :param memory_saving_limit: maximum number of parsed wikidata entities
+        stored in memory before
+    :type memory_saving_limit: int
     :return:
     """
     if wikidata_postprocessing_steps is None:
@@ -68,7 +82,7 @@ def collect_entities_delayed(entity_types,
         # result over again.
     else:
         raise NotImplementedError('Supported modes are: API and dump!')
-    for n in range(n_queries +1):
+    for n in range(n_queries):
         wikipedia_sitelinks_to_retrieve = {lang: {} for lang in languages}
         entities_retrieved = {}
         for idx, entity_data in enumerate(
@@ -78,6 +92,8 @@ def collect_entities_delayed(entity_types,
                                            include_wikipedia=include_wikipedia,
                                            delay_wikipedia_retrieval=delay_wikipedia_retrieval,
                                            **kwargs)):
+
+            # apply postprocessing steps
             for step, param_dict in wikidata_postprocessing_steps:
                 entity_data = step(entity=entity_data, **param_dict)
             if include_wikipedia:
@@ -102,6 +118,7 @@ def collect_entities_delayed(entity_types,
                     entities_retrieved = {}
                     if idx >= limit_per_query:
                         break
+
 
             if idx >= limit_per_query or (delay_wikipedia_retrieval and
                                           include_wikipedia and

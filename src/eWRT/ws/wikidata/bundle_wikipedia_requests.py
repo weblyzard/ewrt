@@ -13,7 +13,7 @@ import warnings
 
 from eWRT.ws.wikidata.enrich_from_wikipedia import \
     wikipedia_page_info_from_titles
-from eWRT.ws.wikidata.filters import filter_result
+from eWRT.ws.wikidata.language_filters import filter_result
 
 
 def collect_multiple_from_wikipedia(sitelinks_cache, entities_cache,
@@ -21,6 +21,7 @@ def collect_multiple_from_wikipedia(sitelinks_cache, entities_cache,
     """Request details about a list of titles from Wikipedia and
     update the cached entities with the result.
     :param batchsize: number of titles to be queried from Wikipedia, per query.
+    :type batchsize: int
     :param sitelinks_cache: a dictionary of the format
         {
             language1: {
@@ -33,6 +34,7 @@ def collect_multiple_from_wikipedia(sitelinks_cache, entities_cache,
     :param entities_cache: a dictionary of retrieved entities' meta_information,
         not including the data from Wikipedia yet to be collected. Keys are
         Wikidata IDs.
+    :type entities_cache: dict
     :returns: iterator with wikipedia info about entities (dicts)"""
     wikipedia_sitelinks_to_retrieve = sitelinks_cache
     for entry in wikipedia_request_dispatcher(
@@ -101,15 +103,20 @@ def wikipedia_request_dispatcher(sitelinks_cache, entity_cache, languages=None,
     which information has been retrieved from Wikidata into smaller chunks
     to be handled as batch queries to Wikipedia.
 
-    :param sitelinks_cache:
-    :param entity_cache:
+    :param sitelinks_cache: dict of format {<language0>: {<wikipedia title in
+        language1>: <wikidata url of entity>}}
+    :type sitelinks_cache: dict
+    :param entity_cache: dict of format {<wikidata url of entity>: <parsed content>}
+    :type entity_cache: dict
     :param languages: If left blank, the sitelinks cache is assumed to already
         contain all and only the languages needed. If stated explicitly, 0
         results in any of the the requested languages leads to a ValueError.
+    :type languages: list
     :param batch_size: The number of titles that will be included in Wikipedia
         query. The maximum is 50, but queries with more than ~20 titles will
         usually contain truncated results (e. g. without abstracts) for a number
         of titles and require a second call anyway.
+    :type batch_size: int
     :returns: Iterator of monolingual entity dicts with Wikidata and Wikipedia
         data combined.
     :rtype: Iterator[dict]
