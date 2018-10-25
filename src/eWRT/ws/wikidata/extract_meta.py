@@ -14,17 +14,20 @@ API with pywikibot.pagegenerators, or using a dump file (faster).
 import sys
 import ujson
 import warnings
-from collections import OrderedDict
-
-import pywikibot.pagegenerators
 import requests
+
+from collections import OrderedDict
+import pywikibot.pagegenerators
+from lxml import etree as et
+from wikipedia import RedirectError, DisambiguationError
 from bz2file import BZ2File
+
 from eWRT.ws.wikidata.enrich_from_wikipedia import wp_summary_from_wdid
 from eWRT.ws.wikidata.wikibot_parse_item import (ParseItemPage,
                                                  get_wikidata_timestamp,
                                                  DoesNotMatchFilterError)
-from lxml import etree as et
-from wikipedia import RedirectError, DisambiguationError
+from eWRT.ws.wikidata.language_filters import filter_result
+
 
 ENTITY_TYPES = ['organization', 'person', 'geo']
 
@@ -139,7 +142,6 @@ def collect_attributes_from_wp_and_wd(itempage, languages,
     entity_extracted_details.update(entity.details)
 
     if include_wikipedia and not delay_wikipedia_retrieval:
-        from eWRT.ws.wikidata.filters import filter_result
         for language in languages:
             if language + 'wiki' in relevant_sitelinks:
                 monolingual_result = filter_result(language=language,
