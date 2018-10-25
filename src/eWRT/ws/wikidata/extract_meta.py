@@ -159,12 +159,17 @@ class WikidataEntityIterator:
         'event': 'Q1190554',  # labelled 'occurence' in WikiData
         'geo': 'Q2221906',
         'organization': 'Q43229',
-        'person': 'Q5',
-        'city': 'Q515'
+        'person': 'Q5'
     }
 
     def __init__(self, top_level_categories=None, lazy_load_subclasses=True,
                  dump_path=None):
+        """
+        :param top_level_categories: dict
+        :param lazy_load_subclasses: Do (not) load subclass-to-superclass
+            mappings until needed
+        :param dump_path:
+        """
 
         self.dump_path = dump_path
 
@@ -193,7 +198,9 @@ class WikidataEntityIterator:
         """
         Get a complete up to date
         :param top_level_categories: dictionary of top level categories by their
-            English label, and their Qxxx identifier
+            English label, and their Qxxx identifier. If None, use the class
+            defaults
+        :type top_level_categories: dict
         :return: set of categories that are (transitively) defined as subclasses
             of either of the top level categories in 'top_level_categories'
         :rtype: frozenset
@@ -201,7 +208,7 @@ class WikidataEntityIterator:
         if not self.entity_types:
             self.entity_types = top_level_categories
             self.all_relevant_categories = self.get_relevant_category_ids(
-                top_level_categories)
+                self.entity_types)
         if top_level_categories is None:
             top_level_categories = self.type_root_identifiers
         all_relevant_categories = frozenset()
@@ -236,7 +243,7 @@ class WikidataEntityIterator:
           }"""
         try:
             res = pywikibot.pagegenerators.WikidataSPARQLPageGenerator(
-                query=subclass_query % self.type_root_identifiers[
+                query=subclass_query % self.entity_types[
                     parent_class_label])
         except KeyError:
             raise KeyError(
@@ -353,8 +360,11 @@ class WikidataEntityIterator:
         the first one. Example: geo-political entities are both organizations
         and locations, but parsed only as one or the other depending on
         the order self.relevant_categories.
-        :param elem_content: A raw entity JSON as retrieved from Wikidata
-        :return:
+        :param elem_content: A raw entity dict as retrieved from Wikidata's JSON
+        :type elem_content: dict
+        :return: boolean whether entity fits any of the searched for categories
+        :rtype: bool
+        :raises ValueError (if JSON is parsed as (empty) list
         """
         try:
             try:
@@ -385,20 +395,9 @@ class WikidataEntityIterator:
                                    **kwargs):
         """Get a list of entities with pywikibot.pagegenerators
 
-        :param param_filter:
-        :param pre_filter:
-        :param raise_on_missing_wikipedias:
-        :param id_only:
-        :param include_attribute_labels:
-        :param require_country:
-        :param include_wikipedia:
-        :param delay_wikipedia_retrieval:
-        :param languages: list if languages (ISO codes); the order determines
-            which one's Wikipedia page will be used for the preferred `url`.
-        :param include_literals: include 'aliases' and 'descriptions' (bool)
-        :type include_literals: bool
-        :param wd_parameters: list of wikidata properties to include in result
-        :type wd_parameters: list
+        :param raise_on_missing_wikipedias: raise ValueError
+        :param id_only: option to retrieve only ID without parsing entity
+        :type id_only: bool
         :param limit_per_query: LIMIT set in the SPARQL query
         :type limit_per_query: int
         :param n_queries: maximum number of subsequent queries
