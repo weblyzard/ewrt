@@ -316,7 +316,8 @@ class WikidataEntityIterator:
 
                         try:
                             elem_content = ujson.loads(elem.text)
-                        except ValueError:
+                            assert isinstance(elem_content, dict)
+                        except (ValueError, AssertionError):
                             del elem
                             del events
                             continue

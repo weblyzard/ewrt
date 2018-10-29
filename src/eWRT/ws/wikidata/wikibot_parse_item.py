@@ -450,7 +450,7 @@ class ParseItemPage:
                         warnings.warn('Entity {} has location property {} '
                                       'set to null'.format(itempage['id'],
                                                            location_type))
-        raise ValueError
+        return None
 
 
 class ParseClaim:

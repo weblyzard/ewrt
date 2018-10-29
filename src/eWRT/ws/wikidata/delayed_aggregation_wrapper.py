@@ -139,49 +139,49 @@ def collect_entities_delayed(entity_types,
                     if idx >= limit_per_query:
                         break
 
-            if idx >= limit_per_query or (delay_wikipedia_retrieval and
-                                          include_wikipedia and
-                                          (idx + 1) % memory_saving_limit == 0):
+            # if idx >= limit_per_query or (delay_wikipedia_retrieval and
+            #                               include_wikipedia and
+            #                               (idx + 1) % memory_saving_limit == 0):
+            #
+            #     for raw in entities_retrieved.values():
+            #         if not any((e.endswith('wiki') for e in raw)):
+            #             raise ValueError(
+            #                 'Entity {} without any wikipedia '
+            #                 'sitelinks'.format(raw['wikidata_id'])
+            #             ) # these should have been sorted out earlier anyway
+            #     for merged_result in collect_multiple_from_wikipedia(
+            #             wikipedia_sitelinks_to_retrieve,
+            #             entities_retrieved):
+            #         yield merged_result
+            #         continue
+            #
+            #     # reset caches:
+            #     wikipedia_sitelinks_to_retrieve = {lang: {} for lang in
+            #                                        languages}
+            #     entities_retrieved = {}
+            #     if idx >= limit_per_query:
+            #         break
+                if not delay_wikipedia_retrieval:
 
-                for raw in entities_retrieved.values():
-                    if not any((e.endswith('wiki') for e in raw)):
-                        raise ValueError(
-                            'Entity {} without any wikipedia '
-                            'sitelinks'.format(raw['wikidata_id'])
-                        ) # these should have been sorted out earlier anyway
-                for merged_result in collect_multiple_from_wikipedia(
-                        wikipedia_sitelinks_to_retrieve,
-                        entities_retrieved):
-                    yield merged_result
-                    continue
+                    for language in languages:
+                        try:
+                            for entry in batch_enrich_from_wikipedia(
+                                    wikipedia_pages={
+                                        language: {
+                                            entity_data[language + 'wiki']['title']:
+                                                entity_data['url']
+                                        }
+                                    },
+                                    entities_cache={
+                                        entity_data['url']: entity_data
+                                    },
+                                    language=language):
+                                yield entry
 
-                # reset caches:
-                wikipedia_sitelinks_to_retrieve = {lang: {} for lang in
-                                                   languages}
-                entities_retrieved = {}
-                if idx >= limit_per_query:
-                    break
-            elif not delay_wikipedia_retrieval:
+                        except KeyError as e:
+                            pass
 
-                for language in languages:
-                    try:
-                        for entry in batch_enrich_from_wikipedia(
-                                wikipedia_pages={
-                                    language: {
-                                        entity_data[language + 'wiki']['title']:
-                                            entity_data['url']
-                                    }
-                                },
-                                entities_cache={
-                                    entity_data['url']: entity_data
-                                },
-                                language=language):
-                            yield entry
-
-                    except KeyError as e:
-                        pass
-
-                    yield entity_data
+                        yield entity_data
         print('Successfully parsed {} entities!'.format(idx))
 
         for merged_result in collect_multiple_from_wikipedia(
