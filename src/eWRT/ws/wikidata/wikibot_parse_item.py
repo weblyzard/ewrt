@@ -268,8 +268,6 @@ class ParseItemPage:
             except KeyError as e:
                 pass
 
-            # warnings.warn(
-            #    'claim {} not available for entity {}'.format(claim, self.details['labels']))
         if ('country' not in self.details or not self.details['country']) and \
                 self._resolve_country:
             country_info = self.get_country_from_any(self.item_raw,
@@ -289,7 +287,7 @@ class ParseItemPage:
         for attribute in [a for a in self.details]:
 
             if not self.details[attribute] or 'values' in self.details[
-                attribute] and not self.details[attribute]['values']:
+                    attribute] and not self.details[attribute]['values']:
                 del self.details[attribute]
 
     @classmethod
@@ -335,21 +333,8 @@ class ParseItemPage:
                                                   preferred.snak]
 
             except ValueError as e:
-                # try:
-                #     most_recent = guess_current_value([Claim.fromJSON(site=DataSite('wikidata', 'wikidata'),
-                #                    data=claim) for claim in claim_instances])
-                #     claim_details['preferred'] = [instance for instance in
-                #                                   claim_details['values'] if
-                #                                   instance['claim_id'] ==
-                #                                   most_recent.snak]
-                # except Exception as e:
-
                 warnings.warn('encountered exception: {}'.format(e))
 
-            # ParseItemPage.extract_literal_properties(preferred[0],
-            #                                          languages=languages,
-            #                                          literals=[
-            #                                              'labels'])
         return claim_details if claim_details else None
 
     @classmethod

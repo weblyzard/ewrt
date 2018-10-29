@@ -182,7 +182,7 @@ class WikidataEntityIterator:
 
         if not top_level_categories:
             top_level_categories = self.type_root_identifiers
-        elif isinstance(top_level_categories, dict):
+        elif isinstance(top_level_categories, (dict, OrderedDict)):
             pass
         else:
             try:
@@ -303,74 +303,77 @@ class WikidataEntityIterator:
         with best_guess_open(dump_path) as xml_file:
 
             parser = et.iterparse(xml_file, events=('end',))
+            try:
+                for events, elem in parser:
+                    if elem.tag == '{http://www.mediawiki.org/xml/export-0.10/}timestamp':
+                        timestamp = elem.text
+                    elif elem.tag == '{http://www.mediawiki.org/xml/export-0.10/}text':
 
-            for events, elem in parser:
-                if elem.tag == '{http://www.mediawiki.org/xml/export-0.10/}timestamp':
-                    timestamp = elem.text
-                elif elem.tag == '{http://www.mediawiki.org/xml/export-0.10/}text':
-
-                    if not elem.text:
-                        del elem
-                        del events
-                        continue
-
-                    try:
-                        elem_content = ujson.loads(elem.text)
-                    except ValueError:
-                        del elem
-                        del events
-                        continue
-                    try:
-                        elem_content['timestamp'] = timestamp
-                        del timestamp
-                    except NameError:
-                        warnings.warn('Item {} cannot be assigned a '
-                                      'timestamp!'.format(
-                            elem_content['id']
-                        ))
-                    try:
-                        category = self.determine_relevant_category(
-                            elem_content)
-                        assert category
-                    except (ValueError,  # if the JSON is empty
-                            AssertionError
-                            # if the entity doesn't fit search categories
-                            ):
-                        del elem
-                        del events
-                        continue
-                    pre_filter_result = all(
-                        [filter_function(entity=elem_content, **filter_params)
-                         for filter_function, filter_params in pre_filter]
-                    )
-                    if category and pre_filter_result:
-                        try:
-                            for entity in collect_attributes_from_wp_and_wd(
-                                    elem_content,
-                                    include_wikipedia=include_wikipedia,
-                                    delay_wikipedia_retrieval=True,
-                                    entity_type=category,
-                                    **kwargs):
-                                entity['category'] = category
-                                if include_wikipedia and not delay_wikipedia_retrieval:
-                                    for language_result in merge_with_wikipedia_by_language(
-                                            entity=entity,
-                                            languages=kwargs['languages']):
-                                        yield language_result
-                                else:
-                                    yield entity
-
-                        except DoesNotMatchFilterError as e:  # this probably means no
-                            # Wikipedia page in any of our languages. We
-                            # have no use for such entities.
-                            # if raise_on_missing_wikipedias:
-                            #     raise ValueError(
-                            #         'No information about this entity found!')
+                        if not elem.text:
                             del elem
                             del events
                             continue
-                del elem
-                del events
+
+                        try:
+                            elem_content = ujson.loads(elem.text)
+                        except ValueError:
+                            del elem
+                            del events
+                            continue
+                        try:
+                            elem_content['timestamp'] = timestamp
+                            del timestamp
+                        except NameError:
+                            warnings.warn('Item {} cannot be assigned a '
+                                          'timestamp!'.format(
+                                elem_content['id']
+                            ))
+                        try:
+                            category = self.determine_relevant_category(
+                                elem_content)
+                            assert category
+                        except (ValueError,  # if the JSON is empty
+                                AssertionError
+                                # if the entity doesn't fit search categories
+                                ):
+                            del elem
+                            del events
+                            continue
+                        pre_filter_result = all(
+                            [filter_function(entity=elem_content, **filter_params)
+                             for filter_function, filter_params in pre_filter]
+                        )
+                        if category and pre_filter_result:
+                            try:
+                                for entity in collect_attributes_from_wp_and_wd(
+                                        elem_content,
+                                        include_wikipedia=include_wikipedia,
+                                        delay_wikipedia_retrieval=True,
+                                        entity_type=category,
+                                        **kwargs):
+                                    entity['category'] = category
+                                    if include_wikipedia and not delay_wikipedia_retrieval:
+                                        for language_result in merge_with_wikipedia_by_language(
+                                                entity=entity,
+                                                languages=kwargs['languages']):
+                                            yield language_result
+                                    else:
+                                        yield entity
+
+                            except DoesNotMatchFilterError as e:  # this probably means no
+                                # Wikipedia page in any of our languages. We
+                                # have no use for such entities.
+                                # if raise_on_missing_wikipedias:
+                                #     raise ValueError(
+                                #         'No information about this entity found!')
+                                del elem
+                                del events
+                                continue
+                    del elem
+                    del events
+            except EOFError:
+                pass
+
 
     def determine_relevant_category(self, elem_content):
         """
