@@ -371,7 +371,8 @@ class WikidataEntityIterator:
                                 continue
                     del elem
                     del events
-            except EOFError:
+            except (EOFError, IOError) as e:
+                warnings.warn('Error parsing file {}: {}'.format(dump_path, e))
                 pass
 
 

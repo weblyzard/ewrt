@@ -86,7 +86,7 @@ class ParseItemPage:
                  entity_type_properties=None,
                  languages=None,
                  resolve_country=True,
-                 include_attribute_labels=True,
+                 include_attribute_labels=False,
                  qualifiers_of_interest=None,
                  param_filter=None,
                  literals=None,
@@ -144,7 +144,7 @@ class ParseItemPage:
         if wd_parameters is None:
             self.claims_of_interest = CLAIMS_OF_INTEREST
         else:
-            self.claims_of_interest = wd_parameters
+            self.claims_of_interest = wd_parameters.pop(entity_type, [])
         self._image_requested = {attribute: image_attributes[attribute] for
                                  attribute in
                                  self.claims_of_interest if
@@ -457,7 +457,7 @@ class ParseClaim:
     """Parse an individual claim and its qualifiers"""
 
     def __init__(self, claim, languages, literals, delay=False,
-                 include_attribute_labels=True, qualifiers=None):
+                 include_attribute_labels=False, qualifiers=None):
         """
         Parse additional information about a specified claim. The result
         (dict format) is accessible through ParseClaim(claim).claim_details

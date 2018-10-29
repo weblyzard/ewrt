@@ -5446,7 +5446,7 @@ itempage = {
     u'timestamp': '+2018-10-04T02:20:35Z'
 }
 
-sample_output = {'wikidata_timestamp': '+2018-09-25T00:00:00Z',
+sample_output = {'wikidata_timestamp': '+2018-10-04T02:20:35Z',
                  u'image': {'url': 'P18',
                             'values': [OrderedDict(
                                 [('claim_id',

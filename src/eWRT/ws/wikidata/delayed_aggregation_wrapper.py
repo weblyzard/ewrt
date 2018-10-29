@@ -32,7 +32,7 @@ def combine_and_split(entity):
 
     :return:
     """
-    pass
+    return entity
 
 
 def collect_entities_delayed(entity_types,
