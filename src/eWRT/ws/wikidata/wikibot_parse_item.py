@@ -81,7 +81,7 @@ class ParseItemPage:
     LITERAL_PROPERTIES = ['labels', 'aliases', 'descriptions']
     attribute_preferred_value = attribute_preferred_value
 
-    def __init__(self, itempage, include_literals=False,
+    def __init__(self, itempage, include_literals=True,
                  wd_parameters=None,
                  entity_type_properties=None,
                  languages=None,
@@ -144,7 +144,7 @@ class ParseItemPage:
         if wd_parameters is None:
             self.claims_of_interest = CLAIMS_OF_INTEREST
         else:
-            self.claims_of_interest = wd_parameters.pop(entity_type, [])
+            self.claims_of_interest = wd_parameters.get(entity_type, [])
         self._image_requested = {attribute: image_attributes[attribute] for
                                  attribute in
                                  self.claims_of_interest if

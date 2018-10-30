@@ -285,7 +285,7 @@ class WikidataEntityIterator:
             raise ValueError('Dump path required!')
 
         if pre_filter is None:
-            pre_filter = [(lambda entity: True, {})]
+            pre_filter = [(lambda entity, entity_type: True, {})]
 
         def best_guess_open(file_name):
             """
@@ -341,10 +341,10 @@ class WikidataEntityIterator:
                             del events
                             continue
                         pre_filter_result = all(
-                            [filter_function(entity=elem_content, **filter_params)
+                            [filter_function(entity=elem_content, entity_type=category,  **filter_params)
                              for filter_function, filter_params in pre_filter]
                         )
-                        if category and pre_filter_result:
+                        if pre_filter_result:
                             try:
                                 for entity in collect_attributes_from_wp_and_wd(
                                         elem_content,
@@ -374,7 +374,6 @@ class WikidataEntityIterator:
                     del events
             except (EOFError, IOError) as e:
                 warnings.warn('Error parsing file {}: {}'.format(dump_path, e))
-                pass
 
 
     def determine_relevant_category(self, elem_content):

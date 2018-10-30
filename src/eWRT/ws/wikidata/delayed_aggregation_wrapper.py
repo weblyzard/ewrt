@@ -136,8 +136,7 @@ def collect_entities_delayed(entity_types,
                     wikipedia_sitelinks_to_retrieve = {lang: {} for lang in
                                                        languages}
                     entities_retrieved = {}
-                    if idx >= limit_per_query:
-                        break
+
 
             # if idx >= limit_per_query or (delay_wikipedia_retrieval and
             #                               include_wikipedia and
@@ -181,10 +180,12 @@ def collect_entities_delayed(entity_types,
                         except KeyError as e:
                             pass
 
-                        yield entity_data
-        print('Successfully parsed {} entities!'.format(idx))
-
-        for merged_result in collect_multiple_from_wikipedia(
-                wikipedia_sitelinks_to_retrieve,
-                entities_retrieved):
-            yield merged_result
+                yield entity_data
+                if idx >= limit_per_query:
+                    break
+        # print('Successfully parsed {} entities!'.format(idx))
+        #
+        # for merged_result in collect_multiple_from_wikipedia(
+        #         wikipedia_sitelinks_to_retrieve,
+        #         entities_retrieved):
+        #     yield merged_result
