@@ -16,6 +16,17 @@ from eWRT.ws.wikidata.enrich_from_wikipedia import \
 from eWRT.ws.wikidata.language_filters import filter_result
 
 
+def update_wikidata_batch_from_wikipedia(wikidata_result_list, languages, **kwargs):
+    entities_cache = {entity['wikidata_id']: entity for entity in wikidata_result_list}
+    sitelinks_cache = {lang: {} for lang in languages}
+    for entity in wikidata_result_list:
+        for language in languages:
+            if language + 'wiki' in entity:
+                sitelinks_cache[language][entity[language + 'wiki']] = entity['wikidata_id']
+
+    for result in collect_multiple_from_wikipedia(sitelinks_cache=sitelinks_cache,entities_cache=entities_cache, **kwargs):
+        yield result
+
 def collect_multiple_from_wikipedia(sitelinks_cache, entities_cache,
                                     batchsize=20, return_type='merged'):
     """Request details about a list of titles from Wikipedia and
