@@ -267,6 +267,7 @@ class WikidataEntityIterator:
                                    include_wikipedia=True,
                                    delay_wikipedia_retrieval=True,
                                    pre_filter=None,
+                                   return_type=None,
                                    **kwargs
                                    ):
         """

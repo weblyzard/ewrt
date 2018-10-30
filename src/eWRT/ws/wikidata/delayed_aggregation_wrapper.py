@@ -46,6 +46,7 @@ def collect_entities_delayed(entity_types,
                              dump_path=None,
                              memory_saving_limit=500,
                              preloaded_data=None,
+                             return_type='merged',
                              **kwargs):
     """
 
@@ -109,6 +110,7 @@ def collect_entities_delayed(entity_types,
                                            n_queries=n_queries,
                                            include_wikipedia=include_wikipedia,
                                            delay_wikipedia_retrieval=delay_wikipedia_retrieval,
+                    return_type=return_type,
                                            **kwargs)):
 
             # apply postprocessing steps
@@ -131,7 +133,7 @@ def collect_entities_delayed(entity_types,
                 if not delay_wikipedia_retrieval:
                     for merged_result in collect_multiple_from_wikipedia(
                             wikipedia_sitelinks_to_retrieve,
-                            entities_retrieved):
+                            entities_retrieved, return_type=return_type):
                         yield merged_result
                     wikipedia_sitelinks_to_retrieve = {lang: {} for lang in
                                                        languages}
