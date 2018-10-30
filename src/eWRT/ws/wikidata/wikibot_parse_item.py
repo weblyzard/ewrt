@@ -38,7 +38,6 @@ QUALIFIERS = {'P580': 'start date',
               'P854': 'reference_url',
               'P1686': 'for_work'}
 
-QUALIFIERS = {}
 
 CLAIMS_OF_INTEREST = ["P18", "P19", 'P39', 'P106', 'P108', 'P102']
 
