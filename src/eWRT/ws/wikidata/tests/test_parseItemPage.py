@@ -173,6 +173,8 @@ def test_get_country_from_location():
 
 douglas_adams_extract = sample_output
 
+def result_without_timestamp(result):
+    return dict([item for item in result.items() if item[0] != 'wikidata_timestamp'])
 
 def test_parseItemPage_all():
     entity = itempage
@@ -200,7 +202,7 @@ def test_parseItemPage_all():
                 for literal in ('labels', 'descriptions', 'aliases')))
     pprint.pprint(parsed_with_attribute_labels)
 
-    assert parsed_with_attribute_labels == douglas_adams_extract
+    assert result_without_timestamp(parsed_with_attribute_labels) == result_without_timestamp(douglas_adams_extract)
     for val in parsed_with_attribute_labels.values():
         if 'values' in val and 'P18' not in val['url']:
             assert all(('labels' in sub_val for sub_val in val['values']))
