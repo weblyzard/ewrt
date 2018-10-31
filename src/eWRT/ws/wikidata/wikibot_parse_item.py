@@ -66,6 +66,9 @@ def get_wikidata_timestamp(item_page):
 
 
 class DoesNotMatchFilterError(Exception):
+    """
+
+    """
     def __init__(self, entity, msg=None):
         if msg is None:
             # Set some default useful error message
@@ -558,40 +561,47 @@ class ParseClaim:
                                                                  self.literals)
         return claim_details
 
-    def get_claim_dates(self):
-        """Check if the qualifiers include start time, end time or point in time
-        attributes. If present, send it to self.claim_temporal_attributes()"""
-
-        temporal_attributes = {}
-        for attribute in TEMPORAL_QUALIFIERS:
-            try:
-                temporal_attributes[TEMPORAL_QUALIFIERS[attribute]] = \
-                    self.claim_temporal_attributes(attribute)
-            except ValueError:
-                pass
-        return temporal_attributes
-
-    def claim_temporal_attributes(self, temporal_attribute):
-        """Parse an individual temporal attribute (start date, end date,...)"""
-
-        if self.claim.has_qualifier and temporal_attribute in self.claim.qualifiers:
-            try:
-                claim_date = self.claim.qualifiers[temporal_attribute][-1]
-                if not claim_date:
-                    raise ValueError('No dates found.')
-
-                normalized_date_string = claim_date.target.toTimestr(
-                    force_iso=True)
-                # pprint(normalized_date_string)
-                # date = datetime.datetime.strptime(normalized_date_string,
-                #                                   '%Y-%m-%dT%H:%M:%SZ')
-                return normalized_date_string
-            except TypeError:
-                raise TypeError
-        raise ValueError('No dates found.')
+    # This method is no longer used since temporal qualifiers (start date,
+    # end date) now receive the same treatment as other qualifiers.
+    # def get_claim_dates(self):
+    #     """Check if the qualifiers include start time, end time or point in time
+    #     attributes. If present, send it to self.claim_temporal_attributes()"""
+    #
+    #     temporal_attributes = {}
+    #     for attribute in TEMPORAL_QUALIFIERS:
+    #         try:
+    #             temporal_attributes[TEMPORAL_QUALIFIERS[attribute]] = \
+    #                 self.claim_temporal_attributes(attribute)
+    #         except ValueError:
+    #             pass
+    #     return temporal_attributes
+    #
+    # def claim_temporal_attributes(self, temporal_attribute):
+    #     """Parse an individual temporal attribute (start date, end date,...)"""
+    #
+    #     if self.claim.has_qualifier and temporal_attribute in self.claim.qualifiers:
+    #         try:
+    #             claim_date = self.claim.qualifiers[temporal_attribute][-1]
+    #             if not claim_date:
+    #                 raise ValueError('No dates found.')
+    #
+    #             normalized_date_string = claim_date.target.toTimestr(
+    #                 force_iso=True)
+    #             # pprint(normalized_date_string)
+    #             # date = datetime.datetime.strptime(normalized_date_string,
+    #             #                                   '%Y-%m-%dT%H:%M:%SZ')
+    #             return normalized_date_string
+    #         except TypeError:
+    #             raise TypeError
+    #     raise ValueError('No dates found.')
 
 
 def start_date(instance):
+    """
+
+    :param instance:
+    :return:
+    """
     try:
         if instance.has_qualifier or instance.qualifiers:
             if 'P580' in instance.qualifiers:
@@ -615,6 +625,11 @@ def start_date(instance):
 
 
 def end_date(instance):
+    """
+
+    :param instance:
+    :return:
+    """
     if 'temporal_attributes' not in instance or 'P582' not in \
             instance['temporal_attributes']:
         return None

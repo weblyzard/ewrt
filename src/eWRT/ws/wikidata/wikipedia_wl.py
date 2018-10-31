@@ -30,7 +30,7 @@ class WikipediaPage(WikipediaPage):
                     'action': 'query',
                 'format': 'json'
                 }
-            rev = requests.get(API_URL, params=params, headers=headers)
+            rev = requests.get(API_URL, params=params)
             return rev[0]['timestamp']
 
         # return self._revision_timestamp
