@@ -116,6 +116,7 @@ def merge_wikipedia_and_wikidata(wikibot_result, wikipedia_result, language):
 
         output_formatted_entity[
             language + 'wiki'] = wikipedia_result
+        output_formatted_entity['url'] = wikipedia_result['url']
         return output_formatted_entity
 
 
