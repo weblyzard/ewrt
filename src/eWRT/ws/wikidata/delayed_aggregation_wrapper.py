@@ -14,7 +14,6 @@ the Wikipedia page identifiers from which to supplement them.
 '''
 
 import logging
-
 from collections import OrderedDict
 
 from eWRT.ws.wikidata.bundle_wikipedia_requests import (
@@ -23,9 +22,8 @@ from eWRT.ws.wikidata.bundle_wikipedia_requests import (
 )
 from eWRT.ws.wikidata.extract_meta import WikidataEntityIterator
 
-
-
 logger = logging.Logger(name='wp_bundler')
+
 
 def combine_and_split(entity):
     """
@@ -42,7 +40,7 @@ def collect_entities_delayed(entity_types,
                              languages=None,
                              n_queries=1,
                              delay_wikipedia_retrieval=True,
-                             limit_per_query=1000,
+                             limit_per_query=100,
                              dump_path=None,
                              memory_saving_limit=500,
                              preloaded_data=None,
@@ -103,21 +101,19 @@ def collect_entities_delayed(entity_types,
         wikipedia_sitelinks_to_retrieve = {lang: {} for lang in languages}
         entities_retrieved = {}
 
-
         for idx, entity_data in enumerate(
                 collect_entities_iterative(limit_per_query=limit_per_query,
                                            languages=languages,
                                            n_queries=n_queries,
                                            include_wikipedia=include_wikipedia,
                                            delay_wikipedia_retrieval=delay_wikipedia_retrieval,
-                    return_type=return_type,
+                                           return_type=return_type,
                                            **kwargs)):
 
             # apply postprocessing steps
             for step, param_dict in wikidata_postprocessing_steps:
                 entity_data = step(entity=entity_data, **param_dict)
 
-            combine_and_split(entity=entity_data, )
             if include_wikipedia:
                 entities_retrieved[entity_data['url']] = entity_data
                 if delay_wikipedia_retrieval:
@@ -139,29 +135,30 @@ def collect_entities_delayed(entity_types,
                                                        languages}
                     entities_retrieved = {}
 
+                # if return_type == 'merged':
 
-            # if idx >= limit_per_query or (delay_wikipedia_retrieval and
-            #                               include_wikipedia and
-            #                               (idx + 1) % memory_saving_limit == 0):
-            #
-            #     for raw in entities_retrieved.values():
-            #         if not any((e.endswith('wiki') for e in raw)):
-            #             raise ValueError(
-            #                 'Entity {} without any wikipedia '
-            #                 'sitelinks'.format(raw['wikidata_id'])
-            #             ) # these should have been sorted out earlier anyway
-            #     for merged_result in collect_multiple_from_wikipedia(
-            #             wikipedia_sitelinks_to_retrieve,
-            #             entities_retrieved):
-            #         yield merged_result
-            #         continue
-            #
-            #     # reset caches:
-            #     wikipedia_sitelinks_to_retrieve = {lang: {} for lang in
-            #                                        languages}
-            #     entities_retrieved = {}
-            #     if idx >= limit_per_query:
-            #         break
+                # if idx >= limit_per_query or (delay_wikipedia_retrieval and
+                #                               include_wikipedia and
+                #                               (idx + 1) % memory_saving_limit == 0):
+                #
+                #     for raw in entities_retrieved.values():
+                #         if not any((e.endswith('wiki') for e in raw)):
+                #             raise ValueError(
+                #                 'Entity {} without any wikipedia '
+                #                 'sitelinks'.format(raw['wikidata_id'])
+                #             ) # these should have been sorted out earlier anyway
+                #     for merged_result in collect_multiple_from_wikipedia(
+                #             wikipedia_sitelinks_to_retrieve,
+                #             entities_retrieved):
+                #         yield merged_result
+                #         continue
+                #
+                #     # reset caches:
+                #     wikipedia_sitelinks_to_retrieve = {lang: {} for lang in
+                #                                        languages}
+                #     entities_retrieved = {}
+                #     if idx >= limit_per_query:
+                #         break
                 if not delay_wikipedia_retrieval:
 
                     for language in languages:
@@ -169,7 +166,8 @@ def collect_entities_delayed(entity_types,
                             for entry in batch_enrich_from_wikipedia(
                                     wikipedia_pages={
                                         language: {
-                                            entity_data[language + 'wiki']['title']:
+                                            entity_data[language + 'wiki'][
+                                                'title']:
                                                 entity_data['url']
                                         }
                                     },
@@ -185,9 +183,4 @@ def collect_entities_delayed(entity_types,
                 yield entity_data
                 if idx >= limit_per_query:
                     break
-        # print('Successfully parsed {} entities!'.format(idx))
-        #
-        # for merged_result in collect_multiple_from_wikipedia(
-        #         wikipedia_sitelinks_to_retrieve,
-        #         entities_retrieved):
-        #     yield merged_result
+
