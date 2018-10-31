@@ -56,11 +56,14 @@ def extract_country_or_none(entity_extract, location_attributes=None):
         return None
 
 
-def item_with_country(wikipedia_title, language, location_attributes=local_attributes):
+def item_with_country(wikipedia_title, language=['en'], location_attributes=local_attributes,return_type='label'):
     itempage = wikidata_from_wptitle(wikipedia_title, language=language)
     country = extract_country_or_none(itempage,location_attributes=location_attributes)
     country = attribute_preferred_value(country)
-    return country[0]['labels'][language]
+    if return_type == 'labels':
+        return country[0]['labels'][language]
+    elif return_type == 'iso':
+        return country[0]['url']
 
 
 if __name__ == '__main__':
