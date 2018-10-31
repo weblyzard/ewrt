@@ -36,11 +36,12 @@ def test_collect_attributes_from_wp_and_wd_offline():
     without a new call to the API for every attribute to retrieve
     human readable values."""
     adams_data = collect_attributes_from_wp_and_wd(adams, ['en'],
-                                                   wd_parameters=WD_PARAMETERS,
+                                                   wd_parameters={'person': WD_PARAMETERS},
                                                    include_literals=False,
                                                    raise_on_no_wikipage=False,
                                                    include_attribute_labels=False,
-                                                   require_country=False).next()
+                                                   resolve_country=False,
+                                                   entity_type='person').next()
     assert adams_data['date of death']['values'][0]['value'].startswith(
         '+2001-05-11')
     for claim in adams_data.values():
@@ -54,13 +55,14 @@ def test_collect_attributes_from_wp_and_wd_offline():
 def test_collect_attributes_from_wp_and_wd_online():
     """"""
     adams_data = collect_attributes_from_wp_and_wd(adams, ['en'],
-                                                   wd_parameters=WD_PARAMETERS,
+                                                   wd_parameters={'person':WD_PARAMETERS},
                                                    include_literals=False,
                                                    raise_on_no_wikipage=False,
                                                    include_attribute_labels=True,
                                                    include_wikipedia=True,
                                                    delay_wikipedia_retrieval=False,
-                                                   require_country=False).next()
+                                                   resolve_country=False,
+                                                   entity_type='person').next()
     assert adams_data['date of death']['values'][0]['value'].startswith(
         '+2001-05-11')
     for claim in adams_data.values():
@@ -85,11 +87,12 @@ def test_collect_attributes_from_wp_and_wd_delay_wikipedia():
     :return:
     """
     adams_data = collect_attributes_from_wp_and_wd(adams, ['en'],
-                                                   wd_parameters=WD_PARAMETERS,
+                                                   wd_parameters={'person':WD_PARAMETERS},
+                                                   entity_type='person',
                                                    include_literals=False,
                                                    raise_on_no_wikipage=False,
                                                    include_attribute_labels=True,
-                                                   require_country=False,
+                                                   resolve_country=False,
                                                    include_wikipedia=True,
                                                    delay_wikipedia_retrieval=True).next()
     assert 'enwiki' in adams_data

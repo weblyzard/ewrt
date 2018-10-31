@@ -173,6 +173,8 @@ def test_get_country_from_location():
 
 douglas_adams_extract = sample_output
 
+def result_without_timestamp(result):
+    return dict([item for item in result.items() if item[0] != 'wikidata_timestamp'])
 
 def test_parseItemPage_all():
     entity = itempage
@@ -181,13 +183,13 @@ def test_parseItemPage_all():
                                                     include_literals=True,
                                                     languages=['en', 'de',
                                                                'sv'],
-                                                    require_country=False,
+                                                    resolve_country=False,
                                                     include_attribute_labels=False
                                                     ).details
 
     parsed_with_attribute_labels = ParseItemPage(entity, include_literals=True,
                                                  languages=['en', 'de', 'sv'],
-                                                 require_country=False,
+                                                 resolve_country=False,
                                                  include_attribute_labels=True
                                                  ).details
     assert set(parsed_with_attribute_labels.keys()) == set(
@@ -200,18 +202,19 @@ def test_parseItemPage_all():
                 for literal in ('labels', 'descriptions', 'aliases')))
     pprint.pprint(parsed_with_attribute_labels)
 
-    assert parsed_with_attribute_labels == douglas_adams_extract
+    assert result_without_timestamp(parsed_with_attribute_labels) == result_without_timestamp(douglas_adams_extract)
     for val in parsed_with_attribute_labels.values():
         if 'values' in val and 'P18' not in val['url']:
             assert all(('labels' in sub_val for sub_val in val['values']))
     parsed_with_country = ParseItemPage(entity,
                                         include_literals=False,
-                                        wd_parameters=[],
+                                        wd_parameters={},
                                         languages=['en', 'de',
                                                    'sv'],
-                                        require_country=True,
+                                        resolve_country=True,
                                         include_attribute_labels=True,
-                                        qualifiers_of_interest=[]
+                                        qualifiers_of_interest=[],
+                                        entity_type='person',
                                         ).details
     assert 'country' in parsed_with_country
     pprint.pprint(parsed_with_country['country'])
@@ -231,64 +234,70 @@ def test_parseItemPage_filter():
     """Filtering method, allows to filter entities by a) presence of a certain
     parameter or b) maximal/minimal value (use +/- prefixed string for dates!)"""
     try:
-        filter_params = {('P39', 'has_attr', None)}
+        filter_params = {'person': [('P39', 'has_attr', None)]}
         parsed_with_filter = ParseItemPage(itempage,
                                            include_literals=True,
                                            languages=['en', 'de',
                                                   'sv'],
-                                           require_country=False,
+                                           resolve_country=False,
                                            include_attribute_labels=False,
-                                           param_filter=filter_params
+                                           param_filter=filter_params,
+                                           entity_type='person'
                                            ).details
         raise ValueError('The sample itempage does not contain a claim "P39", '
                          'this should raise an error!')
     except DoesNotMatchFilterError:
         pass
     try:
-        filter_params = [('P19', 'has_attr', None)]
+        filter_params =  {'person': [('P569', 'min', '+1952-01-01')]}
         parsed_with_filter = ParseItemPage(itempage,
                                            include_literals=True,
                                            languages=['en', 'de',
                                                   'sv'],
-                                           require_country=False,
+                                           resolve_country=False,
                                            include_attribute_labels=False,
-                                           param_filter=filter_params
+                                           param_filter=filter_params,
+                                           entity_type='person'
                                            ).details
         parsed_without_filter = ParseItemPage(itempage,
                                        include_literals=True,
                                        languages=['en', 'de',
                                                   'sv'],
-                                       require_country=False,
-                                       include_attribute_labels=False
+                                       resolve_country=False,
+                                       include_attribute_labels=False,
+                                           entity_type='person'
                                        ).details
         assert parsed_with_filter == parsed_without_filter
     except ValueError:
         raise ValueError('The sample itempage does contain a claim "P19" '
                          '(place of birth), this should pass the filter')
     try:
-        filter_params = [('P569', 'min', '+1952-01-01')]
+        filter_params = {'person': [('P569', 'min', '+1952-01-01')]}
         parsed_with_filter = ParseItemPage(itempage,
                                            include_literals=True,
                                            languages=['en', 'de',
                                                   'sv'],
-                                           require_country=False,
+                                           resolve_country=False,
                                            include_attribute_labels=False,
-                                           param_filter=filter_params
+                                           param_filter=filter_params,
+                                           entity_type='person'
                                            ).details
     except ValueError:
         raise ValueError('Failed to identify Douglas Adams birth date as '
                          '>= 1952')
     try:
-        filter_params = [('P569', 'min', '+1956-01-01')]
+        filter_params =  {'person': [('P569', 'min', '+1955-01-01')]}
         parsed_with_filter = ParseItemPage(itempage,
                                            include_literals=True,
                                            languages=['en', 'de',
                                                   'sv'],
-                                           require_country=False,
+                                           resolve_country=False,
                                            include_attribute_labels=False,
-                                           param_filter=filter_params
+                                           param_filter=filter_params,
+                                           entity_type='person'
                                            ).details
-        raise ValueError('Douglas Adams misidentified')
+        raise ValueError('Douglas Adams misidentified as being younger than '
+                         '1955-01-01')
     except DoesNotMatchFilterError:
         pass
 

@@ -17,19 +17,17 @@ wikidata metadata.
 import sys
 import warnings
 
-from pywikibot import WbTime, Claim, Coordinate, WbQuantity
-from pywikibot.site import DataSite
-
 from eWRT.ws.wikidata.definitions import (local_attributes as LOCAL_ATTRIBUTES,
                                           image_attributes,
                                           GENERIC_PROPERTIES)
 from eWRT.ws.wikidata.get_image_from_wikidataid import get_image, \
     NoImageFoundError
 from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
+from pywikibot import WbTime, Claim, Coordinate, WbQuantity
+from pywikibot.site import DataSite
 
 if sys.version_info.major == 3:
     basestring = (bytes, str)
-
 
 RELEVANT_LANGUAGES = ['en']
 
@@ -40,7 +38,6 @@ QUALIFIERS = {'P580': 'start date',
               'P854': 'reference_url',
               'P1686': 'for_work'}
 
-QUALIFIERS = {}
 
 CLAIMS_OF_INTEREST = ["P18", "P19", 'P39', 'P106', 'P108', 'P102']
 
@@ -67,6 +64,7 @@ def get_wikidata_timestamp(item_page):
             return None
     return timestamp
 
+
 class DoesNotMatchFilterError(Exception):
     def __init__(self, entity, msg=None):
         if msg is None:
@@ -82,15 +80,17 @@ class ParseItemPage:
     LITERAL_PROPERTIES = ['labels', 'aliases', 'descriptions']
     attribute_preferred_value = attribute_preferred_value
 
-    def __init__(self, itempage, include_literals=False,
+    def __init__(self, itempage, include_literals=True,
                  wd_parameters=None,
                  entity_type_properties=None,
                  languages=None,
-                 require_country=True,
-                 include_attribute_labels=True,
+                 resolve_country=True,
+                 include_attribute_labels=False,
                  qualifiers_of_interest=None,
                  param_filter=None,
-                 literals=None):
+                 literals=None,
+                 entity_type=None,
+                 ):
         """
         :param itempage: pywikibot.ItemPage to be parsed
         :param include_literals: bool defining whether to includehttps://gitlab.semanticlab.net/nlp-backend/issues0
@@ -101,7 +101,7 @@ class ParseItemPage:
         :param entity_type_properties: dict of property identifiers and
             their labels entity_type_properties.
         :param languages: list of languages of interest in their preferred order
-        :param require_country: whether to try and deduce country from other
+        :param resolve_country: whether to try and deduce country from other
             location attributes ('location', 'place of birth', 'headquarters
             location'...).
         :param include_attribute_labels: Include the labels of attribute values
@@ -109,14 +109,12 @@ class ParseItemPage:
             for offline extraction from JSON/testing.
         """
 
-        # include 'labels' only if include_literals == False
-        # itempage.get()
         self.item_raw = itempage
         try:
             self.claims = itempage['claims']
         except AttributeError:
             self.claims = itempage['claims']
-        if param_filter and not self.filter(param_filter):
+        if param_filter and not self.filter(param_filter[entity_type]):
             raise DoesNotMatchFilterError(entity=self.item_raw['id'])
         if not isinstance(itempage, dict):
             id = itempage.id
@@ -135,7 +133,7 @@ class ParseItemPage:
             self.literals = self.LITERAL_PROPERTIES
         else:
             self.literals = ['labels']
-        self._require_country = require_country
+        self._resolve_country = resolve_country
         if languages is None: \
                 languages = RELEVANT_LANGUAGES
         self.languages = languages
@@ -145,7 +143,7 @@ class ParseItemPage:
         if wd_parameters is None:
             self.claims_of_interest = CLAIMS_OF_INTEREST
         else:
-            self.claims_of_interest = wd_parameters
+            self.claims_of_interest = wd_parameters.get(entity_type, [])
         self._image_requested = {attribute: image_attributes[attribute] for
                                  attribute in
                                  self.claims_of_interest if
@@ -197,7 +195,6 @@ class ParseItemPage:
                              param[0] == claim}
             if not any(filter_claims.values()):
                 continue
-
 
             # values = [value['mainsnak']['datavalue'] for value in self.claims[claim]]
             values = self.complete_claim_details(claim,
@@ -270,10 +267,8 @@ class ParseItemPage:
             except KeyError as e:
                 pass
 
-            # warnings.warn(
-            #    'claim {} not available for entity {}'.format(claim, self.details['labels']))
         if ('country' not in self.details or not self.details['country']) and \
-                self._require_country:
+                self._resolve_country:
             country_info = self.get_country_from_any(self.item_raw,
                                                      local_attributes=LOCAL_ATTRIBUTES,
                                                      languages=self.languages,
@@ -291,7 +286,7 @@ class ParseItemPage:
         for attribute in [a for a in self.details]:
 
             if not self.details[attribute] or 'values' in self.details[
-                attribute] and not self.details[attribute]['values']:
+                    attribute] and not self.details[attribute]['values']:
                 del self.details[attribute]
 
     @classmethod
@@ -337,21 +332,8 @@ class ParseItemPage:
                                                   preferred.snak]
 
             except ValueError as e:
-                # try:
-                #     most_recent = guess_current_value([Claim.fromJSON(site=DataSite('wikidata', 'wikidata'),
-                #                    data=claim) for claim in claim_instances])
-                #     claim_details['preferred'] = [instance for instance in
-                #                                   claim_details['values'] if
-                #                                   instance['claim_id'] ==
-                #                                   most_recent.snak]
-                # except Exception as e:
-
                 warnings.warn('encountered exception: {}'.format(e))
 
-            # ParseItemPage.extract_literal_properties(preferred[0],
-            #                                          languages=languages,
-            #                                          literals=[
-            #                                              'labels'])
         return claim_details if claim_details else None
 
     @classmethod
@@ -467,14 +449,14 @@ class ParseItemPage:
                         warnings.warn('Entity {} has location property {} '
                                       'set to null'.format(itempage['id'],
                                                            location_type))
-        raise ValueError
+        return None
 
 
 class ParseClaim:
     """Parse an individual claim and its qualifiers"""
 
     def __init__(self, claim, languages, literals, delay=False,
-                 include_attribute_labels=True, qualifiers=None):
+                 include_attribute_labels=False, qualifiers=None):
         """
         Parse additional information about a specified claim. The result
         (dict format) is accessible through ParseClaim(claim).claim_details

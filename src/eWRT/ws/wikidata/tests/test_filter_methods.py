@@ -8,7 +8,7 @@ Created on October 09, 2018
 
 import pytest
 
-from eWRT.ws.wikidata.filters import filter_result, \
+from eWRT.ws.wikidata.language_filters import filter_result, \
     filter_language_values
 
 input_raw_result = {

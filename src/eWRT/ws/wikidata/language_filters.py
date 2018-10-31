@@ -13,13 +13,18 @@ import copy
 
 
 def filter_result(language, raw_result,
-                  literals=('labels', 'descriptions', 'aliases')):
+                  literals=['labels', 'descriptions', 'aliases']):
     """
 
-    :param language:
-    :param raw_result:
-    :param literals:
-    :return:
+    :param language: language iso code
+    :type language: basestring
+    :param raw_result: dict with metadata about entity
+    :type raw_result: dict
+    :param literals: iterable of literal attributes
+    :type literals: list
+    :return: dict with all language-unspecific data + data in selected
+        language, discarding data in other languages
+    :rtype dict
     """
     output_formatted_entity = {}
     wikibot_result = raw_result
