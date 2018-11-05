@@ -39,7 +39,7 @@ def wikipedia_query(titles, index, language):
     """
     API_URL = wikipedia.API_URL.replace('en.', language.lower() + '.')
     params = {'titles': titles,
-              'prop': 'info|extracts|pageprops',
+              'prop': 'info|extracts|pageprops|revisions',
               'explaintext': '',
               'exintro': '',
               'excontinue': index,
@@ -47,7 +47,8 @@ def wikipedia_query(titles, index, language):
               'redirects': '',
               'inprop': 'url',
               'action': 'query',
-              'format': 'json'
+              'format': 'json',
+              'rvprop': 'timestamp'
               }
 
     headers = {
@@ -103,7 +104,7 @@ def wikipedia_page_info_from_titles(wikipage_titles, language, redirect=False,
                 continue
             language_page['url'] = page['canonicalurl']
             language_page['title'] = title
-            language_page['timestamp'] = page['touched']
+            language_page['timestamp'] = page['revisions'][0]['timestamp']
             yield language_page
 
     query_result = wikipedia_query(wikipage_titles, 0, language)
