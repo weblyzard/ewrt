@@ -11,8 +11,8 @@ local_attributes = OrderedDict([
     ("P17", u"country"),
     ("P131", u"located in the administrative territorial entity"),
     ("P19", u"place of birth"),
-    ("P551", u"residence"),
     ("P27", u"country of citizenship"),
+    ("P551", u"residence"),
     ("P159", u"headquarters location"),
     ("P740", u"location of formation"),
 ])

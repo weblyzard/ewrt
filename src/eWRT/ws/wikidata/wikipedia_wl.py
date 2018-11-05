@@ -12,26 +12,28 @@ Note: the [MediaWikiAPI-fork](https://github.com/lehinevych/MediaWikiAPI/)
 of this package seems to be more actively maintained nowadays, but it doesn't
 ship with a timestamp-attribute either. Both are licensed with the MIT license.
 """
+import requests
 
-from wikipedia import (WikipediaPage, PageError, search)
+from wikipedia import (WikipediaPage, PageError, search, API_URL)
 
 
 class WikipediaPage(WikipediaPage):
 
     @property
     def revision_timestamp(self):
-        '''
-        Timestamp of most recent revision of Wikipedia page.
-        '''
-        if not getattr(self, '_revision_timestamp', False):
-            self._revision_timestamp = [
-                revision['timestamp']
-                for revision in self.__continued_query({
+            '''
+            Timestamp of most recent revision of Wikipedia page.
+            '''
+            params = {'titles': self.title,
                     'prop': 'revisions',
-                    'ellimit': 'max'
-                })
-            ]
-        return self._revision_timestamp[0]
+                    'ellimit': 1,
+                    'action': 'query',
+                'format': 'json'
+                }
+            rev = requests.get(API_URL, params=params)
+            return rev[0]['timestamp']
+
+        # return self._revision_timestamp
 
 
 def page(title=None, pageid=None, auto_suggest=True, redirect=True, preload=False):
