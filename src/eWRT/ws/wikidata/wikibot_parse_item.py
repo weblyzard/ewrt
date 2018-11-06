@@ -277,11 +277,11 @@ class ParseItemPage:
                                                      languages=self.languages,
                                                      include_attribute_labels=self.include_attribute_labels)
             if country_info:
-                try:
-                    country_info[0]['claim_id'] = self.item_raw['id'] + '@' + \
-                                                  country_info[0]['claim_id']
-                except KeyError:
-                    print(country_info)
+                # try:
+                #     country_info[0]['claim_id'] = self.item_raw['id'] + '@' + \
+                #                                   country_info[0]['claim_id']
+                # except KeyError:
+                #     print(country_info)
                 self.details['country'] = {'values': country_info,
                                            'url': 'https://www.wikidata.org/wiki/Property:P17'
                                            }
@@ -298,6 +298,8 @@ class ParseItemPage:
                                qualifiers=None):
         """Find values for specified claim types for which no specific
         handling is defined.
+        :param include_attribute_labels:
+        :param qualifiers:
         :param claim_id: Pxx id of the attribute.
         :param claim_instances: list of propositions (pywikibot.Claim instances).
         :param languages: list of languages
@@ -380,6 +382,7 @@ class ParseItemPage:
     def get_country_from_location(cls, location_item_page, languages,
                                   include_attribute_labels=True):
         """Get country info from sub-country location.
+        :param include_attribute_labels:
         :param location_item_page: a location-type entities ItemPage.
         :type location_item_page: pywikibot.ItemPage
         :returns: country of the location as a list of `ItemPage`s.
@@ -413,6 +416,7 @@ class ParseItemPage:
                              include_attribute_labels=True):
         """
         Try to
+        :param include_attribute_labels:
         :param itempage: parent item
         :param local_attributes: attributes which might be used to infer country
         :param languages: languages for country label
