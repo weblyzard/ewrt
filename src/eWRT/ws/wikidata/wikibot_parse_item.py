@@ -116,7 +116,7 @@ class ParseItemPage:
         try:
             self.claims = itempage['claims']
         except AttributeError:
-            self.claims = itempage['claims']
+            self.claims = itempage.claims
         if param_filter and not self.filter(param_filter[entity_type]):
             raise DoesNotMatchFilterError(entity=self.item_raw['id'])
         if not isinstance(itempage, dict):
@@ -206,11 +206,16 @@ class ParseItemPage:
                                                  literals=[],
                                                  include_attribute_labels=False,
                                                  )
+            if not values:
+                return False
             thresholds = {param: filter_claims[param] for param in
                           ['min', 'max'] if param in filter_claims}
-            if not any(
-                    (inside_both(instance['value'], **thresholds) for instance
-                     in values['values'] if instance['value'] is not None)):
+            try:
+                if not any(
+                        (inside_both(instance['value'], **thresholds) for instance
+                         in values['values'] if instance['value'] is not None)):
+                    return False
+            except TypeError:
                 return False
 
         return True
