@@ -282,6 +282,7 @@ class ParseItemPage:
                 #                                   country_info[0]['claim_id']
                 # except KeyError:
                 #     print(country_info)
+                country_info[0]['derived'] = True
                 self.details['country'] = {'values': country_info,
                                            'url': 'https://www.wikidata.org/wiki/Property:P17'
                                            }
