@@ -12,15 +12,14 @@ the Wikipedia page identifiers from which to supplement them.
 
 
 '''
-
 import logging
+
 from collections import OrderedDict
 
 from eWRT.ws.wikidata.bundle_wikipedia_requests import (
     collect_multiple_from_wikipedia,
     batch_enrich_from_wikipedia
 )
-from eWRT.ws.wikidata.extract_meta import WikidataEntityIterator
 
 logger = logging.Logger(name='wp_bundler')
 
@@ -82,6 +81,11 @@ def collect_entities_delayed(entity_types,
     relevant_entity_types = OrderedDict(
         [(entity_type, entity_types[entity_type]) for entity_type in
          entity_types])
+
+    # this import is intentionally deferred, since it requires a pywikibot config
+    # to be defined in the calling project
+    from eWRT.ws.wikidata.extract_meta import WikidataEntityIterator
+
     iterator = WikidataEntityIterator(relevant_entity_types,
                                       dump_path=dump_path)
 
@@ -168,7 +172,7 @@ def collect_entities_delayed(entity_types,
                                         language: {
                                             entity_data[language + 'wiki'][
                                                 'title']:
-                                                entity_data['url']
+                                            entity_data['url']
                                         }
                                     },
                                     entities_cache={
@@ -183,4 +187,3 @@ def collect_entities_delayed(entity_types,
                 yield entity_data
                 if idx >= limit_per_query:
                     break
-
