@@ -350,7 +350,7 @@ class WikidataEntityIterator:
                                 for entity in collect_attributes_from_wp_and_wd(
                                         elem_content,
                                         include_wikipedia=include_wikipedia,
-                                        delay_wikipedia_retrieval=True,
+                                        delay_wikipedia_retrieval=delay_wikipedia_retrieval,
                                         entity_type=category,
                                         **kwargs):
                                     entity['category'] = category
