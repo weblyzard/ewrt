@@ -362,15 +362,15 @@ class WikidataEntityIterator:
                                     else:
                                         yield entity
 
-                            except DoesNotMatchFilterError as e:  # this probably means no
-                                # Wikipedia page in any of our languages. We
+                            except (DoesNotMatchFilterError, ValueError) as e:
+                                # this probably means no
+                                # Wikipedia page in any of our languages, or
+                                # failute to mach filter criteria
                                 # have no use for such entities.
-                                # if raise_on_missing_wikipedias:
-                                #     raise ValueError(
-                                #         'No information about this entity found!')
                                 del elem
                                 del events
                                 continue
+
                     del elem
                     del events
             except (EOFError, IOError) as e:
