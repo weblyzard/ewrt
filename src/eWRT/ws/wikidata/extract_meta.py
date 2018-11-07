@@ -14,18 +14,20 @@ API with pywikibot.pagegenerators, or using a dump file (faster).
 import sys
 import ujson
 import warnings
-from collections import OrderedDict
-
 import pywikibot.pagegenerators
 import requests
+
+from collections import OrderedDict
 from bz2file import BZ2File
+from lxml import etree as et
+from wikipedia import RedirectError, DisambiguationError
+
 from eWRT.ws.wikidata.enrich_from_wikipedia import wp_summary_from_wdid
 from eWRT.ws.wikidata.language_filters import filter_result
 from eWRT.ws.wikidata.wikibot_parse_item import (ParseItemPage,
                                                  get_wikidata_timestamp,
                                                  DoesNotMatchFilterError)
-from lxml import etree as et
-from wikipedia import RedirectError, DisambiguationError
+
 
 ENTITY_TYPES = ['organization', 'person', 'geo']
 
@@ -328,8 +330,8 @@ class WikidataEntityIterator:
                         except NameError:
                             warnings.warn('Item {} cannot be assigned a '
                                           'timestamp!'.format(
-                                elem_content['id']
-                            ))
+                                              elem_content['id']
+                                          ))
                         try:
                             category = self.determine_relevant_category(
                                 elem_content)
@@ -375,7 +377,6 @@ class WikidataEntityIterator:
                     del events
             except (EOFError, IOError) as e:
                 warnings.warn('Error parsing file {}: {}'.format(dump_path, e))
-
 
     def determine_relevant_category(self, elem_content):
         """
@@ -461,7 +462,8 @@ class WikidataEntityIterator:
                             yield result
 
                     except ValueError:  # this probably means no Wikipedia page in
-                        # any of our languages. We have no use for such entities.
+                        # any of our languages. We have no use for such
+                        # entities.
                         if raise_on_missing_wikipedias:
                             raise ValueError(
                                 'No information about this entity found!')
