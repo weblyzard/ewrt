@@ -71,21 +71,21 @@ def get_images(itempage,
         # str(target) returns a string of format [[site:namespace:filename]],
         # e. g. [[commons:File:Barack_Obama.jpg]], the wiki link of the image
         # page. We substitute this for a valid external link
-        site, ns, link = image_interwiki_link = str(
+        site, ns, link = image_interwiki_link = unicode(
             target).replace(' ', '_').strip('[]').split(':')
-        image_description_page = 'https://{}.wikimedia.org/wiki/{}:{}'.format(
+        image_description_page = u'https://{}.wikimedia.org/wiki/{}:{}'.format(
             *image_interwiki_link)
 
         # after:
         # https://stackoverflow.com/questions/34393884/how-to-get-image-url-property-from-wikidata-item-by-api
         thumbnail_template = u'https://{}.wikimedia.org/w/thumb.php?width={}&f={}'
-        thumbnail_link = thumbnail_template.format(site, image_width, link.decode('utf8'))
-        image_md5 = hashlib.md5(link).hexdigest()
+        thumbnail_link = thumbnail_template.format(site, image_width, link)
+        image_md5 = hashlib.md5(link.encode('utf-8')).hexdigest()
         a, b = image_md5[:2]
         direct_link_template = 'https://upload.wikimedia.org/wikipedia/{}/{}/{}/{}'
-        image_direct_link = direct_link_template.format(site, a, a + b,
-                                                        quote(link)
-                                                        )
+        image_direct_link = unicode(direct_link_template.format(site, a, a + b,
+                                                        quote(link.encode('utf-8'))
+                                                        ))
 
         images_retrieved[image_type] = OrderedDict(
             [('claim_id', claim_id),
