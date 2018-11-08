@@ -538,7 +538,8 @@ class ParseClaim:
                 self.claim.id,
                 claim_details['claim_id'].split('$')[0]
             ))
-            return None
+            claim_details['value'] = None
+            # return None
         # dates = self.get_claim_dates()
         # if dates:
         #     claim_details['temporal_attributes'] = dates
