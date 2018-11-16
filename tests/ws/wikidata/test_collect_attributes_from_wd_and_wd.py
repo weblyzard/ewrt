@@ -8,7 +8,12 @@ Created on September 22, 2018
 from pprint import pprint
 
 import mock
-from pywikibot import ItemPage
+try:
+    from pywikibot import ItemPage
+except RuntimeError:
+    import os
+    os.environ['PYWIKIBOT_NO_USER_CONFIG'] = '1'
+    from pywikibot import ItemPage
 from eWRT.ws.wikidata.extract_meta import (collect_attributes_from_wp_and_wd,
                                            )
 from eWRT.ws.wikidata.sample_itempage import itempage as adams_itempage

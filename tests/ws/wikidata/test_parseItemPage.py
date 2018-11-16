@@ -8,8 +8,18 @@ Created on September 24, 2018
 
 import copy
 from collections import OrderedDict
-from pywikibot import Claim
-from pywikibot.site import DataSite
+
+
+try:
+    import pywikibot
+    from pywikibot import Claim
+    from pywikibot.site import DataSite
+except RuntimeError:
+    import os
+    os.environ['PYWIKIBOT_NO_USER_CONFIG'] = '1'
+    import pywikibot
+    from pywikibot import Claim
+    from pywikibot.site import DataSite
 
 import mock
 import pytest
@@ -277,7 +287,7 @@ def test_extract_literal_properties_freestanding():
                     u'id': u'q42$3D284234-52BC-4DA3-83A3-7C39F84BA518',
                     u'rank': u'normal'})
     # target_id = 'Q{}'.format(claim['mainsnak']['datavalue']['value']['numeric-id'])
-    import pywikibot
+
     target = claim.target
     # target = pywikibot.ItemPage.from_entity_uri(site=DataSite('wikidata', 'wikidata'), uri=target_id)
     result = ParseItemPage.extract_literal_properties(entity=target,languages=['en'], literals=['labels'])

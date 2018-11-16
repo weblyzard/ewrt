@@ -14,7 +14,13 @@ API with pywikibot.pagegenerators, or using a dump file (faster).
 import sys
 import ujson
 import warnings
-import pywikibot.pagegenerators
+
+try:
+    import pywikibot.pagegenerators
+except RuntimeError:
+    import os
+    os.environ['PYWIKIBOT_NO_USER_CONFIG'] = '1'
+    import pywikibot.pagegenerators
 import requests
 
 from collections import OrderedDict

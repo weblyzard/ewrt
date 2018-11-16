@@ -18,7 +18,12 @@ import hashlib
 import sys
 import warnings
 
-import pywikibot
+try:
+    import pywikibot
+except RuntimeError:
+    import os
+    os.environ['PYWIKIBOT_NO_USER_CONFIG'] = '1'
+    import pywikibot
 
 from collections import OrderedDict
 

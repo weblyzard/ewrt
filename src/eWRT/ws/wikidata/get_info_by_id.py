@@ -10,13 +10,20 @@ a known id.
 entity types.
 Starting point is the
 [pywikibot manual](https://www.mediawiki.org/wiki/Manual:Pywikibot/Wikidata)'''
-import pywikibot
 import sys
 
 from pprint import pprint
 
 from eWRT.ws.wikidata.definitions import person_properties
 
+
+try:
+    import pywikibot
+except RuntimeError:
+    import os
+    os.environ['PYWIKIBOT_NO_USER_CONFIG'] = '1'
+    import pywikibot
+    
 # any site will work, this is just an example
 site = pywikibot.Site('en', 'wikipedia')
 repo = site.data_repository()  # this is a DataSite object
