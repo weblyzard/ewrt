@@ -19,7 +19,14 @@ language defaults to 'en'
 import sys
 import warnings
 
-import pywikibot
+
+try:
+    import pywikibot
+except RuntimeError:
+    import os
+    os.environ['PYWIKIBOT_NO_USER_CONFIG'] = '1'
+    import pywikibot
+
 from eWRT.ws.wikidata.definitions import local_attributes, COUNTRY_ISO2_CODES_DICT
 from eWRT.ws.wikidata.enrich_from_wikipedia import RELEVANT_LANGUAGES
 from eWRT.ws.wikidata.extract_meta import WIKIDATA_SITE

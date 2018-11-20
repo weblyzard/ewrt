@@ -9,6 +9,18 @@ Created on September 24, 2018
 import copy
 from collections import OrderedDict
 
+
+try:
+    import pywikibot
+    from pywikibot import Claim
+    from pywikibot.site import DataSite
+except RuntimeError:
+    import os
+    os.environ['PYWIKIBOT_NO_USER_CONFIG'] = '1'
+    import pywikibot
+    from pywikibot import Claim
+    from pywikibot.site import DataSite
+
 import mock
 import pytest
 from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
@@ -38,6 +50,260 @@ def test_extract_literal_properties(literal_type, language, expected):
                                                       literals=[literal_type]
                                                       )
     assert result == expected
+
+
+def test_extract_literal_properties_freestanding():
+    """
+
+    :return:
+    """
+    claim = Claim.fromJSON(DataSite("wikidata", "wikidata"),
+                   {u'type': u'statement', u'references': [{
+                       u'snaks': {
+                           u'P248': [
+                               {
+                                   u'datatype': u'wikibase-item',
+                                   u'datavalue': {
+                                       u'type': u'wikibase-entityid',
+                                       u'value': {
+                                           u'entity-type': u'item',
+                                           u'numeric-id': 5375741}},
+                                   u'property': u'P248',
+                                   u'snaktype': u'value'}]},
+                       u'hash': u'355b56329b78db22be549dec34f2570ca61ca056',
+                       u'snaks-order': [
+                           u'P248']},
+                       {
+                           u'snaks': {
+                               u'P1476': [
+                                   {
+                                       u'datatype': u'monolingualtext',
+                                       u'datavalue': {
+                                           u'type': u'monolingualtext',
+                                           u'value': {
+                                               u'text': u'Obituary: Douglas Adams',
+                                               u'language': u'en'}},
+                                       u'property': u'P1476',
+                                       u'snaktype': u'value'}],
+                               u'P407': [
+                                   {
+                                       u'datatype': u'wikibase-item',
+                                       u'datavalue': {
+                                           u'type': u'wikibase-entityid',
+                                           u'value': {
+                                               u'entity-type': u'item',
+                                               u'numeric-id': 1860}},
+                                       u'property': u'P407',
+                                       u'snaktype': u'value'}],
+                               u'P813': [
+                                   {
+                                       u'datatype': u'time',
+                                       u'datavalue': {
+                                           u'type': u'time',
+                                           u'value': {
+                                               u'after': 0,
+                                               u'precision': 11,
+                                               u'time': u'+00000002013-12-07T00:00:00Z',
+                                               u'timezone': 0,
+                                               u'calendarmodel': u'http://www.wikidata.org/entity/Q1985727',
+                                               u'before': 0}},
+                                       u'property': u'P813',
+                                       u'snaktype': u'value'}],
+                               u'P1433': [
+                                   {
+                                       u'datatype': u'wikibase-item',
+                                       u'datavalue': {
+                                           u'type': u'wikibase-entityid',
+                                           u'value': {
+                                               u'entity-type': u'item',
+                                               u'numeric-id': 11148}},
+                                       u'property': u'P1433',
+                                       u'snaktype': u'value'}],
+                               u'P854': [
+                                   {
+                                       u'datatype': u'url',
+                                       u'datavalue': {
+                                           u'type': u'string',
+                                           u'value': u'http://www.theguardian.com/news/2001/may/15/guardianobituaries.books'},
+                                       u'property': u'P854',
+                                       u'snaktype': u'value'}],
+                               u'P577': [
+                                   {
+                                       u'datatype': u'time',
+                                       u'datavalue': {
+                                           u'type': u'time',
+                                           u'value': {
+                                               u'after': 0,
+                                               u'precision': 11,
+                                               u'time': u'+00000002001-05-15T00:00:00Z',
+                                               u'timezone': 0,
+                                               u'calendarmodel': u'http://www.wikidata.org/entity/Q1985727',
+                                               u'before': 0}},
+                                       u'property': u'P577',
+                                       u'snaktype': u'value'}],
+                               u'P50': [
+                                   {
+                                       u'datatype': u'wikibase-item',
+                                       u'datavalue': {
+                                           u'type': u'wikibase-entityid',
+                                           u'value': {
+                                               u'entity-type': u'item',
+                                               u'numeric-id': 18145749}},
+                                       u'property': u'P50',
+                                       u'snaktype': u'value'}]},
+                           u'hash': u'3f4d26cf841e20630c969afc0e48e5e3ef0c5a49',
+                           u'snaks-order': [
+                               u'P854',
+                               u'P577',
+                               u'P813',
+                               u'P1433',
+                               u'P50',
+                               u'P1476',
+                               u'P407']},
+                       {
+                           u'snaks': {
+                               u'P123': [
+                                   {
+                                       u'datatype': u'wikibase-item',
+                                       u'datavalue': {
+                                           u'type': u'wikibase-entityid',
+                                           u'value': {
+                                               u'entity-type': u'item',
+                                               u'numeric-id': 192621}},
+                                       u'property': u'P123',
+                                       u'snaktype': u'value'}],
+                               u'P1476': [
+                                   {
+                                       u'datatype': u'monolingualtext',
+                                       u'datavalue': {
+                                           u'type': u'monolingualtext',
+                                           u'value': {
+                                               u'text': u"Hitch Hiker's Guide author Douglas Adams dies aged 49",
+                                               u'language': u'en'}},
+                                       u'property': u'P1476',
+                                       u'snaktype': u'value'}],
+                               u'P407': [
+                                   {
+                                       u'datatype': u'wikibase-item',
+                                       u'datavalue': {
+                                           u'type': u'wikibase-entityid',
+                                           u'value': {
+                                               u'entity-type': u'item',
+                                               u'numeric-id': 1860}},
+                                       u'property': u'P407',
+                                       u'snaktype': u'value'}],
+                               u'P813': [
+                                   {
+                                       u'datatype': u'time',
+                                       u'datavalue': {
+                                           u'type': u'time',
+                                           u'value': {
+                                               u'after': 0,
+                                               u'precision': 11,
+                                               u'time': u'+00000002015-01-03T00:00:00Z',
+                                               u'timezone': 0,
+                                               u'calendarmodel': u'http://www.wikidata.org/entity/Q1985727',
+                                               u'before': 0}},
+                                       u'property': u'P813',
+                                       u'snaktype': u'value'}],
+                               u'P854': [
+                                   {
+                                       u'datatype': u'url',
+                                       u'datavalue': {
+                                           u'type': u'string',
+                                           u'value': u'http://www.telegraph.co.uk/news/uknews/1330072/Hitch-Hikers-Guide-author-Douglas-Adams-dies-aged-49.html'},
+                                       u'property': u'P854',
+                                       u'snaktype': u'value'}],
+                               u'P577': [
+                                   {
+                                       u'datatype': u'time',
+                                       u'datavalue': {
+                                           u'type': u'time',
+                                           u'value': {
+                                               u'after': 0,
+                                               u'precision': 11,
+                                               u'time': u'+00000002001-05-13T00:00:00Z',
+                                               u'timezone': 0,
+                                               u'calendarmodel': u'http://www.wikidata.org/entity/Q1985727',
+                                               u'before': 0}},
+                                       u'property': u'P577',
+                                       u'snaktype': u'value'}]},
+                           u'hash': u'51a934797fd7f7d3ee91d4d541356d4c5974075b',
+                           u'snaks-order': [
+                               u'P1476',
+                               u'P577',
+                               u'P123',
+                               u'P407',
+                               u'P854',
+                               u'P813']},
+                       {
+                           u'snaks': {
+                               u'P248': [
+                                   {
+                                       u'datatype': u'wikibase-item',
+                                       u'datavalue': {
+                                           u'type': u'wikibase-entityid',
+                                           u'value': {
+                                               u'entity-type': u'item',
+                                               u'numeric-id': 36578}},
+                                       u'property': u'P248',
+                                       u'snaktype': u'value'}],
+                               u'P813': [
+                                   {
+                                       u'datatype': u'time',
+                                       u'datavalue': {
+                                           u'type': u'time',
+                                           u'value': {
+                                               u'after': 0,
+                                               u'precision': 11,
+                                               u'time': u'+00000002015-07-07T00:00:00Z',
+                                               u'timezone': 0,
+                                               u'calendarmodel': u'http://www.wikidata.org/entity/Q1985727',
+                                               u'before': 0}},
+                                       u'property': u'P813',
+                                       u'snaktype': u'value'}],
+                               u'P227': [
+                                   {
+                                       u'datatype': u'external-id',
+                                       u'datavalue': {
+                                           u'type': u'string',
+                                           u'value': u'119033364'},
+                                       u'property': u'P227',
+                                       u'snaktype': u'value'}]},
+                           u'hash': u'a02f3a77ddd343e6b88be25696b055f5131c3d64',
+                           u'snaks-order': [
+                               u'P248',
+                               u'P227',
+                               u'P813']}],
+                    u'mainsnak': {
+                        u'datatype': u'wikibase-item',
+                        u'datavalue': {
+                            u'type': u'wikibase-entityid',
+                            u'value': {
+                                u'entity-type': u'item',
+                                u'numeric-id': 350}},
+                        u'property': u'P19',
+                        u'snaktype': u'value'},
+                    u'id': u'q42$3D284234-52BC-4DA3-83A3-7C39F84BA518',
+                    u'rank': u'normal'})
+    # target_id = 'Q{}'.format(claim['mainsnak']['datavalue']['value']['numeric-id'])
+
+    target = claim.target
+    # target = pywikibot.ItemPage.from_entity_uri(site=DataSite('wikidata', 'wikidata'), uri=target_id)
+    result = ParseItemPage.extract_literal_properties(entity=target,languages=['en'], literals=['labels'])
+    print result
+    assert result['labels']['en'] == 'Cambridge'
+    entity_id = 'Q350'
+    target = pywikibot.ItemPage.from_entity_uri(
+        site=DataSite('wikidata', 'wikidata'), uri='http://www.wikidata.org/entity' + '/' + entity_id)
+    print target
+    result = ParseItemPage.extract_literal_properties(entity=target,languages=['en'], literals=['labels'])
+    print result
+    assert result['labels']['en'] == 'Cambridge'
+
+
+
+
 
 
 expected_names_result = {'url': 'https://www.wikidata.org/wiki/Property:P735',
