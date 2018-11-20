@@ -488,7 +488,8 @@ def test_parseItemPage_all():
     assert parsed_with_country['country'] == {
         'url': 'https://www.wikidata.org/wiki/Property:P17',
         'values': [
-            {'claim_id': u'Q42@q350$8E72D3A5-A067-47CB-AF45-C73ED7CFFF9E',
+            {'claim_id': u'q350$8E72D3A5-A067-47CB-AF45-C73ED7CFFF9E',
+             'derived': True,
              'labels': {'de': u'Vereinigtes K\xf6nigreich',
                         'en': u'United Kingdom',
                         'sv': u'Storbritannien'},
