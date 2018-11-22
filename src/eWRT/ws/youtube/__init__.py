@@ -164,8 +164,7 @@ class YouTube_v3(WebDataSource):
         self.get_details = get_details
         self.client = build(self.YOUTUBE_API_SERVICE_NAME,
                             self.YOUTUBE_API_VERSION,
-                            developerKey=self.api_key,
-                            cache_discovery=False)
+                            developerKey=self.api_key)
         self.sleep_time = sleep_time
 
     def _convert_item_to_video(self, item, max_comment_count=0):
