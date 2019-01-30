@@ -7,10 +7,16 @@ https://github.com/googleads/googleads-python-lib/blob/master/examples/
 adwords/v201809/optimization/get_keyword_ideas.py
 '''
 
+import logging
+
+import time
 
 from googleads import adwords
+from googleads.errors import GoogleAdsServerFault
 
 import zeep
+
+logger = logging.getLogger(__name__)
 
 
 class GoogleAdWordsKeywordStatistics(object):
@@ -30,6 +36,7 @@ class GoogleAdWordsKeywordStatistics(object):
         'COMPETITION': lambda x: x,
         # 'CATEGORY_PRODUCTS_AND_SERVICES': lambda x: x,
     }
+    MAX_RETRIES = 3
 
     def __init__(self, config_file=None):
         '''
@@ -97,28 +104,43 @@ class GoogleAdWordsKeywordStatistics(object):
         })
         results = {}
         more_pages = True
+        num_retries = 0
         while more_pages:
-            page = targeting_idea_service.get(selector)
-            # Display results.
-            if 'entries' in page:
-                for result in page['entries']:
-                    attribute_results = {}
-                    for attribute_result in result['data']:
-                        attribute_results[attribute_result['key']] = getattr(
-                            attribute_result['value'], 'value', '0')
-                    keyword = attribute_results.get('KEYWORD_TEXT')
-                    if keyword is None:
-                        continue
-                    results[keyword] = {
-                        attribute: mapping(attribute_results[attribute])
-                        for attribute, mapping in attributes.items()
-                        if attribute != 'KEYWORD_TEXT'
-                    }
-            else:
-                print('No related keywords were found.')
-            offset += self.PAGE_SIZE
-            selector['paging']['startIndex'] = str(offset)
-            more_pages = offset < int(page['totalNumEntries'])
+            try:
+                page = targeting_idea_service.get(selector)
+                # Display results.
+                if 'entries' in page:
+                    for result in page['entries']:
+                        attribute_results = {}
+                        for attribute_result in result['data']:
+                            attribute_results[attribute_result['key']] = getattr(
+                                attribute_result['value'], 'value', '0')
+                        keyword = attribute_results.get('KEYWORD_TEXT')
+                        if keyword is None:
+                            continue
+                        results[keyword] = {
+                            attribute: mapping(attribute_results[attribute])
+                            for attribute, mapping in attributes.items()
+                            if attribute != 'KEYWORD_TEXT'
+                        }
+                else:
+                    print('No related keywords were found.')
+                offset += self.PAGE_SIZE
+                selector['paging']['startIndex'] = str(offset)
+                more_pages = offset < int(page['totalNumEntries'])
+            except GoogleAdsServerFault as exc:
+                if (len(exc.errors) == 1
+                    and exc.errors[0]['errorString'] ==
+                        'RateExceededError.RATE_EXCEEDED'
+                   ):
+                    if num_retries > self.MAX_RETRIES:
+                        break
+                    seconds = exc.errors[0]['retryAfterSeconds']
+                    num_retries += 1
+                    logger.error("Hitted Google Adwords rate limit, "
+                                "retrying in %s seconds",
+                                seconds)
+                    time.sleep(seconds)
         return results
 
 if __name__ == '__main__':
