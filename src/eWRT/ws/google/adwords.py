@@ -5,6 +5,9 @@
 This module builds heavily on the get_keyword_ideas.py file by Google:
 https://github.com/googleads/googleads-python-lib/blob/master/examples/
 adwords/v201809/optimization/get_keyword_ideas.py
+
+The config file must follow the google ads config yaml:
+https://github.com/googleads/googleads-python-lib/blob/master/googleads.yaml
 '''
 
 import logging
