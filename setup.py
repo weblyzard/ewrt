@@ -25,7 +25,8 @@ setup(
                       'gdata',
                       'wikipedia',
                       'pywikibot',
-                      'bz2file'
+                      'bz2file',
+                      'googleads',
                       #                         'python-oauth2' #linkedin
                       ],
     classifiers=[

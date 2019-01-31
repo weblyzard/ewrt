@@ -89,7 +89,7 @@ class GoogleAdWordsKeywordStatistics(object):
         # Language setting (optional).
         selector['searchParameters'].append({
             'xsi_type': 'LanguageSearchParameter',
-            'languages': [{'id': self.LANGUAGE_MAPPING[language]}]
+            'languages': [{'id': self.LANGUAGE_MAPPING[language.lower()]}]
         })
 
         # Network search parameter (optional)
