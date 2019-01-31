@@ -16,6 +16,7 @@ import time
 
 from googleads import adwords
 from googleads.errors import GoogleAdsServerFault
+from googleads.oauth2 import GoogleRefreshTokenClient
 
 import zeep
 
@@ -41,13 +42,34 @@ class GoogleAdWordsKeywordStatistics(object):
     }
     MAX_RETRIES = 3
 
-    def __init__(self, config_file=None):
+    def __init__(self, adwords_client):
+        self.client = adwords_client
+
+    @classmethod
+    def from_config_parameters(cls, developer_token, client_id, client_secret,
+                               client_customer_id, refresh_token,
+                               user_agent='unknown', timeout=3600):
+        oauth2_client = GoogleRefreshTokenClient(
+            client_id=client_id,
+            client_secret=client_secret,
+            refresh_token=refresh_token)
+        client = adwords.AdWordsClient(
+            developer_token=developer_token,
+            oauth2_client=oauth2_client,
+            user_agent=user_agent,
+            timeout=timeout,
+        client_customer_id=client_customer_id)
+        return cls(adwords_client=client)
+
+    @classmethod
+    def from_config_file(cls, config_file=None):
         '''
         :param config_file: The path to the yaml file containing the Google \
                 Adwords configuration.
         :type config_file: str
         '''
-        self.client = adwords.AdWordsClient.LoadFromStorage(config_file)
+        client = adwords.AdWordsClient.LoadFromStorage(config_file)
+        return cls(adwords_client=client)
 
     def get_keyword_stats(self, keywords, attributes=None, language='de'):
         '''
@@ -132,6 +154,7 @@ class GoogleAdWordsKeywordStatistics(object):
                 selector['paging']['startIndex'] = str(offset)
                 more_pages = offset < int(page['totalNumEntries'])
             except GoogleAdsServerFault as exc:
+                logger.warning(exc)
                 if (len(exc.errors) == 1
                     and exc.errors[0]['errorString'] ==
                         'RateExceededError.RATE_EXCEEDED'
@@ -147,7 +170,7 @@ class GoogleAdWordsKeywordStatistics(object):
         return results
 
 if __name__ == '__main__':
-    client = GoogleAdWordsKeywordStatistics(
+    client = GoogleAdWordsKeywordStatistics.from_config_file(
         config_file='./googleads.yaml')
     keyword_statistics = client.get_keyword_stats(
         keywords=['donald trump', 'brexit'],
