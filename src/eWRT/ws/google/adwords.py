@@ -253,7 +253,7 @@ class GoogleAdWordsKeywordStatistics(object):
                         max_dict[k]['microAmount'] + min_dict[k]['microAmount']
                     ) / 2000000.0
                 else:
-                    results[keyword][k] = max_dict[k] + min_dict[k] / 2.0
+                    results[keyword][k] = (max_dict[k] + min_dict[k]) / 2.0
         return results
 
 
