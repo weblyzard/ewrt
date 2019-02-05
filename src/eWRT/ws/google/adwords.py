@@ -10,6 +10,8 @@ The config file must follow the google ads config yaml:
 https://github.com/googleads/googleads-python-lib/blob/master/googleads.yaml
 '''
 
+from collections import OrderedDict
+
 import logging
 
 import time
@@ -33,7 +35,7 @@ class GoogleAdWordsKeywordStatistics(object):
         'fr': '1002'
     }
     PAGE_SIZE = 1000
-    DEFAULT_ATTRIBUTES = {
+    STATS_DEFAULT_ATTRIBUTES = {
         'KEYWORD_TEXT': lambda x: x,
         'SEARCH_VOLUME': lambda x: x,
         'AVERAGE_CPC': lambda x: zeep.helpers.serialize_object(x)['microAmount'],
@@ -96,7 +98,7 @@ class GoogleAdWordsKeywordStatistics(object):
             'requestType': 'STATS'
         }
         if attributes is None:
-            attributes = self.DEFAULT_ATTRIBUTES
+            attributes = self.STATS_DEFAULT_ATTRIBUTES
         elif 'KEYWORD_TEXT' not in attributes:
             attributes['KEYWORD_TEXT'] = None
         selector['requestedAttributeTypes'] = attributes.keys()
@@ -169,11 +171,97 @@ class GoogleAdWordsKeywordStatistics(object):
                     time.sleep(seconds)
         return results
 
+    def get_traffic_estimates(self, keywords, attributes=None, language='de'):
+        '''
+        Get traffic estimates for keywords from Google Ads.
+
+        :param keywords: A list of keywords for which to fetch statistics.
+        :type keywords: list
+        :param attributes: The traffic estimates attributes to fetch together \
+                with a mapping to use to compile the result. If None set to \
+                DEFAULT_ATTRIBUTES.
+        :type attributes: dict
+        :param language: two-letter language code to fetch. Currently only \
+                de, en and fr supported.
+        :returns: A mapping of keyword to a dict containing the attribute \
+                values.
+        :rtype: dict
+        '''
+        traffic_estimator_service = self.client.GetService(
+            'TrafficEstimatorService', version='v201809')
+        keyword_estimate_requests = [
+            {
+                'keyword': {
+                    'xsi_type': 'Keyword',
+                    'text': kw,
+                    'matchType': 'EXACT'
+                }
+            }
+            for kw in keywords
+        ]
+
+        # Create ad group estimate requests.
+        adgroup_estimate_requests = [{
+            'keywordEstimateRequests': keyword_estimate_requests,
+            'maxCpc': {
+                'xsi_type': 'Money',
+                'microAmount': '1000000'
+            }
+        }]
+
+        # Create campaign estimate requests.
+        campaign_estimate_requests = [{
+            'adGroupEstimateRequests': adgroup_estimate_requests,
+            'criteria': [
+                #{
+                #    'xsi_type': 'Location',
+                #    'id': '2840'  # United States.
+                #},
+                {
+                    'xsi_type': 'Language',
+                    'id': self.LANGUAGE_MAPPING[language]
+                }
+            ],
+        }]
+
+        # Create the selector.
+        selector = {
+            'campaignEstimateRequests': campaign_estimate_requests,
+        }
+
+        estimates = traffic_estimator_service.get(selector)
+        mapped_estimates = {
+            k:v for k, v in zip(
+                keywords,
+                zeep.helpers.serialize_object(
+                    estimates['campaignEstimates'][0]
+                ).get(
+                    'adGroupEstimates', [{}]
+                )[0].get(
+                    'keywordEstimates', []
+                )
+            )
+        }
+        results = {}
+        for keyword, value in mapped_estimates.items():
+            max_dict = value['max']
+            min_dict = value['min']
+            results[keyword] = {}
+            for k in max_dict:
+                if k in ('totalCost', 'averageCpc'):
+                    results[keyword][k] = (
+                        max_dict[k]['microAmount'] + min_dict[k]['microAmount']
+                    ) / 2000000.0
+                else:
+                    results[keyword][k] = max_dict[k] + min_dict[k] / 2.0
+        return results
+
+
 if __name__ == '__main__':
     client = GoogleAdWordsKeywordStatistics.from_config_file(
         config_file='./googleads.yaml')
-    keyword_statistics = client.get_keyword_stats(
+    keyword_statistics = client.get_traffic_estimates(
         keywords=['donald trump', 'brexit'],
-        language='de')
+        language='en')
     from pprint import pprint
     pprint(keyword_statistics)
