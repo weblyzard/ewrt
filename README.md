@@ -1,5 +1,7 @@
 # extensible Web Retrieval Toolkit (eWRT)
 
+[![Build Status](https://www.travis-ci.org/weblyzard/ewrt.png?branch=master)](https://www.travis-ci.org/weblyzard/ewrt)
+
 The **Extensible Web Retrieval Toolkit (eWRT)** is a modular open-source Python API which 
   1. offers a unified interface for retrieving social data from Web sources such as Delicious, Flickr, Yahoo! and Wikipedia, 
   2. includes various helper classes for effective caching and data management,
