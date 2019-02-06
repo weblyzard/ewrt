@@ -40,8 +40,12 @@ table = string.maketrans('ac', 'cx')
 
 
 def detect_language(text):
-    ''' detects the most probable language for a given text '''
-    if not text.strip():
+    """
+    Detect the most probable language for a given text.
+    :param text, the text to use for language detection
+    :return the most probable language (2 chars) of the input text.
+    """
+    if text is None or not len(text.strip()):
         return None
 
     text = text.lower()
