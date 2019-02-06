@@ -8,6 +8,7 @@ from eWRT.ws.google import GoogleBlogSearch
 
 logger = logging.getLogger('logger')
 
+
 class TestGoogleSearch(unittest.TestCase):
     ''' '''
 
@@ -37,7 +38,8 @@ class TestGoogleSearch(unittest.TestCase):
         assert len(urls) == 200
 
     def test_country(self):
-        urls = GoogleBlogSearch.get_blog_links('finanzkrise', maxResults=10, country='AT')
+        urls = GoogleBlogSearch.get_blog_links(
+            'finanzkrise', maxResults=10, country='AT')
         for url in urls:
             print(url)
             assert url['url'].startswith('http')
@@ -48,6 +50,7 @@ class TestGoogleSearch(unittest.TestCase):
         url = GoogleBlogSearch.parse_url(url)
         print(url)
         assert url == 'http://wiweb.at/index.php?option=com_content&view=article&id=650:eu-budget-kommissar&catid=36:welt'
+
 
 if __name__ == '__main__':
 

@@ -5,8 +5,8 @@ Created on September 20, 2018
 
 @author: jakob <jakob.steixner@modul.ac.at>
 '''
-
 import pytest
+
 from eWRT.ws.wikidata.enrich_from_wikipedia import (
     wikipedia_page_info_from_titles,
     get_sitelinks_from_wd_id)
@@ -95,7 +95,7 @@ class TestWikipedia_page_info_from_title():
     def test_get_sitelinks_from_wdid(self):
         try:
             assert get_sitelinks_from_wd_id('Q42', ['en', 'ru', 'sr']) == \
-                   {'ruwiki': u'Адамс, Дуглас', 'enwiki': u'Douglas Adams',
+                {'ruwiki': u'Адамс, Дуглас', 'enwiki': u'Douglas Adams',
                     'srwiki': u'Даглас Адамс'}
             print('Expected site titles retrieved.')
         except AssertionError:
@@ -109,7 +109,7 @@ class TestWikipedia_page_info_from_title():
         titles = u'Wiener Neustadt', u'Douglas Adams', u'Wien 19', u'Ferdinand Raimund', u'Österreich', u'Frankreich', u'Deutschland', u'Mesopotamien', u'Neuschwanstein',
 
         results = list(wikipedia_page_info_from_titles('|'.join(titles),
-                                                      'de'))
+                                                       'de'))
         expected_failures = (
             'Wien 19',  # is a redirect, we only accept strict matches
             u'Döbling',  # the result of the redirection
@@ -133,12 +133,12 @@ class TestWikipedia_page_info_from_title():
         """
         with pytest.raises(ValueError):
             country_results = list(wikipedia_page_info_from_titles('|'.join(countries),
-                                                      'en'))
+                                                                   'en'))
         self.country_results = []
         selected_countries = countries[:50]
 
         for country in wikipedia_page_info_from_titles('|'.join(selected_countries),
-                                                      'en', redirect=True):
+                                                       'en', redirect=True):
             self.country_results.append(country)
         # we expect some loss due to pages that are named somewhat differently
         # in our list than in the English Wikipedia, but not too much.

@@ -5,17 +5,9 @@ Created on September 22, 2018
 
 @author: jakob <jakob.steixner@modul.ac.at>
 '''
-from pprint import pprint
-
 import mock
-try:
-    from pywikibot import ItemPage
-except RuntimeError:
-    import os
-    os.environ['PYWIKIBOT_NO_USER_CONFIG'] = '1'
-    from pywikibot import ItemPage
-from eWRT.ws.wikidata.extract_meta import (collect_attributes_from_wp_and_wd,
-                                           )
+
+from eWRT.ws.wikidata.extract_meta import collect_attributes_from_wp_and_wd
 from eWRT.ws.wikidata.sample_itempage import itempage as adams_itempage
 
 
@@ -41,7 +33,8 @@ def test_collect_attributes_from_wp_and_wd_offline():
     without a new call to the API for every attribute to retrieve
     human readable values."""
     adams_data = collect_attributes_from_wp_and_wd(adams, ['en'],
-                                                   wd_parameters={'person': WD_PARAMETERS},
+                                                   wd_parameters={
+                                                       'person': WD_PARAMETERS},
                                                    include_literals=False,
                                                    raise_on_no_wikipage=False,
                                                    include_attribute_labels=False,
@@ -60,7 +53,8 @@ def test_collect_attributes_from_wp_and_wd_offline():
 def test_collect_attributes_from_wp_and_wd_online():
     """"""
     adams_data = collect_attributes_from_wp_and_wd(adams, ['en'],
-                                                   wd_parameters={'person':WD_PARAMETERS},
+                                                   wd_parameters={
+                                                       'person': WD_PARAMETERS},
                                                    include_literals=False,
                                                    raise_on_no_wikipage=False,
                                                    include_attribute_labels=True,
@@ -79,10 +73,11 @@ def test_collect_attributes_from_wp_and_wd_online():
                         ['labels' in instance for instance in claim['values']])
                 except AssertionError:
                     assert all(
-                            ['value' in instance for instance in claim['values']])
+                        ['value' in instance for instance in claim['values']])
     assert 'enwiki' in adams_data
     assert isinstance(adams_data['enwiki'], dict)
     assert 'summary' in adams_data['enwiki']
+
 
 def test_collect_attributes_from_wp_and_wd_delay_wikipedia():
     """
@@ -92,7 +87,8 @@ def test_collect_attributes_from_wp_and_wd_delay_wikipedia():
     :return:
     """
     adams_data = collect_attributes_from_wp_and_wd(adams, ['en'],
-                                                   wd_parameters={'person':WD_PARAMETERS},
+                                                   wd_parameters={
+                                                       'person': WD_PARAMETERS},
                                                    entity_type='person',
                                                    include_literals=False,
                                                    raise_on_no_wikipage=False,

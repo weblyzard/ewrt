@@ -52,6 +52,9 @@ dist
 .settings
 .metadata
 
+.idea
+.cache
+
 # vi
 .*.swp
 

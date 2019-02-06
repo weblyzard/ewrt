@@ -5,11 +5,10 @@ Created on October 09, 2018
 
 @author: jakob <jakob.steixner@modul.ac.at>
 '''
-
 import pytest
 
-from eWRT.ws.wikidata.language_filters import filter_result, \
-    filter_language_values
+from eWRT.ws.wikidata.language_filters import (filter_result,
+                                               filter_language_values)
 
 input_raw_result = {
     "descriptions": {
@@ -33,6 +32,7 @@ expected_result = [
     ("fr", {'labels': "Yoshihide Kiry\u016b",
             'descriptions': "athl\u00e8te japonais, sp\u00e9cialiste des \u00e9preuves de sprint"})
 ]
+
 
 @pytest.mark.parametrize('language,expected', expected_result)
 def test_filter_result(language, expected):
@@ -107,6 +107,7 @@ def test_filter_language_values():
     # of attribute values should be returned (with the Wikidata ID of
     # their referent and their claim_id
     result_lv = filter_language_values(language='lv',
-                                    value_list=unfiltered_positions_held_GW)
+                                       value_list=unfiltered_positions_held_GW)
     assert len(result) == len(result_lv)
-    assert len([res for res in result_lv if 'labels' in res and res['labels']]) == 1
+    assert len(
+        [res for res in result_lv if 'labels' in res and res['labels']]) == 1

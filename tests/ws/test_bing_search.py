@@ -15,13 +15,14 @@ class TestBingSearch(unittest.TestCase):
 
     def setUp(self):
         self.api_key = os.getenv('BING_USERNAME') or BING_USERNAME
-        if not self.api_key or len(self.api_key)==0:
-            raise unittest.SkipTest('Skipping TestBingSearch: missing username')
+        if not self.api_key or len(self.api_key) == 0:
+            raise unittest.SkipTest(
+                'Skipping TestBingSearch: missing username')
         self.username = BING_USERNAME
         self.api_key = BING_API_KEY
-        self.client = BingSearch(api_key=self.api_key, 
+        self.client = BingSearch(api_key=self.api_key,
                                  username=self.username)
-    
+
     def test_default(self):
         ''' test default api call (max_results = DEFAULT_MAX_RESULTS) '''
         search_terms = ['modul', 'university']

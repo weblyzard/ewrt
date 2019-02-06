@@ -4,7 +4,7 @@ import os
 import unittest
 
 from eWRT.ws.google.custom import CustomSearch
-from eWRT.config import (GOOGLE_CUSTOM_SEARCH_API_KEY,\
+from eWRT.config import (GOOGLE_CUSTOM_SEARCH_API_KEY,
                          GOOGLE_CUSTOM_SEARCH_ENGINE_ID)
 
 
@@ -13,9 +13,11 @@ class TestCustomGoogleSearch(unittest.TestCase):
     search_terms = ['modul', 'university']
 
     def setUp(self):
-        api_key = os.getenv('GOOGLE_CUSTOM_SEARCH_API_KEY') or GOOGLE_CUSTOM_SEARCH_API_KEY
-        if not api_key or len(api_key)==0:
-            raise unittest.SkipTest('Skipping TestCustomGoogleSearch: missing API key')
+        api_key = os.getenv(
+            'GOOGLE_CUSTOM_SEARCH_API_KEY') or GOOGLE_CUSTOM_SEARCH_API_KEY
+        if not api_key or len(api_key) == 0:
+            raise unittest.SkipTest(
+                'Skipping TestCustomGoogleSearch: missing API key')
         self.api_key = GOOGLE_CUSTOM_SEARCH_API_KEY
         self.engine_id = GOOGLE_CUSTOM_SEARCH_ENGINE_ID
 
@@ -53,6 +55,7 @@ class TestCustomGoogleSearch(unittest.TestCase):
 
         # assert the correct number of the results
         assert len(list(results)) == max_results * len(self.search_terms)
+
 
 # for the testing purposes
 if __name__ == '__main__':

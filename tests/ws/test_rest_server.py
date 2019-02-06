@@ -6,7 +6,7 @@ from urllib2 import HTTPError
 
 from eWRT.ws.rest import MultiRESTClient, RESTClient
 
-    
+
 class TestRESTClient(unittest.TestCase):
 
     TEST_URL = 'http://httpbin.org/basic-auth/user/passwd'
@@ -47,7 +47,7 @@ class TestRESTClient(unittest.TestCase):
             assert False, 'must raise an assertion error'
         except Exception as e:
             print '!!! previous exception is OK, we expected that'
-            assert 'if set, user AND pwd required' in e.args # not tested (SV)
+            assert 'if set, user AND pwd required' in e.args  # not tested (SV)
 
     def test_get_url(self):
         assert RESTClient.get_request_url(self.TEST_URL, 'execute', '12') \
@@ -77,6 +77,7 @@ class TestRESTClient(unittest.TestCase):
 
         assert len(client._service_urls) == len(service_urls)
         assert service_urls <> client._service_urls
+
 
 if __name__ == '__main__':
     unittest.main()

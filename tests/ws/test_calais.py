@@ -7,9 +7,9 @@ from eWRT.ws.opencalais import Calais
 from eWRT.config import OPEN_CALAIS_KEY
 
 
-class TestCalais( unittest.TestCase ):
+class TestCalais(unittest.TestCase):
     ''' Testing GoogleTrends webservice '''
-    
+
     test_html = '''  
   <html>
   <head>
@@ -48,11 +48,11 @@ class TestCalais( unittest.TestCase ):
 </div>
 </body>
 </html>
- ''' 
-    
+ '''
+
     def setUp(self):
         self.api_key = os.getenv('OPEN_CALAIS_KEY') or OPEN_CALAIS_KEY
-        if not self.api_key or len(self.api_key)==0:
+        if not self.api_key or len(self.api_key) == 0:
             raise unittest.SkipTest('Skipping TestCalais: missing API key')
         self.calais = Calais(submitter='test', api_key=self.api_key)
 
@@ -61,6 +61,7 @@ class TestCalais( unittest.TestCase ):
         things = self.calais.analyze(self.test_html, 'text/html')
         print things
         assert len(things) == 6
+
 
 if __name__ == '__main__':
     unittest.main()
