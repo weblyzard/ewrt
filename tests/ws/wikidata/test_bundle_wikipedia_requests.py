@@ -80,12 +80,12 @@ GW_snapshot_wikidata_result = {
                                                'fr': u"premier pr\xe9sident des \xc9tats-Unis d'Am\xe9rique",
                                                'es': u'primer presidente de los Estados Unidos de Am\xe9rica'},
                                            'wikidata_id': u'Q23', 'country': {
-            'url': 'https://www.wikidata.org/wiki/Property:P17', 'values': [
-                {'url': u'https://www.wikidata.org/wiki/Q30',
-                 'labels': {'de': u'Vereinigte Staaten',
-                            'en': u'United States of America',
-                            'fr': u'\xc9tats-Unis', 'es': u'Estados Unidos'},
-                 'claim_id': u'Q23@q495645$A10AFE59-9C11-40BC-87A5-567221D430AA'}]},
+                                               'url': 'https://www.wikidata.org/wiki/Property:P17', 'values': [
+                                                   {'url': u'https://www.wikidata.org/wiki/Q30',
+                                                    'labels': {'de': u'Vereinigte Staaten',
+                                                               'en': u'United States of America',
+                                                               'fr': u'\xc9tats-Unis', 'es': u'Estados Unidos'},
+                                                       'claim_id': u'Q23@q495645$A10AFE59-9C11-40BC-87A5-567221D430AA'}]},
                                            'aliases': {'de': [
                                                u'Pr\xe4sident Washington',
                                                u'G. Washington'],
@@ -150,6 +150,7 @@ sitelink_cache = {
 # mock_enrich = mock.Mock()
 # mock_enrich.return_value = (el for el in [GW_snapshot_wikipedia_result])
 
+
 def batch_enrich_mock(title, language):
     print(title
           )
@@ -193,7 +194,6 @@ def test_collect_multiple_from_wikipedia():
         pass
 
 
-
 def test_enrich_from_wikipedia_offline():
     """
     No mock, real call to Wikipedia API, basic structure should still be
@@ -201,7 +201,7 @@ def test_enrich_from_wikipedia_offline():
     cached snapshot is not expected
     """
     with mock.patch(target='eWRT.ws.wikidata.bundle_wikipedia_requests.wikipedia_page_info_from_titles',
-            new=batch_enrich_mock):
+                    new=batch_enrich_mock):
         enrichment_result = batch_enrich_from_wikipedia(
             wikipedia_pages=sitelink_cache['en'],
             entities_cache=GW_snapshot_wikidata_result,
@@ -231,14 +231,16 @@ def assert_basic_structure_as_expected(merged_result):
     except ValueError:
         raise ValueError('Timestamp doesn\'t appear to be a valid time. '
                          'Timestamp returned was: {}, expected format  {}'.format(
-            wiki_timestamp,
-            datetime.datetime.now().strftime(u'%Y-%m-%dT%H:%M:%SZ')))
+                             wiki_timestamp,
+                             datetime.datetime.now().strftime(u'%Y-%m-%dT%H:%M:%SZ')))
     assert u'2018-10-04T05:06:49Z' <= merged_result['enwiki'][
         'timestamp'] < datetime.datetime.now().strftime(u'%Y-%m-%dT%H:%M:%SZ')
     # todo: add test for similarity of retrieved summary with snapshot?
 
 
 batch_calls = 0
+
+
 def mock_batch_enrich(*args, **kwargs):
     """generator that yields 20 entities at a time, for no more than a
     total of 100"""
@@ -246,7 +248,10 @@ def mock_batch_enrich(*args, **kwargs):
     batch_calls += 1
     if batch_calls > 5:
         raise StopIteration
-    for i in range(20): yield {}
+    for i in range(20):
+        yield {}
+
+
 @mock.patch(
     target='eWRT.ws.wikidata.bundle_wikipedia_requests.batch_enrich_from_wikipedia',
     new=mock_batch_enrich)
@@ -260,4 +265,3 @@ def test_wikipedia_request_dispatcher():
     returned = [result for result in results]
     assert returned
     assert len(returned) >= 100
-
