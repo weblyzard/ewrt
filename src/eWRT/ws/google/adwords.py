@@ -43,6 +43,8 @@ class GoogleAdWordsKeywordStatistics(object):
         # 'CATEGORY_PRODUCTS_AND_SERVICES': lambda x: x,
     }
     MAX_RETRIES = 3
+    # according to https://developers.google.com/adwords/api/docs/appendix/limits
+    TRAFFIC_KEYWORDS_LIMIT = 2500
 
     def __init__(self, adwords_client):
         self.client = adwords_client
@@ -187,74 +189,95 @@ class GoogleAdWordsKeywordStatistics(object):
                 values.
         :rtype: dict
         '''
+        def get_sub_result(traffic_estimator_service,
+                           keywords,
+                           language):
+            keyword_estimate_requests = [
+                {
+                    'keyword': {
+                        'xsi_type': 'Keyword',
+                        'text': kw,
+                        'matchType': 'EXACT'
+                    }
+                }
+                for kw in keywords
+            ]
+
+            # Create ad group estimate requests.
+            adgroup_estimate_requests = [{
+                'keywordEstimateRequests': keyword_estimate_requests,
+                'maxCpc': {
+                    'xsi_type': 'Money',
+                    'microAmount': '1000000'
+                }
+            }]
+
+            # Create campaign estimate requests.
+            campaign_estimate_requests = [{
+                'adGroupEstimateRequests': adgroup_estimate_requests,
+                'criteria': [
+                    #{
+                    #    'xsi_type': 'Location',
+                    #    'id': '2840'  # United States.
+                    #},
+                    {
+                        'xsi_type': 'Language',
+                        'id': self.LANGUAGE_MAPPING[language]
+                    }
+                ],
+            }]
+
+            # Create the selector.
+            selector = {
+                'campaignEstimateRequests': campaign_estimate_requests,
+            }
+
+            estimates = traffic_estimator_service.get(selector)
+            mapped_estimates = {
+                k:v for k, v in zip(
+                    keywords,
+                    zeep.helpers.serialize_object(
+                        estimates['campaignEstimates'][0]
+                    ).get(
+                        'adGroupEstimates', [{}]
+                    )[0].get(
+                        'keywordEstimates', []
+                    )
+                )
+            }
+            results = {}
+            for keyword, value in mapped_estimates.items():
+                max_dict = value['max']
+                min_dict = value['min']
+                results[keyword] = {}
+                for k in max_dict:
+                    try:
+                        if k in ('totalCost', 'averageCpc'):
+                            results[keyword][k] = (
+                                max_dict[k].get('microAmount', 0.)
+                                + min_dict[k].get('microAmount', 0.)
+                            ) / 2000000.0
+                        else:
+                            results[keyword][k] = (max_dict[k] + min_dict[k]) / 2.0
+                    except (AttributeError, TypeError):
+                        results[keyword][k] = 0.
+            return results
+
         traffic_estimator_service = self.client.GetService(
             'TrafficEstimatorService', version='v201809')
-        keyword_estimate_requests = [
-            {
-                'keyword': {
-                    'xsi_type': 'Keyword',
-                    'text': kw,
-                    'matchType': 'EXACT'
-                }
-            }
-            for kw in keywords
-        ]
+        result = {}
+        lower = 0
+        num_keywords = len(keywords)
+        while lower < num_keywords:
+            sub_result = get_sub_result(
+                traffic_estimator_service=traffic_estimator_service,
+                keywords=keywords[lower:min(lower+self.TRAFFIC_KEYWORDS_LIMIT,
+                                            num_keywords)],
+                language=language)
+            result.update(sub_result)
+            lower = min(num_keywords, lower+self.TRAFFIC_KEYWORDS_LIMIT)
+        return result
 
-        # Create ad group estimate requests.
-        adgroup_estimate_requests = [{
-            'keywordEstimateRequests': keyword_estimate_requests,
-            'maxCpc': {
-                'xsi_type': 'Money',
-                'microAmount': '1000000'
-            }
-        }]
-
-        # Create campaign estimate requests.
-        campaign_estimate_requests = [{
-            'adGroupEstimateRequests': adgroup_estimate_requests,
-            'criteria': [
-                #{
-                #    'xsi_type': 'Location',
-                #    'id': '2840'  # United States.
-                #},
-                {
-                    'xsi_type': 'Language',
-                    'id': self.LANGUAGE_MAPPING[language]
-                }
-            ],
-        }]
-
-        # Create the selector.
-        selector = {
-            'campaignEstimateRequests': campaign_estimate_requests,
-        }
-
-        estimates = traffic_estimator_service.get(selector)
-        mapped_estimates = {
-            k:v for k, v in zip(
-                keywords,
-                zeep.helpers.serialize_object(
-                    estimates['campaignEstimates'][0]
-                ).get(
-                    'adGroupEstimates', [{}]
-                )[0].get(
-                    'keywordEstimates', []
-                )
-            )
-        }
-        results = {}
-        for keyword, value in mapped_estimates.items():
-            max_dict = value['max']
-            min_dict = value['min']
-            results[keyword] = {}
-            for k in max_dict:
-                if k in ('totalCost', 'averageCpc'):
-                    results[keyword][k] = (
-                        max_dict[k]['microAmount'] + min_dict[k]['microAmount']
-                    ) / 2000000.0
-                else:
-                    results[keyword][k] = (max_dict[k] + min_dict[k]) / 2.0
-        return results
 
 
 if __name__ == '__main__':
