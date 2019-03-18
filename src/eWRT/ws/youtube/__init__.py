@@ -93,7 +93,10 @@ class YouTubeEntry(dict):
         'snippet.description': 'user_status',
         'snippet.title': 'user_name',
         'snippet.country': 'user_location',
-        'published_at': 'location'
+        'published_at': 'location',
+        'statistics.subscriberCount': 'statistics_channel_subscribercount',
+        'statistics.viewCount': 'statistics_channel_viewcount',
+        'statistics.videoCount': 'statistics_channel_videocount'
     }
 
     def __init__(self, search_result, mapping=VIDEO_MAPPING):
@@ -247,11 +250,11 @@ class YouTube_v3(WebDataSource):
 
     def _get_video_details(self, video_id):
         return self.client.videos().list(id=video_id,
-                                         part='contentDetails,statistics,topicDetails').execute()
+                                         part='contentDetails,topicDetails,statistics').execute()
 
     def _get_video_channel_detail(self, channel_id):
         return self.client.channels().list(id=channel_id,
-                                           part='contentOwnerDetails,snippet').execute()
+                                           part='contentOwnerDetails,snippet,statistics').execute()
 
     def like_video(self, video_id):
         """ Adds to the video rating. This code sets the rating to "like," but you
