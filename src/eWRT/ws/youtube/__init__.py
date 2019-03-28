@@ -64,11 +64,6 @@ class YouTubeEntry(dict):
         'contentDetails.duration': 'duration',
         'contentDetails.caption': 'caption',
         'contentDetails.licensedContent': 'licensed',
-        'statistics.viewCount': 'statistics_viewcount',
-        'statistics.favoriteCount': 'statistics_favoritecount',
-        'statistics.likeCount': 'statistics_likecount',
-        'statistics.dislikeCount': 'statistics_dislikecount',
-        'statistics.commentCount': 'statistics_commentcount',
         'topicDetails.relevantTopicIds': 'freebase_topics_relevant',
         'topicDetails.topicIds': 'freebase_topics',
     }
@@ -250,7 +245,7 @@ class YouTube_v3(WebDataSource):
 
     def _get_video_details(self, video_id):
         return self.client.videos().list(id=video_id,
-                                         part='contentDetails,topicDetails,statistics').execute()
+                                         part='contentDetails,topicDetails').execute()
 
     def _get_video_channel_detail(self, channel_id):
         return self.client.channels().list(id=channel_id,
