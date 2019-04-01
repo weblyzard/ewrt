@@ -1,7 +1,11 @@
+from __future__ import print_function
 # 
 # Unittests
 # run nosetest from python-nose to execute these tests
 #
+from builtins import zip
+from builtins import str
+from builtins import range
 import pytest
 import unittest
 
@@ -141,7 +145,7 @@ class SkipTestDiskCached(TestCached):
         CACHE_DIR = get_cache_dir(5)
         i = IterableCache(CACHE_DIR)
 
-        getTestIterator = lambda x: range(x)
+        getTestIterator = lambda x: list(range(x))
 
         for iteratorSize in (4, 5, 6):
             cachedIterator = i.fetch( getTestIterator, iteratorSize )

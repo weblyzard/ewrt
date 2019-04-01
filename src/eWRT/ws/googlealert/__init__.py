@@ -11,6 +11,7 @@ EmailParser supplies the following methods:
 
 @author: Philipp Konrad
 '''
+from builtins import object
 import email
 import unittest
 import re
@@ -79,7 +80,7 @@ class EmailParser(object):
         try:
             if '@' in possible_email_obj['To']:
                 is_email = True
-        except TypeError, e:
+        except TypeError as e:
             is_email = False
 
         return is_email

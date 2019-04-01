@@ -2,6 +2,7 @@
 
 ''' @package eWRT.access.http
     provides access to resources using http '''
+from __future__ import print_function
 
 # (C)opyrights 2008-2012 by Albert Weichselbraun <albert@weblyzard.com>
 #
@@ -17,8 +18,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from future import standard_library
+standard_library.install_aliases()
 import unittest
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 from pytest import raises
 
@@ -63,7 +66,7 @@ class TestHttpRetrieve(unittest.TestCase):
         ''' tests whether the socket timeout is honored by our class '''
         SLOW_URL = "http://www.csse.uwa.edu.au/"
 
-        with raises(urllib2.URLError):
+        with raises(urllib.error.URLError):
             r = Retrieve(self.__class__.__name__,
                          default_timeout=0.1).open(SLOW_URL)
             content = r.read()

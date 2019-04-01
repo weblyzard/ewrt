@@ -7,6 +7,7 @@ Created on Dec 6, 2012
 @author: albert
 '''
 
+from builtins import object
 from bz2 import BZ2File
 from gzip import GzipFile
 from os.path import basename

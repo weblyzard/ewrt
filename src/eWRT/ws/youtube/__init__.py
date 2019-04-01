@@ -7,18 +7,20 @@ Created on 25.09.2012
 '''
 from __future__ import print_function
 
+from future import standard_library
+standard_library.install_aliases()
 import os
 import unittest
 import logging
 import dateutil.parser as dateparser
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import json
 import pytz
 
 from six import string_types
 from operator import attrgetter
 from datetime import datetime, timedelta
-from cPickle import dump
+from pickle import dump
 from time import sleep
 from apiclient.discovery import build
 
@@ -103,14 +105,14 @@ class YouTubeEntry(dict):
             self['url'] = ''.join([YOUTUBE_SEARCH_URL, self['video_id']])
 
     def __repr__(self):
-        return '** entry: %s' % '\n'.join(['%s: %s' % (k, v) for k, v in self.iteritems()])
+        return '** entry: %s' % '\n'.join(['%s: %s' % (k, v) for k, v in self.items()])
 
     def update_entry(self, search_result, mapping=VIDEO_MAPPING):
         ''' stores the mapped items in a dictionary
         @param search_result: the search result returned by youtube
         @param entry_type: string, either comment or video
         '''
-        for attr, key in mapping.iteritems():
+        for attr, key in mapping.items():
 
             if attr == 'comments' and 'comments' in search_result:
                 self['comments'] = search_result['comments']
@@ -121,7 +123,7 @@ class YouTubeEntry(dict):
                 continue
 
             value = get_value(attr, search_result)
-            if isinstance(value, unicode):
+            if isinstance(value, str):
                 value = value.encode('utf-8')
             if key in self and isinstance(self[key], list):
                 if value:
@@ -186,7 +188,7 @@ class YouTube_v3(WebDataSource):
         @return: yt_dict
         """
         yt_dict = {}
-        for attr, key in mapping.iteritems():
+        for attr, key in mapping.items():
             try:
                 yt_dict[key] = attrgetter(attr)(entry)
 
@@ -399,9 +401,9 @@ class YouTube_v3(WebDataSource):
     def get_freebase_topics(self, QUERY_TERM):
         """ Retrieves a list of Freebase topics associated with the query term """
         freebase_params = dict(query=QUERY_TERM, key=self.api_key)
-        freebase_url = self.FREEBASE_SEARCH_URL % urllib.urlencode(
+        freebase_url = self.FREEBASE_SEARCH_URL % urllib.parse.urlencode(
             freebase_params)
-        freebase_response = json.loads(urllib.urlopen(freebase_url).read())
+        freebase_response = json.loads(urllib.request.urlopen(freebase_url).read())
         if len(freebase_response['result']) == 0:
             print('No matching terms were found in Freebase.')
 

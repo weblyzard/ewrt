@@ -8,7 +8,9 @@ Created on October 09, 2018
 Add Wikipedia information to a batch of skeleton entities with with Wikidata
 metadata and literals only.
 '''
+from __future__ import print_function
 
+from builtins import range
 import warnings
 
 from eWRT.ws.wikidata.enrich_from_wikipedia import \
@@ -73,7 +75,7 @@ def batch_enrich_from_wikipedia(wikipedia_pages, language, entities_cache,
     :rtype: Iterator[dict]
     """
     batch = wikipedia_pages
-    titles = '|'.join(batch.keys())
+    titles = '|'.join(list(batch.keys()))
     try:
         retrieved_pages = list(wikipedia_page_info_from_titles(titles,
                                                                language))
@@ -158,7 +160,7 @@ def wikipedia_request_dispatcher(sitelinks_cache, entity_cache, languages=None,
         except AssertionError:
             continue
         total_sitelinks = sitelinks_cache[language]
-        sitelink_list = total_sitelinks.keys()
+        sitelink_list = list(total_sitelinks.keys())
         n_sitelinks = len(total_sitelinks)
         print('{} links in language {}'.format(n_sitelinks, language))
         steps = (n_sitelinks - 1) // batch_size + 1
@@ -192,5 +194,5 @@ def wikipedia_request_dispatcher(sitelinks_cache, entity_cache, languages=None,
                 ' back to Wikidata entities, encoding issue?'.format(language))
 
     if return_type == 'keep_raw_results':
-        for wikidata_id, unmerged_result in output.items():
+        for wikidata_id, unmerged_result in list(output.items()):
             yield unmerged_result

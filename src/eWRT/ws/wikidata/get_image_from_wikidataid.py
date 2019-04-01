@@ -13,7 +13,11 @@ types of images (e.g. flags, coats of arms, etc.) where given.
 CLI usage to get thumbnail link from WikiData ID: <path-to-script> <ID> [size]
 
 '''
+from __future__ import print_function
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 import hashlib
 import sys
 import warnings
@@ -32,7 +36,7 @@ from eWRT.ws.wikidata.definitions import image_attributes
 if sys.version_info.major == 3:
     from urllib.parse import quote
 else:
-    from urllib2 import quote
+    from urllib.parse import quote
 
 DEFAULT_THUMBNAIL_WIDTH = 128
 
@@ -76,7 +80,7 @@ def get_images(itempage,
         # str(target) returns a string of format [[site:namespace:filename]],
         # e. g. [[commons:File:Barack_Obama.jpg]], the wiki link of the image
         # page. We substitute this for a valid external link
-        site, ns, link = image_interwiki_link = unicode(
+        site, ns, link = image_interwiki_link = str(
             target).replace(' ', '_').strip('[]').split(':')
         image_description_page = u'https://{}.wikimedia.org/wiki/{}:{}'.format(
             *image_interwiki_link)
@@ -88,7 +92,7 @@ def get_images(itempage,
         image_md5 = hashlib.md5(link.encode('utf-8')).hexdigest()
         a, b = image_md5[:2]
         direct_link_template = 'https://upload.wikimedia.org/wikipedia/{}/{}/{}/{}'
-        image_direct_link = unicode(direct_link_template.format(site, a, a + b,
+        image_direct_link = str(direct_link_template.format(site, a, a + b,
                                                         quote(link.encode('utf-8'))
                                                         ))
 

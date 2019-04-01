@@ -6,6 +6,8 @@ from __future__ import absolute_import
 # create a iterable ResultSet for storing values of the Webservices
 
 
+from past.builtins import cmp
+from builtins import object
 class ResultSet(object):
 
     # Constructor
@@ -21,7 +23,7 @@ class ResultSet(object):
     # returns the next item in the ResultSet
     # @result or ResultSet
     # @return content = Result, ResultSet
-    def next(self):
+    def __next__(self):
         # if self.idx > self.content.count:
         if self.idx >= len(self.content):
             self.refresh()

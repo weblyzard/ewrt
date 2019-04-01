@@ -26,12 +26,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from builtins import object
 import re
 import collections
 
 from string import ascii_lowercase
 from bz2 import BZ2File
-from cPickle import dump, load
+from pickle import dump, load
 from os.path import dirname, join as pjoin
 
 from logging import getLogger

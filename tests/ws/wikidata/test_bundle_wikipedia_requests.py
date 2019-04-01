@@ -5,6 +5,10 @@ Created on October 04, 2018
 
 @author: jakob <jakob.steixner@modul.ac.at>
 '''
+from __future__ import print_function
+from builtins import next
+from builtins import str
+from builtins import range
 import datetime
 
 import mock
@@ -170,24 +174,24 @@ def test_batch_enrich_from_wikipedia():
         entities_cache=GW_snapshot_wikidata_result,
         language='en',
     )
-    merge_result = enrichment_result.next()
+    merge_result = next(enrichment_result)
     assert_basic_structure_as_expected(merge_result)
     assert merge_result['enwiki'] == GW_snapshot_wikipedia_result
 
 
 def test_collect_multiple_from_wikipedia():
     global sitelink_cache
-    enrichment_result = collect_multiple_from_wikipedia(
+    enrichment_result = next(collect_multiple_from_wikipedia(
         sitelinks_cache=sitelink_cache,
         entities_cache=GW_snapshot_wikidata_result
-    ).next()
+    ))
 
     try:
         modified_sitelink_cache = {'de': {}}
-        enrichment_result = collect_multiple_from_wikipedia(
+        enrichment_result = next(collect_multiple_from_wikipedia(
             sitelinks_cache=modified_sitelink_cache,
             entities_cache=GW_snapshot_wikidata_result
-        ).next()
+        ))
         raise ValueError
 
     except StopIteration:
@@ -202,11 +206,11 @@ def test_enrich_from_wikipedia_offline():
     """
     with mock.patch(target='eWRT.ws.wikidata.bundle_wikipedia_requests.wikipedia_page_info_from_titles',
                     new=batch_enrich_mock):
-        enrichment_result = batch_enrich_from_wikipedia(
+        enrichment_result = next(batch_enrich_from_wikipedia(
             wikipedia_pages=sitelink_cache['en'],
             entities_cache=GW_snapshot_wikidata_result,
             language='en',
-        ).next()
+        ))
     assert_basic_structure_as_expected(enrichment_result)
     assert GW_snapshot_wikipedia_result['timestamp'] == enrichment_result['enwiki']['timestamp']
 

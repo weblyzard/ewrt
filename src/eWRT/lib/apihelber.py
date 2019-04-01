@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 
+from builtins import str
 def info(object, spacing=10, collapse=1):
     """Print methods and doc strings.
     Takes module, class, list, dictionary, or string."""

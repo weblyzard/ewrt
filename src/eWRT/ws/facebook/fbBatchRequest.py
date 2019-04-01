@@ -5,9 +5,14 @@ Created on 21.06.2012
 
 class for executing batch requests to the facebook api
 '''
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from builtins import object
 import json
-import urllib
-import httplib
+import urllib.request, urllib.parse, urllib.error
+import http.client
 import logging
 
 from ssl import SSLError
@@ -104,14 +109,14 @@ class FbBatchRequest(object):
         returns all the search results for the batch request
         '''
         result = []
-        conn = httplib.HTTPSConnection(cls.faceBookGraphHost,
+        conn = http.client.HTTPSConnection(cls.faceBookGraphHost,
                                        timeout=TIMEOUT)
         all_batch_requests = cls._get_json_batch_request_string(fbWSList)
 
         for batch_requests in cls.get_batch(all_batch_requests):
             batch_requests = json.dumps(batch_requests)
             logger.debug('Making batch_requests with %s' % batch_requests)
-            params = urllib.urlencode({cls.accessTokenHTTPParam: access_token,
+            params = urllib.parse.urlencode({cls.accessTokenHTTPParam: access_token,
                                        cls.batchHTTPParam: batch_requests})
             headers = {'Content-type': 'application/x-www-form-urlencoded',
                        'Accept': 'text/plain'}
@@ -128,7 +133,7 @@ class FbBatchRequest(object):
                 else:
                     result.extend(data)
 
-            except SSLError, e:
+            except SSLError as e:
                 logger.error('Could not request: %s, %s' % (batch_requests, e))
 
         conn.close()

@@ -2,6 +2,7 @@
 """
  @package eWRT.ontology.compare.relationtypes
 """
+from __future__ import print_function
 
 # (C)opyrights 2010 by Albert Weichselbraun <albert@weichselbraun.net>
 # 
@@ -18,6 +19,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from builtins import zip
+from builtins import object
 from nltk import WordNetLemmatizer, pos_tag
 from collections import defaultdict
 
@@ -45,7 +48,7 @@ class RelationTypes(object):
         """ returns the pos tags for the given text """
         posMap = []
         for term, pos in pos_tag( text.split() ):
-            mapping = [ spos for lpos, spos in RelationTypes.SHORT_POS.items() if pos.startswith(lpos) ]
+            mapping = [ spos for lpos, spos in list(RelationTypes.SHORT_POS.items()) if pos.startswith(lpos) ]
             pos = mapping[0] if mapping else ''
             posMap.append( pos )
 
@@ -86,15 +89,15 @@ class TestRelationTypes(object):
 
     def testPosTagging(self):
         """ tests the pos tagging """
-        print self.rt.getPos("can be saved by")
+        print(self.rt.getPos("can be saved by"))
         assert self.rt.getPos("can be saved by") == ['v', 'v', 'v', 'p']
 
-        print self.rt.getPos("involves")
+        print(self.rt.getPos("involves"))
         assert self.rt.getPos("involves") == ['v', ]
 
     def testPartitioning(self):
         """ tests the verb partitioning """
-        print self.rt.partitionRelation("can be saved by") 
+        print(self.rt.partitionRelation("can be saved by")) 
         assert dict(self.rt.partitionRelation("can be saved by")) == {'v': ['save', ], 'p': ['by',],  } 
         assert dict(self.rt.partitionRelation("results in"))      == {'v': ['result', ], 'p': ['in',],  }
         assert dict(self.rt.partitionRelation("e.g."))            == {'v': ["e.g."] }
@@ -105,7 +108,7 @@ class TestRelationTypes(object):
         """ tests the removal of auxiliary verbs """
         assert self.rt.removeAuxiliaryVerbs( ("can", "be", "save", ) ) == ["save", ]
 
-        print self.rt.removeAuxiliaryVerbs( ("be",))
+        print(self.rt.removeAuxiliaryVerbs( ("be",)))
         assert self.rt.removeAuxiliaryVerbs( ("be",)) == ["be",]
         assert self.rt.removeAuxiliaryVerbs( ("can", "range", "high")) == ["range", "high"]
         

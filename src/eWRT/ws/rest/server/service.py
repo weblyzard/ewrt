@@ -33,7 +33,7 @@ class WeblyzardService(resource.Resource):
         self.function = function
     
     def render_GET(self, request):
-        args = { key: value[0] for key, value in request.args.items() }
+        args = { key: value[0] for key, value in list(request.args.items()) }
         return self.call(self.function, args)
     
     def render_POST(self, request):

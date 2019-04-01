@@ -11,6 +11,7 @@ for details on how to obtain the `access_token` and usage of the API
 .. todo:: use superclass Webservice and adapt this class. 
 
 '''
+from builtins import object
 import json
 import requests
 import logging

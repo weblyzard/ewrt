@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+from builtins import zip
 from eWRT.input.csv import get_csv_data
 from eWRT.util.module_path import get_resource
 
@@ -11,5 +13,5 @@ def test_csv_data():
         for correct, computed in zip(CORRECT, get_csv_data(f,
                                                         ('int(row["a"])', 'int(row["a"])+int(row["b"])'),
                                                         'row["show"]=="True"')):
-            print correct, computed
+            print(correct, computed)
             assert correct == computed

@@ -25,6 +25,9 @@ from __future__ import print_function
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 __author__ = "Albert Weichselbraun"
 __copyright__ = "GPL"
 
@@ -34,7 +37,7 @@ import gzip
 
 from shutil import rmtree
 from os.path import join, exists
-from cPickle import load, UnpicklingError
+from pickle import load, UnpicklingError
 from subprocess import Popen
 from glob import glob
 

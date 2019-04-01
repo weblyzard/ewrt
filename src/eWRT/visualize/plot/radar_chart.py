@@ -13,6 +13,10 @@ This example has been taken from
   http://matplotlib.org/examples/api/radar_chart.html
   
 """
+from __future__ import print_function
+from __future__ import division
+from builtins import zip
+from past.utils import old_div
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -38,7 +42,7 @@ def radar_factory(num_vars, frame='circle'):
     # calculate evenly-spaced axis angles
     theta = 2 * np.pi * np.linspace(0, 1 - 1. / num_vars, num_vars)
     # rotate theta such that the first axis is at the top
-    theta += np.pi / 2
+    theta += old_div(np.pi, 2)
 
     def draw_poly_patch(self):
         verts = unit_poly_verts(theta)
@@ -80,7 +84,7 @@ def radar_factory(num_vars, frame='circle'):
                 line.set_data(x, y)
 
         def set_varlabels(self, labels):
-            self.set_thetagrids(theta * 180 / np.pi, labels)
+            self.set_thetagrids(old_div(theta * 180, np.pi), labels)
 
         def _gen_axes_patch(self):
             return self.draw_patch()
@@ -184,7 +188,7 @@ if __name__ == '__main__':
         ax.set_title(title, weight='bold', size='medium', position=(0.5, 1.1),
                      horizontalalignment='center', verticalalignment='center')
         for d, color in zip(data[title], colors):
-            print d
+            print(d)
             ax.plot(theta, d, color=color)
             ax.fill(theta, d, facecolor=color, alpha=0.25)
         ax.set_varlabels(spoke_labels)

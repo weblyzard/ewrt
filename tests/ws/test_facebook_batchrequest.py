@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 import os
 import unittest
 
@@ -22,7 +23,7 @@ class TestFacebookBatchRequest(unittest.TestCase):
         try:
             self.fb_batch_client.run_search('Linus Torvalds')
         except Exception as e:
-            print 'thats ok: %s' % e
+            print('thats ok: %s' % e)
             assert True
 
     def test_batch_search2(self):
@@ -37,7 +38,7 @@ class TestFacebookBatchRequest(unittest.TestCase):
                                                  limit=10)
 
         for x in result:
-            print x
+            print(x)
 
         assert len(result) >= 1
 
@@ -58,8 +59,8 @@ class TestFacebookBatchRequest(unittest.TestCase):
 
         result = self.fb_batch_client._send_post(access_token=self.api_key,
                                                  fbWSList=fbWSList)
-        print result
-        print len(result)
+        print(result)
+        print(len(result))
 
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@
 # Result is an item of ResultSet
 
 
+from builtins import object
 class Result(object):
 
     # constructor

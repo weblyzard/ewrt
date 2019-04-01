@@ -12,6 +12,7 @@ the Wikipedia page identifiers from which to supplement them.
 
 
 '''
+from builtins import range
 import logging
 
 from collections import OrderedDict

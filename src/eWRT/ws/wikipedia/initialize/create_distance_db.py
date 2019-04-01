@@ -21,6 +21,8 @@
 #
 # -----------------------------------------------------------------------------------
 
+from builtins import map
+from builtins import object
 import re
 import xml.parsers.expat
 
@@ -88,8 +90,8 @@ class WikiParse(object):
             self._wiki_concept = quote_str(data)
             self.container = ''
         elif self.container == 'text':
-            self._wiki_redirects = self._wiki_redirects.union( map(quote_str, self.RE_REDIRECT.findall(data)) )
-            self._wiki_links     = self._wiki_links.union( map(quote_str, self.RE_LINK.findall(data)) )
+            self._wiki_redirects = self._wiki_redirects.union( list(map(quote_str, self.RE_REDIRECT.findall(data))) )
+            self._wiki_links     = self._wiki_links.union( list(map(quote_str, self.RE_LINK.findall(data))) )
 
     def parse(self, fhandle):
         self.p.ParseFile(fhandle)

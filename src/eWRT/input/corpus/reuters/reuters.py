@@ -4,12 +4,14 @@
     @package DetectLanguage.reuters
     a generic method to retrieve text from the reuters corpus
 """
+from __future__ import print_function
 
 # -----------------------------------------------------------------------
 # - (C)opyright 2009 by Albert Weichselbraun <albert@weichselbraun.net>
 # -                    webLyzard technology gmbh <awe@weblyzard.com>
 # -----------------------------------------------------------------------
 
+from builtins import object
 __revision__ = "$Revision: 545 $"
 __author__ = "Albert Weichselbraun"
 
@@ -73,7 +75,7 @@ class ReutersGetCorpus(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         if self.files:
             xmlTxt = open(self.files.pop()).read()
             return Reuters.getText(xmlTxt)
@@ -91,7 +93,7 @@ class ReutersGetZipCorpus(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         if not self.files:
             self.zip, self.files = self.openNextZipFile()
 
@@ -115,4 +117,4 @@ if __name__ == '__main__':
         sys.exit(0)
 
     for nr, t in enumerate(ReutersGetCorpus("de")):
-        print nr
+        print(nr)
