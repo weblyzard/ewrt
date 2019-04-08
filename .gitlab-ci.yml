@@ -9,7 +9,7 @@ stages:
 job_tox:
     stage: tox
     script:
-        - python3 -m pip install pytest pytest-cov setuptools mock ujson numpy feedparser python-dateutil
+        - python3 -m pip --quiet install pytest pytest-cov setuptools mock ujson numpy feedparser python-dateutil future
         - tox
     only:
         - migration
