@@ -25,8 +25,8 @@ standard_library.install_aliases()
 from builtins import object
 try:
     # urllib2 is merged into urllib in python3 (SV)
-    # import urllib.request as urllib2
-    import urllib, urllib.request
+    # import urllib.request as urllib2  # [mig] urllib2 --> urllib in py3
+    import urllib, urllib.request  # [mig]
 except:
     import urllib.request, urllib.error, urllib.parse  # python2
 

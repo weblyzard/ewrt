@@ -37,7 +37,7 @@ class TestAsync(unittest.TestCase):
 
         assert async.has_processes_limit_reached() == True
 
-        time.sleep(3)  # NOTE: sleep 1 && sleep 2 make 3 sec right?
+        time.sleep(3)  # [mig] NOTE: sleep 1 && sleep 2 make 3 sec right?
         flag = async.has_processes_limit_reached()
         print((flag, [ p.pid for p in async.cur_processes ]))
         assert flag  == False

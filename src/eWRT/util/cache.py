@@ -172,7 +172,7 @@ class DiskCache(Cache):
             self._cache_hit += 1
             with GzipFile(cache_file) as f:
                 # return load(f)
-                return load(f, encoding='latin1')  # FIXME: no hardcoded enc!
+                return load(f, encoding='utf-8')  # [mig] FIXME: no hardcoded enc!
 
         #
         # case 2: cache miss

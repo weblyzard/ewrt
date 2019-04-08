@@ -37,8 +37,8 @@ DELETE_CHARS = ",.!?\"'"
 DELETE_TABLE = {ch: None for ch in DELETE_CHARS}
 
 
-# import string
-table = str.maketrans('ac', 'cx')
+# import string [mig]
+table = str.maketrans('ac', 'cx')  # [mig] string --> str
 
 
 def detect_language(text):
