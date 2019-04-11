@@ -1,7 +1,7 @@
 # CI configuration
 image: registry.gitlab.semanticlab.net/core/ewrt:fullbase-with-py3
 before_script:
-    - python3 -m pip install -e .
+    - python3 -m pip --quiet install -e .
 
 stages:
     - tox
