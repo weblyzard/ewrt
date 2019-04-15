@@ -1,19 +1,36 @@
 # CI configuration
-#image: registry.gitlab.semanticlab.net/core/ewrt:fullbase-with-py3
 image: registry.gitlab.semanticlab.net/docker/py3base:latest
 before_script:
     - python3 -m pip --quiet install -e .
 
 stages:
-    - tox
+    - test
+#    - build-package
 
-job_tox:
-    stage: tox
+pytest:
+    stage: test
     script:
         - python3 -m pip --quiet install pytest pytest-cov setuptools mock ujson numpy feedparser python-dateutil future
         - tox
+        - sonar-scanner
     only:
         - migration
     tags:
         - docker
+
+pylint:
+    stage: test
+    script:
+        - python3 -m pylint
+    only:
+        - migration
+    when: manual
+    tags:
+        - docker
+
+slowtest:
+    stage: test
+    script:
+        - python3 -m pip --quiet install pytest pytest-cov setuptools mock ujson numpy feedparser python-dateutil future
+        - pytest -m 'only slow' # or something with tox?? TODO
 
