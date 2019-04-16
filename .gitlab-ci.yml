@@ -1,7 +1,7 @@
 # CI configuration
 image: registry.gitlab.semanticlab.net/docker/py3base:latest
-before_script:
-    - python3 -m pip --quiet install -e .
+#before_script:
+#    - python3 -m pip --quiet install -e .
 
 stages:
     - test
@@ -10,9 +10,8 @@ stages:
 pytest:
     stage: test
     script:
-        - python3 -m pip --quiet install pytest pytest-cov setuptools mock ujson numpy feedparser python-dateutil future
-        - tox
-        - sonar-scanner
+        - tox -e pytest
+        - sonar-scanner -D sonar.host.url=$sonarhost  -D sonar.login=$sonarlogin
     only:
         - migration
     tags:
@@ -21,7 +20,7 @@ pytest:
 pylint:
     stage: test
     script:
-        - python3 -m pylint
+        - tox -e pylint
     only:
         - migration
     when: manual
@@ -31,6 +30,10 @@ pylint:
 slowtest:
     stage: test
     script:
-        - python3 -m pip --quiet install pytest pytest-cov setuptools mock ujson numpy feedparser python-dateutil future
-        - pytest -m 'only slow' # or something with tox?? TODO
+        - tox -e pytest-slow
+    only:
+        - migration
+    when: manual
+    tags:
+        - docker
 
