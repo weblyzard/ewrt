@@ -19,6 +19,7 @@ pytest:
 pylint:
     stage: test
     script:
+        - python3 -m pip install pylint
         - python3 -m pylint --rcfile=pylint.cfg src/eWR/
         #        - tox -e pylint
     only:
