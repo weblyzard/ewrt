@@ -1,7 +1,6 @@
 # CI configuration
 image: registry.gitlab.semanticlab.net/docker/py3base:latest
 #before_script:
-#    - python3 -m pip --quiet install -e .
 
 stages:
     - test
@@ -20,7 +19,8 @@ pytest:
 pylint:
     stage: test
     script:
-        - tox -e pylint
+        - python3 -m pylint --rcfile=pylint.cfg src/eWR/
+        #        - tox -e pylint
     only:
         - migration
     when: manual
