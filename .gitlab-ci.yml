@@ -6,6 +6,7 @@ stages:
     - test
 #    - build-package
 
+# run all non-slow tests with coverage report and upload to Sonar
 pytest:
     stage: test
     script:
@@ -16,6 +17,7 @@ pytest:
     tags:
         - docker
 
+# lint the code
 pylint:
     stage: test
     script:
@@ -26,10 +28,23 @@ pylint:
     tags:
         - docker
 
+# run the as slow marked tests 
 slowtest:
     stage: test
     script:
         - tox -e pytest-slow
+    only:
+        - migration
+    when: manual
+    tags:
+        - docker
+
+# CAVEAT: vulture returns exit code 1 if dead code is found, so the job will
+# always fail *if* vulture finds something. 
+vulture:
+    stage: test
+    script:
+        - tox -e vulture
     only:
         - migration
     when: manual
