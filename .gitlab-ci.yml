@@ -19,10 +19,7 @@ pytest:
 pylint:
     stage: test
     script:
-        - python3 -m pip install -e .
-        - python3 -m pip install --quiet pylint
-        - python3 -m pylint --rcfile=pylint.cfg src/eWR/
-        #        - tox -e pylint
+        - tox -e pylint
     only:
         - migration
     when: manual
