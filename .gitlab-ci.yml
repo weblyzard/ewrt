@@ -1,12 +1,12 @@
 # CI configuration
 image: registry.gitlab.semanticlab.net/docker/py3base:latest
-#before_script:
 
 stages:
     - test
-#    - build-package
+    - build-package
 
 # run all non-slow tests with coverage report and upload to Sonar
+# sonar-scanner is not inside tox to ease the pain of env variable passing
 pytest:
     stage: test
     script:
@@ -50,4 +50,16 @@ vulture:
     when: manual
     tags:
         - docker
+
+# building and deploying
+build:
+    stage: build-package
+    script:
+        - chmod +x build-package.sh
+        - ./build-package.sh
+    only:
+        - migration
+    when: manual
+    tags:
+        - shell-runner
 
