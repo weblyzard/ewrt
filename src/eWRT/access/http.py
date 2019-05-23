@@ -122,6 +122,8 @@ class Retrieve(object):
             authentification_method]
         urlObj = None
         tries = 0
+        if isinstance(data, str):
+            data = data.encode('utf-8')
         while not urlObj:
             request = urllib.request.Request(url, data, headers)
 
