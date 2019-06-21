@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """ install eWRT :) """
+import sys
+
 from setuptools import setup, find_packages
 
 from sys import exit
@@ -10,7 +12,7 @@ setup(
     ###########################################
     # Metadata
     name="eWRT",
-    version="0.9.7.20190405-dev",
+    version="0.9.7.20190621-dev",
     description='eWRT',
     author='Albert Weichselbraun, Heinz Lang, Gerhard Wohlgenannt, Johannes Duong, Norman Süsstrunk, Daniel Streiff',
     author_email='albert@weblyzard.com, lang@weblyzard.com, wohlg@ai.wu.ac.at, johannes.duong@wu.ac.at, norman.suestrunk@htwchur.ch, daniel.streiff@htwchur.ch',
@@ -26,7 +28,7 @@ setup(
                       'wikipedia',
                       'pywikibot',
                       'bz2file',
-                      'googleads',
+                      'googleads==19.0.1' if sys.version.major == 2 else 'googleads',
                       #                         'python-oauth2' #linkedin
                       ],
     classifiers=[
