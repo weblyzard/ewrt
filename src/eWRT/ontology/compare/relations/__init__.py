@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import division
+from builtins import object
+from past.utils import old_div
 import re
 import rdflib
 import unittest
@@ -60,7 +64,7 @@ class OntologyEvaluator(object):
 
             dp = float(len(rn.getShortestPathToNode(msca)))
 
-            la = cp / ( fp + dp )
+            la = old_div(cp, ( fp + dp ))
             
             bdm = self.calcBDM(cn, rn)
             
@@ -76,7 +80,7 @@ class OntologyEvaluator(object):
         counter = 0
 
     
-        for name, node in self.nodes.iteritems():
+        for name, node in self.nodes.items():
             sum += node.spLen
             counter +=1
             
@@ -99,7 +103,7 @@ class OntologyEvaluator(object):
         dpk = concept.spLen
         dpr = response.spLen
         
-        bdm = (br * (cp / avgChainLength)) / ( br * ( cp / avgChainLength ) + (dpk / conceptAvgLen ) + ( dpr / responseAvgLen ) )
+        bdm = old_div((br * (old_div(cp, avgChainLength))), ( br * ( old_div(cp, avgChainLength) ) + (old_div(dpk, conceptAvgLen) ) + ( old_div(dpr, responseAvgLen) ) ))
     
         return bdm
     
@@ -115,7 +119,7 @@ class OntologyEvaluator(object):
         sum = 0
         counter = 0
         
-        for node in self.nodes.itervalues():
+        for node in self.nodes.values():
             
             sum += node.br
             counter += 1
@@ -251,7 +255,7 @@ class OntologyEvaluator(object):
 
         for sub, obj, pr in self.rdf:
 
-            if not self.nodes.has_key(sub):
+            if sub not in self.nodes:
                 node = Node(sub, self)
                 self.nodes[sub] = node
 
@@ -259,7 +263,7 @@ class OntologyEvaluator(object):
             if (obj in HIERARCHY_LINK_TYPES or IGNORE_HIERARCHY_LINK_TYPES) and sub != self.root_node:
                 self.nodes[sub].addParent(pr)
 
-                if not self.nodes.has_key(pr):
+                if pr not in self.nodes:
                     new_node = Node(pr, self)
                     self.nodes[pr] = new_node
                     
@@ -324,7 +328,7 @@ class Node(object):
         
         if node == end:
                
-            if not self.pathsToNode.has_key(end):
+            if end not in self.pathsToNode:
                 self.pathsToNode[end] = []
 
             self.pathsToNode[end].append(path)
@@ -348,7 +352,7 @@ class Node(object):
         if not type(node).__name__ == 'URIRef':
             node = URIRef(node)
     
-        if not self.pathsToNode.has_key(node):
+        if node not in self.pathsToNode:
             self._findPathsToNode(self.uri, node)
         
         return self.pathsToNode[node]
@@ -379,12 +383,12 @@ class Node(object):
         
         node = URIRef(nodeURI)
         
-        if not self.pathsToNode.has_key(node):
+        if node not in self.pathsToNode:
             self._findPathsToNode(self.uri, end=node, path=[])
             
         shortestPath = []    
         
-        if self.pathsToNode.has_key(node):
+        if node in self.pathsToNode:
             
             for path in self.pathsToNode[node]:
     
@@ -419,18 +423,18 @@ class TestOntologyEvaluator(unittest.TestCase):
     def __init__(self):
         
         self.oe = OntologyEvaluator(self.file, self.root_node)
-        print self.oe.rdf.serialize(format="pretty-xml")
+        print(self.oe.rdf.serialize(format="pretty-xml"))
         
     def test_getPathToRoot(self):
         """ tests if the path was properly extracted """
     
-        print '\n\n*** test finding paths to root *** \n'
+        print('\n\n*** test finding paths to root *** \n')
     
         node = Node('http://semanticweb.net/c4', self.oe)
     
         node.getShortestPathToNode('http://semanticweb.net/c1')
 
-        print 'found ', len(node.pathsToRoot), ' paths '
+        print('found ', len(node.pathsToRoot), ' paths ')
         sumLen = 0 
         for path in node.pathsToRoot:
             sumLen += len(path)
@@ -442,7 +446,7 @@ class TestOntologyEvaluator(unittest.TestCase):
     def test_getPathToNode(self):
         """ tests if the path was properly extracted """
     
-        print '\n\n*** test finding paths to node *** \n'
+        print('\n\n*** test finding paths to node *** \n')
     
         node = Node('http://semanticweb.net/c4', self.oe)
     
@@ -450,7 +454,7 @@ class TestOntologyEvaluator(unittest.TestCase):
                 [rdflib.URIRef('http://semanticweb.net/c4'), rdflib.URIRef('http://semanticweb.net/c2'), rdflib.URIRef('http://semanticweb.net/c1')],
                 [rdflib.URIRef('http://semanticweb.net/c4'), rdflib.URIRef('http://semanticweb.net/c8'), rdflib.URIRef('http://semanticweb.net/c3'), rdflib.URIRef('http://semanticweb.net/c1')]]
 
-        print 'paths to node = ', node.getPathsToNode('http://semanticweb.net/c3')
+        print('paths to node = ', node.getPathsToNode('http://semanticweb.net/c3'))
     
     def test_isRoot(self):
         
@@ -460,57 +464,57 @@ class TestOntologyEvaluator(unittest.TestCase):
     
     def test_findShortestPath(self):
         
-        print '\n\n*** test finding shortest path *** \n'
+        print('\n\n*** test finding shortest path *** \n')
         node = None
         
         node = Node('http://semanticweb.net/c4', self.oe)
         shortestPath =  node.getShortestPathToNode('http://semanticweb.net/c1')
-        print 'shortestPath: ', shortestPath
+        print('shortestPath: ', shortestPath)
         assert len(shortestPath) == 3
         assert shortestPath == [rdflib.URIRef('http://semanticweb.net/c4'), rdflib.URIRef('http://semanticweb.net/c2'), rdflib.URIRef('http://semanticweb.net/c1')]
     
     
         node = Node('http://semanticweb.net/c4', self.oe)
         shortestPath =  node.getShortestPathToNode('http://semanticweb.net/c3')
-        print 'shortestPath: ', shortestPath
+        print('shortestPath: ', shortestPath)
         assert len(shortestPath) == 3
         assert shortestPath == [rdflib.URIRef('http://semanticweb.net/c4'), rdflib.URIRef('http://semanticweb.net/c8'), rdflib.URIRef('http://semanticweb.net/c3')]
         
         
     def test_shortestPathLen(self):
         
-        print '\n\n*** test shortest path len ***\n'
+        print('\n\n*** test shortest path len ***\n')
         
         node = self.oe.nodes[URIRef('http://semanticweb.net/c1')]
-        print 'shortest path of c1 == ', node.spLen
+        print('shortest path of c1 == ', node.spLen)
         assert node.spLen == 1
         
         node = self.oe.nodes[URIRef('http://semanticweb.net/c2')]
-        print 'shortest path of c2 == ', node.spLen
+        print('shortest path of c2 == ', node.spLen)
         assert node.spLen == 2
         
         node = self.oe.nodes[URIRef('http://semanticweb.net/c3')]
-        print 'shortest path of c3 == ', node.spLen
+        print('shortest path of c3 == ', node.spLen)
         assert node.spLen == 2
         
         node = self.oe.nodes[URIRef('http://semanticweb.net/c4')]
-        print 'shortest path of c4 == ', node.spLen
+        print('shortest path of c4 == ', node.spLen)
         assert node.spLen == 3
         
         node = self.oe.nodes[URIRef('http://semanticweb.net/c5')]
-        print 'shortest path of c5 == ', node.spLen
+        print('shortest path of c5 == ', node.spLen)
         assert node.spLen == 2
         
         node = self.oe.nodes[URIRef('http://semanticweb.net/c6')]
-        print 'shortest path of c6 == ', node.spLen
+        print('shortest path of c6 == ', node.spLen)
         assert node.spLen == 3
         
         node = self.oe.nodes[URIRef('http://semanticweb.net/c7')]
-        print 'shortest path of c7 == ', node.spLen
+        print('shortest path of c7 == ', node.spLen)
         assert node.spLen == 3
         
         node = self.oe.nodes[URIRef('http://semanticweb.net/c8')]
-        print 'shortest path of c8 == ', node.spLen
+        print('shortest path of c8 == ', node.spLen)
         assert node.spLen == 3 
         
         assert node.spLen == 3
@@ -518,14 +522,14 @@ class TestOntologyEvaluator(unittest.TestCase):
     
     def test_compareLists(self):
         
-        print '\n\n*** test comparing lists ***\n'
+        print('\n\n*** test comparing lists ***\n')
                 
         array1 = [rdflib.URIRef('http://semanticweb.net/c7'), rdflib.URIRef('http://semanticweb.net/c2'), rdflib.URIRef('http://semanticweb.net/c1')]
         array2 = [rdflib.URIRef('http://semanticweb.net/c4'), rdflib.URIRef('http://semanticweb.net/c2'), rdflib.URIRef('http://semanticweb.net/c1')]
-        print OntologyEvaluator.compareLists(array1, array2);
+        print(OntologyEvaluator.compareLists(array1, array2));
         assert OntologyEvaluator.compareLists(array1, array2) == [rdflib.URIRef('http://semanticweb.net/c1'), rdflib.URIRef('http://semanticweb.net/c2')]
 
-        print 'second test'
+        print('second test')
         path = []
         array1 = [rdflib.URIRef('http://semanticweb.net/c8'), rdflib.URIRef('http://semanticweb.net/c3'), rdflib.URIRef('http://semanticweb.net/c1')]
         array2 = [rdflib.URIRef('http://semanticweb.net/c7'), rdflib.URIRef('http://semanticweb.net/c3'), rdflib.URIRef('http://semanticweb.net/c1')]
@@ -534,7 +538,7 @@ class TestOntologyEvaluator(unittest.TestCase):
     
     def test_findMSCA(self):
         
-        print '\n\n *** test finding MSCA *** \n'
+        print('\n\n *** test finding MSCA *** \n')
         
         cnode_paths = [
             [rdflib.URIRef('http://semanticweb.net/c4'), rdflib.URIRef('http://semanticweb.net/c2'), rdflib.URIRef('http://semanticweb.net/c1')],
@@ -545,60 +549,60 @@ class TestOntologyEvaluator(unittest.TestCase):
         
         len, path = OntologyEvaluator.findMSCA(cnode_paths, rnode_paths)
         
-        print len, path
+        print(len, path)
         assert len == 2
         assert path == rdflib.URIRef('http://semanticweb.net/c3') or path == rdflib.URIRef('http://semanticweb.net/c2')
 
     def test_getSimilarity(self):
         
-        print '\n\n *** test getting similarity *** \n'
+        print('\n\n *** test getting similarity *** \n')
         self.oe = OntologyEvaluator(self.file, self.root_node)
         
-        for uri, node in self.oe.nodes.iteritems():
+        for uri, node in self.oe.nodes.items():
             
-            print uri, node.spLen
+            print(uri, node.spLen)
         
         correct_node = 'http://semanticweb.net/c4'
         respone_node = 'http://semanticweb.net/c7'
         
-        print self.oe.getSimilarity(correct_node, respone_node)
+        print(self.oe.getSimilarity(correct_node, respone_node))
         
         # todo: check if the result is correct 
     
     def test_buildTree(self):
-        print '\n\n*** test build Tree ***\n'
+        print('\n\n*** test build Tree ***\n')
         self.oe._buildTree()
-        print self.oe.nodes
+        print(self.oe.nodes)
         
-        for name, node in self.oe.nodes.iteritems():
-            print name, node.spLen
+        for name, node in self.oe.nodes.items():
+            print(name, node.spLen)
         
         assert len(self.oe.nodes) == 8
         
     
     def test_averageChainLength(self):
-        print '\n\n*** test average chain length ***\n'
+        print('\n\n*** test average chain length ***\n')
         avgChainLen = self.oe.getAverageChainLength()
-        print avgChainLen
+        print(avgChainLen)
         assert 2.375 == avgChainLen
         
     
     def test_averageConceptLength(self):
         
-        print '\n\n*** test average concept length ***\n'
+        print('\n\n*** test average concept length ***\n')
         
         node = Node('http://semanticweb.net/c4', self.oe) 
         
         avg = self.oe.averageLengthConcept(node)
         
-        print avg
+        print(avg)
         
         assert 3.5 == avg
         
         
     def test_calculateBR(self):
         
-        print '\n\n*** test _calculateBR ***\n'
+        print('\n\n*** test _calculateBR ***\n')
         
         node = URIRef('http://semanticweb.net/c1')
         
@@ -610,13 +614,13 @@ class TestOntologyEvaluator(unittest.TestCase):
     
     def test_calcBR(self):
         
-        print '\n\n*** test _calculateBR ***\n'
+        print('\n\n*** test _calculateBR ***\n')
 
         assert 1.5 == self.oe.calcBR(self.oe.nodes[URIRef('http://semanticweb.net/c3')])
 
     def test_calcBDM(self):
         ''' '''
-        print '\n\n *** test calcBDM *** \n'
+        print('\n\n *** test calcBDM *** \n')
         
         correct_node = URIRef('http://semanticweb.net/c4')
         response_node = URIRef('http://semanticweb.net/c7')
@@ -624,13 +628,13 @@ class TestOntologyEvaluator(unittest.TestCase):
         cn = self.oe.nodes[correct_node]
         rn = self.oe.nodes[response_node]
     
-        print self.oe.calcBDM(cn, rn)
+        print(self.oe.calcBDM(cn, rn))
         
         # todo: check if the result is correct 
     
     def test_sample_of_paper(self):
         
-        print '\n\n*** testing proton ontology *** \n'
+        print('\n\n*** testing proton ontology *** \n')
         
         # ontology can be downloaded from http://veggente.berlios.de/ns/RIMOntology
         

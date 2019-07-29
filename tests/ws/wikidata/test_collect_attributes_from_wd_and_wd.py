@@ -5,6 +5,8 @@ Created on September 22, 2018
 
 @author: jakob <jakob.steixner@modul.ac.at>
 '''
+from builtins import next
+from past.builtins import basestring
 import mock
 
 from eWRT.ws.wikidata.extract_meta import collect_attributes_from_wp_and_wd
@@ -32,17 +34,17 @@ def test_collect_attributes_from_wp_and_wd_offline():
     """Test the version of the data collection loop that does
     without a new call to the API for every attribute to retrieve
     human readable values."""
-    adams_data = collect_attributes_from_wp_and_wd(adams, ['en'],
+    adams_data = next(collect_attributes_from_wp_and_wd(adams, ['en'],
                                                    wd_parameters={
                                                        'person': WD_PARAMETERS},
                                                    include_literals=False,
                                                    raise_on_no_wikipage=False,
                                                    include_attribute_labels=False,
                                                    resolve_country=False,
-                                                   entity_type='person').next()
+                                                   entity_type='person'))
     assert adams_data['date of death']['values'][0]['value'].startswith(
         '+2001-05-11')
-    for claim in adams_data.values():
+    for claim in list(adams_data.values()):
         if isinstance(claim, dict):
             if 'values' in claim:
                 # no labels expected to be stored with attribute values
@@ -52,7 +54,7 @@ def test_collect_attributes_from_wp_and_wd_offline():
 
 def test_collect_attributes_from_wp_and_wd_online():
     """"""
-    adams_data = collect_attributes_from_wp_and_wd(adams, ['en'],
+    adams_data = next(collect_attributes_from_wp_and_wd(adams, ['en'],
                                                    wd_parameters={
                                                        'person': WD_PARAMETERS},
                                                    include_literals=False,
@@ -61,10 +63,10 @@ def test_collect_attributes_from_wp_and_wd_online():
                                                    include_wikipedia=True,
                                                    delay_wikipedia_retrieval=False,
                                                    resolve_country=False,
-                                                   entity_type='person').next()
+                                                   entity_type='person'))
     assert adams_data['date of death']['values'][0]['value'].startswith(
         '+2001-05-11')
-    for claim in adams_data.values():
+    for claim in list(adams_data.values()):
         if isinstance(claim, dict):
             if 'values' in claim and claim['url'] != 'P18':
                 # two types of attributes in
@@ -86,7 +88,7 @@ def test_collect_attributes_from_wp_and_wd_delay_wikipedia():
     of the dict with retrieved data.
     :return:
     """
-    adams_data = collect_attributes_from_wp_and_wd(adams, ['en'],
+    adams_data = next(collect_attributes_from_wp_and_wd(adams, ['en'],
                                                    wd_parameters={
                                                        'person': WD_PARAMETERS},
                                                    entity_type='person',
@@ -95,6 +97,6 @@ def test_collect_attributes_from_wp_and_wd_delay_wikipedia():
                                                    include_attribute_labels=True,
                                                    resolve_country=False,
                                                    include_wikipedia=True,
-                                                   delay_wikipedia_retrieval=True).next()
+                                                   delay_wikipedia_retrieval=True))
     assert 'enwiki' in adams_data
     assert isinstance(adams_data['enwiki'], basestring)

@@ -1,8 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
 import unittest
 
-from urllib2 import HTTPError
+from urllib.error import HTTPError
 
 from eWRT.ws.rest import MultiRESTClient, RESTClient
 
@@ -46,7 +51,7 @@ class TestRESTClient(unittest.TestCase):
             client = MultiRESTClient(urls)
             assert False, 'must raise an assertion error'
         except Exception as e:
-            print '!!! previous exception is OK, we expected that'
+            print('!!! previous exception is OK, we expected that')
             assert 'if set, user AND pwd required' in e.args  # not tested (SV)
 
     def test_get_url(self):
@@ -76,7 +81,7 @@ class TestRESTClient(unittest.TestCase):
                                  use_random_server=True)
 
         assert len(client._service_urls) == len(service_urls)
-        assert service_urls <> client._service_urls
+        assert service_urls != client._service_urls
 
 
 if __name__ == '__main__':

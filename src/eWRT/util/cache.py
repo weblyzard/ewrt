@@ -5,6 +5,10 @@
 '''
 from __future__ import print_function
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import next
+from builtins import object
 import redis
 import pickle
 
@@ -38,7 +42,7 @@ __copyright__ = "GPL"
 
 
 try:
-    from cPickle import dump, load
+    from pickle import dump, load
 except ImportError:
     from pickle import dump, load
 
@@ -167,7 +171,8 @@ class DiskCache(Cache):
             #
             self._cache_hit += 1
             with GzipFile(cache_file) as f:
-                return load(f)
+                # return load(f)
+                return load(f, encoding='utf-8')  # [mig] FIXME: no hardcoded enc!
 
         #
         # case 2: cache miss
@@ -299,7 +304,7 @@ class MemoryCache(Cache):
         if self.max_cache_size == 0 or len(self._cacheData) <= self.max_cache_size:
             return
 
-        (key, _) = sorted(self._usage.items(),
+        (key, _) = sorted(list(self._usage.items()),
                           key=itemgetter(1), reverse=True).pop()
         del self._usage[key]
         del self._cacheData[key]
@@ -366,7 +371,7 @@ class IterableCache(DiskCache):
 
         return self
 
-    def next(self):
+    def __next__(self):
         return self._read_next_element() if self._cached else self._cache_next_element()
 
     def _cache_next_element(self):
@@ -431,8 +436,8 @@ class RedisCache(Cache):
             longest time '''
         if self.max_cache_size == 0 or self._cacheData.dbsize() < self.max_cache_size:
             return
-        usage_dict = {k: self._usage[k] for k in self._usage.keys()}
-        (key, _) = sorted(usage_dict.items(),
+        usage_dict = {k: self._usage[k] for k in list(self._usage.keys())}
+        (key, _) = sorted(list(usage_dict.items()),
                           key=itemgetter(1), reverse=True).pop()
         del self._usage[key]
         del self._cacheData[key]

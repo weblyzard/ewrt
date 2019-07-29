@@ -1,7 +1,10 @@
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 __author__ = 'Philipp Konrad'
 
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import requests
 import json
 import pycurl
@@ -109,8 +112,8 @@ class CrowdFlowerClient(object):
 
         headers = {'content-type': 'application/json'}
 
-        args = {'job[%s]' % k if k != 'key' else k:v for k, v in job.iteritems()}
-        qry_args = urllib.urlencode(args)
+        args = {'job[%s]' % k if k != 'key' else k:v for k, v in job.items()}
+        qry_args = urllib.parse.urlencode(args)
 
         url = "https://api.crowdflower.com/v1/jobs/%s.json?" % job['id']
         url = url + qry_args
@@ -183,7 +186,7 @@ class CrowdFlowerClient2(object):
 
         if cml: post_dict['job[problem]'] = cml
 
-        post_fields = urllib.urlencode(post_dict)
+        post_fields = urllib.parse.urlencode(post_dict)
 
         c = pycurl.Curl()
         c.setopt(pycurl.POST, True)

@@ -11,6 +11,9 @@ API with pywikibot.pagegenerators, or using a dump file (faster).
 
 '''
 
+from builtins import next
+from builtins import range
+from builtins import object
 import sys
 import ujson
 import warnings
@@ -165,7 +168,7 @@ def collect_attributes_from_wp_and_wd(itempage, languages,
         yield entity_extracted_details
 
 
-class WikidataEntityIterator:
+class WikidataEntityIterator(object):
     """
     Iterates over a collection of Wikidata entities either from dump (xml
     with embedded json) or as a pywikikibot.pagegenerator.
@@ -205,7 +208,7 @@ class WikidataEntityIterator:
 
             self.all_relevant_categories = self.get_relevant_category_ids(
                 top_level_categories)
-        elif self.entity_types.keys() == ['person']:
+        elif list(self.entity_types.keys()) == ['person']:
             self.relevant_categories = {'person': 'Q5'}
             self.all_relevant_categories = self.relevant_categories
 
@@ -454,7 +457,7 @@ class WikidataEntityIterator:
                         if sys.version_info.major == 3:
                             entity_raw = next(generator)
                         else:
-                            entity_raw = generator.next()
+                            entity_raw = next(generator)
 
                     except StopIteration:
                         break

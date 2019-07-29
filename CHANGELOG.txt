@@ -1,3 +1,8 @@
+2.0.20190418
+* version bump to signify the migration to python 3
+* all scripts are futurized and run with python3.6
+* automated CI/CD and testing (see .gitlab-ci.yml and tox.ini)
+
 0.7.7
 * improved facebook module
 * changed defaulttimeout to prevent read-errors when accessing web services

@@ -4,6 +4,7 @@
     provides access to wikipedia using the wikipedia api
     http://en.wikipedia.org/w/api.php 
 """
+from __future__ import print_function
 
 # (C)opyrights 2008 by Albert Weichselbraun <albert@weichselbraun.net>
 # 
@@ -20,11 +21,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import map
+from builtins import object
 __version__ = "$Header$"
 
 import unittest
 
-from urllib import urlencode
+from urllib.parse import urlencode
 from xml.dom.minidom import parseString
 from nose.plugins.attrib import attr
 
@@ -115,16 +120,16 @@ class TestWikiPedia(unittest.TestCase):
     def testRetrievePage(self):
         """ tries to retrieve the following url's from the list """
 
-        for (keyword, lang), searchTerms in self.TEST_QUERIES.iteritems():
+        for (keyword, lang), searchTerms in self.TEST_QUERIES.items():
             wikiPediaText = self.w.getWikiPage(keyword, lang=lang)
             for term in searchTerms:
-                print keyword, term
+                print(keyword, term)
                 assert term in wikiPediaText
 
     @attr("remote")
     def testAlternations(self):
 
-        print self.w._getPageNameAlterations("Greenhouse Gas Emissions")
+        print(self.w._getPageNameAlterations("Greenhouse Gas Emissions"))
         assert self.w._getPageNameAlterations("Greenhouse Gas Emissions") == ['Greenhouse Gas Emissions', 'Greenhouse gas emissions']
         
     @attr("remote")

@@ -5,6 +5,7 @@
 
     Examples: see unittests
 '''
+from __future__ import division
 
 # (C)opyrights 2010 - 2015 by Albert Weichselbraun <albert@weichselbraun.net>
 #
@@ -21,6 +22,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from builtins import range
+from past.utils import old_div
+from builtins import object
 __author__ = "Albert Weichselbraun"
 __copyright__ = "GPL"
 
@@ -68,8 +72,8 @@ class TimedTest(TestCase):
             self._timeFunction(self, x, 10 * x)
 
         assert self._timeFunction.numberOfCalls == NR_CALL
-        self.assertAlmostEqual(self._timeFunction.totalCallDuration /
-                               NR_CALL, self._timeFunction.lastCallDuration, 1)
+        self.assertAlmostEqual(old_div(self._timeFunction.totalCallDuration,
+                               NR_CALL), self._timeFunction.lastCallDuration, 1)
 
     def testClearCallStatistics(self):
         NR_CALL = 5000

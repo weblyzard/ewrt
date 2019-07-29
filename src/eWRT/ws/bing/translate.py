@@ -12,12 +12,14 @@ Created on 23.10.2014
     `Translator Language Codes <http://msdn.microsoft.com/en-us/library/hh456380.aspx>`_
 
 '''
+from future import standard_library
+standard_library.install_aliases()
 import json
 import requests
 
 from six import string_types
 from datetime import datetime, timedelta
-from urllib import urlencode
+from urllib.parse import urlencode
 
 from eWRT.ws import AbstractWebSource
 

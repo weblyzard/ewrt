@@ -6,6 +6,7 @@
   * recall
   * F1 measure
 """
+from __future__ import division
 
 # (C)opyrights 2010 by Albert Weichselbraun <albert@weichselbraun.net>
 #                   and others (as outlined in the functions.
@@ -29,6 +30,8 @@
 #
 
 
+from builtins import object
+from past.utils import old_div
 def precision(relevant, retrieved):
     """ returns the precision of the given sets 
         @param[in]  relevant set of relevant terms
@@ -60,7 +63,7 @@ def fMeasure(p, r, beta=1.):
         @param[in] beta  weight used to compute the f mesure
         @returns the F-Measure
     """
-    return (1 + beta * beta) * (p * r) / (beta * beta * p + r)
+    return old_div((1 + beta * beta) * (p * r), (beta * beta * p + r))
 
 
 class TestEvaluationMetrics(object):

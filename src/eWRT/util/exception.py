@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 """ @package eWRT.util.exception """
+from builtins import object
 from eWRT.config import SNMP_MODULE_NAME, SNMP_LOG_LEVEL, SNMP_HOST_CFG
 
 # (C)opyrights 2008-2010 by Albert Weichselbraun <albert@weichselbraun.net>

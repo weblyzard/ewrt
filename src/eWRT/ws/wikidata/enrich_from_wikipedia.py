@@ -10,7 +10,12 @@ Starting with a wikidata ID, retrieve additional information from Wikipedia
 either for a single page or a list of pages (identified by their language and
 exact title.
 '''
+from __future__ import print_function
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import next
+from past.builtins import basestring
 import sys
 import ujson
 import warnings
@@ -21,7 +26,7 @@ if sys.version_info.major == 3:
     from urllib.request import urlopen
     basestring = (bytes, str)
 else:
-    from urllib2 import urlopen
+    from urllib.request import urlopen
 
 RELEVANT_LANGUAGES = ['en', 'de', 'fr', 'es']
 
@@ -86,7 +91,7 @@ def wikipedia_page_info_from_titles(wikipage_titles, language, redirect=False,
         if 'redirects' in query_result['query']:
             flagged_as_redirect = set([page_redirect['to'] for page_redirect in
                                        query_result['query']['redirects']])
-        for page in query_result['query']['pages'].values():
+        for page in list(query_result['query']['pages'].values()):
             title = page['title']
             if 'missing' in page:
                 continue
@@ -179,7 +184,7 @@ def wp_summary_from_wdid(wikidata_id, languages=None, sitelinks=None):
             try:
                 wikipedia_page = wikipedia_page_info_from_titles(wikipage_title,
                                                                  language)
-                wikipedia_data.append(wikipedia_page.next())
+                wikipedia_data.append(next(wikipedia_page))
             except Exception as e:
                 raise (e)
             except ValueError:

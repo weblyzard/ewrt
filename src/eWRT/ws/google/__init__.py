@@ -16,6 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 __version__ = "$Header$"
 
 import re
@@ -27,7 +30,7 @@ import logging
 try:
     from io import StringIO
 except:
-    import StringIO
+    import io
 
 import time
 from datetime import datetime, timedelta, date
@@ -35,7 +38,7 @@ from datetime import datetime, timedelta, date
 try:
     from urllib.parse import urlparse, parse_qs  # porting to python 3.4 (SV)
 except:
-    from urlparse import urlparse, parse_qs  # python2
+    from urllib.parse import urlparse, parse_qs  # python2
 
 from xml.dom.minidom import parse, parseString
 from lxml import etree

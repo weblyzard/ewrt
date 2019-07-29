@@ -9,7 +9,9 @@
             important concepts which have been found in the 
             source ontology.
 """
+from __future__ import print_function
 
+from builtins import map
 from glob import glob
 from os import path
 from bz2 import BZ2File
@@ -21,7 +23,7 @@ from eWRT.stat.string.spelling import SpellSuggestion
 
 from rdflib import Namespace, ConjunctiveGraph, Literal
 from collections import defaultdict
-from itertools import izip_longest
+from itertools import zip_longest
 from operator import itemgetter
 from csv import writer
 
@@ -41,7 +43,7 @@ s.train( SpellSuggestion.words( BZ2File( CUSTOM_RISK_CORPUS ).read() ) )
 
 # compile cleanup queue
 
-strCleanupPipe = (lambda s:s.replace(u'\xd7', " "), unicode.lower, RemovePossessive(), FixDashSpace() )
+strCleanupPipe = (lambda s:s.replace(u'\xd7', " "), str.lower, RemovePossessive(), FixDashSpace() )
 phrCleanupPipe = (SplitEnumerations(), SplitMultiTerms(), SplitBracketExplanations() )
 fs = FixSpelling(s)
 wrdCleanupPipe = (fs, RemovePunctationAndBrackets(),)
@@ -125,6 +127,6 @@ def _addUseCaseSpecificUnusedConcepts( g ):
 
 # main
 if __name__ == '__main__':
-    topConcepts = map(None, map(str.strip, open( IMPORTANT_CONCEPTS_LIST )) )
+    topConcepts = list(list(map(str.strip, open( IMPORTANT_CONCEPTS_LIST ))))
     computeHybridOntology( glob(ONTOLOGY_DIR +"/*.cxl"), topConcepts )
 

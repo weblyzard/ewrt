@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import object
 __author__ = 'Philipp Konrad'
 
 import re
@@ -80,7 +82,7 @@ class CmlBuilder(object):
 
         # XML documents only can contain strings therefore unicode(v)
         # moreover, we filter all non-parameters and self, cls.
-        filtered_kwargs = {k:unicode(v) for k, v in kwargs.iteritems() if is_param(k) and v}
+        filtered_kwargs = {k:str(v) for k, v in kwargs.items() if is_param(k) and v}
 
         cleaned_kwargs = {}
         error_msg = 'The attribute is invalid: %s:%s'
@@ -88,7 +90,7 @@ class CmlBuilder(object):
         # check the sanity of all attributes.
         # each check function is looked up in a _attribute_checks dictionary
         # in the case of a bad attribute an exception is raised.
-        for attr, v in filtered_kwargs.iteritems():
+        for attr, v in filtered_kwargs.items():
             check_func = self._attribute_checks.get(attr)
             if check_func: assert check_func(attr, v), error_msg % (attr, v)
             cleaned_kwargs[attr] = v

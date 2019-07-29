@@ -5,6 +5,7 @@ Created on September 20, 2018
 
 @author: jakob <jakob.steixner@modul.ac.at>
 '''
+from __future__ import print_function
 import mock
 import pytest
 
@@ -123,7 +124,7 @@ itempage.claims = {
         u'id': u'Q42$44889d0f-474c-4fb9-1961-9a3366cbbb9e'})]}
 
 for claim in itempage.claims['P18'] + itempage.claims['P1442']:
-    print claim
+    print(claim)
 
 expected_links = [
     (128, [
@@ -159,13 +160,13 @@ def test_get_images(width, expected_links):
     assert isinstance(images, dict)
     assert len(images) == len(
         [at for at in image_attributes if at in itempage.claims])
-    print images.keys()
-    assert all([len(values.values()) == 4 for values in images.values()])
-    assert images['P18'].values()[1]
-    assert get_images(itempage, width)['P18'].values() == expected_links
+    print(list(images.keys()))
+    assert all([len(list(values.values())) == 4 for values in list(images.values())])
+    assert list(images['P18'].values())[1]
+    assert list(get_images(itempage, width)['P18'].values()) == expected_links
 
 
 @pytest.mark.parametrize('image_type,expected_types', expected_types)
 def test_get_image(image_type, expected_types):
-    assert get_image(itempage=itempage, image_type=image_type,
-                     include_claim_id=True).values() == expected_types
+    assert list(get_image(itempage=itempage, image_type=image_type,
+                     include_claim_id=True).values()) == expected_types

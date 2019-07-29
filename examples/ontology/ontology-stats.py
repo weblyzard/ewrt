@@ -2,12 +2,15 @@
 
 """ ontology-stats.py
     computes the top overlapping concepts of ontologies """
+from __future__ import division
+from builtins import map
+from past.utils import old_div
 from glob import glob
 from os import path
 from bz2 import BZ2File
 from rdflib import Namespace
 from collections import defaultdict
-from itertools import izip_longest
+from itertools import zip_longest
 from operator import itemgetter
 from csv import writer
 
@@ -31,7 +34,7 @@ s.train( SpellSuggestion.words( BZ2File( CUSTOM_RISK_CORPUS ).read() ) )
 
 # compile cleanup queue
 
-strCleanupPipe = (lambda s:s.replace(u'\xd7', " "), unicode.lower, RemovePossessive(), FixDashSpace() )
+strCleanupPipe = (lambda s:s.replace(u'\xd7', " "), str.lower, RemovePossessive(), FixDashSpace() )
 phrCleanupPipe = (SplitEnumerations(), SplitMultiTerms(), SplitBracketExplanations() )
 fs = FixSpelling(s)
 wrdCleanupPipe = (fs, RemovePunctationAndBrackets(),)
@@ -97,8 +100,8 @@ def computeOntologyStatistics( ff, cc, rc, ccCutOffCount, rcCutOffCount):
         @param[in] ccCutOffCount min cc required for a term to be considered
         @param[in] rcCutOffCount min cc required for a term to be considered
     """
-    goldStandardConcepts  = set([ c for c, cnt in cc.items() if cnt >= ccCutOffCount ])
-    goldStandardRelations = set([ r for r, cnt in rc.items() if cnt >= rcCutOffCount ])
+    goldStandardConcepts  = set([ c for c, cnt in list(cc.items()) if cnt >= ccCutOffCount ])
+    goldStandardRelations = set([ r for r, cnt in list(rc.items()) if cnt >= rcCutOffCount ])
     c = open("ontology-stats.csv", "w")
     w = writer(c) 
     w.writerow( ("ontology", "concept precision", "concept recall", "concept F1", 
@@ -113,14 +116,14 @@ def computeOntologyStatistics( ff, cc, rc, ccCutOffCount, rcCutOffCount):
        if (cPrecision + cRecall) == 0.:
            cF1 = "NaN"
        else:
-           cF1        = 2 * cPrecision * cRecall / (cPrecision + cRecall)
+           cF1        = old_div(2 * cPrecision * cRecall, (cPrecision + cRecall))
 
        rPrecision = len(goldStandardRelations.intersection( relations ))/float( len(relations) )
        rRecall    = len(goldStandardRelations.intersection( relations ))/float( len(goldStandardRelations) )
        if (rPrecision + rRecall) == 0.:
            rF1 = "NaN"
        else:
-           rF1        = 2 * rPrecision * rRecall / (rPrecision + rRecall)
+           rF1        = old_div(2 * rPrecision * rRecall, (rPrecision + rRecall))
 
        w.writerow( (path.basename(f), cPrecision, cRecall, cF1, rPrecision, rRecall, rF1) )
 
@@ -132,8 +135,8 @@ def csvOutput( termCnt, relCnt ):
     w = writer(f) 
 
     w.writerow( ("terms", "termCnt", "relation", "relationCnt") )
-    for row1, row2 in izip_longest( sorted( termCnt.items(), key=itemgetter(1), reverse=True ), \
-                             sorted( relCnt.items(), key=itemgetter(1), reverse=True), fillvalue=('','')) :
+    for row1, row2 in zip_longest( sorted( list(termCnt.items()), key=itemgetter(1), reverse=True ), \
+                             sorted( list(relCnt.items()), key=itemgetter(1), reverse=True), fillvalue=('','')) :
         w.writerow( row1+row2 )
 
 

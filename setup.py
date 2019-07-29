@@ -32,14 +32,14 @@ setup(
                       #                         'python-oauth2' #linkedin
                       ],
     classifiers=[
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3 :: Only',
     ],
 
 
     ###########################################
-    # Run unittests
+    # Run unittests 
+    # NOTE: is this still needed with gitlab-ci in place?
     test_suite='nose.collector',
 
     ###########################################

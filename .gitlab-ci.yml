@@ -1,0 +1,65 @@
+# CI configuration
+image: registry.gitlab.semanticlab.net/docker/py3base:latest
+
+stages:
+    - test
+    - build-package
+
+# run all non-slow tests with coverage report and upload to Sonar
+# sonar-scanner is not inside tox to ease the pain of env variable passing
+pytest:
+    stage: test
+    script:
+        - tox -e pytest
+        - sonar-scanner -D sonar.host.url=$sonarhost  -D sonar.login=$sonarlogin
+    only:
+        - migration
+    tags:
+        - docker
+
+# lint the code
+pylint:
+    stage: test
+    script:
+        - tox -e pylint
+    only:
+        - migration
+    when: manual
+    tags:
+        - docker
+
+# run the as slow marked tests 
+slowtest:
+    stage: test
+    script:
+        - tox -e pytest-slow
+    only:
+        - migration
+    when: manual
+    tags:
+        - docker
+
+# CAVEAT: vulture returns exit code 1 if dead code is found, so the job will
+# always fail *if* vulture finds something. 
+vulture:
+    stage: test
+    script:
+        - tox -e vulture
+    only:
+        - migration
+    when: manual
+    tags:
+        - docker
+
+# building and deploying
+build:
+    stage: build-package
+    script:
+        - chmod +x build-package.sh
+        - ./build-package.sh
+    only:
+        - migration
+    when: manual
+    tags:
+        - shell-runner
+

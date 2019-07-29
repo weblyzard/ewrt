@@ -4,6 +4,7 @@
  fetches for an ContentID or GazEntry-ID where it is located
  e.g. for Vienna: Europe/Austria/Vienna
 """
+from __future__ import print_function
 
 # (C)opyrights 2009 by Heinz Lang <heinz.lang@wu.ac.at>
 #                      Albert Weichselbraun <albert@weichselbraun.net>
@@ -21,6 +22,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from builtins import map
+from builtins import object
 from eWRT.access.db import PostgresqlDb
 from eWRT.util.cache import MemoryCached
 from eWRT.config import DATABASE_CONNECTION, GEO_ENTITY_SEPARATOR
@@ -105,12 +108,12 @@ class Gazetteer(object):
                 map(str, id))
             res = self.db.query(q)
             if len(res) > 0:
-                entities = [dict(self._getResultById(res, i).items())
+                entities = [dict(list(self._getResultById(res, i).items()))
                             for i in id]
                 self._addGeoUrl(entities)
                 return entities
 
-            print "WARNING: no entities found for ", ", ".join(map(str, id))
+            print("WARNING: no entities found for ", ", ".join(map(str, id)))
 
         return []
 
@@ -145,7 +148,7 @@ class Gazetteer(object):
                 parentLocationName = self._getPreferredGeoName(
                     parentLocationEntity)
                 if parentLocationEntity in geoIdPath:
-                    print "%s in %s" % (parentLocationName, geoNamePath)
+                    print("%s in %s" % (parentLocationName, geoNamePath))
                     break
                 geoNamePath.append(parentLocationName)
 
@@ -188,9 +191,9 @@ class Gazetteer(object):
         # todo: is it necessary, that this functions can process multiple parents?
         # multiple parents (!)
         if result.__len__() > 1:
-            print '### result > 1 ###'
-            print '    child_id:  %s' % child_id
-            print '    parent_id: %s ' % [e['parent_id'] for e in result]
+            print('### result > 1 ###')
+            print('    child_id:  %s' % child_id)
+            print('    parent_id: %s ' % [e['parent_id'] for e in result])
 
         # todo: does it make sense to fetch infinite loops
         if result == []:

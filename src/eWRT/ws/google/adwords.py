@@ -9,7 +9,11 @@ adwords/v201809/optimization/get_keyword_ideas.py
 The config file must follow the google ads config yaml:
 https://github.com/googleads/googleads-python-lib/blob/master/googleads.yaml
 '''
+from __future__ import print_function
 
+from builtins import str
+from builtins import zip
+from builtins import object
 from collections import OrderedDict
 
 import logging
@@ -105,7 +109,7 @@ class GoogleAdWordsKeywordStatistics(object):
             attributes = self.STATS_DEFAULT_ATTRIBUTES
         elif 'KEYWORD_TEXT' not in attributes:
             attributes['KEYWORD_TEXT'] = None
-        selector['requestedAttributeTypes'] = attributes.keys()
+        selector['requestedAttributeTypes'] = list(attributes.keys())
 
         offset = 0
 
@@ -151,7 +155,7 @@ class GoogleAdWordsKeywordStatistics(object):
                             continue
                         results[keyword] = {
                             attribute: mapping(attribute_results[attribute])
-                            for attribute, mapping in attributes.items()
+                            for attribute, mapping in list(attributes.items())
                             if attribute != 'KEYWORD_TEXT'
                         }
                 else:

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 """ uses the del.icio.us API to access information about del.icio.us URLs """
+from __future__ import print_function
 
 # (C)opyrights 2008-2010 by Albert Weichselbraun <albert@weichselbraun.net>
 #                           Heinz Peter Lang <hplang@langatium.net>
@@ -18,12 +19,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from future import standard_library
+standard_library.install_aliases()
 __version__ = "$Header$"
 
 import re
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
-from urllib import quote
+from urllib.parse import quote
 from time import sleep
 from hashlib import md5
 
@@ -59,7 +62,7 @@ class Delicious(TagInfoService):
         try:
             content = Delicious._get_content(url)
             return Delicious._parse_counts(content)
-        except urllib2.HTTPError:
+        except urllib.error.HTTPError:
             return 0
 
     @staticmethod
@@ -169,5 +172,5 @@ if __name__ == '__main__':
     #    print Delicious.getUrlInfo( url ), "counts"
     #    print Delicious.getTagInfo( ("debian", "linux") ), "counts"
     #    print Delicious.getRelatedTag( ("debian", "linux") ), "counts"
-    print Delicious.getTagInfo(("debian", "linux")), "counts"
-    print Delicious.getRelatedTags(('debian', 'linux'))
+    print(Delicious.getTagInfo(("debian", "linux")), "counts")
+    print(Delicious.getRelatedTags(('debian', 'linux')))

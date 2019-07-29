@@ -4,6 +4,7 @@ Created on Feb 3, 2012
 @author: heinz-peterlang
 '''
 
+from builtins import object
 class ArgumentErrorMsg(object):
     def __init__(self, function):
         self.function = function

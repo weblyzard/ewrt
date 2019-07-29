@@ -3,6 +3,7 @@
  @package eWRT.input.clean.text
  cleans up text phrases
 """
+from __future__ import print_function
 
 # (C)opyrights 2010 by Albert Weichselbraun <albert@weichselbraun.net>
 #
@@ -24,6 +25,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+from builtins import object
 from eWRT.stat.string.spelling import SpellSuggestion
 import re
 
@@ -44,7 +46,7 @@ class PhraseCleanup(object):
     @staticmethod
     def getFullCleanupProfile():
         """ returns the full cleanup profile using all cleanup modules """
-        strCleanupPipe = (unicode.lower, RemovePossessive(), FixDashSpace())
+        strCleanupPipe = (str.lower, RemovePossessive(), FixDashSpace())
         phrCleanupPipe = (SplitEnumerations(),
                           SplitMultiTerms(), SplitBracketExplanations())
         wrdCleanupPipe = (FixSpelling(), RemovePunctationAndBrackets(),)
@@ -231,12 +233,12 @@ class TestPhraseCleanup(object):
             u"quick/speedy output") == [u"quick output", u"speedy output"]
         assert self.p.clean(u"i/o error") == [u"i/o error", ]
         assert self.p.clean(u"planning/design") == [u"planning", u"design"]
-        print self.p.clean(u'defective product/ services')
+        print(self.p.clean(u'defective product/ services'))
         assert self.p.clean(
             u'defective product/ services') == [u'defective product', u'defective services']
 
     def testFixSpellingErrors(self):
-        print self.p.clean(u"determine mening")
+        print(self.p.clean(u"determine mening"))
         assert self.p.clean(u"deterrmin mening") == [u"determine meaning", ]
 
     def testFixDashSpace(self):
@@ -245,7 +247,7 @@ class TestPhraseCleanup(object):
         assert self.p.clean(u"run-/config") == [u"run-/config"]
 
     def testRemoveEnumerations(self):
-        print self.p.clean(u"1. fix it, 2. do it")
+        print(self.p.clean(u"1. fix it, 2. do it"))
         assert self.p.clean(u"1. fix it, 2. do it") == [u"fix it", u"do it"]
         assert self.p.clean(u"1) fix it, 2) do it") == [u"fix it", u"do it"]
         assert self.p.clean(u"(1) fix it, (2) do it") == [u"fix it", u"do it"]
@@ -253,7 +255,7 @@ class TestPhraseCleanup(object):
         assert self.p.clean(u"a) fix it, b) do it") == [u"fix it", u"do it"]
 
         # mistakes found in applications
-        print self.p.clean(u"1. life cycle phase 2. risk management tasks 3. risk management activities")
+        print(self.p.clean(u"1. life cycle phase 2. risk management tasks 3. risk management activities"))
         assert self.p.clean(u"1. life cycle phase 2. risk management tasks 3. risk management activities") == \
             [u"life cycle phase", u"risk management tasks",
                 u"risk management activities"]
@@ -263,7 +265,7 @@ class TestPhraseCleanup(object):
         # cha -> ha; dow -> now due to the non risk-specific spell checking!
         assert self.p.clean(u'concept hazard analysis(cha)') == [
             u'concept hazard analysis', u'ha']
-        print self.p.clean(u'dow fire and explosion index (f&ei)')
+        print(self.p.clean(u'dow fire and explosion index (f&ei)'))
         assert self.p.clean(u'dow fire and explosion index (f&ei)') == [
             u'now fire and explosion index', u'f&ei']
 
@@ -272,6 +274,6 @@ class TestPhraseCleanup(object):
             returns the number of mistakes fixed in the given phrase 
         """
         s = FixSpelling()
-        print s.numMistakesFixed(u'dow fire and explossion index (f&ei)'.split(" "))
+        print(s.numMistakesFixed(u'dow fire and explossion index (f&ei)'.split(" ")))
         assert s.numMistakesFixed(
             u'dow fire and explossion index (f&ei)'.split(" ")) == 2

@@ -15,6 +15,7 @@ Usage as CLI: python postprocess_geo.py <title> [<language>]
 language defaults to 'en'
 
 '''
+from __future__ import print_function
 
 import sys
 import warnings

@@ -5,6 +5,7 @@ Created on Nov 29, 2017
 
 .. codeauthor: Max Göbel <goebel@weblyzard.com>
 '''
+from __future__ import print_function
 import unittest
 import logging
 import os
@@ -101,12 +102,12 @@ class YouTubeTest(unittest.TestCase):
 
         for r in self.youtube.search(self.search_terms, None):
 
-            assert len(required_keys) == len(r.keys())
+            assert len(required_keys) == len(list(r.keys()))
             assert isinstance(r['last_modified'], datetime)
             for rk in required_keys:
-                if not rk in r.keys():
-                    print('k ', sorted(r.keys()))
-                    print('rk', sorted(required_keys))
+                if not rk in list(r.keys()):
+                    print(('k ', sorted(r.keys())))
+                    print(('rk', sorted(required_keys)))
                     assert False, 'key %s missing' % rk
 
     def test_convert_date(self):

@@ -6,6 +6,7 @@
     @remarks
     this module is based on yahoo's boss search service 
 """
+from __future__ import print_function
 
 # (C)opyrights 2008-2010 by Albert Weichselbraun <albert@weichselbraun.net>
 #                           Heinz Peter Lang <hplang@langatium.net>
@@ -23,10 +24,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import map
+from builtins import object
 __version__ = "$Header$"
-
-from urllib import urlopen, urlencode, quote
-from urllib2 import URLError
+from urllib.request import urlopen
+from urllib.parse import urlencode, quote
+from urllib.error import URLError
 from nose.plugins.attrib import attr
 from socket import setdefaulttimeout
 
@@ -64,7 +69,7 @@ class Yahoo(TagInfoService):
         } )
         params = urlencode( queryParams )
         url = YAHOO_SEARCH_URL % "%2B".join(map( quote, terms) ) +"?"+ params
-        print url
+        print(url)
         try:
             result = eval( self.r.open(url).read().replace("\\/", "/" ))
             return result['ysearchresponse']
@@ -123,11 +128,11 @@ class TestYahoo(object):
 
     @attr("remote")
     def testSearchCounts(self):
-        for query, refinedQueries in self.SEARCH_QUERIES.iteritems():
+        for query, refinedQueries in self.SEARCH_QUERIES.items():
             qCount = int(self.y.query( (query, ) )['totalhits'])
 
             for q in refinedQueries:
-                print query, q, "**",qCount, int(self.y.query( q )['totalhits'])
+                print(query, q, "**",qCount, int(self.y.query( q )['totalhits']))
                 assert qCount > int(self.y.query( q )['totalhits'])
     
     @attr("remote")
@@ -142,7 +147,7 @@ class TestYahoo(object):
         for resultSite in Yahoo.getSearchResults(self.y.query( ("linux", "firefox", ),  \
                             count=1, queryParams={'view':'keyterms', 'abstract': 'long'} )):
 
-            print resultSite.search_result['keyterms']['terms']
+            print(resultSite.search_result['keyterms']['terms'])
             assert len( resultSite.getPageText() ) > len(resultSite.search_result['abstract'])
             assert 'http' in resultSite.search_result['url']
 
@@ -200,11 +205,11 @@ if __name__ == '__main__':
     #print y.query( ("energy", "coal") )
     #print y.query( ("d'alembert", "law") )
     r = y.query( ("linux", "python", ), count=5, queryParams={'view': 'keyterms', 'abstract': 'long'} )
-    print "***", r
+    print("***", r)
     for entry in r['resultset_web']:
-        print entry.keys()
-        print entry['keyterms']['terms']
-        print entry['url']
-        print entry['abstract']
+        print(list(entry.keys()))
+        print(entry['keyterms']['terms'])
+        print(entry['url'])
+        print(entry['abstract'])
 
 
