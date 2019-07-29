@@ -14,6 +14,8 @@ pytest:
         - sonar-scanner -D sonar.host.url=$sonarhost  -D sonar.login=$sonarlogin
     only:
         - migration
+        - develop
+        - master
     tags:
         - docker
 
@@ -24,6 +26,8 @@ pylint:
         - tox -e pylint
     only:
         - migration
+        - develop
+        - master
     when: manual
     tags:
         - docker
@@ -35,6 +39,8 @@ slowtest:
         - tox -e pytest-slow
     only:
         - migration
+        - develop
+        - master
     when: manual
     tags:
         - docker
@@ -47,6 +53,8 @@ vulture:
         - tox -e vulture
     only:
         - migration
+        - develop
+        - master
     when: manual
     tags:
         - docker
@@ -59,6 +67,7 @@ build:
         - ./build-package.sh
     only:
         - migration
+        - master
     when: manual
     tags:
         - shell-runner
