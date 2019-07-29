@@ -5,6 +5,7 @@ Created on September 24, 2018
 
 @author: jakob <jakob.steixner@modul.ac.at>
 '''
+from __future__ import print_function
 
 import copy
 import mock
@@ -291,15 +292,15 @@ def test_extract_literal_properties_freestanding():
     # target = pywikibot.ItemPage.from_entity_uri(site=DataSite('wikidata', 'wikidata'), uri=target_id)
     result = ParseItemPage.extract_literal_properties(
         entity=target, languages=['en'], literals=['labels'])
-    print result
+    print(result)
     assert result['labels']['en'] == 'Cambridge'
     entity_id = 'Q350'
     target = ItemPage.from_entity_uri(
         site=DataSite('wikidata', 'wikidata'), uri='http://www.wikidata.org/entity' + '/' + entity_id)
-    print target
+    print(target)
     result = ParseItemPage.extract_literal_properties(
         entity=target, languages=['en'], literals=['labels'])
-    print result
+    print(result)
     assert result['labels']['en'] == 'Cambridge'
 
 
@@ -436,7 +437,7 @@ def test_get_country_from_location():
 
 
 def result_without_timestamp(result):
-    return dict([item for item in result.items() if item[0] != 'wikidata_timestamp'])
+    return dict([item for item in list(result.items()) if item[0] != 'wikidata_timestamp'])
 
 
 def test_parseItemPage_all():
@@ -458,7 +459,7 @@ def test_parseItemPage_all():
     assert set(parsed_with_attribute_labels.keys()) == set(
         parsed_without_attribute_labels.keys())
     assert not any(
-        ('labels' in val for val in parsed_without_attribute_labels.values()))
+        ('labels' in val for val in list(parsed_without_attribute_labels.values())))
     # assert any(('labels' in val for val in parsed_with_attribute_labels.values()))
     assert all((parsed_with_attribute_labels[literal] ==
                 parsed_without_attribute_labels[literal]
@@ -467,7 +468,7 @@ def test_parseItemPage_all():
 
     assert result_without_timestamp(
         parsed_with_attribute_labels) == result_without_timestamp(sample_output)
-    for val in parsed_with_attribute_labels.values():
+    for val in list(parsed_with_attribute_labels.values()):
         if 'values' in val and 'P18' not in val['url']:
             assert all(('labels' in sub_val for sub_val in val['values']))
     parsed_with_country = ParseItemPage(entity,

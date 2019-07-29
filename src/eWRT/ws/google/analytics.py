@@ -5,6 +5,8 @@ Created on May 29, 2018
 
 @author: Max Göbel <goebel@weblyzard.com>
 '''
+from __future__ import print_function
+from builtins import object
 import httplib2
 import unittest
 import datetime
@@ -16,7 +18,7 @@ from apiclient.discovery import build
 from oauth2client.client import OAuth2Credentials
 
 
-class GAnalyticsClient():
+class GAnalyticsClient(object):
 
     VERSION = 'v3'  # needed by apiclient
     SERVICE_NAME = 'analytics'  # needed by apiclient
@@ -350,7 +352,7 @@ class GanalyticsTest(unittest.TestCase):
 
         client = GAnalyticsClient()
         result = client.run(",".join(metrics))
-        print result
+        print(result)
 
 
 if __name__ == "__main__":

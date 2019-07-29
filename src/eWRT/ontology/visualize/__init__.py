@@ -19,10 +19,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #from eWRT.stat.coherence import Coherence, DiceCoherence, PMICoherence
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import map
+from builtins import object
 from rdflib.Graph import Graph
 from rdflib import Namespace
 
-from commands import getoutput
+from subprocess import getoutput
 from itertools import chain
 from operator import itemgetter
 from os.path import splitext
@@ -133,7 +138,7 @@ class GraphvizVisualize(Output):
     def __str__(self):
         stmts = self.getOntologyStatements()
         conceptDefinitions  = [ '"%s" [ label="%s" ]' % (c,c) 
-                               for c in set( chain( map(itemgetter(0), stmts), map(itemgetter(2), stmts) ) ) ]
+                               for c in set( chain( list(map(itemgetter(0), stmts)), list(map(itemgetter(2), stmts)) ) ) ]
         relationDefinitions = ['"%s" -> "%s" %s' % (s,o,self.mapPredicate(p)) for s,p,o in stmts ]
         
         return "digraph G{%s\n%s\n\n%s\n\n\n%s\n}" % (GraphvizVisualize.GRAPHVIZ_HEADER,

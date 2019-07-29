@@ -6,6 +6,8 @@
 
 language detection
 '''
+from __future__ import print_function
+from builtins import map
 import re
 import unittest
 
@@ -18,7 +20,7 @@ from eWRT.util.module_path import get_resource
 def read_wordlist(fname):
     ''' reads a language wordlist from a file '''
     with open(fname) as f:
-        return set(map(str.lower, map(str.strip, f.readlines())))
+        return set(map(str.lower, list(map(str.strip, f.readlines()))))
 
 
 # returns the language name based on the language file's name
@@ -35,8 +37,8 @@ DELETE_CHARS = ",.!?\"'"
 DELETE_TABLE = {ch: None for ch in DELETE_CHARS}
 
 
-import string
-table = string.maketrans('ac', 'cx')
+# import string [mig]
+table = str.maketrans('ac', 'cx')  # [mig] string --> str
 
 
 def detect_language(text):
@@ -59,7 +61,7 @@ def detect_language(text):
     words = [word.strip() for word in cleaned_text.split(" ")]
     current_lang = None
     current_wordcount = 0
-    for lang, reference_wordlist in STOPWORD_DICT.items():
+    for lang, reference_wordlist in list(STOPWORD_DICT.items()):
         wordcount = sum([1 for word in words if word in reference_wordlist])
         if wordcount >= current_wordcount and wordcount > 0:
             current_wordcount = wordcount

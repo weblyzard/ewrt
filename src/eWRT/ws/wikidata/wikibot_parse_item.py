@@ -14,6 +14,9 @@ wikidata metadata.
 
 '''
 
+from builtins import map
+from past.builtins import basestring
+from builtins import object
 import sys
 import warnings
 
@@ -77,7 +80,7 @@ class DoesNotMatchFilterError(Exception):
         self.entity = entity
 
 
-class ParseItemPage:
+class ParseItemPage(object):
     """Methods to parse pywikibot.ItemPage for a specifiable list
         of properties, returning a dict of property labels and values."""
     LITERAL_PROPERTIES = ['labels', 'aliases', 'descriptions']
@@ -465,7 +468,7 @@ class ParseItemPage:
         return None
 
 
-class ParseClaim:
+class ParseClaim(object):
     """Parse an individual claim and its qualifiers"""
 
     def __init__(self, claim, languages, literals, delay=False,
@@ -683,11 +686,9 @@ def guess_current_value(attribute_instances):
             #     return most_recent_instance
 
             most_recent_startdate = max(
-                map(start_date, instance_has_startdate))
+                list(map(start_date, instance_has_startdate)))
 
-            most_recent_instances = filter(
-                lambda i: start_date(i) == most_recent_startdate,
-                instance_has_startdate)
+            most_recent_instances = [i for i in instance_has_startdate if start_date(i) == most_recent_startdate]
             if len(most_recent_startdate) > 1:
                 raise ValueError('Several equally recent start dates found.')
             else:

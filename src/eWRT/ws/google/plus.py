@@ -5,10 +5,13 @@ Created on Dec 13, 2011
 
 :author: heinz
 '''
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 import json
 import logging
 
-from urllib import urlencode
+from urllib.parse import urlencode
 from datetime import datetime
 
 from eWRT.ws.WebDataSource import WebDataSource
@@ -44,7 +47,7 @@ class GooglePlus(object):
         :returns: generator with the result
         '''
         for search_term in search_terms:
-            if isinstance(search_term, unicode):
+            if isinstance(search_term, str):
                 search_term = search_term.encode('utf-8')
             params = {'query': '"%s"' % search_term,
                       'orderBy': DEFAULT_ORDER_BY,

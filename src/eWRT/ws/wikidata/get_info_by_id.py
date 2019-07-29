@@ -10,6 +10,7 @@ a known id.
 entity types.
 Starting point is the
 [pywikibot manual](https://www.mediawiki.org/wiki/Manual:Pywikibot/Wikidata)'''
+from __future__ import print_function
 import sys
 
 from pprint import pprint

@@ -22,6 +22,7 @@
 #
 # -----------------------------------------------------------------------------------
  
+from builtins import object
 __author__   = "albert"
 __revision__ = "$Revision: 1 $"
  

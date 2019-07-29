@@ -9,12 +9,15 @@ Client for accessing the Reputation API for Web of Trust
 
 see: `WOT API Documentation <http://www.mywot.com/wiki/API#Documentation:_Reputation_API>`_
 '''
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 import unittest
 import json
 
 from six import string_types
-from urllib import urlencode, quote
-from urlparse import urlparse
+from urllib.parse import urlencode, quote
+from urllib.parse import urlparse
 
 from eWRT.access.http import Retrieve
 
@@ -85,9 +88,9 @@ class WebOfTrust(object):
         details
         '''
         result = {}
-        for host, reputation in data.iteritems():
+        for host, reputation in data.items():
             r = {}
-            for attr_name, new_attr_name in MAPPING.iteritems():
+            for attr_name, new_attr_name in MAPPING.items():
                 if attr_name in reputation:
                     r[new_attr_name] = reputation[attr_name]
             r['wot_link'] = WOT_LINK % r['target']
@@ -104,8 +107,8 @@ class TestWOT(unittest.TestCase):
                 u'derstandard.at': {u'1': [93, 60], u'0': [93, 62], 
                                     u'2': [93, 61], u'target': u'derstandard.at', 
                                     u'4': [93, 60]}}
-        for details in WebOfTrust._format_result(data).itervalues():
-            assert all(attr in details for attr in MAPPING.values())
+        for details in WebOfTrust._format_result(data).values():
+            assert all(attr in details for attr in list(MAPPING.values()))
 
         
 if __name__ == '__main__':

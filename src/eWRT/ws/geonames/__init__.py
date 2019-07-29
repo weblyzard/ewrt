@@ -2,6 +2,7 @@
 """
  @package eWRT.ws.geonames
 """
+from __future__ import print_function
 
 # (C)opyrights 2009 by Albert Weichselbraun <albert@weichselbraun.net>
 #
@@ -18,6 +19,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from builtins import zip
+from builtins import object
 from eWRT.util.cache import MemoryCached, DiskCached
 from eWRT.access.http import Retrieve
 from eWRT.ws.geonames.gazetteer import Gazetteer
@@ -90,7 +93,7 @@ class GeoEntity(object):
             is located """
 
         assert self['level'] >= 3
-        print self['level'], self['idUrl'], self['idUrl'][2]
+        print(self['level'], self['idUrl'], self['idUrl'][2])
         return GeoEntity.factory(id=self['idUrl'][2])[0]
 
     def getCountry(self):
@@ -144,7 +147,7 @@ class GeoNames(object):
         url = GeoNames.NEIGHBOURS_SERVICE_URL % geo_entity.id
         jsonData = eval(Retrieve('eWRT.ws.geonames').open(url, retry=5).read())
         if 'geonames' in jsonData:
-            return filter(None, [GeoNames.getGeoEntity(GeoEntity.factory(id=e['geonameId'])) for e in jsonData['geonames']])
+            return [_f for _f in [GeoNames.getGeoEntity(GeoEntity.factory(id=e['geonameId'])) for e in jsonData['geonames']] if _f]
         else:
             return []
 
@@ -199,7 +202,7 @@ class TestGeoNames(object):
         g = self.EXAMPLE_ENTITIES['.carinthia']
         assert g.highestCommonLevel(self.EXAMPLE_ENTITIES['.at']) == 2
         assert g.highestCommonLevel(self.EXAMPLE_ENTITIES['.eu']) == 1
-        print g.highestCommonLevel(self.EXAMPLE_ENTITIES['.ch'])
+        print(g.highestCommonLevel(self.EXAMPLE_ENTITIES['.ch']))
         assert g.highestCommonLevel(self.EXAMPLE_ENTITIES['.ch']) == 1
         assert g.highestCommonLevel(self.EXAMPLE_ENTITIES['.carinthia']) == 3
 

@@ -2,6 +2,7 @@
 
 """ @package eWRT.ws.amazon
     provides access to amazon data """
+from __future__ import print_function
 
 # (C)opyrights 2008 by Albert Weichselbraun <albert@weichselbraun.net>
 #
@@ -19,17 +20,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 __revision__ = "$Revision$"
 
 
 import base64
 import hashlib
 import hmac
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import time
 import logging
 
-from urllib import quote
+from urllib.parse import quote
 from xml.parsers.expat import ParserCreate
 from time import strftime
 
@@ -101,7 +105,7 @@ class ResultList(object):
 
     def test(self):
         self.parse(open("a.xml").read())
-        print self.xmlResult
+        print(self.xmlResult)
 
 
 class AmazonWS(object):
@@ -118,7 +122,7 @@ class AmazonWS(object):
     def generateWsUrl(self, arguments):
         """ generates a valid amazon webservice request url """
         argList = ["%s&SubscriptionId=%s" % (
-            self.wsBase, self.accessKey)] + ["%s=%s" % (k, quote(v)) for k, v in arguments.items()]
+            self.wsBase, self.accessKey)] + ["%s=%s" % (k, quote(v)) for k, v in list(arguments.items())]
         return "&".join(argList)
 
     def generateSignedWsUrl(self, **arguments):
@@ -217,7 +221,7 @@ class AmazonUrl(object):
 
         params.update(self.timestamp())
         params.update(AWS_ACCESS_KEY_ID)
-        url_encoded = urllib.urlencode(params)
+        url_encoded = urllib.parse.urlencode(params)
 
         msg = [entry for entry in url_encoded.split('&')]
         msg.sort()  # amazon also calculates signature from sorted entries
@@ -233,7 +237,7 @@ class AmazonUrl(object):
         url_msg, sig_msg = self.get_msgs(params)
         signature = self.get_signature(sig_msg)
         request_url = "%s&%s" % (
-            url_msg, urllib.urlencode({'Signature': signature}))
+            url_msg, urllib.parse.urlencode({'Signature': signature}))
         return request_url.replace('%0A', '')
 
 
@@ -241,4 +245,4 @@ if __name__ == "__main__":
     url_generator = AmazonWS()
     url = url_generator.generateSignedWsUrl(Operation='BrowseNodeLookup', Service='AWSECommerceService',
                                             ResponseGroup='NewReleases', Marketplace='us', BrowseNodeId='281052')
-    print url
+    print(url)

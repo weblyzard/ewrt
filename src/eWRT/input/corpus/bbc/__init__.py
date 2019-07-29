@@ -5,12 +5,14 @@
     @package DetectLanguage.reuters
     a generic method to retrieve text from the reuters corpus
 """
+from __future__ import print_function
 
 # -----------------------------------------------------------------------
 # - (C)opyright 2009 by Albert Weichselbraun <albert@weichselbraun.net>
 # -                    webLyzard technology gmbh <awe@weblyzard.com>
 # -----------------------------------------------------------------------
 
+from builtins import object
 __revision__ = "$Revision: 545 $"
 __author__ = "Albert Weichselbraun"
 
@@ -31,7 +33,7 @@ class BBCGetCorpus(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         if self.files:
             htmlTxt = open(self.files.pop()).read()
             return HtmlToText.getText(htmlTxt)
@@ -48,4 +50,4 @@ if __name__ == '__main__':
     def n(x): return x.replace("'", "''")
     for num, text in enumerate(BBCGetCorpus("7[3456789]*.stm")):
         title = BBCGetCorpus.getTitle(text)
-        print "INSERT INTO evaluation_documents (content_id, title, content) VALUES ('%d', '%s', '%s');" % (num, n(title), n(text))
+        print("INSERT INTO evaluation_documents (content_id, title, content) VALUES ('%d', '%s', '%s');" % (num, n(title), n(text)))

@@ -1,5 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from __future__ import print_function
+from builtins import str
+from builtins import range
 import time
 import unittest
 
@@ -29,20 +32,20 @@ class TestAsync(unittest.TestCase):
     def test_max_process_limit(self):
         ''' tests the max process limit '''
         async = Async(self.TEST_CACHE_DIR, max_processes=1)
-        for x in xrange(2):
+        for x in range(2):
             async.post( [ "/bin/sleep", str(x+1) ] )
 
         assert async.has_processes_limit_reached() == True
 
-        time.sleep(2)
+        time.sleep(3)  # [mig] NOTE: sleep 1 && sleep 2 make 3 sec right?
         flag = async.has_processes_limit_reached()
-        print(flag, [ p.pid for p in async.cur_processes ])
+        print((flag, [ p.pid for p in async.cur_processes ]))
         assert flag  == False
 
     def test_debug_mode(self):
         ''' tests the debug mode '''
         async = Async(self.TEST_CACHE_DIR, max_processes=1, debug_dir=self.TEST_CACHE_DIR)
-        for x in xrange(2):
+        for x in range(2):
             async.post( ["/bin/echo", "hallo"] )
 
         print(glob( join(self.TEST_CACHE_DIR, "debug*")))

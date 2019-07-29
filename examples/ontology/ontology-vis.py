@@ -2,6 +2,8 @@
 
 """ ontology-vis
     visualizes ontologies """
+from __future__ import print_function
+from builtins import str
 import sys
 
 from glob import glob
@@ -39,7 +41,7 @@ def visualizeOntologyFile( f ):
     """ visualizes the given ontology file
         @param[in] f   the filename of the ontology to visualize
     """
-    print "Visualizing "+f
+    print("Visualizing "+f)
     rdfOntology = Graph()
     fName, fExt = path.splitext( path.basename(f))
 
@@ -51,14 +53,14 @@ def visualizeOntologyFile( f ):
  
 
 def usage():
-    print "ontology-vis.py -d [ontology-directory] -f [ontology-file] -h"
+    print("ontology-vis.py -d [ontology-directory] -f [ontology-file] -h")
 
 # main
 if __name__ == '__main__':
     try:
         opts, args = getopt( sys.argv[1:], "hd:f:", ["help", "input-dir=", "input-file="] )
-    except GetoptError, err:
-        print str(err)
+    except GetoptError as err:
+        print(str(err))
         usage()
         sys.exit(2)
     

@@ -7,6 +7,11 @@
 
     eWRT REST Client barebone with support for authentificated https requests
 '''
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from builtins import object
 import traceback
 import logging
 import random
@@ -15,14 +20,14 @@ try:
     # urllib2 is merged into urllib in python3 (SV)
     from urllib.error import HTTPError
 except:
-    from urllib2 import HTTPError  # python2
+    from urllib.error import HTTPError  # python2
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 try:
     from urllib.parse import urlsplit, urlunsplit  # porting to python 3.4 (SV)
 except:
-    from urlparse import urlsplit, urlunsplit  # python2
+    from urllib.parse import urlsplit, urlunsplit  # python2
 
 from six import string_types
 from json import dumps, loads
@@ -123,7 +128,7 @@ class RESTClient(object):
                 url = url + "?" + urllib.parse.urlencode(query_parameters,
                                                          doseq=True)
             except:
-                url = url + "?" + urllib.urlencode(query_parameters,
+                url = url + "?" + urllib.parse.urlencode(query_parameters,
                                                    doseq=True)
 
         return url

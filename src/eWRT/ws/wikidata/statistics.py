@@ -11,13 +11,15 @@ article in any language. Also allows to retrieve other
 types of images (e.g. flags, coats of arms, etc.) where given.
 
 '''
+from __future__ import print_function
+from builtins import object
 import glob
 import ujson
 
 from collections import Counter
 
 
-class OutputStatistics:
+class OutputStatistics(object):
     """Tools to process statistics about the results from
     a batch of items processed by
     eWRT.ws.wikidata.extract_meta.collect_attributes_from_wp_and_wd"""

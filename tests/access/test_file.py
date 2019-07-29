@@ -5,6 +5,7 @@ Created on Nov 29, 2017
 
 .. codeauthor: max goebel <mcgoebel@gmail.com>
 '''
+from builtins import bytes
 import unittest
 
 from os import remove

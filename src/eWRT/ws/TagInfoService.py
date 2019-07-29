@@ -1,3 +1,4 @@
+from builtins import object
 class TagInfoService(object):
     """ Class for fetching assigned tags """
 

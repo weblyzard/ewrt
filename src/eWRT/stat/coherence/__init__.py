@@ -3,6 +3,7 @@
  @package eWRT.ws.stat.coherence
  Determines how strongly two terms are connected to each other
 """
+from __future__ import division
 
 # (C)opyrights 2010 by Albert Weichselbraun <albert@weichselbraun.net>
 #                      Johannes Duong <johannes.duong@wu.ac.at>
@@ -20,6 +21,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from builtins import str
+from past.utils import old_div
+from builtins import object
 from eWRT.ws.TagInfoService import TagInfoService
 from unittest import TestCase
 from eWRT.util.cache import DiskCache
@@ -97,10 +101,10 @@ class PMICoherence(Coherence):
 
         nz = nx + ny + nt
         try:
-            fx = (nx / nz) * exp((nx / nz) * -1)
-            fy = (ny / nz) * exp((ny / nz) * -1)
-            ft = (nt / nz) * exp((nt / nz) * -1)
-            return ft / (fx * fy)
+            fx = (old_div(nx, nz)) * exp((old_div(nx, nz)) * -1)
+            fy = (old_div(ny, nz)) * exp((old_div(ny, nz)) * -1)
+            ft = (old_div(nt, nz)) * exp((old_div(nt, nz)) * -1)
+            return old_div(ft, (fx * fy))
         except ZeroDivisionError:
             return None
 

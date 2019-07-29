@@ -12,7 +12,7 @@ setup(
     ###########################################
     # Metadata
     name="eWRT",
-    version="0.9.7.20190621-dev",
+    version="3.0.0.20190729-dev",
     description='eWRT',
     author='Albert Weichselbraun, Heinz Lang, Gerhard Wohlgenannt, Johannes Duong, Norman Süsstrunk, Daniel Streiff',
     author_email='albert@weblyzard.com, lang@weblyzard.com, wohlg@ai.wu.ac.at, johannes.duong@wu.ac.at, norman.suestrunk@htwchur.ch, daniel.streiff@htwchur.ch',
@@ -32,14 +32,14 @@ setup(
                       #                         'python-oauth2' #linkedin
                       ],
     classifiers=[
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3 :: Only',
     ],
 
 
     ###########################################
-    # Run unittests
+    # Run unittests 
+    # NOTE: is this still needed with gitlab-ci in place?
     test_suite='nose.collector',
 
     ###########################################

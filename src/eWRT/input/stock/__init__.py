@@ -8,7 +8,10 @@ Interesting indices to support in the future:
 * BALTIC DRY INDEX (BDIY:IND)
 * Howe Robinson Container Index
 """
+from __future__ import print_function
 
+from builtins import zip
+from builtins import object
 from bz2 import BZ2File
 from csv import reader
 from glob import glob
@@ -47,7 +50,7 @@ class StockIndex(object):
         """retrieves data from the given future in csv format
            @param future_name: the name of the future
         """
-        print cls.SUPPORTED_FUTURES[future_name]
+        print(cls.SUPPORTED_FUTURES[future_name])
         return cls._read_index_filen(cls.SUPPORTED_FUTURES[future_name])[1:]
 
     @classmethod
@@ -79,10 +82,10 @@ if __name__ == '__main__':
     delta = []
     Analysis = namedtuple('analysis', "delta volatility change_percentage")
     for s, f in zip(s_list, f_list):
-        print s.date, f.date
+        print(s.date, f.date)
         assert s.date == f.date
         delta.append(
             (s.date, Analysis(f.last - s.last, s.last - s.open, s.change_percentage)))
 
     delta.sort(key=lambda x: x[1].delta)
-    print delta[:10]
+    print(delta[:10])

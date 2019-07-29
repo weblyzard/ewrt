@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 import os
 import unittest
 
@@ -59,7 +60,7 @@ class TestCalais(unittest.TestCase):
     def test_analyze(self):
         ''' '''
         things = self.calais.analyze(self.test_html, 'text/html')
-        print things
+        print(things)
         assert len(things) == 6
 
 

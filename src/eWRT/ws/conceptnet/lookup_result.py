@@ -6,9 +6,12 @@ Access to conceptnet data structures using its REST interface
 
 ::author: Albert Weichselbraun <albert.weichselbraun@htwchur.ch>
 """
+from __future__ import print_function
 
+from future import standard_library
+standard_library.install_aliases()
 try:
-    from urllib import quote
+    from urllib.parse import quote
 except ImportError:
     from urllib.parse import quote
 

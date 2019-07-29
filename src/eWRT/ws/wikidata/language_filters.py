@@ -9,6 +9,7 @@ Filter multilingual result to produce monolingual documents by rejecting
 labels etc. in the non-required languages.
 '''
 
+from past.builtins import basestring
 import copy
 
 

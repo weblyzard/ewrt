@@ -19,6 +19,7 @@
 For more information, see the README.md under /storage  and the documentation
 at https://cloud.google.com/storage/docs.
 """
+from __future__ import print_function
 
 import argparse
 import datetime

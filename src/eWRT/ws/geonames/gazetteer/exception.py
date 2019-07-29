@@ -4,6 +4,7 @@
  exceptions related to the gazetteer class
 
 """
+from __future__ import print_function
 
 # (C)opyrights 2009 by Heinz Lang <heinz.lang@wu.ac.at>
 #                      Albert Weichselbraun <albert@weichselbraun.net>
@@ -30,7 +31,7 @@ class GazetteerEntryNotFound(Exception):
     def __init__(self, id, query):
         self.id = id
         self.query = query
-        print id, query
+        print(id, query)
 
     def __str__(self):
         return "Gazetteer lookup for entity-id '%s' failed." % (self.id)

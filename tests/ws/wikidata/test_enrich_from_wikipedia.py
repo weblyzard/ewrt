@@ -5,6 +5,9 @@ Created on September 20, 2018
 
 @author: jakob <jakob.steixner@modul.ac.at>
 '''
+from __future__ import print_function
+from builtins import next
+from builtins import object
 import pytest
 
 from eWRT.ws.wikidata.enrich_from_wikipedia import (
@@ -66,7 +69,7 @@ countries = ['Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola',
              'Zimbabwe']
 
 
-class TestWikipedia_page_info_from_title():
+class TestWikipedia_page_info_from_title(object):
 
     @pytest.mark.parametrize(u'title,language,expected',
                              [('Douglas Adams', 'en',
@@ -74,7 +77,7 @@ class TestWikipedia_page_info_from_title():
                               ('Österreich', 'de', austria_expected)])
     def test_wikipedia_page_info_from_title(self, title, language, expected):
         try:
-            page_info = wikipedia_page_info_from_titles(title, language).next()
+            page_info = next(wikipedia_page_info_from_titles(title, language))
             print('Retrieved meta info!')
         except StopIteration:
             raise ValueError(u'No English Wikipedia page identified for '
@@ -90,7 +93,7 @@ class TestWikipedia_page_info_from_title():
         except AssertionError:
             raise AssertionError(u'Summary does not match expected keywords')
         with pytest.raises(StopIteration):
-            wikipedia_page_info_from_titles('Georgia', 'en').next()
+            next(wikipedia_page_info_from_titles('Georgia', 'en'))
 
     def test_get_sitelinks_from_wdid(self):
         try:

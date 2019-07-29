@@ -136,7 +136,7 @@ def metaphone (term):
             "wh":"w"
         }
 
-        if first_chars in table.keys():
+        if first_chars in list(table.keys()):
             term = term[2:]
             code = table[first_chars]
             term_length = len(term)
@@ -342,7 +342,7 @@ def nysiis (term):
         "sch":"sss"
     }
 
-    for table_entry in table.keys():
+    for table_entry in list(table.keys()):
         table_value = table[table_entry]    # get table value
         table_value_len = len(table_value)    # calculate its length
         first_chars = term[0:table_value_len]
@@ -363,7 +363,7 @@ def nysiis (term):
         "nd":"d",
     }
 
-    for table_entry in table.keys():
+    for table_entry in list(table.keys()):
         table_value = table[table_entry]    # get table value
         table_entry_len = len(table_entry)    # calculate its length
         last_chars = term[(0 - table_entry_len):]

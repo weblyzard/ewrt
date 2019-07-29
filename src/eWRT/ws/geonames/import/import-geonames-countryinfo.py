@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 from xml.dom.minidom import parse
 from gzip import open
 
@@ -30,7 +31,7 @@ for country in parse( open(COUNTRY_INFO_FILE) ).getElementsByTagName("country"):
     else:
         area = "'"+area+"'"
 
-    print "INSERT INTO countryinfo (id, area, population) VALUES ('%s', %s, %s);" \
-      % (getNodeText(country, "geonameId"), area, population)
+    print("INSERT INTO countryinfo (id, area, population) VALUES ('%s', %s, %s);" \
+      % (getNodeText(country, "geonameId"), area, population))
 
     

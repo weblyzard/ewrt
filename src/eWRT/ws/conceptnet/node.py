@@ -7,6 +7,7 @@ Access to conceptnet data structures using its REST interface
 ::author: Albert Weichselbraun <albert.weichselbraun@htwchur.ch>
 """
 
+from builtins import object
 from warnings import warn
 
 
