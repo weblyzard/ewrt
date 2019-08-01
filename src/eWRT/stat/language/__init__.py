@@ -38,7 +38,7 @@ DELETE_CHARS = ",.!?\"'"
 DELETE_TABLE = {ch: None for ch in DELETE_CHARS}
 
 
-if sys.version.startswith('3')
+if sys.version.startswith('3'):
     table = str.maketrans('ac', 'cx')  # [mig] string --> str
 else:
     import string
