@@ -9,6 +9,7 @@ language detection
 from __future__ import print_function
 from builtins import map
 import re
+import sys
 import unittest
 
 from glob import glob
@@ -37,8 +38,11 @@ DELETE_CHARS = ",.!?\"'"
 DELETE_TABLE = {ch: None for ch in DELETE_CHARS}
 
 
-# import string [mig]
-table = str.maketrans('ac', 'cx')  # [mig] string --> str
+if sys.version.startswith('3')
+    table = str.maketrans('ac', 'cx')  # [mig] string --> str
+else:
+    import string
+    table = string.maketrans('ac', 'cx')
 
 
 def detect_language(text):
