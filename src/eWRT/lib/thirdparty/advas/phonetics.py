@@ -11,6 +11,7 @@
 import string
 import re
 
+
 def soundex (term):
     "Return the soundex value to a string argument."
 
@@ -29,20 +30,20 @@ def soundex (term):
     # changes by Frank Hofmann / Jan 02 2005
 
     # generate translation table only once. used to translate into soundex numbers
-    #table = string.maketrans('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', '0123012002245501262301020201230120022455012623010202')
-    table = string.maketrans('ABCDEFGHIJKLMNOPQRSTUVWXYZ', '01230120022455012623010202')
+    # table = string.maketrans('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', '0123012002245501262301020201230120022455012623010202')
+    trantab = term.maketrans('ABCDEFGHIJKLMNOPQRSTUVWXYZ', '01230120022455012623010202')
 
     # check parameter
     if not term:
-        return "0000" # could be Z000 for compatibility with other implementations
+        return "0000"  # could be Z000 for compatibility with other implementations
     # end if
 
         # convert into uppercase letters
-    term = string.upper(term)
+    term = term.upper()
     first_char = term[0]
 
     # translate the string into soundex code according to the table above
-    term = string.translate(term[1:], table)
+    term = term[1:].translate(trantab)
 
     # remove all 0s
     term = term.replace("0", "")
@@ -56,13 +57,14 @@ def soundex (term):
     # end for
 
     # pad with zeros
-    str2 = str2+"0"*len(str2)
+    str2 = str2 + "0"*len(str2)
 
     # take the first four letters
     return_value = str2[:4]
 
     # return value
     return return_value
+
 
 def metaphone (term):
     "returns metaphone code for a given string"
@@ -168,7 +170,7 @@ def metaphone (term):
     }
 
     i = 0
-    while (i<term_length):
+    while (i < term_length):
         # init character to add, init basic patterns
         add_char = ""
         part_n_2 = ""
@@ -179,28 +181,28 @@ def metaphone (term):
 
         # extract a number of patterns, if possible
         if (i < (term_length - 1)):
-            part_n_2 = term[i:i+2]
+            part_n_2 = term[i:i + 2]
 
-            if (i>0):
-                part_c_2 = term[i-1:i+1]
-                part_c_3 = term[i-1:i+2]
+            if (i > 0):
+                part_c_2 = term[i - 1:i + 1]
+                part_c_3 = term[i - 1:i + 2]
             # end if
         # end if
 
         if (i < (term_length - 2)):
-            part_n_3 = term[i:i+3]
+            part_n_3 = term[i:i + 3]
         # end if
 
         if (i < (term_length - 3)):
-            part_n_4 = term[i:i+4]
+            part_n_4 = term[i:i + 4]
         # end if
 
         # use table with conditions for translations
         if (term[i] == "b"):
             add_char = st_trans["b"]
             if (i == (term_length - 1)):
-                if (i>0):
-                    if (term[i-1] == "m"):
+                if (i > 0):
+                    if (term[i - 1] == "m"):
                         add_char = ""
                     # end if
                 # end if
@@ -240,7 +242,7 @@ def metaphone (term):
                 add_char = ""
             elif (part_n_4 == "gned"):
                 add_char = ""
-            elif (re.search(r'dg[eyi]',part_c_3)):
+            elif (re.search(r'dg[eyi]', part_c_3)):
                 add_char = ""
             elif (part_n_2 == "gi"):
                 if (part_c_3 != "ggi"):
@@ -319,6 +321,7 @@ def metaphone (term):
     # return metaphone code
     return code
 
+
 def nysiis (term):
     "returns New York State Identification and Intelligence Algorithm (NYSIIS) code for the given term"
 
@@ -343,8 +346,8 @@ def nysiis (term):
     }
 
     for table_entry in list(table.keys()):
-        table_value = table[table_entry]    # get table value
-        table_value_len = len(table_value)    # calculate its length
+        table_value = table[table_entry]  # get table value
+        table_value_len = len(table_value)  # calculate its length
         first_chars = term[0:table_value_len]
         if (first_chars == table_entry):
             term = table_value + term[table_value_len:]
@@ -364,10 +367,10 @@ def nysiis (term):
     }
 
     for table_entry in list(table.keys()):
-        table_value = table[table_entry]    # get table value
-        table_entry_len = len(table_entry)    # calculate its length
+        table_value = table[table_entry]  # get table value
+        table_entry_len = len(table_entry)  # calculate its length
         last_chars = term[(0 - table_entry_len):]
-        #print last_chars, ", ", table_entry, ", ", table_value
+        # print last_chars, ", ", table_entry, ", ", table_value
         if (last_chars == table_entry):
             term = term[:(0 - table_value_len + 1)] + table_value
             break
@@ -406,7 +409,7 @@ def nysiis (term):
 
     # transform h-> if previous or next is nonvowel -> previous
     occur = re.findall(r'([a-z]{0,1}?)h([a-z]{0,1}?)', code)
-    #print occur
+    # print occur
     for occur_group in occur:
         occur_item_previous = occur_group[0]
         occur_item_next = occur_group[1]
@@ -421,7 +424,7 @@ def nysiis (term):
 
     # transform w-> if previous is vowel -> previous
     occur = re.findall(r'([aeiouy]{1}?)w', code)
-    #print occur
+    # print occur
     for occur_group in occur:
         occur_item_previous = occur_group[0]
         # make substitution
@@ -438,6 +441,7 @@ def nysiis (term):
 
     # return nysiis code
     return code
+
 
 def caverphone (term):
     "returns the language key using the caverphone algorithm 2.0"
