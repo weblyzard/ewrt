@@ -19,7 +19,7 @@ from eWRT.util.module_path import get_resource
 
 def read_wordlist(fname):
     ''' reads a language wordlist from a file '''
-    with open(fname) as f:
+    with open(fname, 'r', encoding='utf-8') as f:
         return set(map(str.lower, list(map(str.strip, f.readlines()))))
 
 
