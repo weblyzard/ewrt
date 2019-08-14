@@ -164,7 +164,7 @@ class Retrieve(object):
     def _getHTTPBasicAuthOpener(url, user, pwd):
         ''' returns an opener, capable of handling http-auth '''
         passman = urllib.request.HTTPPasswordMgrWithDefaultRealm()
-        passman.add_password(None, url, user, pwd)
+        passman.add_password(None, [url], user, pwd)
         auth_handler = urllib.request.HTTPBasicAuthHandler(passman)
         return auth_handler
 
