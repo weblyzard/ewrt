@@ -221,6 +221,45 @@ organization_properties = {
     "P4290": u"official app",
 }
 
+# a subset of properties potentially present for all entity types
+core_properties_generic = {
+        "label": ("(rdfs:label|wdt:P2561)", "mandatory_filterlanguages"),
+        "altLabel": ("(skos:altLabel|wdt:P1449|wdt:P742)", "optional_filterlanguages"),
+        "description": ("schema:description", "optional_filterlanguages"),
+        "type": ("wdt:P31", "optional")
+}
+
+
+# a subset of properties relevant for events with human readable identifiers,
+# some defined as mandatory here though they're not strictly mandatory in
+# wikidata's model, e.g. an event without a start date cannot be used for
+# constructing a timeline and will thus be discarded
+core_event_properties = {
+        "startDate": ("(wdt:P580|wdt:P585|wdt:P619)", "mandatory"),
+        "coord": ("wdt:P625", "optional"),
+        "location": ("(wdt:P276|wdt:P1427|wdt:P1444)", "optional"),
+        "administrative": ("wdt:P131", "optional"),
+        "country": ("wdt:P17", "optional"),
+        "endDate": ("wdt:P582", "optional"),
+        'hashtag': ('wdt:P2572', 'optional'),
+        'website': ('wdt:P856', 'optional'),
+        "organizer": ("(wdt:P664)", "optional"),
+        "participatingTeam": ("wdt:P1923", "optional"),
+        "participant": ("wdt:P710", "optional"),
+        # "officeContested": ("wdt:P541", "optional"),
+        "winner": ("(wdt:P991|wdt:P13469|wdt:P1346)", "optional"),
+        "speaker": ("wdt:P823", "optional"),
+        "guestOfHonor": ("wdt:P967", "optional"),
+        "openedBy": ("wdt:P542", "optional"),
+        "partOf": ("wdt:P361", "optional"),
+        "follows": ("wdt:P155", "optional"),
+        "followedBy": ("wdt:P156", "optional"),
+        "sport": ("wdt:P641", "optional"),
+        # "numberOfInjured": ("wdt:P1339", "optional"),
+        # "numberOfDeaths": ("wdt:P1120", "optional")
+}
+
+
 ENTITY_TYPE_DEFINITIONS = {'person': person_properties,
                            'organization': organization_properties,
                            'geo': location_properties}
@@ -228,3 +267,4 @@ ENTITY_TYPE_DEFINITIONS = {'person': person_properties,
 GENERIC_PROPERTIES = copy.copy(person_properties)
 GENERIC_PROPERTIES.update(organization_properties)
 GENERIC_PROPERTIES.update(location_properties)
+
