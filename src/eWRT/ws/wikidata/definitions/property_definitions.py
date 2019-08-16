@@ -5,7 +5,7 @@
 # a variety of entity types
 
 import copy
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 
 local_attributes = OrderedDict([
     ("P17", u"country"),
@@ -221,45 +221,115 @@ organization_properties = {
     "P4290": u"official app",
 }
 
-# a subset of properties potentially present for all entity types
-core_properties_generic = {
-        "label": ("(rdfs:label|wdt:P2561)", "mandatory_filterlanguages"),
-        "altLabel": ("(skos:altLabel|wdt:P1449|wdt:P742)", "optional_filterlanguages"),
-        "description": ("schema:description", "optional_filterlanguages"),
-        "type": ("wdt:P31", "optional")
-}
 
+PropertyParseInstruction = namedtuple(
+    typename='PropertyParseInstruction',
+    field_names=['name', 'identifiers', 'is_optional', 'language_specific'],
+)
+PropertyParseInstruction.__new__.__defaults__ = ('', '', True, False)
+
+
+# a subset of properties potentially present for all entity types
+CORE_GENERIC_PROPERTIES = [
+    PropertyParseInstruction(name='label',
+                             identifiers='(rdfs:label|wdt:P2561)',
+                             is_optional=False, language_specific=True),
+    PropertyParseInstruction(name='altLabel',
+                             identifiers='(skos:altLabel|wdt:P1449|wdt:P742)',
+                             is_optional=True, language_specific=True),
+    PropertyParseInstruction(name='description',
+                             identifiers='schema:description',
+                             is_optional=True,
+                             language_specific=True),
+    PropertyParseInstruction(name='type', identifiers='wdt:P31',
+                             is_optional=True, language_specific=False)
+]
 
 # a subset of properties relevant for events with human readable identifiers,
 # some defined as mandatory here though they're not strictly mandatory in
 # wikidata's model, e.g. an event without a start date cannot be used for
 # constructing a timeline and will thus be discarded
-core_event_properties = {
-        "startDate": ("(wdt:P580|wdt:P585|wdt:P619)", "mandatory"),
-        "coord": ("wdt:P625", "optional"),
-        "location": ("(wdt:P276|wdt:P1427|wdt:P1444)", "optional"),
-        "administrative": ("wdt:P131", "optional"),
-        "country": ("wdt:P17", "optional"),
-        "endDate": ("wdt:P582", "optional"),
-        'hashtag': ('wdt:P2572', 'optional'),
-        'website': ('wdt:P856', 'optional'),
-        "organizer": ("(wdt:P664)", "optional"),
-        "participatingTeam": ("wdt:P1923", "optional"),
-        "participant": ("wdt:P710", "optional"),
-        # "officeContested": ("wdt:P541", "optional"),
-        "winner": ("(wdt:P991|wdt:P13469|wdt:P1346)", "optional"),
-        "speaker": ("wdt:P823", "optional"),
-        "guestOfHonor": ("wdt:P967", "optional"),
-        "openedBy": ("wdt:P542", "optional"),
-        "partOf": ("wdt:P361", "optional"),
-        "follows": ("wdt:P155", "optional"),
-        "followedBy": ("wdt:P156", "optional"),
-        "sport": ("wdt:P641", "optional"),
-        # "numberOfInjured": ("wdt:P1339", "optional"),
-        # "numberOfDeaths": ("wdt:P1120", "optional")
-}
+CORE_PROPERTIES_EVENTS = [
+    PropertyParseInstruction(name='startDate',
+                             identifiers='(wdt:P580|wdt:P585|wdt:P619)',
+                             is_optional=False,
+                             language_specific=False),
+    PropertyParseInstruction(name='coord',
+                             identifiers='wdt:P625',
+                             is_optional=True,
+                             language_specific=False),
+    PropertyParseInstruction(name='location',
+                             identifiers='(wdt:P276|wdt:P1427|wdt:P1444)',
+                             is_optional=True,
+                             language_specific=False),
+    PropertyParseInstruction(name='administrative',
+                             identifiers='wdt:P131',
+                             is_optional=True,
+                             language_specific=False),
+    PropertyParseInstruction(name='country',
+                             identifiers='wdt:P17',
+                             is_optional=True,
+                             language_specific=False),
+    PropertyParseInstruction(name='endDate',
+                             identifiers='wdt:P582',
+                             is_optional=True,
+                             language_specific=False),
+    PropertyParseInstruction(name='hashtag',
+                             identifiers='wdt:P2572',
+                             is_optional=True,
+                             language_specific=False),
+    PropertyParseInstruction(name='website',
+                             identifiers='wdt:P856',
+                             is_optional=True,
+                             language_specific=False),
+    PropertyParseInstruction(name='organizer',
+                             identifiers='(wdt:P664)',
+                             is_optional=True,
+                             language_specific=False),
+    PropertyParseInstruction(name='participatingTeam',
+                             identifiers='wdt:P1923',
+                             is_optional=True,
+                             language_specific=False),
+    PropertyParseInstruction(name='participant',
+                             identifiers='wdt:P710',
+                             is_optional=True,
+                             language_specific=False),
+    PropertyParseInstruction(name='winner',
+                             identifiers='(wdt:P991|wdt:P13469|wdt:P1346)',
+                             is_optional=True,
+                             language_specific=False),
+    PropertyParseInstruction(name='speaker',
+                             identifiers='wdt:P823',
+                             is_optional=True,
+                             language_specific=False),
+    PropertyParseInstruction(name='guestOfHonor',
+                             identifiers='wdt:P967',
+                             is_optional=True,
+                             language_specific=False),
+    PropertyParseInstruction(name='openedBy',
+                             identifiers='wdt:P542',
+                             is_optional=True,
+                             language_specific=False),
+    PropertyParseInstruction(name='partOf',
+                             identifiers='wdt:P361',
+                             is_optional=True,
+                             language_specific=False),
+    PropertyParseInstruction(name='follows',
+                             identifiers='wdt:P155',
+                             is_optional=True,
+                             language_specific=False),
+    PropertyParseInstruction(name='followedBy',
+                             identifiers='wdt:P156',
+                             is_optional=True,
+                             language_specific=False),
+    PropertyParseInstruction(name='sport',
+                             identifiers='wdt:P641',
+                             is_optional=True,
+                             language_specific=False)
+]
 
-
+# mapping from main entity type as human readable string to the respective
+# relevant properties
 ENTITY_TYPE_DEFINITIONS = {'person': person_properties,
                            'organization': organization_properties,
                            'geo': location_properties}
@@ -267,4 +337,3 @@ ENTITY_TYPE_DEFINITIONS = {'person': person_properties,
 GENERIC_PROPERTIES = copy.copy(person_properties)
 GENERIC_PROPERTIES.update(organization_properties)
 GENERIC_PROPERTIES.update(location_properties)
-
