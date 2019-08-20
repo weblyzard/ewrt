@@ -5,7 +5,7 @@
 # a variety of entity types
 
 import copy
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 
 local_attributes = OrderedDict([
     ("P17", u"country"),
@@ -221,6 +221,125 @@ organization_properties = {
     "P4290": u"official app",
 }
 
+
+PropertyParseInstruction = namedtuple(
+    typename='PropertyParseInstruction',
+    field_names=['name', # str
+                 'identifiers', # str
+                 'is_optional', # bool
+                 'language_specific' # int, one of (-1, 0, 1)
+                 ],
+)
+PropertyParseInstruction.__new__.__defaults__ = ('', '', True, 0)
+# PropertyParseInstructions.language_specific expects values:
+#   - 0: not language specific, e. g. datetime, coordinates or official website
+#   - 1: language specific literal
+#   - -1: WikiData entity, as an abstract key not language specific but
+#         can have language specific labels (to allow searching for the labels
+#         too where that makes sense
+
+
+# a subset of properties potentially present for all entity types
+CORE_GENERIC_PROPERTIES = [
+    PropertyParseInstruction(name='label',
+                             identifiers='(rdfs:label|wdt:P2561)',
+                             is_optional=False, language_specific=1),
+    PropertyParseInstruction(name='altLabel',
+                             identifiers='(skos:altLabel|wdt:P1449|wdt:P742)',
+                             is_optional=True, language_specific=1),
+    PropertyParseInstruction(name='description',
+                             identifiers='schema:description',
+                             is_optional=True,
+                             language_specific=1),
+    PropertyParseInstruction(name='type', identifiers='wdt:P31',
+                             is_optional=True, language_specific=-1)
+]
+
+# a subset of properties relevant for events with human readable identifiers,
+# some defined as mandatory here though they're not strictly mandatory in
+# wikidata's model, e.g. an event without a start date cannot be used for
+# constructing a timeline and will thus be discarded
+CORE_PROPERTIES_EVENTS = [
+    PropertyParseInstruction(name='startDate',
+                             identifiers='(wdt:P580|wdt:P585|wdt:P619)',
+                             is_optional=False,
+                             language_specific=0),
+    PropertyParseInstruction(name='coord',
+                             identifiers='wdt:P625',
+                             is_optional=True,
+                             language_specific=0),
+    PropertyParseInstruction(name='location',
+                             identifiers='(wdt:P276|wdt:P1427|wdt:P1444)',
+                             is_optional=True,
+                             language_specific=-1),
+    PropertyParseInstruction(name='administrative',
+                             identifiers='wdt:P131',
+                             is_optional=True,
+                             language_specific=-1),
+    PropertyParseInstruction(name='country',
+                             identifiers='wdt:P17',
+                             is_optional=True,
+                             language_specific=0),
+    PropertyParseInstruction(name='endDate',
+                             identifiers='wdt:P582',
+                             is_optional=True,
+                             language_specific=0),
+    PropertyParseInstruction(name='hashtag',
+                             identifiers='wdt:P2572',
+                             is_optional=True,
+                             language_specific=0),
+    PropertyParseInstruction(name='website',
+                             identifiers='wdt:P856',
+                             is_optional=True,
+                             language_specific=0),
+    PropertyParseInstruction(name='organizer',
+                             identifiers='(wdt:P664)',
+                             is_optional=True,
+                             language_specific=-1),
+    PropertyParseInstruction(name='participatingTeam',
+                             identifiers='wdt:P1923',
+                             is_optional=True,
+                             language_specific=-1),
+    PropertyParseInstruction(name='participant',
+                             identifiers='wdt:P710',
+                             is_optional=True,
+                             language_specific=-1),
+    PropertyParseInstruction(name='winner',
+                             identifiers='(wdt:P991|wdt:P13469|wdt:P1346)',
+                             is_optional=True,
+                             language_specific=-1),
+    PropertyParseInstruction(name='speaker',
+                             identifiers='wdt:P823',
+                             is_optional=True,
+                             language_specific=-1),
+    PropertyParseInstruction(name='guestOfHonor',
+                             identifiers='wdt:P967',
+                             is_optional=True,
+                             language_specific=0),
+    PropertyParseInstruction(name='openedBy',
+                             identifiers='wdt:P542',
+                             is_optional=True,
+                             language_specific=0),
+    PropertyParseInstruction(name='partOf',
+                             identifiers='wdt:P361',
+                             is_optional=True,
+                             language_specific=0),
+    PropertyParseInstruction(name='follows',
+                             identifiers='wdt:P155',
+                             is_optional=True,
+                             language_specific=-1),
+    PropertyParseInstruction(name='followedBy',
+                             identifiers='wdt:P156',
+                             is_optional=True,
+                             language_specific=-1),
+    PropertyParseInstruction(name='sport',
+                             identifiers='wdt:P641',
+                             is_optional=True,
+                             language_specific=-1)
+]
+
+# mapping from main entity type as human readable string to the respective
+# relevant properties
 ENTITY_TYPE_DEFINITIONS = {'person': person_properties,
                            'organization': organization_properties,
                            'geo': location_properties}

@@ -30,8 +30,8 @@ def soundex (term):
     # changes by Frank Hofmann / Jan 02 2005
 
     # generate translation table only once. used to translate into soundex numbers
-    # table = string.maketrans('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', '0123012002245501262301020201230120022455012623010202')
-    trantab = term.maketrans('ABCDEFGHIJKLMNOPQRSTUVWXYZ', '01230120022455012623010202')
+    #table = string.maketrans('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', '0123012002245501262301020201230120022455012623010202')
+    table = string.maketrans('ABCDEFGHIJKLMNOPQRSTUVWXYZ', '01230120022455012623010202')
 
     # check parameter
     if not term:
@@ -39,11 +39,11 @@ def soundex (term):
     # end if
 
         # convert into uppercase letters
-    term = term.upper()
+    term = string.upper(term)
     first_char = term[0]
 
     # translate the string into soundex code according to the table above
-    term = term[1:].translate(trantab)
+    term = string.translate(term[1:], table)
 
     # remove all 0s
     term = term.replace("0", "")
