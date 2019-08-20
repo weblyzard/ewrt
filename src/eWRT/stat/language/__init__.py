@@ -19,7 +19,7 @@ from eWRT.util.module_path import get_resource
 
 def read_wordlist(fname):
     ''' reads a language wordlist from a file '''
-    with open(fname) as f:
+    with open(fname, 'r', encoding='utf-8') as f:
         return set(map(str.lower, list(map(str.strip, f.readlines()))))
 
 
@@ -29,16 +29,15 @@ def get_lang_name(fname): return basename(fname).split(".")[0]
 
 LANG_DATA_DIR = get_resource(__file__, 'data')
 
-##
+# #
 # \var STOPWORD_DICT: a dictionary of the 100 most common words in the given language
 STOPWORD_DICT = {get_lang_name(fname): read_wordlist(
     fname) for fname in glob(LANG_DATA_DIR + "/*.csv")}
 DELETE_CHARS = ",.!?\"'"
 DELETE_TABLE = {ch: None for ch in DELETE_CHARS}
 
-
 # import string [mig]
-table = str.maketrans('ac', 'cx')  # [mig] string --> str
+# table = str.maketrans('ac', 'cx')  # [mig] string --> str
 
 
 def detect_language(text):
