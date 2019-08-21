@@ -55,7 +55,7 @@ def collect_entities_delayed(entity_types,
     :type dump_path: basestring
     :param entity_types: dict/Ordered dict of entity types and their Wikidata
         codes (e. g. {'human': 'Q5'}
-    :type entity_types: (dict, OrderedDict)
+    :type entity_types: dict
     :param retrieval_mode: read entities from API or dumped file.
     :type retrieval_mode: basestring
     :param n_queries: number of subsequent queries, with automatic offset
@@ -112,7 +112,6 @@ def collect_entities_delayed(entity_types,
                                            n_queries=n_queries,
                                            include_wikipedia=include_wikipedia,
                                            delay_wikipedia_retrieval=delay_wikipedia_retrieval,
-                                           return_type=return_type,
                                            **kwargs)):
 
             # apply postprocessing steps
