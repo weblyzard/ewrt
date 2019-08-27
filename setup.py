@@ -24,7 +24,7 @@ setup(
                       'oauth2client==2.2.0',  # YT
                       'google-api-python-client==1.4.0',  # YT,
                       'six',
-                      'gdata',
+                      'gdata @ git+https://github.com/dvska/gdata-python3#egg=gdata',
                       'wikipedia',
                       'pywikibot',
                       'bz2file',
