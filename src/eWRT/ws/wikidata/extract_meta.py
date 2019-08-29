@@ -31,6 +31,7 @@ from bz2file import BZ2File
 from lxml import etree as et
 from wikipedia import RedirectError, DisambiguationError
 
+from eWRT.config import USER_AGENT
 from eWRT.ws.wikidata.enrich_from_wikipedia import wp_summary_from_wdid
 from eWRT.ws.wikidata.language_filters import filter_result
 from eWRT.ws.wikidata.wikibot_parse_item import (ParseItemPage,
@@ -158,6 +159,8 @@ def collect_attributes_from_wp_and_wd(itempage, languages,
             'entity {} does not match filter criteria'.format(
                 itempage['id']
             ))
+    except Exception as e:
+        raise e
     entity_extracted_details.update(entity.details)
     if include_wikipedia and not delay_wikipedia_retrieval:
         for language_result in merge_with_wikipedia_by_language(
@@ -260,14 +263,18 @@ class WikidataEntityIterator(object):
           ?item wdt:P279* wd:%s .
           }"""
         try:
-            res = pywikibot.pagegenerators.WikidataSPARQLPageGenerator(
+            site = pywikibot.Site('wikidata', 'wikidata', user=USER_AGENT)
+            res = pywikibot.pagegenerators.WikidataSPARQLPageGenerator(site=site,
                 query=subclass_query % self.entity_types[
                     parent_class_label])
         except KeyError:
             raise KeyError(
                 'Undefined parent type label, needs to be one of {}'.format(
                     [name for name in self.type_root_identifiers]))
-        res = list([item.id for item in res])
+        try:
+            res = list([item.id for item in res])
+        except Exception as e:
+            raise e
         return res
 
     def collect_entities_from_dump(self,
@@ -278,7 +285,6 @@ class WikidataEntityIterator(object):
                                    include_wikipedia=True,
                                    delay_wikipedia_retrieval=True,
                                    pre_filter=None,
-                                   return_type=None,
                                    **kwargs
                                    ):
         """
@@ -309,9 +315,12 @@ class WikidataEntityIterator(object):
                 return open(file_name)
 
         dump_path = self.dump_path
-        if not self.all_relevant_categories:
-            self.all_relevant_categories = self.get_relevant_category_ids(
-                self.entity_types)
+        try:
+            if not self.all_relevant_categories:
+                self.all_relevant_categories = self.get_relevant_category_ids(
+                    self.entity_types)
+        except Exception as e:
+            raise e
         with best_guess_open(dump_path) as xml_file:
 
             parser = et.iterparse(xml_file, events=('end',))
@@ -381,6 +390,8 @@ class WikidataEntityIterator(object):
                                 del elem
                                 del events
                                 continue
+                            except Exception as e:
+                                raise e
 
                     del elem
                     del events
