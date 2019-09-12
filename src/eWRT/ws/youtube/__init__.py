@@ -1,30 +1,30 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import print_function
+import urllib.error
+import urllib.parse
+import urllib.request
+from eWRT.ws.WebDataSource import WebDataSource
+from apiclient.discovery import build
+from time import sleep
+from pickle import dump
+from datetime import datetime, timedelta
+from operator import attrgetter
+from six import string_types
+import pytz
+import json
+import dateutil.parser as dateparser
+import logging
+import unittest
+import os
 '''
 Created on 25.09.2012
 
 @author: Norman Süsstrunk, Heinz-Peter Lang, Albert Weichselbraun
 '''
-from __future__ import print_function
 
 from future import standard_library
 standard_library.install_aliases()
-import os
-import unittest
-import logging
-import dateutil.parser as dateparser
-import urllib.request, urllib.parse, urllib.error
-import json
-import pytz
-
-from six import string_types
-from operator import attrgetter
-from datetime import datetime, timedelta
-from pickle import dump
-from time import sleep
-from apiclient.discovery import build
-
-from eWRT.ws.WebDataSource import WebDataSource
 
 
 logger = logging.getLogger('eWRT.ws.youtube')
@@ -123,8 +123,6 @@ class YouTubeEntry(dict):
                 continue
 
             value = get_value(attr, search_result)
-            if isinstance(value, str):
-                value = value.encode('utf-8')
             if key in self and isinstance(self[key], list):
                 if value:
                     self[key].append(value)
@@ -284,6 +282,7 @@ class YouTube_v3(WebDataSource):
                 item['snippet'] = {'channel_id': channel_id}
 
         # retrieve comments and details as requested
+        logger.info('max_comment_count: {}'.format(max_comment_count))
         if max_comment_count > 0:
             item['comments'] = [YouTubeEntry(comment, YouTubeEntry.COMMENT_MAPPING)
                                 for comment in self._get_video_comments(video_id=video_id)]
@@ -363,7 +362,8 @@ class YouTube_v3(WebDataSource):
                                                        max_comment_count=self.max_comment_count,
                                                        get_details=self.get_details)
                     except Exception as e:
-                        logger.error('Failed to convert Youtube item: %s' % e)
+                        logger.error(
+                            'Failed to convert Youtube item: %s' % e, exc_info=True)
 
             if items_count >= max_results:
                 continue_search = False
@@ -403,7 +403,8 @@ class YouTube_v3(WebDataSource):
         freebase_params = dict(query=QUERY_TERM, key=self.api_key)
         freebase_url = self.FREEBASE_SEARCH_URL % urllib.parse.urlencode(
             freebase_params)
-        freebase_response = json.loads(urllib.request.urlopen(freebase_url).read())
+        freebase_response = json.loads(
+            urllib.request.urlopen(freebase_url).read())
         if len(freebase_response['result']) == 0:
             print('No matching terms were found in Freebase.')
 
