@@ -49,5 +49,5 @@ def attribute_preferred_value(claim_instances):
             logger.info(
                 'Several instances of claim {} on entity {} marked as '
                 'preferred, this is suspicious but does have valid use '
-                'cases!'.format(sample_claim.id, sample_claim.on_item.id))
+                'cases!'.format(sample_claim.id, sample_claim.snak.split('$')[0]))
         return [claim for claim in preferred]
