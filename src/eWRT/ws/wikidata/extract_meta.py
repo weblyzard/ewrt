@@ -16,8 +16,8 @@ from builtins import range
 from builtins import object
 import sys
 import ujson
-import warnings
 import gzip
+import logging
 
 try:
     import pywikibot.pagegenerators
@@ -39,6 +39,8 @@ from eWRT.ws.wikidata.language_filters import filter_result
 from eWRT.ws.wikidata.wikibot_parse_item import (ParseItemPage,
                                                  get_wikidata_timestamp,
                                                  DoesNotMatchFilterError)
+
+logger = logging.getLogger(__name__)
 
 ENTITY_TYPES = ['organization', 'person', 'geo']
 
@@ -101,14 +103,18 @@ def collect_attributes_from_wp_and_wd(itempage, languages,
     if include_wikipedia:
         sitelinks = itempage['sitelinks']
         if languages:
-            relevant_sitelinks = [wiki for wiki in sitelinks if
+            relevant_sitelinks = {wiki: content for wiki, content in
+                                  sitelinks.items() if
                                   any([lang + 'wiki' == wiki for lang in
-                                       languages])]
+                                       languages])}
         else:
             relevant_sitelinks = sitelinks
         try:
-            sitelinks = [wiki['title'] for wiki in relevant_sitelinks]
-        except TypeError:
+            sitelinks = {wiki: content['title'] for wiki, content in
+                         relevant_sitelinks.items()}
+            pass
+        except TypeError as e:
+            sitelinks = relevant_sitelinks
             pass
 
         if not sitelinks:
@@ -133,10 +139,14 @@ def collect_attributes_from_wp_and_wd(itempage, languages,
                                                       sitelinks=sitelinks)
 
             except (RedirectError, DisambiguationError):
+                logger.warn('Failed to determine Wikipedia article: linked '
+                            'article is redirect or disambiguation page.',
+                            exc_info=True)
                 raise ValueError
             except requests.exceptions.ConnectionError:
-                warnings.warn('Failed to get info about entity {} from '
-                              'Wikipedia API!'.format(itempage['id']))
+                logger.warn('Failed to get info about entity {} from '
+                            'Wikipedia API!'.format(itempage['id']),
+                            exc_info=True)
 
     try:
         entity_extracted_details = {'url': wikipedia_data[0]['url']}
@@ -353,8 +363,8 @@ class WikidataEntityIterator(object):
                             elem_content['timestamp'] = timestamp
                             del timestamp
                         except NameError:
-                            warnings.warn('Item {} cannot be assigned a '
-                                          'timestamp!'.format(
+                            logger.warn('Item {} cannot be assigned a '
+                                        'timestamp!'.format(
                                 elem_content['id']
                             ))
                         try:
@@ -405,7 +415,8 @@ class WikidataEntityIterator(object):
                     del elem
                     del events
             except (EOFError, IOError) as e:
-                warnings.warn('Error parsing file {}: {}'.format(dump_path, e))
+                logger.warn('Error parsing file {}: {}'.format(dump_path, e),
+                            exc_info=True)
 
     def determine_relevant_category(self, elem_content):
         """
@@ -422,7 +433,7 @@ class WikidataEntityIterator(object):
         :raises ValueError (if JSON is parsed as (empty) list
         """
         if self.process_all:
-            return 'Q35120'
+            return 'Q35120'  # top level "entity" category
         try:
             try:
                 types = elem_content['claims']['P31']
