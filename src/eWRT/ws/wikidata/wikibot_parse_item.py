@@ -166,7 +166,10 @@ class ParseItemPage(object):
         if not entity_type_properties:
             self.entity_type_properties = GENERIC_PROPERTIES
         if unfiltered_attributes:
-            self.claims_of_interest = list(self.claims.keys())
+            try:
+                self.claims_of_interest = list(self.claims.keys())
+            except AttributeError as e:
+                raise e
         elif wd_parameters is None:
             self.claims_of_interest = CLAIMS_OF_INTEREST
         else:
@@ -396,7 +399,14 @@ class ParseItemPage(object):
             pass
         literal_properties = {prop: {} for prop in literals}
         for prop in literal_properties:
+            if not entity[prop]: # need to escape early since the dumps get
+                    # empty objects and empty lists mixed up:
+                    # entity[prop].keys() produces a type error when an entity
+                    # has e. g. no aliases because instead  of an empty dict,
+                    # this results in an empty list
+                continue
             languages_recorded = languages if languages else entity[prop].keys()
+
 
             for language in languages_recorded:
                     try:
