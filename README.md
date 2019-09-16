@@ -67,6 +67,7 @@ to your setting and save it to
   * `rss`
   * `technorati`
   * `twitter`
+  * `wikidata`
   * `wikipedia`
   * `wordnet`
   * `wot`
@@ -84,6 +85,7 @@ to your setting and save it to
    - python-rdflib
    - python-nltk
    - python-feedparser (eWRT.ws.rss)
+   - pywikibot (eWRT.ws.wikidata)
 
 * text conversion (eWRT.input.conv):
    - lynx 
