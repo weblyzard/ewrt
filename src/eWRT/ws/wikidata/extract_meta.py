@@ -16,12 +16,14 @@ from builtins import range
 from builtins import object
 import sys
 import ujson
-import warnings
+import gzip
+import logging
 
 try:
     import pywikibot.pagegenerators
 except RuntimeError:
     import os
+
     os.environ['PYWIKIBOT_NO_USER_CONFIG'] = '1'
     import pywikibot.pagegenerators
 import requests
@@ -38,6 +40,7 @@ from eWRT.ws.wikidata.wikibot_parse_item import (ParseItemPage,
                                                  get_wikidata_timestamp,
                                                  DoesNotMatchFilterError)
 
+logger = logging.getLogger(__name__)
 
 ENTITY_TYPES = ['organization', 'person', 'geo']
 
@@ -99,12 +102,19 @@ def collect_attributes_from_wp_and_wd(itempage, languages,
     wikipedia_data = []
     if include_wikipedia:
         sitelinks = itempage['sitelinks']
-        relevant_sitelinks = [wiki for wiki in sitelinks if
-                              any([lang + 'wiki' == wiki for lang in
-                                   languages])]
+        if languages:
+            relevant_sitelinks = {wiki: content for wiki, content in
+                                  sitelinks.items() if
+                                  any([lang + 'wiki' == wiki for lang in
+                                       languages])}
+        else:
+            relevant_sitelinks = sitelinks
         try:
-            sitelinks = [wiki['title'] for wiki in relevant_sitelinks]
-        except TypeError:
+            sitelinks = {wiki: content['title'] for wiki, content in
+                         relevant_sitelinks.items()}
+            pass
+        except TypeError as e:
+            sitelinks = relevant_sitelinks
             pass
 
         if not sitelinks:
@@ -129,10 +139,14 @@ def collect_attributes_from_wp_and_wd(itempage, languages,
                                                       sitelinks=sitelinks)
 
             except (RedirectError, DisambiguationError):
+                logger.warn('Failed to determine Wikipedia article: linked '
+                            'article is redirect or disambiguation page.',
+                            exc_info=True)
                 raise ValueError
             except requests.exceptions.ConnectionError:
-                warnings.warn('Failed to get info about entity {} from '
-                              'Wikipedia API!'.format(itempage['id']))
+                logger.warn('Failed to get info about entity {} from '
+                            'Wikipedia API!'.format(itempage['id']),
+                            exc_info=True)
 
     try:
         entity_extracted_details = {'url': wikipedia_data[0]['url']}
@@ -184,7 +198,7 @@ class WikidataEntityIterator(object):
     }
 
     def __init__(self, top_level_categories=None, lazy_load_subclasses=True,
-                 dump_path=None):
+                 dump_path=None, process_all=False):
         """
         :param top_level_categories: dict
         :param lazy_load_subclasses: Do (not) load subclass-to-superclass
@@ -193,6 +207,7 @@ class WikidataEntityIterator(object):
         """
 
         self.dump_path = dump_path
+        self.process_all = process_all
 
         if not top_level_categories:
             top_level_categories = self.type_root_identifiers
@@ -264,7 +279,8 @@ class WikidataEntityIterator(object):
           }"""
         try:
             site = pywikibot.Site('wikidata', 'wikidata', user=USER_AGENT)
-            res = pywikibot.pagegenerators.WikidataSPARQLPageGenerator(site=site,
+            res = pywikibot.pagegenerators.WikidataSPARQLPageGenerator(
+                site=site,
                 query=subclass_query % self.entity_types[
                     parent_class_label])
         except KeyError:
@@ -311,6 +327,8 @@ class WikidataEntityIterator(object):
             regular open otherwise."""
             if file_name.endswith('.bz2'):
                 return BZ2File(file_name)
+            elif file_name.endswith('.gz'):
+                return gzip.open(file_name)
             else:
                 return open(file_name)
 
@@ -322,7 +340,6 @@ class WikidataEntityIterator(object):
         except Exception as e:
             raise e
         with best_guess_open(dump_path) as xml_file:
-
             parser = et.iterparse(xml_file, events=('end',))
             try:
                 for events, elem in parser:
@@ -346,10 +363,10 @@ class WikidataEntityIterator(object):
                             elem_content['timestamp'] = timestamp
                             del timestamp
                         except NameError:
-                            warnings.warn('Item {} cannot be assigned a '
-                                          'timestamp!'.format(
-                                              elem_content['id']
-                                          ))
+                            logger.warn('Item {} cannot be assigned a '
+                                        'timestamp!'.format(
+                                elem_content['id']
+                            ))
                         try:
                             category = self.determine_relevant_category(
                                 elem_content)
@@ -362,7 +379,9 @@ class WikidataEntityIterator(object):
                             del events
                             continue
                         pre_filter_result = all(
-                            [filter_function(entity=elem_content, entity_type=category,  **filter_params)
+                            [filter_function(entity=elem_content,
+                                             entity_type=category,
+                                             **filter_params)
                              for filter_function, filter_params in pre_filter]
                         )
                         if pre_filter_result:
@@ -396,7 +415,8 @@ class WikidataEntityIterator(object):
                     del elem
                     del events
             except (EOFError, IOError) as e:
-                warnings.warn('Error parsing file {}: {}'.format(dump_path, e))
+                logger.warn('Error parsing file {}: {}'.format(dump_path, e),
+                            exc_info=True)
 
     def determine_relevant_category(self, elem_content):
         """
@@ -412,6 +432,8 @@ class WikidataEntityIterator(object):
         :rtype: bool
         :raises ValueError (if JSON is parsed as (empty) list
         """
+        if self.process_all:
+            return 'Q35120'  # top level "entity" category
         try:
             try:
                 types = elem_content['claims']['P31']

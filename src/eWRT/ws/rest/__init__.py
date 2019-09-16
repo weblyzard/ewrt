@@ -262,7 +262,7 @@ class MultiRESTClient(object):
                     msg = 'could not execute %s %s, error %s\n%s' % (
                         client.service_url, path, e,
                         traceback.format_exc())
-                    logger.warn(msg)
+                    logger.warn(msg, exc_info=True)
                     errors.append(msg)
 
         if len(errors) == len(self.clients):
