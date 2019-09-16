@@ -86,8 +86,7 @@ to your setting and save it to
    - python-nltk
    - python-feedparser (eWRT.ws.rss)
    - pywikibot (eWRT.ws.wikidata)
-
-* text conversion (eWRT.input.conv):
+   - text conversion (eWRT.input.conv):
    - lynx 
    - pdftotext (poppler-utils)
    - antiword
