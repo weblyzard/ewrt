@@ -10,9 +10,12 @@ If an attribute has several values, identify any that may be marked as
 'rank': 'preferred'
 '''
 
+import logging
+
 from pywikibot import Claim
 from pywikibot.site import DataSite
 
+logger = logging.getLogger(__name__)
 
 def attribute_preferred_value(claim_instances):
     """When an attribute has several instances, try to
@@ -39,15 +42,12 @@ def attribute_preferred_value(claim_instances):
                 pass
         preferred = [
             claim for claim in claim_instances if claim.rank == 'preferred']
-        if len(preferred) == 1:
-            return [claim for claim in preferred]
-
-            pass
-        elif len(preferred) == 0:
+        if len(preferred) == 0:
             raise ValueError('No claim instance marked as preferred!')
-        else:
-            raise ValueError(
-                'Incorrectly tagged data: several instances '
-                'marked as preferred, this should not happen!')
-        # return [claim.target for claim in preferred]
-
+        elif len(preferred) > 1:
+            sample_claim = preferred[0]
+            logger.info(
+                'Several instances of claim {} on entity {} marked as '
+                'preferred, this is suspicious but does have valid use '
+                'cases!'.format(sample_claim.id, sample_claim.on_item.id))
+        return [claim for claim in preferred]
