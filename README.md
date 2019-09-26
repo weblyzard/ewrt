@@ -1,7 +1,5 @@
 # extensible Web Retrieval Toolkit (eWRT)
-[Travis/Master Branch]: [![Build Status](https://www.travis-ci.org/weblyzard/ewrt.png?branch=master)](https://www.travis-ci.org/weblyzard/ewrt)
-
-[Migration Branch]: [![pipeline status](https://gitlab.semanticlab.net/core/ewrt/badges/migration/pipeline.svg)](https://gitlab.semanticlab.net/core/ewrt/commits/migration) [![coverage report](https://gitlab.semanticlab.net/core/ewrt/badges/migration/coverage.svg)](https://gitlab.semanticlab.net/core/ewrt/commits/migration)
+[Travis/Develop Branch]: [![Build Status](https://www.travis-ci.org/weblyzard/ewrt.png?branch=develop)](https://www.travis-ci.org/weblyzard/ewrt)
 
 The **Extensible Web Retrieval Toolkit (eWRT)** is a modular open-source Python API which 
   1. offers a unified interface for retrieving social data from Web sources such as Delicious, Flickr, Yahoo! and Wikipedia, 
