@@ -18,7 +18,7 @@ from builtins import map
 from past.builtins import basestring
 from builtins import object
 import sys
-import warnings
+import logging
 
 from eWRT.ws.wikidata.definitions import (local_attributes as LOCAL_ATTRIBUTES,
                                           image_attributes,
@@ -26,11 +26,14 @@ from eWRT.ws.wikidata.definitions import (local_attributes as LOCAL_ATTRIBUTES,
 from eWRT.ws.wikidata.get_image_from_wikidataid import get_image, \
     NoImageFoundError
 from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
-from pywikibot import (WbTime, Claim, Coordinate, WbQuantity, WbMonolingualText, WbGeoShape)
+from pywikibot import (WbTime, Claim, Coordinate, WbQuantity, WbMonolingualText,
+                       WbGeoShape)
 from pywikibot.site import DataSite
 
 if sys.version_info.major == 3:
     basestring = (bytes, str)
+
+logger = logging.getLogger(__name__)
 
 RELEVANT_LANGUAGES = ['en']
 
@@ -40,7 +43,6 @@ QUALIFIERS = {'P580': 'start date',
               'P642': 'at_organization',
               'P854': 'reference_url',
               'P1686': 'for_work'}
-
 
 CLAIMS_OF_INTEREST = ["P18", "P19", 'P39', 'P106', 'P108', 'P102']
 
@@ -165,7 +167,12 @@ class ParseItemPage(object):
         self.languages = languages
         if not entity_type_properties:
             self.entity_type_properties = GENERIC_PROPERTIES
-        if unfiltered_attributes:
+        if not self.claims:
+            self.claims_of_interest = []
+        elif isinstance(self.claims, list):
+            logger.warn('Claims show up as list!')
+            self.claims_of_interest = []
+        elif unfiltered_attributes:
             try:
                 self.claims_of_interest = list(self.claims.keys())
             except AttributeError as e:
@@ -242,7 +249,8 @@ class ParseItemPage(object):
                           ['min', 'max'] if param in filter_claims}
             try:
                 if not any(
-                        (inside_both(instance['value'], **thresholds) for instance
+                        (inside_both(instance['value'], **thresholds) for
+                         instance
                          in values['values'] if instance['value'] is not None)):
                     return False
             except TypeError:
@@ -299,7 +307,7 @@ class ParseItemPage(object):
                         self.details[claim_name]['url'] = \
                             'https://www.wikidata.org/wiki/Property:' + claim
                     else:
-                        warnings.warn(
+                        logger.warn(
                             'Unable to parse claim {claim} for item {item}, '
                             'should be present!'.format(claim=claim,
                                                         item=self.item_raw[
@@ -328,7 +336,7 @@ class ParseItemPage(object):
         for attribute in [a for a in self.details]:
 
             if not self.details[attribute] or 'values' in self.details[
-                    attribute] and not self.details[attribute]['values']:
+                attribute] and not self.details[attribute]['values']:
                 del self.details[attribute]
 
     @classmethod
@@ -358,8 +366,8 @@ class ParseItemPage(object):
                     values.append(value)
             except ValueError as e:
                 pass
-            except Exception as e:
-                raise e
+            # except Exception as e:
+            #     raise e
         if values:
             wd_prop_url = 'https://www.wikidata.org/wiki/Property:'
             claim_details = {'values': values,
@@ -373,12 +381,16 @@ class ParseItemPage(object):
                 if len(marked_preferred) >= 1:
                     preferred_item_snaks = [p.snak for p in marked_preferred]
                     claim_details['preferred'] = [instance for instance in
-                                                  claim_details['values'] if any((
-                                                  instance['claim_id'] == snak for snak in preferred_item_snaks))
+                                                  claim_details['values'] if
+                                                  any((
+                                                      instance[
+                                                          'claim_id'] == snak
+                                                      for snak in
+                                                      preferred_item_snaks))
                                                   ]
 
             except ValueError as e:
-                warnings.warn('encountered exception: {}'.format(e))
+                logger.info('Failed to identify claim instances: {}'.format(e))
 
         return claim_details if claim_details else None
 
@@ -399,33 +411,32 @@ class ParseItemPage(object):
             pass
         literal_properties = {prop: {} for prop in literals}
         for prop in literal_properties:
-            if not entity[prop]: # need to escape early since the dumps get
-                    # empty objects and empty lists mixed up:
-                    # entity[prop].keys() produces a type error when an entity
-                    # has e. g. no aliases because instead  of an empty dict,
-                    # this results in an empty list
+            if not entity[prop]:  # need to escape early since the dumps get
+                # empty objects and empty lists mixed up:
+                # entity[prop].keys() produces a type error when an entity
+                # has e. g. no aliases because instead  of an empty dict,
+                # this results in an empty list
                 continue
             languages_recorded = languages if languages else entity[prop].keys()
 
-
             for language in languages_recorded:
-                    try:
+                try:
+                    literal_properties[prop][language] = \
+                        entity[prop][language]
+                    if isinstance(literal_properties[prop][language], dict):
                         literal_properties[prop][language] = \
-                            entity[prop][language]
-                        if isinstance(literal_properties[prop][language], dict):
-                            literal_properties[prop][language] = \
-                                literal_properties[prop][language]['value']
-                        elif isinstance(literal_properties[prop][language], list):
-                            try:
-                                literal_properties[prop][language] = [entry['value']
-                                                                      for entry in
-                                                                      literal_properties[
-                                                                          prop][
-                                                                          language]]
-                            except TypeError:
-                                pass
-                    except (KeyError, AttributeError, TypeError):
-                        pass
+                            literal_properties[prop][language]['value']
+                    elif isinstance(literal_properties[prop][language], list):
+                        try:
+                            literal_properties[prop][language] = [entry['value']
+                                                                  for entry in
+                                                                  literal_properties[
+                                                                      prop][
+                                                                      language]]
+                        except TypeError:
+                            pass
+                except (KeyError, AttributeError, TypeError):
+                    pass
         return literal_properties
 
     @classmethod
@@ -503,9 +514,9 @@ class ParseItemPage(object):
                         except ValueError:
                             pass
                     else:
-                        warnings.warn('Entity {} has location property {} '
-                                      'set to null'.format(itempage['id'],
-                                                           location_type))
+                        logger.warn('Entity {} has location property {} '
+                                    'set to null'.format(itempage['id'],
+                                                         location_type))
         return None
 
 
@@ -550,46 +561,58 @@ class ParseClaim(object):
         :return: dictionary of claim attributes/qualifiers and their values."""
         claim_details = {}
         try:
-            claim_details['claim_id'] = self.claim.snak
+            claim_details['claim_id'] = getattr(self.claim, 'snak', None)
             if not claim_details['claim_id']:
                 claim_details['claim_id'] = self.claim.hash
                 if not claim_details['claim_id']:
-                    warnings.warn('No claim id identified')
+                    logger.warn('No claim id identified')
         except Exception as e:
-            warnings.warn('No claim id identified!')
-        if isinstance(self.claim.target, WbTime):
+            logger.warn('No claim id identified!')
+        try:
+            target = self.claim.target
+        except:
+            target = self.claim['mainsnak']['datavalue']['value']
+        if isinstance(target, WbTime):
             pass
-        if isinstance(self.claim.target, basestring):
-            claim_details['value'] = self.claim.target
-        elif isinstance(self.claim.target, WbMonolingualText):
-            claim_details['value'] = '@'.join([self.claim.target.text, self.claim.target.language])
+        if isinstance(target, basestring):
+            claim_details['value'] = target
+        elif isinstance(target, WbMonolingualText):
+            claim_details['value'] = '@'.join([target.text, target.language])
             return claim_details
-        elif isinstance(self.claim.target, WbGeoShape):
-            claim_details['value'] = self.claim.target.page.full_url()
-        elif isinstance(self.claim.target, WbTime):
+        elif isinstance(target, WbGeoShape):
+            claim_details['value'] = target.page.full_url()
+        elif isinstance(target, WbTime):
             try:
-                claim_details['value'] = self.claim.target.toTimestr(
+                claim_details['value'] = target.toTimestr(
                     force_iso=True)
             except AttributeError:
                 pass
             return claim_details
-        elif isinstance(self.claim.target, Coordinate):
+        elif isinstance(target, Coordinate):
             claim_details[
-                'values'] = self.claim.target.lat, self.claim.target.lon
-        elif isinstance(self.claim.target, WbQuantity):
-            claim_details['value'] = float(self.claim.target.amount)
-        elif not self.claim.target is None:
+                'values'] = target.lat, target.lon
+        elif isinstance(target, WbQuantity):
+
+            claim_details['value'] = float(target.amount)
+        elif not target is None:
             try:
                 claim_details['url'] = 'https://www.wikidata.org/wiki/' + \
-                                       self.claim.target.id
+                                       target.id
                 if self.include_attribute_labels:
                     claim_details.update(self.extract_literal_claim())
             except Exception as e:
-                claim_details['url'] = self.claim.target.full_url()
+                try:
+                    claim_details['url'] = target.full_url()
+                except Exception as e:
+                    logger.warn(
+                        'Error parsing attribute {} of type {}'.format(
+                            self.claim.id, type(target)
+                        ), exc_info=True
+                    )
                 if self.include_attribute_labels:
                     claim_details.update(self.extract_literal_claim())
         else:
-            warnings.warn('claim {} on item {} is None'.format(
+            logger.warn('claim {} on item {} is None'.format(
                 self.claim.id,
                 claim_details['claim_id'].split('$')[0]
             ))
@@ -599,7 +622,8 @@ class ParseClaim(object):
         # if dates:
         #     claim_details['temporal_attributes'] = dates
         # self.qualifiers.update(TEMPORAL_QUALIFIERS)
-        if self.claim.has_qualifier and self.claim.qualifiers:
+
+        if getattr(self.claim, 'has_qualifier', None) and self.claim.qualifiers:
             for qualifier in self.qualifiers:
                 if qualifier in self.claim.qualifiers:
                     try:
@@ -614,7 +638,7 @@ class ParseClaim(object):
                             'url': qualifier,
                             'values': qualifier_targets}
                     except (KeyError, AttributeError):
-                        warnings.warn(
+                        logger.warn(
                             'qualifier not found: {}.'.format(
                                 self.qualifiers[qualifier]))
         return claim_details
@@ -669,7 +693,9 @@ def start_date(instance):
     :return:
     """
     try:
-        if instance.has_qualifier or instance.qualifiers:
+        if getattr(instance, 'has_qualifier', None) or getattr(instance,
+                                                               'qualifiers',
+                                                               None):
             if 'P580' in instance.qualifiers:
 
                 if isinstance(instance.qualifiers['P580'][0].target, WbTime):
@@ -740,7 +766,8 @@ def guess_current_value(attribute_instances):
             most_recent_startdate = max(
                 list(map(start_date, instance_has_startdate)))
 
-            most_recent_instances = [i for i in instance_has_startdate if start_date(i) == most_recent_startdate]
+            most_recent_instances = [i for i in instance_has_startdate if
+                                     start_date(i) == most_recent_startdate]
             if len(most_recent_startdate) > 1:
                 raise ValueError('Several equally recent start dates found.')
             else:
@@ -749,3 +776,6 @@ def guess_current_value(attribute_instances):
             raise ValueError(
                 'Unable to determine most recent instance of attribute!' +
                 '\nError message was: {}'.format(e))
+
+
+from weblyzard_api.client.fuseki import FusekiWrapper
