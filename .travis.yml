@@ -5,7 +5,8 @@ python:
 git:
   submodules: false
 install:
-  - python3 -m pip install --quiet -U pip setuptools tox pip-tools
+  - python -m pip install --quiet -U pip setuptools tox pip-tools pytest pytest-cov mock future python-dateutil feedparser numpy ujson
+  - python -m pip --quiet install -e .
 # command to run tests
 script:
   - tox -q -e pytest
