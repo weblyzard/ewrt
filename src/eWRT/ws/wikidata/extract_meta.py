@@ -174,7 +174,12 @@ def collect_attributes_from_wp_and_wd(itempage, languages,
                 itempage['id']
             ))
     except Exception as e:
-        raise e
+        logger.warn(
+            'Uncaught Exception: {}. Entity {} will not be processed.'.format(
+                e, itempage['id']
+            ),
+            exc_info=True
+        )
     entity_extracted_details.update(entity.details)
     if include_wikipedia and not delay_wikipedia_retrieval:
         for language_result in merge_with_wikipedia_by_language(
@@ -222,7 +227,7 @@ class WikidataEntityIterator(object):
                     'Category with undefined defaults: {}'.format(e))
         self.entity_types = top_level_categories
         self.all_relevant_categories = []
-        if not lazy_load_subclasses:
+        if not lazy_load_subclasses and not self.process_all:
 
             self.all_relevant_categories = self.get_relevant_category_ids(
                 top_level_categories)
@@ -259,11 +264,6 @@ class WikidataEntityIterator(object):
                 raise ValueError(
                     'Nothing found for category {}: {}'.format(label, e))
 
-        # all_relevant_categories = (
-        #         frozenset(type_subclasses('event')) |
-        #         frozenset(type_subclasses('human')) |
-        #         frozenset(type_subclasses('geographical location')) |
-        #         frozenset(type_subclasses('organization')))
         return all_relevant_categories
 
     def type_subclasses(self, parent_class_label):
@@ -277,6 +277,8 @@ class WikidataEntityIterator(object):
         subclass_query = """SELECT ?item WHERE {
           ?item wdt:P279* wd:%s .
           }"""
+        if self.process_all:
+            return
         try:
             site = pywikibot.Site('wikidata', 'wikidata', user=USER_AGENT)
             res = pywikibot.pagegenerators.WikidataSPARQLPageGenerator(
@@ -334,7 +336,7 @@ class WikidataEntityIterator(object):
 
         dump_path = self.dump_path
         try:
-            if not self.all_relevant_categories:
+            if not self.all_relevant_categories and not self.process_all:
                 self.all_relevant_categories = self.get_relevant_category_ids(
                     self.entity_types)
         except Exception as e:
