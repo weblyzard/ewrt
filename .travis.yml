@@ -1,10 +1,11 @@
 language: python
 python:
   - "3.6"
-# command to install dependencies
+
+git:
+  submodules: false
 install:
-  - pip install -r requirements.txt
+  - python3 -m pip install --quiet -U pip setuptools tox pip-tools
 # command to run tests
 script:
-  - pip install pytest-cov
-  - py.test tests/ --cov=eWRT --cov-report xml
+  - tox -q -e pytest
