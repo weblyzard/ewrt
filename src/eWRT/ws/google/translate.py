@@ -74,8 +74,6 @@ class GoogleTranslator(AbstractWebSource):
         ''' makes the request to GoogleAPI '''
         if not 'key' in params:
             params['key'] = self.api_key
-        # set format to not default to html encoding (in response)
-        params['format'] = 'text'
         full_url = self.api_url + path + '?' + urlencode(params)
         resp = requests.get(full_url)
         return json.loads(resp.text)

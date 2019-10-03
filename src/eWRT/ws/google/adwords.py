@@ -180,10 +180,8 @@ class GoogleAdWordsKeywordStatistics(object):
         return results
 
     def get_traffic_estimates(self, keywords, attributes=None, language='de',
-                              max_retries=MAX_RETRIES,
-                              traffic_keywords_limit=TRAFFIC_KEYWORDS_LIMIT,
-                              value_scale=1000000, seconds_limit_for_retry=60,
-                              match_type='PHRASE'):
+                              max_retries=MAX_RETRIES, traffic_keywords_limit=TRAFFIC_KEYWORDS_LIMIT,
+                              value_scale=1000000, seconds_limit_for_retry=60):
         '''
         Get traffic estimates for keywords from Google Ads.
 
@@ -207,7 +205,7 @@ class GoogleAdWordsKeywordStatistics(object):
                     'keyword': {
                         'xsi_type': 'Keyword',
                         'text': kw,
-                        'matchType': match_type
+                        'matchType': 'EXACT'
                     }
                 }
                 for kw in keywords

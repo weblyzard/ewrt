@@ -12,7 +12,7 @@ setup(
     ###########################################
     # Metadata
     name="eWRT",
-    version="3.0.0-dev",
+    version="0.9.7.20190621-dev",
     description='eWRT',
     author='Albert Weichselbraun, Heinz Lang, Gerhard Wohlgenannt, Johannes Duong, Norman Süsstrunk, Daniel Streiff',
     author_email='albert@weblyzard.com, lang@weblyzard.com, wohlg@ai.wu.ac.at, johannes.duong@wu.ac.at, norman.suestrunk@htwchur.ch, daniel.streiff@htwchur.ch',
@@ -24,7 +24,7 @@ setup(
                       'oauth2client==2.2.0',  # YT
                       'google-api-python-client==1.4.0',  # YT,
                       'six',
-                      'gdata @ git+https://github.com/dvska/gdata-python3#egg=gdata',
+                      'gdata',
                       'wikipedia',
                       'pywikibot',
                       'bz2file',
@@ -36,8 +36,9 @@ setup(
         'Programming Language :: Python :: 3 :: Only',
     ],
 
+
     ###########################################
-    # Run unittests
+    # Run unittests 
     # NOTE: is this still needed with gitlab-ci in place?
     test_suite='nose.collector',
 
