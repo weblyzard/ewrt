@@ -1,10 +1,5 @@
 # CI configuration
-image: registry.gitlab.semanticlab.net/docker/py3full:latest
-before_script:
-    - sed -i s/-dev/".$(date +%Y%m%d.%H%M)"/g setup.py
-    - export PROJECT=`/usr/bin/python3 -W ignore ./setup.py --name | awk 'NR==1{print $1}'`
-    - export VERSION=`/usr/bin/python3 -W ignore ./setup.py --version | awk 'NR==1{print $1}'`
-
+image: registry.gitlab.semanticlab.net/docker/py3base:latest
 
 stages:
     - test
@@ -15,13 +10,10 @@ stages:
 pytest:
     stage: test
     script:
-        - tox -q -e pytest
-    after_script:
-        - export PROJECT=`/usr/bin/python3 -W ignore ./setup.py --name | awk 'NR==1{print $1}'`
-        - export VERSION=`/usr/bin/python3 -W ignore ./setup.py --version | awk 'NR==1{print $1}'`
+        - tox -e pytest
         - sonar-scanner -D sonar.host.url=$sonarhost  -D sonar.login=$sonarlogin
     only:
-        - branches
+        - migration
     tags:
         - docker
 
@@ -29,9 +21,9 @@ pytest:
 pylint:
     stage: test
     script:
-        - tox -q -e pylint
+        - tox -e pylint
     only:
-        - branches
+        - migration
     when: manual
     tags:
         - docker
@@ -40,9 +32,9 @@ pylint:
 slowtest:
     stage: test
     script:
-        - tox -q -e pytest-slow
+        - tox -e pytest-slow
     only:
-        - branches
+        - migration
     when: manual
     tags:
         - docker
@@ -52,9 +44,9 @@ slowtest:
 vulture:
     stage: test
     script:
-        - tox -q -e vulture
+        - tox -e vulture
     only:
-        - branches
+        - migration
     when: manual
     tags:
         - docker
@@ -66,7 +58,8 @@ build:
         - chmod +x build-package.sh
         - ./build-package.sh
     only:
-        - master
+        - migration
+    when: manual
     tags:
         - shell-runner
 
