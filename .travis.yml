@@ -1,0 +1,12 @@
+language: python
+python:
+  - "3.6"
+
+git:
+  submodules: false
+install:
+  - python -m pip install --quiet -U pip setuptools tox pip-tools pytest pytest-cov mock future python-dateutil feedparser numpy ujson
+  - python -m pip --quiet install -e .
+# command to run tests
+script:
+  - python -m pytest -v -m 'not slow' --cov-report xml --cov-report term --junitxml test_results.xml --cov=eWRT tests/
