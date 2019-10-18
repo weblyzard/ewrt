@@ -180,8 +180,10 @@ class GoogleAdWordsKeywordStatistics(object):
         return results
 
     def get_traffic_estimates(self, keywords, attributes=None, language='de',
-                              max_retries=MAX_RETRIES, traffic_keywords_limit=TRAFFIC_KEYWORDS_LIMIT,
-                              value_scale=1000000, seconds_limit_for_retry=60):
+                              max_retries=MAX_RETRIES,
+                              traffic_keywords_limit=TRAFFIC_KEYWORDS_LIMIT,
+                              value_scale=1000000, seconds_limit_for_retry=60,
+                              match_type='PHRASE', max_cpc=1):
         '''
         Get traffic estimates for keywords from Google Ads.
 
@@ -205,7 +207,7 @@ class GoogleAdWordsKeywordStatistics(object):
                     'keyword': {
                         'xsi_type': 'Keyword',
                         'text': kw,
-                        'matchType': 'EXACT'
+                        'matchType': match_type
                     }
                 }
                 for kw in keywords
@@ -216,7 +218,7 @@ class GoogleAdWordsKeywordStatistics(object):
                 'keywordEstimateRequests': keyword_estimate_requests,
                 'maxCpc': {
                     'xsi_type': 'Money',
-                    'microAmount': '1000000'
+                    'microAmount': str(value_scale * max_cpc)
                 }
             }]
 
