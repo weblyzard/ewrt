@@ -74,6 +74,7 @@ class DoesNotMatchFilterError(Exception):
     """
 
     """
+
     def __init__(self, entity, msg=None):
         if msg is None:
             # Set some default useful error message
@@ -138,13 +139,13 @@ class ParseItemPage(object):
         self.item_raw = itempage
         try:
             self.claims = itempage['claims']
-        except AttributeError:
+        except TypeError:
             self.claims = itempage.claims
         if param_filter and not self.filter(param_filter[entity_type]):
             raise DoesNotMatchFilterError(entity=self.item_raw['id'])
         if not isinstance(itempage, dict):
             id = itempage.id
-            timestamp = itempage.timestamp
+            timestamp = get_wikidata_timestamp(item_page=itempage)
             itempage = itempage.text
             itempage.update({'id': id, 'timestamp': timestamp})
 
@@ -778,4 +779,16 @@ def guess_current_value(attribute_instances):
                 '\nError message was: {}'.format(e))
 
 
-from weblyzard_api.client.fuseki import FusekiWrapper
+if __name__ == '__main__':
+    import pywikibot
+
+    entity = pywikibot.ItemPage(
+        pywikibot.Site("wikidata", "wikidata"),
+        title='Q42'
+    )
+    entity.get()
+    parsed_item = ParseItemPage(entity, entity_type='person', wd_parameters={'person': {'P106'}})
+    import pprint
+
+    pprint.pprint(parsed_item.details)
+    pass
