@@ -11,4 +11,5 @@ def test_item_with_country():
     assert item_with_country('Sigmund Freud', 'en',
                              ['P19', 'P27']) == 'Czech Republic'
     # citizenship first:
-    assert item_with_country('Sigmund Freud', 'en', ['P27', 'P19']) == 'Austria'
+    assert item_with_country('Sigmund Freud', 'en', ['P27', 'P19']) in (
+    'Austria', 'Austria-Hungary')
