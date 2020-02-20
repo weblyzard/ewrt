@@ -160,7 +160,7 @@ class MultiRESTClient(object):
     URL_PATH = None
 
     def __init__(self, service_urls, user=None, password=None,
-                 default_timeout=WS_DEFAULT_TIMEOUT, use_random_server=False):
+                 default_timeout=WS_DEFAULT_TIMEOUT, use_random_server=True):
 
         self._service_urls = self.fix_urls(service_urls, user, password)
 

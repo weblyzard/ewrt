@@ -17,14 +17,14 @@ from pprint import pprint
 
 from eWRT.ws.wikidata.definitions import person_properties
 
-
 try:
     import pywikibot
 except RuntimeError:
     import os
+
     os.environ['PYWIKIBOT_NO_USER_CONFIG'] = '1'
     import pywikibot
-    
+
 # any site will work, this is just an example
 site = pywikibot.Site('en', 'wikipedia')
 repo = site.data_repository()  # this is a DataSite object
@@ -39,38 +39,75 @@ def name_or_id(claim_id):
         return claim_id
 
 
-if __name__ == '__main__':
-    try:
-        item = pywikibot.ItemPage(repo, sys.argv[1])
-    except IndexError:
-        print('Required command line argument: QXXX-id of the entity.')
-        exit()
+def get_claim_values_by_id(entity_id, claims_of_interest, language='en',
+                           human_readable_claims=True):
+    """
+    :param entity_id: Qxxx id of entity
+    :param claims_of_interest: iterable of attributes with their Pxx identifiers
+    :param language: language ISO code, e.g. 'en'
+    :param human_readable_claims: map claims to their (English) label where
+        possible (configured for persons only)
+    :return: dictionary of attributres of entity given by entity_id, filtered
+        by claims_of_interest
+    """
+    item = pywikibot.ItemPage(repo, entity_id)
+    claims_of_interest = claims_of_interest or [c for c in CLAIMS_OF_INTEREST]
     item.get()
     claims = {}
     if item.claims:
         for claim in item.claims:
-            if claim in CLAIMS_OF_INTEREST:
+            if claim in claims_of_interest:
+                claim_identifier = name_or_id(claim) if human_readable_claims else claim
                 targets = [(value, value.getTarget())
                            for value in item.claims[claim]]
-                claims[name_or_id(claim)] = data = []
+                claims[claim_identifier] = data = []
                 for container, value in targets:
                     value_data = {}
                     try:
                         try:
-                            value_data['value'] = value.text['labels']['en']
+                            value_data['value'] = value.text['labels'][language]
                         except TypeError:
                             value_data['value'] = value.text
 
                     except AttributeError:
                         value_data['value'] = value
                     if container.qualifiers:
-                        value_data['qualifiers'] = {q: container.qualifiers[q][0].target for q in
-                                                    container.qualifiers}
+                        value_data['qualifiers'] = {
+                            q: container.qualifiers[q][0].target for q in
+                            container.qualifiers}
                     data.append(value_data)
-        pprint(claims)
+    return claims
 
-# exemplary output with command line argument Q42 (Douglas Adams):
+
+if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--item-id', dest='item_id', required=True)
+    parser.add_argument('--claim-ids', dest='claim_ids',
+                        default=CLAIMS_OF_INTEREST, required=False, nargs='*')
+    parser.add_argument('--language', dest='language', default='en')
+    parser.add_argument('--human-readable-claims', dest='human_readable',
+                        default=False, required=False, action='store_true')
+    args = parser.parse_args()
+    pprint(get_claim_values_by_id(
+        args.item_id, claims_of_interest=args.claim_ids,
+        language=args.language,
+        human_readable_claims=args.human_readable)
+    )
+
+# exemplary outputs for Q42 (Douglas Adams):
+# $ get_info_by_id.py --item-id Q42 --claim-ids P106 # wikidata ids for claims,
+# # only interested in P106=occupation
+# {'P106': [{'value': 'playwright'},
+#           {'value': 'screenwriter'},
+#           {'value': 'novelist'},
+#           {'value': "children's writer"},
+#           {'value': 'science fiction writer'},
+#           {'value': 'comedian'}]}
 #
+# $ get_info_by_id.py --item-id Q42 --human-readable-claims # default claims,
+# # representation in human readable form
 #     {u'P1411': [{'qualifiers': {u'P1686': ItemPage(Q3521267),
 #                                 u'P585': WbTime(year=1979, month=0, day=0, hour=0, minute=0,
 #                                                 second=0, precision=9, before=0, after=0,

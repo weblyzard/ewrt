@@ -5464,7 +5464,7 @@ sample_output = {'wikidata_timestamp': '+2018-10-04T02:20:35Z',
                      'values': [
                          {'url': u'https://www.wikidata.org/wiki/Q9531',
                           'labels': {'de': u'British Broadcasting Corporation',
-                                     'en': u'BBC',
+                                     'en': u'British Broadcasting Corporation',
                                      'sv': u'BBC'},
                           'claim_id': u'Q42$853B16C8-1AB3-489A-831E-AEAD7E94AB87'}]},
                  u'place of birth': {

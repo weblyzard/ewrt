@@ -31,7 +31,7 @@ class TestRESTClient(unittest.TestCase):
         urls = (('http://irgendwas.com', None, None),
                 ('http://heinz:secret@irgendwas.com', 'heinz', 'secret'))
         service_urls = [url[0] for url in urls]
-        client = MultiRESTClient(service_urls)
+        client = MultiRESTClient(service_urls, use_random_server=False)
 
         for i, (service_url, user, passwd) in enumerate(urls):
             c = client.clients[i]
@@ -47,7 +47,7 @@ class TestRESTClient(unittest.TestCase):
             assert 'Could not make request to path' in str(e)
 
         try:
-            urls = ('https://heinz@irgendwas.com', )
+            urls = ('https://heinz@irgendwas.com',)
             client = MultiRESTClient(urls)
             assert False, 'must raise an assertion error'
         except Exception as e:
