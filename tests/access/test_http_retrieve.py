@@ -24,6 +24,7 @@ import unittest
 import urllib.request, urllib.error, urllib.parse
 
 from pytest import raises
+from socket import timeout
 
 from eWRT.access.http import DEFAULT_TIMEOUT, Retrieve, setdefaulttimeout, log
 
@@ -66,7 +67,7 @@ class TestHttpRetrieve(unittest.TestCase):
         ''' tests whether the socket timeout is honored by our class '''
         SLOW_URL = "http://www.csse.uwa.edu.au/"
 
-        with raises(urllib.error.URLError):
+        with raises((timeout, urllib.error.URLError)):
             r = Retrieve(self.__class__.__name__,
                          default_timeout=0.1).open(SLOW_URL)
             content = r.read()

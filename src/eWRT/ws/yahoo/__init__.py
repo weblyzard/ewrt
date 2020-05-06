@@ -33,7 +33,7 @@ from urllib.request import urlopen
 from urllib.parse import urlencode, quote
 from urllib.error import URLError
 from nose.plugins.attrib import attr
-from socket import setdefaulttimeout
+from socket import setdefaulttimeout, timeout
 
 from eWRT.ws.TagInfoService import TagInfoService
 from eWRT.config import YAHOO_APP_ID, YAHOO_SEARCH_URL
@@ -73,7 +73,7 @@ class Yahoo(TagInfoService):
         try:
             result = eval( self.r.open(url).read().replace("\\/", "/" ))
             return result['ysearchresponse']
-        except URLError:
+        except (timeout, URLError):
             return ""
 
     @staticmethod
