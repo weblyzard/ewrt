@@ -6,22 +6,23 @@
 from __future__ import print_function
 
 from future import standard_library
+
 standard_library.install_aliases()
 from builtins import next
 from builtins import object
 import redis
 import pickle
 
+from datetime import timedelta
 from gzip import GzipFile
 from hashlib import sha1
 from operator import itemgetter
 from os import makedirs, remove, getpid, link
-from os.path import join, exists, dirname, basename, join
+from os.path import exists, dirname, basename, join
 from socket import gethostname
 from time import time
 
 from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
-
 
 # (C)opyrights 2008-2015 by Albert Weichselbraun <albert@weichselbraun.net>
 #
@@ -40,7 +41,6 @@ from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
 __author__ = "Albert Weichselbraun"
 __copyright__ = "GPL"
 
-
 try:
     from pickle import dump, load
 except ImportError:
@@ -49,7 +49,8 @@ except ImportError:
 
 def get_unique_temp_file(fname): return join(dirname(fname),
                                              "_%s-%s-%d" % (basename(fname),
-                                                            gethostname(), getpid()))
+                                                            gethostname(),
+                                                            getpid()))
 
 
 class Cache(object):
@@ -108,7 +109,8 @@ class DiskCache(Cache):
         This version of DiskCached is threadsafe
     '''
 
-    def __init__(self, cache_dir, cache_nesting_level=0, cache_file_suffix="", fn=None):
+    def __init__(self, cache_dir, cache_nesting_level=0, cache_file_suffix="",
+                 fn=None):
         ''' initializes the Cache object
             ::param cache_dir: the cache base directory
             ::param cache_nesting_level: optional number of nesting level (0)
@@ -172,7 +174,8 @@ class DiskCache(Cache):
             self._cache_hit += 1
             with GzipFile(cache_file) as f:
                 # return load(f)
-                return load(f, encoding='utf-8')  # [mig] FIXME: no hardcoded enc!
+                return load(f,
+                            encoding='utf-8')  # [mig] FIXME: no hardcoded enc!
 
         #
         # case 2: cache miss
@@ -225,7 +228,7 @@ class DiskCache(Cache):
         if not exists(obj_dir):
             try:
                 makedirs(obj_dir)
-            except OSError:            # required for multithreading
+            except OSError:  # required for multithreading
                 pass
 
         return join(obj_dir, obj_id + self.cache_file_suffix)
@@ -240,7 +243,7 @@ class DiskCached(object):
         @remarks
         This version of DiskCached is threadsafe
     '''
-    __slots__ = ('cache', )
+    __slots__ = ('cache',)
 
     def __init__(self, cache_dir, cache_nesting_level=0, cache_file_suffix=""):
         ''' initializes the Cache object
@@ -301,7 +304,8 @@ class MemoryCache(Cache):
     def garbage_collect_cache(self):
         ''' removes the object which have not been in use for the
             longest time '''
-        if self.max_cache_size == 0 or len(self._cacheData) <= self.max_cache_size:
+        if self.max_cache_size == 0 or len(
+                self._cacheData) <= self.max_cache_size:
             return
 
         (key, _) = sorted(list(self._usage.items()),
@@ -318,9 +322,9 @@ class MemoryCached(MemoryCache):
     '''
 
     def __init__(self, arg):
-        ''' initializes the MemoryCache object
+        """initializes the MemoryCache object
             ::param arg: either the max_cache_size or the function to call
-        '''
+        """
         if hasattr(arg, '__call__'):
             MemoryCache.__init__(self)
             self._fn = arg
@@ -334,9 +338,45 @@ class MemoryCached(MemoryCache):
 
             def wrapped_fn(*args, **kargs):
                 return self.fetch(fn, *args, **kargs)
+
             return wrapped_fn
         else:
             return self.fetch(self._fn, *args, **kargs)
+
+
+class TTLMemoryCached(MemoryCached):
+    """Decorator based on Memory cache for caching function calls with
+    a specified time to live, results older than which will be ignored
+    """
+
+
+    def __init__(self, ttl, max_cache_size=0):
+        MemoryCache.__init__(self, max_cache_size=max_cache_size)
+        self._fn = None
+        self.ttl = ttl.total_seconds()
+        self._last_updated = {}
+
+    def fetchObjectId(self, key, fetch_function, *args, **kargs):
+        # update the object's last usage time stamp
+        key = self.getObjectId(key)
+        self._usage[key] = time()
+        try:
+            stored_result = self._cacheData[key]
+            valid_from = self._last_updated[key]
+            if time() - valid_from <= self.ttl:
+                return self._cacheData[key]
+            else:
+                del self._usage[key]
+                del self._cacheData[key]
+                del self._last_updated[key]
+                raise KeyError
+        except KeyError:
+            obj = fetch_function(*args, **kargs)
+            if obj != None:
+                self.garbage_collect_cache()
+                self._cacheData[key] = obj
+                self._last_updated[key] = time()
+            return obj
 
 
 class IterableCache(DiskCache):
@@ -400,7 +440,8 @@ class IterableCache(DiskCache):
 
 class RedisCache(Cache):
 
-    def __init__(self, max_cache_size=0, fn=None, host='localhost', port=6379, db=0):
+    def __init__(self, max_cache_size=0, fn=None, host='localhost', port=6379,
+                 db=0):
         ''' initializes the Cache object '''
         Cache.__init__(self, fn)
         self._cacheData = redis.StrictRedis(host=host, port=port, db=db)
@@ -422,14 +463,14 @@ class RedisCache(Cache):
         # pickling is necessary because Redis turns every input into
         # a string
         try:
-            return(pickle.loads(self._cacheData[key]))
+            return (pickle.loads(self._cacheData[key]))
         except KeyError:
             obj = fetch_function(*args, **kargs)
             if obj != None:
                 self.garbage_collect_cache()
                 p_obj = pickle.dumps(obj)
                 self._cacheData[key] = p_obj
-            return(obj)
+            return (obj)
 
     def garbage_collect_cache(self):
         ''' removes the object which have not been in use for the
@@ -467,6 +508,7 @@ class RedisCached(RedisCache):
 
             def wrapped_fn(*args, **kargs):
                 return self.fetch(fn, *args, **kargs)
+
             return wrapped_fn
         else:
             return self.fetch(self._fn, *args, **kargs)
