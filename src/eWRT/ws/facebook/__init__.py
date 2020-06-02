@@ -16,6 +16,7 @@ import unittest
 import urllib.request, urllib.parse, urllib.error
 from urllib.error import HTTPError, URLError
 
+from socket import timeout
 from eWRT.lib import Webservice, Result
 from eWRT.lib.ResultSet import ResultSet
 from eWRT.access.http import Retrieve
@@ -190,7 +191,7 @@ class FacebookWS(object):
             print('Error: Bad Request for url %s: %s' % (url, e))
             if not tried:
                 result = cls._requestURL(url, maxDoc, result, True)
-        except URLError as e:
+        except (timeout, URLError) as e:
             print('URLError for url %s: %s' % (url, e))
             if not tried:
                 result = cls._requestURL(url, maxDoc, result, True)

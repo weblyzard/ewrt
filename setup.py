@@ -30,6 +30,7 @@ setup(
                       'bz2file',
                       'googleads==19.0.1' if sys.version_info.major == 2 else 'googleads',
                       #                         'python-oauth2' #linkedin
+                      'ujson'
                       ],
     classifiers=[
         'Programming Language :: Python :: 3.6',
