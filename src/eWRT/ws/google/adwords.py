@@ -313,7 +313,11 @@ class GoogleAdWordsKeywordStatistics(object):
                     else:
                         logger.error(exc)
                         if num_retries > max_retries:
-                            break
+                            logger.error(
+                                f'Failed to retrieve keyword values for sub-'
+                                         f'batch of {len(keywords)} keywords. '
+                                f'Exception was {exc}', exc_info=True)
+                            return results
                         num_retries += 1
                 # log other exceptions and terminate if too many
                 except Exception as e:
@@ -323,6 +327,7 @@ class GoogleAdWordsKeywordStatistics(object):
                         return {}
                     exc_count += 1
 
+
         traffic_estimator_service = self.client.GetService(
             'TrafficEstimatorService', version='v201809')
         result = {}
@@ -331,13 +336,13 @@ class GoogleAdWordsKeywordStatistics(object):
         batch_count = 0
         while lower < num_keywords:
             batch_count += 1
+            keywords_batch = keywords[lower:min(lower + traffic_keywords_limit,
+                                            num_keywords)]
             sub_result, faulty_values = get_sub_result(
                 traffic_estimator_service=traffic_estimator_service,
-                keywords=keywords[lower:min(lower + traffic_keywords_limit,
-                                            num_keywords)],
+                keywords=keywords_batch,
                 language=language)
-            keywords_size = len(
-                keywords[lower:min(lower + traffic_keywords_limit, num_keywords)])
+            keywords_size = len(keywords_batch)
             fault_percentage = float(
                 (float(faulty_values) / float(keywords_size)) * 100)
             logger.info("{0:.2f}% from batch {1:.0f}".format(
