@@ -261,7 +261,7 @@ CORE_GENERIC_PROPERTIES = [
 # constructing a timeline and will thus be discarded
 CORE_PROPERTIES_EVENTS = [
     PropertyParseInstruction(name='startDate',
-                             identifiers='(wdt:P580|wdt:P585|wdt:P619)',
+                             identifiers='(wdt:P580|wdt:P585|wdt:P619|wdt:P577)',
                              is_optional=False,
                              language_specific=0),
     PropertyParseInstruction(name='coord',
