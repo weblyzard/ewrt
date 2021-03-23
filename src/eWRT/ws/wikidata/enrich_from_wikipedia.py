@@ -185,13 +185,13 @@ def wp_summary_from_wdid(wikidata_id, languages=None, sitelinks=None):
                 wikipedia_page = wikipedia_page_info_from_titles(wikipage_title,
                                                                  language)
                 wikipedia_data.append(next(wikipedia_page))
-            except Exception as e:
-                raise (e)
             except ValueError:
                 warnings.warn('No Wikipedia page or page with empty summary '
                               'found in language {lang} '
                               'for entity {id}'.format(lang=language,
                                                        id=wikidata_id))
+            except Exception as e:
+                raise (e)
         except KeyError:
             pass
 

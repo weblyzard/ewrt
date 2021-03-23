@@ -16,19 +16,7 @@ import traceback
 import logging
 import random
 
-try:
-    # urllib2 is merged into urllib in python3 (SV)
-    from urllib.error import HTTPError
-except:
-    from urllib2 import HTTPError  # python2
-
-import urllib.request, urllib.parse, urllib.error
-
-try:
-    from urllib.parse import urlsplit, urlunsplit  # porting to python 3.4 (SV)
-except:
-    from urlparse import urlsplit, urlunsplit  # python2
-
+from urllib.parse import urlencode
 from six import string_types
 from json import dumps, loads
 from functools import partial
@@ -123,12 +111,7 @@ class RESTClient(object):
 
         # add query string, if necessary
         if query_parameters:
-            try:
-                url = url + "?" + urllib.parse.urlencode(query_parameters,
-                                                         doseq=True)
-            except:
-                url = url + "?" + urllib.parse.urlencode(query_parameters,
-                                                   doseq=True)
+            url = url + "?" + urlencode(query_parameters, doseq=True)
 
         return url
 
@@ -148,7 +131,7 @@ class RESTClient(object):
         url = self.get_request_url(self.service_url, command, identifier,
                                    query_parameters)
 
-        logger.debug('requesting url %s' % url)
+        logger.debug('Requesting url %s', url)
 
         return self._json_request(url, parameters, return_plain,
                                   json_encode_arguments, content_type)
@@ -157,7 +140,7 @@ class RESTClient(object):
 class MultiRESTClient(object):
     ''' allows multiple URLs for access REST services '''
     MAX_BATCH_SIZE = 500
-    URL_PATH = None
+    URL_PATH: str = ''
 
     def __init__(self, service_urls, user=None, password=None,
                  default_timeout=WS_DEFAULT_TIMEOUT, use_random_server=True):
@@ -255,14 +238,14 @@ class MultiRESTClient(object):
                 if not execute_all_services:
                     break
 
-            except Exception as e:  # ported to python3 (SV)
+            except Exception as e:
                 if pass_through_exceptions:
                     raise e
                 else:
-                    msg = 'could not execute %s %s, error %s\n%s' % (
+                    msg = 'Could not execute %s %s, error %s\n%s' % (
                         client.service_url, path, e,
                         traceback.format_exc())
-                    logger.warn(msg, exc_info=True)
+                    logger.warning(msg, exc_info=True)
                     errors.append(msg)
 
         if len(errors) == len(self.clients):
