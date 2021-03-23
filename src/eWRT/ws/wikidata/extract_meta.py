@@ -139,14 +139,14 @@ def collect_attributes_from_wp_and_wd(itempage, languages,
                                                       sitelinks=sitelinks)
 
             except (RedirectError, DisambiguationError):
-                logger.warn('Failed to determine Wikipedia article: linked '
-                            'article is redirect or disambiguation page.',
-                            exc_info=True)
+                logger.warning('Failed to determine Wikipedia article: linked '
+                               'article is redirect or disambiguation page.',
+                               exc_info=True)
                 raise ValueError
             except requests.exceptions.ConnectionError:
-                logger.warn('Failed to get info about entity {} from '
-                            'Wikipedia API!'.format(itempage['id']),
-                            exc_info=True)
+                logger.warning('Failed to get info about entity %s from '
+                               'Wikipedia API!', itempage['id'],
+                               exc_info=True)
 
     try:
         entity_extracted_details = {'url': wikipedia_data[0]['url']}
@@ -365,10 +365,8 @@ class WikidataEntityIterator(object):
                             elem_content['timestamp'] = timestamp
                             del timestamp
                         except NameError:
-                            logger.warn('Item {} cannot be assigned a '
-                                        'timestamp!'.format(
-                                elem_content['id']
-                            ))
+                            logger.warning("Item %s cannot be assigned a timestamp!",
+                                           elem_content['id'])
                         try:
                             category = self.determine_relevant_category(
                                 elem_content)
@@ -417,8 +415,8 @@ class WikidataEntityIterator(object):
                     del elem
                     del events
             except (EOFError, IOError) as e:
-                logger.warn('Error parsing file {}: {}'.format(dump_path, e),
-                            exc_info=True)
+                logger.warning('Error parsing file {dump_path}: %s', e,
+                               exc_info=True)
 
     def determine_relevant_category(self, elem_content):
         """
