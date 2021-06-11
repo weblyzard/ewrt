@@ -26,7 +26,7 @@ setup(
                       'six',
                       'gdata @ git+https://github.com/dvska/gdata-python3#egg=gdata',
                       'wikipedia',
-                      'pywikibot',
+                      'pywikibot==5.6.0',
                       'bz2file',
                       'googleads==19.0.1' if sys.version_info.major == 2 else 'googleads',
                       #                         'python-oauth2' #linkedin
