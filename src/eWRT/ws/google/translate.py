@@ -24,14 +24,13 @@ from urllib.parse import urlencode
 
 from eWRT.ws import AbstractWebSource
 
-
 API_URL = 'https://www.googleapis.com/language/translate/v2'
 
 
 class GoogleTranslator(AbstractWebSource):
     NAME = 'google_translate'
     SUPPORTED_PARAMS = ('text', 'target_language', 'source_language')
-    logger = logging.getLogger('google_translator')
+    logger = logging.getLogger(__name__)
 
     def __init__(self, api_key, api_url=API_URL):
         self.api_key = api_key
