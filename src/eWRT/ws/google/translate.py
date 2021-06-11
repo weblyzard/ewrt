@@ -13,16 +13,17 @@ Created on 23.10.2014
         Configure your application in the developer console
     
 '''
-from future import standard_library
-standard_library.install_aliases()
 import json
-import requests
 import logging
-
-from six import string_types
+from typing import Union, List, Iterator
 from urllib.parse import urlencode
 
 from eWRT.ws import AbstractWebSource
+from future import standard_library
+import requests
+from six import string_types
+
+standard_library.install_aliases()
 
 logger = logging.getLogger(__name__)
 
@@ -37,17 +38,19 @@ class GoogleTranslator(AbstractWebSource):
         self.api_key = api_key
         self.api_url = api_url
 
-    def search_documents(self, search_terms, source_language, target_language):
+    def search_documents(self, search_terms:Union[List[str], str],
+                         source_language:str, target_language:str) -> Iterator[dict]:
         ''' translates the `search_terms` from `source_language to the 
         `target_language`
         :returns: iterator with the translated text
         '''
-        if isinstance(search_terms, string_types):
+        if isinstance(search_terms, string_types):  # p2/3 string check
             search_terms = [search_terms]
 
         for search_term in search_terms:
-            logger.info('... will translate "%s" to %s',
+            logger.info('translating: %s (source=%s; target=%s)',
                              search_term,
+                             source_language,
                              target_language)
             result = self.translate(text=search_term,
                                     target_language=target_language,
@@ -78,6 +81,12 @@ class GoogleTranslator(AbstractWebSource):
         params['format'] = 'text'
         full_url = self.api_url + path + '?' + urlencode(params)
         resp = requests.get(full_url)
+
+        if resp.status_code == 200:
+            logger.debug(f'translate request successful, {resp.status_code}')
+        else:
+            logger.error(f'translate request error, {resp.status_code}')
+
         return json.loads(resp.text)
 
     def translate(self, text, target_language, source_language=None):
