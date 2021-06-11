@@ -24,13 +24,14 @@ from urllib.parse import urlencode
 
 from eWRT.ws import AbstractWebSource
 
+logger = logging.getLogger(__name__)
+
 API_URL = 'https://www.googleapis.com/language/translate/v2'
 
 
 class GoogleTranslator(AbstractWebSource):
     NAME = 'google_translate'
     SUPPORTED_PARAMS = ('text', 'target_language', 'source_language')
-    logger = logging.getLogger(__name__)
 
     def __init__(self, api_key, api_url=API_URL):
         self.api_key = api_key
@@ -45,7 +46,7 @@ class GoogleTranslator(AbstractWebSource):
             search_terms = [search_terms]
 
         for search_term in search_terms:
-            self.logger.info('... will translate "%s" to %s',
+            logger.info('... will translate "%s" to %s',
                              search_term,
                              target_language)
             result = self.translate(text=search_term,
@@ -55,7 +56,7 @@ class GoogleTranslator(AbstractWebSource):
             translations = []
 
             if 'error' in result:
-                self.logger.error(result['error'])
+                logger.error(result['error'])
                 yield result
                 continue
 
