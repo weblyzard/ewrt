@@ -180,7 +180,7 @@ class MultiRESTClient(object):
             if not url.endswith('/'):
                 url = '%s/' % url
 
-            if not 'rest' in url:
+            if not '/rest' in url:
                 if cls.URL_PATH and not url.endswith(cls.URL_PATH):
                     if cls.URL_PATH.startswith('/'):
                         cls.URL_PATH = cls.URL_PATH[1:]
