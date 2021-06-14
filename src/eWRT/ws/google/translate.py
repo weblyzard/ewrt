@@ -48,7 +48,7 @@ class GoogleTranslator(AbstractWebSource):
             search_terms = [search_terms]
 
         for search_term in search_terms:
-            logger.info('translating: %s (source=%s; target=%s)',
+            logger.info('translating: %s (source=%s;target=%s)',
                              search_term,
                              source_language,
                              target_language)
@@ -81,11 +81,14 @@ class GoogleTranslator(AbstractWebSource):
         params['format'] = 'text'
         full_url = self.api_url + path + '?' + urlencode(params)
         resp = requests.get(full_url)
+        status = resp.status_code
 
-        if resp.status_code == 200:
-            logger.debug(f'translate request successful, {resp.status_code}')
+        text = params['q'].decode('utf-8')
+        log_params = f"{text} (source={params['source']};target={params['target']})"
+        if status == 200:
+            logger.debug(f'translate request successful, {status} ({log_params})')
         else:
-            logger.error(f'translate request error, {resp.status_code}')
+            logger.error(f'translate request error, {status} ({log_params})')
 
         return json.loads(resp.text)
 
