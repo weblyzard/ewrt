@@ -60,7 +60,8 @@ class GoogleTranslator(AbstractWebSource):
 
             if 'error' in result:
                 logger.error(result['error'])
-                yield result
+                yield {'text': search_term,
+                       'error': result['error']}
                 continue
 
             for t in result['data']['translations']:
