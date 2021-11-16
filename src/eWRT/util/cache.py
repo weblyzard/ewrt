@@ -24,6 +24,15 @@ from time import time
 
 from eWRT.util.pickleIterator import WritePickleIterator, ReadPickleIterator
 
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+logger.warning('This module is deprecated in favor of its clone in '
+               '`weblyzard_api.util.cache, please consider '
+               'using that instead!"')
+
 # (C)opyrights 2008-2015 by Albert Weichselbraun <albert@weichselbraun.net>
 #
 # This program is free software: you can redistribute it and/or modify

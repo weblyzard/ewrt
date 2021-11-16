@@ -29,6 +29,12 @@ WS_DEFAULT_TIMEOUT = 900
 
 logger = logging.getLogger('eWRT.ws.rest')
 
+import logging
+
+
+logger.warning('This module is deprecated in favor of its clone in '
+               '`weblyzard_api.client, please consider '
+               'using that instead!"')
 
 class RESTClient(object):
     '''

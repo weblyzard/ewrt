@@ -19,6 +19,7 @@
 
 from future import standard_library
 standard_library.install_aliases()
+
 from builtins import object
 __copyright__ = "GPL"
 
@@ -28,6 +29,15 @@ try:
     from pickle import dumps, loads
 except ImportError:
     from pickle import dumps, loads
+
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+logger.warning('This module is deprecated in favor of its clone in '
+               '`weblyzard_api.util.pickleIterator, please consider '
+               'using that instead!"')
 
 
 class AbstractIterator(object):

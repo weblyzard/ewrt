@@ -53,6 +53,10 @@ from random import randint
 import logging
 log = logging.getLogger(__name__)
 
+log.warning('This module is deprecated in favor of its clone in '
+               '`weblyzard_api.util.http, please consider '
+               'using that instead!"')
+
 RETRY_WAIT_TIME_RANGE = (2, 10)              # in seconds
 # error codes which might trigger a retry:
 HTTP_TEMPORARY_ERROR_CODES = (500, 503, 504)
