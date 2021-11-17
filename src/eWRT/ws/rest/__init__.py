@@ -32,7 +32,7 @@ logger = logging.getLogger('eWRT.ws.rest')
 import logging
 
 
-logger.warning('This module is deprecated in favor of its clone in '
+logger.warning(f'The module {__name__} is deprecated in favor of its clone in '
                '`weblyzard_api.client, please consider '
                'using that instead!"')
 

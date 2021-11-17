@@ -53,7 +53,7 @@ from random import randint
 import logging
 log = logging.getLogger(__name__)
 
-log.warning('This module is deprecated in favor of its clone in '
+log.warning(f'The module {__name__} is deprecated in favor of its clone in '
                '`weblyzard_api.util.http, please consider '
                'using that instead!"')
 

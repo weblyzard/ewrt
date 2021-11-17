@@ -29,7 +29,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-logger.warning('This module is deprecated in favor of its clone in '
+logger.warning(f'The module {__name__} is deprecated in favor of its clone in '
                '`weblyzard_api.util.cache, please consider '
                'using that instead!"')
 
