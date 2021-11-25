@@ -31,6 +31,14 @@ from six import string_types
 from os.path import dirname, join
 
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+logger.warning(f'The module {__name__} is deprecated in favor of its clone in '
+               '`weblyzard_api.util.module_path, please consider '
+               'using that instead!"')
+
 def get_resource(module_path, relative_path_list):
     '''
     Returns the path of the given resource relative to the module's directory.
