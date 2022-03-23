@@ -27,7 +27,7 @@ setup(
                       'gdata @ git+https://github.com/dvska/gdata-python3#egg=gdata',
                       'wikipedia',
                       'pywikibot==7.0.0',
-                      'mwparserfromhell',  # dependency for pywikibot from 6.3.0
+                      'mwparserfromhell>=0.5.0',  # dependency for pywikibot from 6.3.0
                       'bz2file',
                       'googleads==31.0.0' if sys.version_info.major == 2 else 'googleads',
                       'ujson'
