@@ -20,7 +20,7 @@ setup(
     license="GPL3",
     package_dir={'': 'src'},
     install_requires=['redis',
-                      'google-cloud-storage==2.2.1',
+                      'google-cloud-storage==2.0.0',
                       'oauth2client==4.1.3',  # YT
                       'google-api-python-client==2.42.0',  # YT,
                       'six',
