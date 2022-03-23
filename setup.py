@@ -20,20 +20,22 @@ setup(
     license="GPL3",
     package_dir={'': 'src'},
     install_requires=['redis',
-                      'google-cloud-storage==1.10.0',
-                      'oauth2client==2.2.0',  # YT
-                      'google-api-python-client==1.4.0',  # YT,
+                      'google-cloud-storage==2.2.1',
+                      'oauth2client==4.1.3',  # YT
+                      'google-api-python-client==2.42.0',  # YT,
                       'six',
                       'gdata @ git+https://github.com/dvska/gdata-python3#egg=gdata',
                       'wikipedia',
-                      'pywikibot==6.5.0',
+                      'pywikibot==7.0.0',
                       'mwparserfromhell',  # dependency for pywikibot from 6.3.0
                       'bz2file',
-                      'googleads==19.0.1' if sys.version_info.major == 2 else 'googleads',
-                      #                         'python-oauth2' #linkedin
+                      'googleads==31.0.0' if sys.version_info.major == 2 else 'googleads',
                       'ujson'
                       ],
     classifiers=[
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3 :: Only',
     ],
