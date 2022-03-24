@@ -26,7 +26,6 @@ Created on 25.09.2012
 from future import standard_library
 standard_library.install_aliases()
 
-
 logger = logging.getLogger('eWRT.ws.youtube')
 
 DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.000Z'
@@ -101,8 +100,14 @@ class YouTubeEntry(dict):
         dict.__init__(self)
         self.update(self.update_entry(search_result, mapping=mapping))
 
-        if 'video_id' in self and self['video_id']:
-            self['url'] = ''.join([YOUTUBE_SEARCH_URL, self['video_id']])
+        try:
+            video_id = self.get('video_id', None)
+            if video_id is not None and isinstance(video_id, dict):
+                video_id = video_id.get('videoId', None)
+            if video_id is not None:
+                self['url'] = ''.join([YOUTUBE_SEARCH_URL, video_id])
+        except KeyError:
+            pass
 
     def __repr__(self):
         return '** entry: %s' % '\n'.join(['%s: %s' % (k, v) for k, v in self.items()])

@@ -4,8 +4,7 @@ from __future__ import print_function
 import unittest
 import logging
 import pytest
-from eWRT.ws.google import GoogleBlogSearch
-
+from eWRT.ws.google.blogsearch import GoogleBlogSearch
 
 logger = logging.getLogger('logger')
 

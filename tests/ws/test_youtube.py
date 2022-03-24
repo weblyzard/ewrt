@@ -15,7 +15,6 @@ from datetime import datetime, timedelta
 from eWRT.ws.youtube import convert_date, YouTube_v3
 from eWRT.config import YOUTUBE_API_KEY
 
-
 logger = logging.getLogger('eWRT.ws.youtube')
 
 
@@ -60,7 +59,7 @@ class YouTubeTest(unittest.TestCase):
 #         if language:
 #             kwargs['relevanceLanguage'] = language
 
-        response = self.youtube.search().list(**kwargs).execute()
+        response = self.youtube.client.search().list(**kwargs).execute()
         total_results = response['pageInfo']['totalResults']
 
         result = []
@@ -119,16 +118,18 @@ class YouTubeTest(unittest.TestCase):
                         (('Microsoft',), 2))
 
         for search_term, max_results in search_terms:
+            if not isinstance(search_term, str):
+                search_term = ','.join(search_term)
             print('querying youtube for %s' % search_term)
             result = [item for item in self.youtube.search(
-                search_term, max_results)]
+                search_terms=search_term, max_results=max_results)]
             print('\t got %s documents, max_results was %s' % (len(result),
                                                                max_results))
             self.assertEqual(len(result), max_results)
 
             num_comments = max([len(r['comments']) for r in result])
             print("Maximum number of comments for search term '%s': %d" % (
-                search_term[0], num_comments))
+                search_term, num_comments))
             print('-------------------------')
 
     def test_comments(self):
