@@ -5,7 +5,6 @@ set -e
 echo ':: Building package...'
 sed -i s/-dev/".$(date +%Y%m%d.%H%M)"/g setup.py
 
-pip-compile --output-file requirements.txt setup.py
 
 /usr/bin/python3 setup.py sdist --dist-dir /var/www/repo3/
 PACKAGE=$(/usr/bin/python3 -W ignore ./setup.py --name | awk 'NR==1{print $1}')
