@@ -5,7 +5,7 @@
 #    pip-compile --output-file requirements.txt setup.py
 #
 google-api-python-client==1.4.0
-httplib2==0.10.3          # via google-api-python-client, oauth2client
+httplib2==0.20.4         # via google-api-python-client, oauth2client
 oauth2client==2.2.0
 pyasn1-modules==0.2.1     # via oauth2client
 pyasn1==0.4.2             # via oauth2client, pyasn1-modules, rsa
