@@ -64,6 +64,7 @@ vulture:
 build:
     stage: build-package
     script:
+        - make python-dependencies
         - chmod +x build-package.sh
         - ./build-package.sh
     only:
