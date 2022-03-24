@@ -13,4 +13,5 @@ cd /var/www/repo3/ && ls -1 | grep $PACKAGE | grep -v "$PACKAGE.*-dev.*" | grep 
 
 twine upload /var/www/repo3/$PACKAGE-$VERSION.tar.gz  --repository-url "$NEXUS_URL" -u "$NEXUS_USER" -p "$NEXUS_PW"
 
+
 echo ":: Current version of ${PACKAGE} is ${VERSION}."

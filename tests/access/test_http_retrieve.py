@@ -19,6 +19,7 @@ from __future__ import print_function
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from future import standard_library
+
 standard_library.install_aliases()
 import unittest
 import urllib.request, urllib.error, urllib.parse
@@ -79,13 +80,13 @@ class TestHttpRetrieve(unittest.TestCase):
         p = Pool(5)
 
         TEST_URLS = ['http://www.heise.de',
-                     'http://linuxtoday.com',
+                     # 'http://linuxtoday.com', # site anavailable (2020-06)
                      'http://www.kurier.at',
                      'http://www.diepresse.com',
                      'http://www.spiegel.de',
                      'http://www.sueddeutsche.de',
                      ]
-
+        results = []
         for res in p.map(t_retrieve, TEST_URLS):
             assert len(res) > 20
 
@@ -100,6 +101,7 @@ class TestHttpRetrieve(unittest.TestCase):
             assert passwd == exp_passwd
             if user:
                 assert url != test_url
+
 
 def t_retrieve(url):
     ''' retrieves the given url from the web
