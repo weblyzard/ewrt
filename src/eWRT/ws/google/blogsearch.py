@@ -140,8 +140,6 @@ class GoogleBlogSearch(object):
         else:
             if isinstance(query['q'], list):
                 correct_url = query['q'][0]
-            elif isinstance(query['q'], list):
-                correct_url = query['q'][0]
             else:
                 logger.critical(
                     'Unknown type "%s" for query["q"]' % type(query['q']))
@@ -153,7 +151,7 @@ class GoogleBlogSearch(object):
         linkDate = element.xpath('./div[@class="f"]/text()')[0]
         linkDate = linkDate.split('by')[0]
 
-        m = re.match('(\d{1,2} \w* \d{2,4})', linkDate)
+        m = re.match(r'(\d{1,2} \w* \d{2,4})', linkDate)
 
         if m:
             linkDate = datetime.strptime(m.groups()[0], '%d %b %Y')

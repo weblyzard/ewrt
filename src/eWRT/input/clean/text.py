@@ -88,7 +88,7 @@ class StringCleanupModule(CleanupPipeEntry):
         """ cleans the following list of words
             @param[in] s the string to clean
         """
-        raise NotImplemented
+        raise NotImplementedError
 
 
 class RemovePossessive(StringCleanupModule):
@@ -117,7 +117,7 @@ class PhraseCleanupModule(CleanupPipeEntry):
 
     def __call__(self, l):
         """ @param[in] l a list of phrases to cleanup """
-        raise NotImplemented
+        raise NotImplementedError
 
 
 class SplitEnumerations(PhraseCleanupModule):
@@ -183,7 +183,7 @@ class WordCleanupModule(CleanupPipeEntry):
         """ cleans the following list of words
             @param[in] l the list of words to clean
         """
-        raise NotImplemented
+        raise NotImplementedError
 
 
 class FixSpelling(WordCleanupModule):

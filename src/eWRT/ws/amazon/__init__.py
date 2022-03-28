@@ -19,12 +19,10 @@ from __future__ import print_function
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from future import standard_library
 standard_library.install_aliases()
 from builtins import object
 __revision__ = "$Revision$"
-
 
 import base64
 import hashlib
@@ -39,7 +37,6 @@ from time import strftime
 
 from eWRT.access.http import Retrieve
 from eWRT.config import AMAZON_ACCESS_KEY, AMAZON_LOCATIONS, AMAZON_DEBUG_FILE
-
 
 # time to wait after an error in seconds
 ERROR_SLEEP_TIME = 30
@@ -127,7 +124,7 @@ class AmazonWS(object):
 
     def generateSignedWsUrl(self, **arguments):
         """ generates a valid amazon webservice request url """
-        #argList = [ "%s&SubscriptionId=%s" % (self.wsBase, self.accessKey) ] + [ "%s=%s" % (k,quote(v)) for k,v in arguments.items() ]
+        # argList = [ "%s&SubscriptionId=%s" % (self.wsBase, self.accessKey) ] + [ "%s=%s" % (k,quote(v)) for k,v in arguments.items() ]
         # return "&".join(argList)
         return self.amazon_url.get_request_url(arguments)
 
@@ -149,15 +146,15 @@ class AmazonWS(object):
                 time.sleep(ERROR_SLEEP_TIME)
         return res
 
-        @staticmethod
-        def _write_debug_data(data):
-            """ writes the given data to the debug file, if specified """
-            if not AMAZON_DEBUG_FILE:
-                return
+    @staticmethod
+    def _write_debug_data(data):
+        """ writes the given data to the debug file, if specified """
+        if not AMAZON_DEBUG_FILE:
+            return
 
-            d = open(AMAZON_DEBUG_FILE, "a")
-            d.write(data)
-            d.close()
+        d = open(AMAZON_DEBUG_FILE, "a")
+        d.write(data)
+        d.close()
 
     def searchItem(self, searchIndex='Books', **param):
         """ searches an item in the amazon product repository """
@@ -178,23 +175,23 @@ class AmazonWS(object):
         arguments.update(param)
         return self.query(arguments)
 
-        def newReleases(self, **param):
-            """ returns a list of asins of new releases """
-            arguments = {'Operation': 'BrowseNodeLookup',
-                         'ResponseGroup': 'NewReleases',
-                         'Marketplace': 'us'}
+    def newReleases(self, **param):
+        """ returns a list of asins of new releases """
+        arguments = {'Operation': 'BrowseNodeLookup',
+                     'ResponseGroup': 'NewReleases',
+                     'Marketplace': 'us'}
 
-            arguments.update(param)
-            return self.query(arguments)
+        arguments.update(param)
+        return self.query(arguments)
 
-        def itemAttributes(self, item_id, **param):
-            """ returns all item attribues """
-            arguments = {'Operation': 'ItemLookup',
-                         'ItemId': item_id,
-                         'IdType': 'ASIN',
-                         'ResponseGroup': 'ItemAttributes,SalesRank'}
-            arguments.update(param)
-            return self.query(arguments)
+    def itemAttributes(self, item_id, **param):
+        """ returns all item attribues """
+        arguments = {'Operation': 'ItemLookup',
+                     'ItemId': item_id,
+                     'IdType': 'ASIN',
+                     'ResponseGroup': 'ItemAttributes,SalesRank'}
+        arguments.update(param)
+        return self.query(arguments)
 
 
 class AmazonUrl(object):

@@ -33,10 +33,7 @@ from collections import OrderedDict
 
 from eWRT.ws.wikidata.definitions import image_attributes
 
-if sys.version_info.major == 3:
-    from urllib.parse import quote
-else:
-    from urllib.parse import quote
+from urllib.parse import quote
 
 DEFAULT_THUMBNAIL_WIDTH = 128
 
@@ -148,7 +145,7 @@ if __name__ == '__main__':
 
     thumbnails = []
     for entity_wikidata_id in ids.split(','):
-        wikidata_site = pywikibot.site.DataSite("wikidata", "wikidata")
+        wikidata_site = pywikibot.Site("wikidata", "wikidata")
         page = pywikibot.ItemPage(site=wikidata_site, title=entity_wikidata_id)
 
         try:
