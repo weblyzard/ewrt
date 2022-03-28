@@ -12,15 +12,23 @@ import unittest
 
 import mock
 import pytest
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 from eWRT.ws.wikidata.extract_meta import collect_attributes_from_wp_and_wd
 
 try:
     from eWRT.ws.wikidata.sample_itempage import itempage as adams_itempage
-    API_ERROR=False
-except:
+    API_ERROR = False
+except Exception as e:
     API_ERROR = True
+    logger.warning(e, exc_info=True)
+    import os
+    os.environ['PYWIKOBOT_NO_USER_CONFIG'] = '1'
+
 
 
 @pytest.mark.skipif(API_ERROR is True, reason='External API not available')
@@ -41,6 +49,8 @@ class TestCollectAttributesFromWpAndWd(unittest.TestCase):
         'P570',  # date of death
         'P1411'  # nominated for
     ]
+
+    @pytest.mark.skipif(API_ERROR is True, reason='External API not available')
     def test_collect_attributes_from_wp_and_wd_offline(self):
         """Test the version of the data collection loop that does
         without a new call to the API for every attribute to retrieve
@@ -62,7 +72,7 @@ class TestCollectAttributesFromWpAndWd(unittest.TestCase):
                     assert not any(
                         ['labels' in instance for instance in claim['values']])
 
-
+    @pytest.mark.skipif(API_ERROR is True, reason='External API not available')
     def test_collect_attributes_from_wp_and_wd_online(self):
         """"""
         adams_data = next(collect_attributes_from_wp_and_wd(self.adams, ['en'],
@@ -91,7 +101,7 @@ class TestCollectAttributesFromWpAndWd(unittest.TestCase):
         assert isinstance(adams_data['enwiki'], dict)
         assert 'summary' in adams_data['enwiki']
 
-
+    @pytest.mark.skipif(API_ERROR is True, reason='External API not available')
     def test_collect_attributes_from_wp_and_wd_delay_wikipedia(self):
         """
         Check that the 'delay_wikipedia_retrieval' switch does what it should:

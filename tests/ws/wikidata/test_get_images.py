@@ -8,11 +8,16 @@ Created on September 20, 2018
 from __future__ import print_function
 import mock
 import pytest
+import os
 
 from pywikibot import Claim
 
 from eWRT.ws.wikidata.definitions.property_definitions import image_attributes
 from eWRT.ws.wikidata.get_image_from_wikidataid import get_images, get_image
+
+print('PYWIKIBOT_NO_USER_CONFIG: {}'.format(
+    os.getenv('PYIKIBOT_NO_USER_CONFIG'))
+)
 
 DataSite, itempage = mock.Mock(), mock.Mock()
 
