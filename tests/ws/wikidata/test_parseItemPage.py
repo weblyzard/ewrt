@@ -20,6 +20,10 @@ try:
     from pywikibot import Claim, ItemPage
     from pywikibot.site import DataSite
     import pywikibot
+    from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
+    from eWRT.ws.wikidata.sample_itempage import sample_output
+    from eWRT.ws.wikidata.wikibot_parse_item import ParseItemPage, \
+        DoesNotMatchFilterError
 except RuntimeError:
     import os
     os.environ['PYWIKIBOT_NO_USER_CONFIG'] = '1'
@@ -27,9 +31,7 @@ except RuntimeError:
     from pywikibot.site import DataSite
     import pywikibot
 
-from eWRT.ws.wikidata.preferred_claim_value import attribute_preferred_value
-from eWRT.ws.wikidata.sample_itempage import sample_output
-from eWRT.ws.wikidata.wikibot_parse_item import ParseItemPage, DoesNotMatchFilterError
+
 
 
 try:

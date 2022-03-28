@@ -20,14 +20,19 @@ logger = logging.getLogger(__name__)
 
 from eWRT.ws.wikidata.extract_meta import collect_attributes_from_wp_and_wd
 
+API_ERROR = False
 try:
     from eWRT.ws.wikidata.sample_itempage import itempage as adams_itempage
-    API_ERROR = False
 except Exception as e:
-    API_ERROR = True
     logger.warning(e, exc_info=True)
     import os
     os.environ['PYWIKOBOT_NO_USER_CONFIG'] = '1'
+    try:
+        from eWRT.ws.wikidata.sample_itempage import itempage as adams_itempage
+    except Exception as e:
+        logger.warning('Failed import with `PYWIKIBOT_NO_USER_CONFIG`'
+                       'manually set to 1', exc_info=True)
+        API_ERROR = True
 
 
 

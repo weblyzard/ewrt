@@ -9,7 +9,10 @@ from __future__ import print_function
 import mock
 import pytest
 import os
-
+os.environ['PYWIKIBOT_NO_USER_CONFIG'] = '1'
+print('PYWIKIBOT_NO_USER_CONFIG: {}'.format(
+    os.getenv('PYWIKIBOT_NO_USER_CONFIG'))
+)
 from pywikibot import Claim
 
 from eWRT.ws.wikidata.definitions.property_definitions import image_attributes
