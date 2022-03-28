@@ -140,8 +140,6 @@ class GoogleBlogSearch(object):
         else:
             if isinstance(query['q'], list):
                 correct_url = query['q'][0]
-            elif isinstance(query['q'], list):
-                correct_url = query['q'][0]
             else:
                 logger.critical(
                     'Unknown type "%s" for query["q"]' % type(query['q']))

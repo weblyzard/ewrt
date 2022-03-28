@@ -241,8 +241,7 @@ class GAnalyticsClient(object):
             accountId=account_id).execute()
 
         for item in webproperties.get('items'):
-            for pid in self.get_webproperty_details(self.service,
-                                                    account_id,
+            for pid in self.get_webproperty_details(account_id,
                                                     item.get('id')):
                 result.append((account_id, pid))
         return result
@@ -321,8 +320,7 @@ class GAnalyticsClient(object):
             accountId=account_id).execute()
         for item in webproperties.get('items'):
             sleep(self.QUERY_THROTTLE_SECS)
-            for pid in self.get_webproperty_details(service=self.service,
-                                                    account_id=account_id,
+            for pid in self.get_webproperty_details(account_id=account_id,
                                                     webproperty_id=item.get('id')):
                 if pid == profile_id:
                     response = self.get_metrics(profile_id=profile_id,

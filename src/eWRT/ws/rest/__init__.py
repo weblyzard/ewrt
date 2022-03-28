@@ -28,13 +28,10 @@ from eWRT.access.http import Retrieve
 WS_DEFAULT_TIMEOUT = 900
 
 logger = logging.getLogger('eWRT.ws.rest')
-
-import logging
-
-
 logger.warning(f'The module {__name__} is deprecated in favor of its clone in '
                '`weblyzard_api.client, please consider '
                'using that instead!"')
+
 
 class RESTClient(object):
     '''
@@ -209,11 +206,11 @@ class MultiRESTClient(object):
             service_urls = [service_urls]
 
         for url in service_urls:
-            service_url, user, password = Retrieve.get_user_password(url)
+            service_url, new_user, new_password = Retrieve.get_user_password(url)
 
             clients.append(RESTClient(service_url=service_url,
-                                      user=user,
-                                      password=password,
+                                      user=user or new_user,
+                                      password=password or new_password,
                                       default_timeout=default_timeout))
         return clients
 

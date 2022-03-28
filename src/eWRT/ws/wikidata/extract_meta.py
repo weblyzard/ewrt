@@ -487,11 +487,7 @@ class WikidataEntityIterator(object):
                 # parsed_entities = []
                 for j in range(limit_per_query):
                     try:
-                        if sys.version_info.major == 3:
-                            entity_raw = next(generator)
-                        else:
-                            entity_raw = next(generator)
-
+                        entity_raw = next(generator)
                     except StopIteration:
                         break
                     if id_only:

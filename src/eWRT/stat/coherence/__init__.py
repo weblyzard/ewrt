@@ -54,15 +54,15 @@ class Coherence(object):
             @param[in] nt counts of term1 together with term2
             @returns the coherence
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     def getTermCoherence(self, t1, t2):
         """ @param[in] t1 term1
             @param[in] t2 term2
             @returns the coherence between these two terms
         """
-        nx = self.getTagCount((t1, ))
-        ny = self.getTagCount((t2, ))
+        nx = self.getTagCount((t1,))
+        ny = self.getTagCount((t2,))
         nt = self.getTagCount((t1, t2))
         return self.getCoherence(nx, ny, nt)
 

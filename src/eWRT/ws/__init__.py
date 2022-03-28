@@ -25,7 +25,7 @@ class AbstractWebSource(object):
                          to_date=None, **kwargs):
         """runs the actual search / calls the webservice / API ..."""
 
-        raise NotImplemented
+        raise NotImplementedError
 
     def pre_search(self, search_params):
         """override this function to perform pre-run tasks"""
@@ -70,7 +70,7 @@ class AbstractIterableWebSource(AbstractWebSource):
                 for index in range(self.DEFAULT_START_INDEX,
                                    max_results + 1, self.DEFAULT_MAX_RESULTS):
 
-                    sleep(1) # throttle
+                    sleep(1)  # throttle
 
                     # detect the last iteration
                     if (index + self.DEFAULT_MAX_RESULTS > max_results):
@@ -116,4 +116,4 @@ class AbstractIterableWebSource(AbstractWebSource):
         Calls the web source's API
         """
 
-        raise NotImplemented
+        raise NotImplementedError
