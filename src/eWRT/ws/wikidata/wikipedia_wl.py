@@ -14,10 +14,10 @@ ship with a timestamp-attribute either. Both are licensed with the MIT license.
 """
 import requests
 
-from wikipedia import (WikipediaPage, PageError, search, API_URL)
+from wikipedia import (WikipediaPage as WikipediaPageDef, PageError, search, API_URL)
 
 
-class WikipediaPage(WikipediaPage):
+class WikipediaPage(WikipediaPageDef):
 
     @property
     def revision_timestamp(self):
@@ -30,8 +30,9 @@ class WikipediaPage(WikipediaPage):
                     'action': 'query',
                 'format': 'json'
                 }
-            rev = requests.get(API_URL, params=params)
-            return rev[0]['timestamp']
+            response = requests.get(API_URL, params=params)
+            revisions = response.json()['query']['pages'][self.pageid]
+            return revisions[0]['timestamp']
 
         # return self._revision_timestamp
 
@@ -64,3 +65,8 @@ def page(title=None, pageid=None, auto_suggest=True, redirect=True, preload=Fals
         return WikipediaPage(pageid=pageid, preload=preload)
     else:
         raise ValueError("Either a title or a pageid must be specified")
+
+if __name__ == '__main__':
+    wikipedia_page = WikipediaPage(title='Ukraine')
+    timestamp = wikipedia_page.revision_timestamp
+    pass
