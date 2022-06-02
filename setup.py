@@ -24,7 +24,7 @@ setup(
                       'oauth2client==4.1.3',  # YT
                       'google-api-python-client==2.42.0',  # YT,
                       'six',
-                      'gdata @ git+https://github.com/dvska/gdata-python3#egg=gdata',
+#                      'gdata @ git+https://github.com/dvska/gdata-python3#egg=gdata',
                       'wikipedia',
                       'pywikibot==6.5.0',
                       'mwparserfromhell>=0.5.0',  # dependency for pywikibot from 6.3.0
